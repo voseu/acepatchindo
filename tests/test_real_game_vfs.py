@@ -34,5 +34,5 @@ def test_real_windows_game_vfs_zero_unknown_and_zero_overflow() -> None:
     assert counts_zh.get("capacity_skipped", 0) == 0
     assert len(stage_reports) == 6
     assert all(len(r.get("files", [])) > 0 for r in stage_reports)
-    assert counts_en["translated"] > 100000
+    assert counts_en["translated"] > 150000
     assert counts_en.get("invalid_translation", 0) == 0

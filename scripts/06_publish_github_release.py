@@ -21,19 +21,19 @@ TITLE = "Honor of Kings: Ace Indonesian Patcher v1.4.12-id.1"
 
 RELEASE_NOTES = """## Honor of Kings: Ace — Patch Bahasa Indonesia (`v1.4.12-id.1`)
 
-Rilis perdana pemasang *patch* Bahasa Indonesia mandiri (*standalone*) untuk **Honor of Kings: Ace (`WXQ.exe`)** berbasis arsitektur QtsVFS `1.4.12`.
+Rilis pemasang *patch* Bahasa Indonesia mandiri (*standalone*) untuk **Honor of Kings: Ace (`WXQ.exe`)** berbasis arsitektur QtsVFS `1.4.12`.
 
 ### Ringkasan Pembaruan & Verifikasi
 - **41.483** entri kamus utama (`unique`), termasuk **108 string Mandarin (`409` record)** yang sebelumnya terlewat pada *English Patcher 1.4.12*.
-- **29.750** entri pembaruan kontekstual (`english_updates`) dan **22.520** pemetaan pembalik tervalidasi (`en_to_id`).
-- **Hierarki Terminologi 3-Tier:** Mengutamakan kamus komunitas Indonesia (`hok-ace-translate-id.netlify.app`), ensiklopedia `hokace.wiki`, dan pelestarian 100% kerangka tag Unity (`<a href=...>`, `<color=...>`, `<b>`), *placeholder* (`{0}`), token kontrol (`╫`), serta titik koma (`;`).
-- **Dual-State Engine & Auto-Restore:** Otomatis memulihkan cadangan Mandarin (`originals/`) sebelum memasang Bahasa Indonesia apabila mendeteksi instalasi *English Patcher 1.4.12* aktif, serta mendukung *fallback* langsung `Inggris -> Indonesia`.
+- **29.750** entri pembaruan kontekstual (`english_updates`) dan **38.828** pemetaan pembalik tervalidasi (`en_to_id`, dari `42.773` kandidat).
+- **Hierarki Terminologi 3-Tier & Bebas Indlish (`0` Stopword Hits):** Mengutamakan kamus komunitas Indonesia (`hok-ace-translate-id.netlify.app` termasuk penyelarasan `234` rumus dinamis Skill Hero dan `19` Chess Player/Lord), `624` halaman detail dwibahasa `hokace.wiki`, mesin leksikon & tata bahasa Indonesia (`lexicon_id.py`), serta pelestarian 100% kerangka tag Unity (`<a href=...>`, `<color=...>`, `<b>`), *placeholder* (`{0}`, `[194010p1q2/100]`), token kontrol (`╫`), dan titik koma (`;`).
+- **Dual-State Engine & Auto-Restore:** Otomatis memulihkan cadangan Mandarin (`originals/`) sebelum memasang Bahasa Indonesia apabila mendeteksi instalasi *English Patcher 1.4.12* aktif, serta mendukung *fallback* langsung `Inggris -> Indonesia` dengan pesan status runtime berbahasa Indonesia.
 - **Verifikasi Penuh QtsVFS:** `508/508` tabel Protobuf `.bytes`, `unknown = 0`, `invalid_translation = 0`, `capacity_skipped = 0` di seluruh 6 paket QtsVFS (`1`, `4`, `15`, `19`, `20`, `21`).
 
 ### Verifikasi SHA-256
 ```text
-f98af7f76b4b9ae8a250637895c8f57318daf0d95838833f2defb175db9bf293  Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe
-2c9952158ff04be043117c9b3cb71ff3db0ac3fef4537b91ee17fccf9946dd11  ace-worker.exe (embedded @ 0x4CAC4A..0x3838C00)
+3baffa77dd167f88c440af370edd747d4c686d8306e3e0823510de02a20c8a50  Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe
+08f4e0bfe896aae037a06b2f612cf9c0bf7140623c6bb320401b826aaa1f8f6a  ace-worker.exe (embedded @ 0x4CAC4A..0x3838C00)
 ```
 """
 
@@ -58,6 +58,21 @@ def publish_via_gh_cli() -> bool:
                 str(EXE_ASSET),
                 str(SUMS_ASSET),
                 "--clobber",
+                "--repo",
+                REPO,
+            ],
+            check=True,
+        )
+        subprocess.run(
+            [
+                "gh",
+                "release",
+                "edit",
+                TAG,
+                "--title",
+                TITLE,
+                "--notes",
+                RELEASE_NOTES,
                 "--repo",
                 REPO,
             ],
@@ -151,3 +166,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

@@ -7,9 +7,12 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from acepatchindo.lexicon_id import translate_segment_en_to_id
 from acepatchindo.tag_aligner import (
     BRACKET_TERM_MAP,
+    normalize_formula_skeleton_zh,
     normalize_plain_zh,
+    reinject_formula_and_skeleton,
     reinject_skeleton_from_source,
     translate_preserving_skeleton,
 )
@@ -434,7 +437,7 @@ CANONICAL_PROTECTED_TERMS: tuple[str, ...] = (
     "Zhulu Plateau",
     "Three Kingdoms",
     "Sunset Sea",
-    "The First Lands",
+    "First Lands",
     "Temporary Level",
     "True Level",
     "Physical Attack",
@@ -469,39 +472,104 @@ CANONICAL_PROTECTED_TERMS: tuple[str, ...] = (
     "Tri-Point Banner",
 )
 
+STOPWORD_GUARD_RE = re.compile(
+    r"\b(the|and|with|from|into|when|while|after|before|during|within|without|"
+    r"between|against|through|for|you|your|their|his|her|its|this|that|these|those|"
+    r"each|every|deals|dealing|restores|restoring|gains|gaining|grants|granting|"
+    r"increases|increasing|reduces|reducing|summons|summoning|triggers|triggering|"
+    r"enemies|allies|cannot|will|have|has|had|are|was|were|been)\b",
+    re.I,
+)
+
+LORD_NAME_TO_T2_ALT: dict[str, str] = {
+    "Little Daji": "小妲己",
+    "Yao Mei": "瑶妹",
+    "Arli": "阿离",
+    "Jing": "镜",
+    "Qiao Xi": "乔汐",
+    "Little Chang'e": "常小娥",
+    "Yu Huan": "玉环",
+    "Little Zhuang Fish": "庄小鱼",
+    "Marco": "马可",
+    "Bai Ge": "白歌",
+    "Zhaojun": "昭君",
+    "Uncle Ban": "班叔",
+    "Yi Xing": "弈星",
+    "Little Sun Bin": "孙小宾",
+    "Mister Ming": "明先生",
+    "Naonao": "闹闹",
+    "Director Jiang": "姜导",
+    "Ying Lü": "嬴律",
+    "Xiang": "香香",
+}
+
+TIER1_EMBEDDED_EN_CLEANUP: tuple[tuple[str, str], ...] = (
+    ("Indomitable Will", "Tekad Baja"),
+    ("Try Your Luck", "Uji Keberuntungan"),
+    ("Glory of the Old Guard", "Kejayaan Garda Lama"),
+    ("Quench with Illusions", "Padamkan dengan Ilusi"),
+    ("Muster the Troops", "Kumpulkan Pasukan"),
+    ("Power of the Source", "Kekuatan Sumber"),
+    ("Bane of the Mighty", "Kutukan Sang Perkasa"),
+)
+
+
+def _normalize_en_key(text: str) -> str:
+    cleaned = TAG_RE.sub("", text)
+    cleaned = CONTROL_TOKEN_RE.sub("", cleaned)
+    return re.sub(r"\s+", " ", cleaned).strip().lower()
+
 
 @dataclass
 class ThreeTierGlossary:
     tier1_exact_zh_to_id: dict[str, str] = field(default_factory=dict)
     tier1_plain_zh_to_id: dict[str, str] = field(default_factory=dict)
+    tier1_formula_zh_to_id: dict[str, tuple[str, str]] = field(default_factory=dict)
     tier1_en_card_to_id_desc: dict[str, str] = field(default_factory=dict)
+    tier1_en_desc_to_id_desc: dict[str, str] = field(default_factory=dict)
     tier2_zh_to_en: dict[str, str] = field(default_factory=dict)
+    tier2_plain_zh_to_en: dict[str, str] = field(default_factory=dict)
     protected_en_terms: list[str] = field(default_factory=list)
     _protected_re: re.Pattern[str] | None = field(default=None, init=False, repr=False)
 
     @classmethod
     def from_reference_files(
-        cls, tier1_path: Path, tier2_path: Path
+        cls,
+        tier1_path: Path,
+        tier2_path: Path,
+        tier2_details_path: Path | None = None,
     ) -> "ThreeTierGlossary":
         instance = cls()
         protected_set: set[str] = set(CANONICAL_PROTECTED_TERMS)
 
+        t1_data: dict = {}
         if tier1_path.exists():
-            t1 = json.loads(tier1_path.read_text(encoding="utf-8"))
-            instance._ingest_tier1(t1, protected_set)
+            t1_data = json.loads(tier1_path.read_text(encoding="utf-8"))
+            instance._ingest_tier1(t1_data, protected_set)
         if tier2_path.exists():
             t2 = json.loads(tier2_path.read_text(encoding="utf-8"))
             instance._ingest_tier2(t2, protected_set)
 
+        if tier2_details_path is None:
+            tier2_details_path = tier2_path.with_name("tier2_wiki_details_en.json")
+        if tier2_details_path.exists():
+            t2_details = json.loads(tier2_details_path.read_text(encoding="utf-8"))
+            instance._ingest_tier2_details(t1_data, t2_details, protected_set)
+
         for zh_k, id_v in BRACKET_TERM_MAP.items():
             instance.tier1_exact_zh_to_id.setdefault(zh_k, id_v)
         for zh_k, id_v in WINDOWS_108_ZH_TO_ID.items():
-            instance.tier1_exact_zh_to_id[zh_k] = id_v
-            instance.tier1_plain_zh_to_id[normalize_plain_zh(zh_k)] = id_v
+            instance._register_t1_pair(zh_k, id_v)
 
-        # Sort protected multi-word proper names longest-first (len >= 5 and contains space or proper noun)
+        # Sort protected multi-word proper names longest-first, excluding any phrase with English stopwords
         instance.protected_en_terms = sorted(
-            (t for t in protected_set if len(t) >= 5 and any(c.isupper() for c in t)),
+            (
+                t
+                for t in protected_set
+                if len(t) >= 5
+                and any(c.isupper() for c in t)
+                and not STOPWORD_GUARD_RE.search(t)
+            ),
             key=len,
             reverse=True,
         )
@@ -515,10 +583,26 @@ class ThreeTierGlossary:
         id_val = id_val.strip()
         if not zh or not id_val:
             return
+        for old_en, new_id in TIER1_EMBEDDED_EN_CLEANUP:
+            if old_en in id_val:
+                id_val = id_val.replace(old_en, new_id)
         self.tier1_exact_zh_to_id[zh] = id_val
         norm = normalize_plain_zh(zh)
         if norm:
             self.tier1_plain_zh_to_id[norm] = id_val
+        skel = normalize_formula_skeleton_zh(zh)
+        if skel and len(skel) >= 6:
+            self.tier1_formula_zh_to_id[skel] = (zh, id_val)
+
+    def _register_t2_pair(self, zh: str, en_val: str) -> None:
+        zh = zh.strip()
+        en_val = en_val.strip()
+        if not zh or not en_val:
+            return
+        self.tier2_zh_to_en.setdefault(zh, en_val)
+        norm = normalize_plain_zh(zh)
+        if norm:
+            self.tier2_plain_zh_to_en.setdefault(norm, en_val)
 
     def _ingest_tier1(self, t1: dict, protected_set: set[str]) -> None:
         # 1. Factions & Keywords (stored as dicts on hok-ace-translate-id.netlify.app)
@@ -548,8 +632,11 @@ class ThreeTierGlossary:
                 desc_cn = (item.get("descCn") or "").strip()
                 desc_id = (item.get("desc") or "").strip()
                 if name_cn and name_en:
-                    self._register_t1_pair(name_cn, name_en)
-                    protected_set.add(name_en)
+                    if category in ("hero", "equip") and not STOPWORD_GUARD_RE.search(name_en):
+                        self._register_t1_pair(name_cn, name_en)
+                        protected_set.add(name_en)
+                    else:
+                        self._register_t2_pair(name_cn, name_en)
                 if desc_cn and desc_id:
                     self._register_t1_pair(desc_cn, desc_id)
 
@@ -563,8 +650,11 @@ class ThreeTierGlossary:
                     sk_cn = (sk.get("cn") or sk.get("nameCn") or "").strip()
                     sk_name = (sk.get("name") or "").strip()
                     if sk_cn and sk_name:
-                        self._register_t1_pair(sk_cn, sk_name)
-                        protected_set.add(sk_name)
+                        if not STOPWORD_GUARD_RE.search(sk_name):
+                            self._register_t1_pair(sk_cn, sk_name)
+                            protected_set.add(sk_name)
+                        else:
+                            self._register_t2_pair(sk_cn, sk_name)
                     self._register_t1_pair(
                         sk.get("descCn") or "", sk.get("desc") or ""
                     )
@@ -585,41 +675,120 @@ class ThreeTierGlossary:
                 c_name = (tal.get("cardName") or "").strip()
                 c_desc = (tal.get("desc") or "").strip()
                 if c_name:
-                    protected_set.add(c_name)
+                    if not STOPWORD_GUARD_RE.search(c_name):
+                        protected_set.add(c_name)
                     if c_desc:
                         self.tier1_en_card_to_id_desc[c_name] = c_desc
+                        self.tier1_en_desc_to_id_desc[_normalize_en_key(c_name)] = c_desc
             for rel in lord.get("related", []):
                 r_name = (rel.get("name") or "").strip()
                 r_desc = (rel.get("desc") or "").strip()
                 if r_name:
-                    protected_set.add(r_name)
+                    if not STOPWORD_GUARD_RE.search(r_name):
+                        protected_set.add(r_name)
                     if r_desc:
                         self.tier1_en_card_to_id_desc[r_name] = r_desc
+                        self.tier1_en_desc_to_id_desc[_normalize_en_key(r_name)] = r_desc
 
     def _ingest_tier2(self, t2: list[dict], protected_set: set[str]) -> None:
         for entry in t2:
             alt_zh = (entry.get("alt") or "").strip()
             name_en = (entry.get("name") or "").strip()
             if alt_zh and name_en:
-                self.tier2_zh_to_en[alt_zh] = name_en
-                if entry.get("type") in ("Hero", "Chess player", "Equipment", "Effect card", "Talent"):
+                self._register_t2_pair(alt_zh, name_en)
+                if entry.get("type") in ("Hero", "Chess player") and not STOPWORD_GUARD_RE.search(name_en):
                     protected_set.add(name_en)
+
+    def _ingest_tier2_details(
+        self, t1: dict, t2_details: list[dict], protected_set: set[str]
+    ) -> None:
+        t2_players_by_alt: dict[str, dict] = {}
+        for item in t2_details:
+            if item.get("type") == "Chess player" and item.get("alt"):
+                t2_players_by_alt[item["alt"].strip()] = item
+
+            en_block = item.get("en") or {}
+            zh_block = item.get("zh") or {}
+            for key in ("calc_copies", "effect_copies", "skill_names", "breakpoints", "rule_notes"):
+                for zh_s, en_s in zip(zh_block.get(key, []), en_block.get(key, [])):
+                    self._register_t2_pair(zh_s, en_s)
+
+            for ab_zh, ab_en in zip(
+                zh_block.get("abilities", []), en_block.get("abilities", [])
+            ):
+                self._register_t2_pair(ab_zh.get("name", ""), ab_en.get("name", ""))
+                self._register_t2_pair(ab_zh.get("desc", ""), ab_en.get("desc", ""))
+                # If ab_en["name"] is in tier1_en_card_to_id_desc, map ab_en["desc"] and ab_zh["desc"] to Tier 1 ID!
+                ab_en_name = (ab_en.get("name") or "").strip()
+                ab_en_desc = (ab_en.get("desc") or "").strip()
+                if ab_en_name in self.tier1_en_card_to_id_desc:
+                    id_desc = self.tier1_en_card_to_id_desc[ab_en_name]
+                    self._register_t1_pair(ab_zh.get("desc", ""), id_desc)
+                    if ab_en_desc:
+                        self.tier1_en_desc_to_id_desc[_normalize_en_key(ab_en_desc)] = id_desc
+
+        # Pair all 19 Tier 1 Lords with their corresponding Tier 2 Chess Player detail pages
+        for lord in t1.get("lords", []):
+            l_name = (lord.get("name") or "").strip()
+            alt_zh = LORD_NAME_TO_T2_ALT.get(l_name)
+            t2_player = t2_players_by_alt.get(alt_zh or "")
+            if not t2_player:
+                continue
+            zh_abs = (t2_player.get("zh") or {}).get("abilities", [])
+            en_abs = (t2_player.get("en") or {}).get("abilities", [])
+            tals = lord.get("talents", [])
+            rels = lord.get("related", [])
+            for idx, tal in enumerate(tals):
+                c_name = (tal.get("cardName") or "").strip()
+                c_desc = (tal.get("desc") or "").strip()
+                if idx < len(zh_abs):
+                    zh_ab = zh_abs[idx]
+                    if c_name and not STOPWORD_GUARD_RE.search(c_name):
+                        self._register_t1_pair(zh_ab.get("name", ""), c_name)
+                    if c_desc:
+                        self._register_t1_pair(zh_ab.get("desc", ""), c_desc)
+                    m_split = re.search(
+                        r"^(.+?[。！？])\s*([^：:。]{2,12})[：:](.+)$",
+                        zh_ab.get("desc", ""),
+                    )
+                    if m_split:
+                        first_zh, sub_name_zh, sub_desc_zh = m_split.groups()
+                        if c_desc:
+                            self._register_t1_pair(first_zh, c_desc)
+                        if len(rels) > 1:
+                            r1_name = (rels[1].get("name") or "").strip()
+                            r1_desc = (rels[1].get("desc") or "").strip()
+                            if r1_name and not STOPWORD_GUARD_RE.search(r1_name):
+                                self._register_t1_pair(sub_name_zh, r1_name)
+                            if r1_desc:
+                                self._register_t1_pair(sub_desc_zh, r1_desc)
+                                if c_desc and r1_name:
+                                    self._register_t1_pair(
+                                        zh_ab.get("desc", ""),
+                                        f"{c_desc}\n{r1_name}: {r1_desc}",
+                                    )
+                if idx < len(en_abs) and c_desc:
+                    en_ab_desc = (en_abs[idx].get("desc") or "").strip()
+                    if en_ab_desc:
+                        self.tier1_en_desc_to_id_desc[_normalize_en_key(en_ab_desc)] = c_desc
 
     def translate_en_to_id(self, en_text: str) -> str:
         """Convert English HoK Ace text into natural Indonesian while preserving tags, proper nouns, and tokens."""
         if not en_text or not en_text.strip():
             return en_text
 
+        norm_en = _normalize_en_key(en_text)
+        if norm_en in self.tier1_en_desc_to_id_desc and not TAG_RE.findall(en_text) and not PLACEHOLDER_RE.findall(en_text):
+            return self.tier1_en_desc_to_id_desc[norm_en]
+
         def _convert_segment(seg: str) -> str:
-            out = seg
-            # Protect multi-word proper names & canonical Tier 1 mechanics before word-level replacement
+            out = seg.replace("The First Lands", "First Lands")
             sentinels: list[tuple[str, str]] = []
             if self._protected_re is not None:
                 def _protect_match(m: re.Match[str]) -> str:
                     idx = len(sentinels)
                     tok = f"__WXQPR{idx}__"
                     val = m.group(0)
-                    # Normalize 'Central Plains' -> 'Central Plain' & 'Magical Damage' -> 'Magic Damage' per Tier 1
                     if val == "Central Plains":
                         val = "Central Plain"
                     elif val == "Sunset Sea":
@@ -631,8 +800,7 @@ class ThreeTierGlossary:
 
                 out = self._protected_re.sub(_protect_match, out)
 
-            for pattern, repl in EN_TO_ID_PATTERNS:
-                out = pattern.sub(repl, out)
+            out = translate_segment_en_to_id(out)
 
             for tok, orig_val in sentinels:
                 out = out.replace(tok, orig_val, 1)
@@ -666,7 +834,13 @@ class ThreeTierGlossary:
             if len(out) <= limit:
                 break
             out = out.replace(old, new)
-        if len(out) > limit and not TAG_RE.findall(source_zh) and not PLACEHOLDER_RE.findall(source_zh) and not CONTROL_TOKEN_RE.findall(source_zh) and ";" not in source_zh:
+        if (
+            len(out) > limit
+            and not TAG_RE.findall(source_zh)
+            and not PLACEHOLDER_RE.findall(source_zh)
+            and not CONTROL_TOKEN_RE.findall(source_zh)
+            and ";" not in source_zh
+        ):
             out = out[:limit].rstrip()
         return out
 
@@ -712,14 +886,65 @@ class ThreeTierGlossary:
             if ok:
                 return (cand, "tier1")
 
-        # 3. Tier 2 exact entity match -> EN -> ID
-        if source_zh in self.tier2_zh_to_en:
-            en_val = self.tier2_zh_to_en[source_zh]
+        # 2b. Tier 1 formula-skeleton match (handles all 234 dynamic formula Hero skills/enhancements/awakenings)
+        skel_zh = normalize_formula_skeleton_zh(source_zh)
+        if skel_zh and skel_zh in self.tier1_formula_zh_to_id:
+            t1_desc_cn, t1_desc_id = self.tier1_formula_zh_to_id[skel_zh]
+            cand = self._fit_length_bound(
+                source_zh,
+                reinject_formula_and_skeleton(
+                    source_zh,
+                    t1_desc_cn,
+                    t1_desc_id,
+                    inner_translator=self._translate_raw_zh_to_id,
+                    baseline_en=baseline_en,
+                ),
+            )
+            ok, _ = validate_translation(source_zh, cand)
+            if ok:
+                return (cand, "tier1")
+
+        # 2c. Tier 1 Lord card name / description match via baseline_en
+        if baseline_en:
+            clean_en = TAG_RE.sub("", baseline_en).strip()
+            if clean_en in self.tier1_en_card_to_id_desc and len(source_zh) >= 8:
+                cand = self._fit_length_bound(
+                    source_zh,
+                    reinject_skeleton_from_source(
+                        source_zh,
+                        self.tier1_en_card_to_id_desc[clean_en],
+                        inner_translator=self._translate_raw_zh_to_id,
+                        baseline_en=baseline_en,
+                    ),
+                )
+                if validate_translation(source_zh, cand)[0]:
+                    return (cand, "tier1")
+
+            norm_en = _normalize_en_key(baseline_en)
+            if norm_en in self.tier1_en_desc_to_id_desc and len(source_zh) >= 8:
+                cand = self._fit_length_bound(
+                    source_zh,
+                    reinject_skeleton_from_source(
+                        source_zh,
+                        self.tier1_en_desc_to_id_desc[norm_en],
+                        inner_translator=self._translate_raw_zh_to_id,
+                        baseline_en=baseline_en,
+                    ),
+                )
+                if validate_translation(source_zh, cand)[0]:
+                    return (cand, "tier1")
+
+        # 3. Tier 2 exact or plain entity/detail match -> EN -> ID
+        t2_en = self.tier2_zh_to_en.get(source_zh) or (
+            self.tier2_plain_zh_to_en.get(norm_zh) if norm_zh else None
+        )
+        if t2_en:
+            t2_id = self.translate_en_to_id(t2_en)
             cand = self._fit_length_bound(
                 source_zh,
                 reinject_skeleton_from_source(
                     source_zh,
-                    en_val,
+                    t2_id,
                     inner_translator=self._translate_raw_zh_to_id,
                     baseline_en=baseline_en,
                 ),
@@ -738,10 +963,6 @@ class ThreeTierGlossary:
             if ok:
                 return (cand, "tier3")
 
-            # If baseline_en itself passed validation against source_zh, keep skeleton of baseline_en
-            if validate_translation(source_zh, baseline_en)[0]:
-                return (baseline_en, "tier3")
-
             repaired = self._fit_length_bound(
                 source_zh,
                 reinject_skeleton_from_source(
@@ -754,6 +975,9 @@ class ThreeTierGlossary:
             ok2, _ = validate_translation(source_zh, repaired)
             if ok2:
                 return (repaired, "tier3")
+
+            if validate_translation(source_zh, baseline_en)[0]:
+                return (baseline_en, "tier3")
 
         # 5. Fallback for unmapped raw Chinese strings
         cand = self._fit_length_bound(source_zh, self._translate_raw_zh_to_id(source_zh))

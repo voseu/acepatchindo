@@ -147,6 +147,68 @@ def load_catalog(folder: Path) -> Catalog | None:
 
 _orig_run = _run
 
+_ID_MESSAGE_REPLACEMENTS: tuple[tuple[str, str], ...] = (
+    (
+        "English installed and verified. Unknown text was preserved.",
+        "Bahasa Indonesia berhasil dipasang dan diverifikasi. Teks tidak dikenal dipertahankan.",
+    ),
+    (
+        "Saved originals restored and verified.",
+        "File asli berhasil dipulihkan dan diverifikasi.",
+    ),
+    (
+        "No matching restore backup. Updated game files will not be overwritten.",
+        "Tidak ada cadangan pemulihan yang cocok. File game terbaru tidak ditimpa.",
+    ),
+    (
+        "No safe new replacements found. Unknown Chinese text is preserved.",
+        "Tidak ada pembaruan teks baru. Teks tidak dikenal dipertahankan.",
+    ),
+    (
+        "English files are installed, but launcher file-size metadata needs repair.",
+        "File Bahasa Indonesia sudah terpasang, tetapi metadata ukuran file launcher perlu diperbaiki.",
+    ),
+    (
+        "Installed package metadata repaired; translated files were already installed.",
+        "Metadata paket berhasil diperbaiki; file terjemahan sudah terpasang.",
+    ),
+    (
+        "Interrupted operation recovered; previous files restored and verified.",
+        "Operasi yang terputus berhasil dipulihkan; file sebelumnya dikembalikan dan diverifikasi.",
+    ),
+    (
+        "Known translations found in the current files.",
+        "Terjemahan yang dikenal ditemukan di dalam file saat ini.",
+    ),
+    (
+        "Offline stage verified; game files unchanged.",
+        "Stage offline diverifikasi; file game tidak berubah.",
+    ),
+    (
+        "No installation found. Select the game folder or WXQ.exe.",
+        "Instalasi tidak ditemukan. Pilih folder game atau WXQ.exe.",
+    ),
+    (
+        "Select WXQ.exe or a folder containing WXQ.exe and WXQ_Data/Package/builtin.",
+        "Pilih WXQ.exe atau folder yang berisi WXQ.exe dan WXQ_Data/Package/builtin.",
+    ),
+    ("Installation discovered.", "Instalasi ditemukan."),
+    (" known strings; ", " string dikenal; "),
+    (" unknown left Chinese; ", " tidak dikenal dipertahankan; "),
+    (" graphics; ", " grafik; "),
+    (" strings skipped for capacity.", " string dilewati karena kapasitas."),
+)
+
+
+def _localize_report_message(report: dict) -> dict:
+    if isinstance(report, dict) and isinstance(report.get("message"), str):
+        msg = report["message"]
+        for en_sub, id_sub in _ID_MESSAGE_REPLACEMENTS:
+            if en_sub in msg:
+                msg = msg.replace(en_sub, id_sub)
+        report["message"] = msg
+    return report
+
 
 def _run(action: str, game: Path, assets: Path, work: Path) -> dict:
     if action == "install":
@@ -162,5 +224,6 @@ def _run(action: str, game: Path, assets: Path, work: Path) -> dict:
                     _orig_run("restore", resolved_game, assets, work)
         except Exception:
             pass
-    return _orig_run(action, game, assets, work)
+    report = _orig_run(action, game, assets, work)
+    return _localize_report_message(report)
 '''

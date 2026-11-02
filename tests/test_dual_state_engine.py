@@ -93,7 +93,11 @@ def test_adaptive_auto_restores_chinese_originals_before_install(
 
     def fake_orig_run(action: str, game: Path, assets: Path, work: Path) -> dict:
         calls.append(action)
-        return {"state": "current", "action": action}
+        return {
+            "state": "current",
+            "action": action,
+            "message": "English installed and verified. Unknown text was preserved.",
+        }
 
     monkeypatch.setattr(adaptive, "_matching_restore_items", fake_matching_restore_items)
     monkeypatch.setattr(adaptive, "scan", fake_scan)
@@ -102,4 +106,8 @@ def test_adaptive_auto_restores_chinese_originals_before_install(
     res = adaptive._run("install", tmp_path / "game", tmp_path / "assets", tmp_path / "work")
     assert calls == ["restore", "install"]
     assert res["action"] == "install"
+    assert (
+        res["message"]
+        == "Bahasa Indonesia berhasil dipasang dan diverifikasi. Teks tidak dikenal dipertahankan."
+    )
 

@@ -9,11 +9,11 @@ Aplikasi pemasang *patch* lokalisasi **Bahasa Indonesia** mandiri (*standalone*)
 1. **Cakupan Terjemahan Penuh (100% Bebas Sisa Mandarin pada `originals/`):**
    - **41.483** entri kamus utama (`unique`), mencakup **41.375** entri basis `1.4.12` ditambah **108 string Mandarin (`409` record)** yang sebelumnya terlewat oleh *English Patcher 1.4.12*.
    - **29.750** entri pembaruan kontekstual (`english_updates`).
-   - **22.520** pemetaan pembalik tervalidasi (`en_to_id`) untuk instalasi gim yang sudah terpasang *English Patch*.
+   - **38.828** pemetaan pembalik tervalidasi (`en_to_id`, dari `42.773` kandidat) untuk instalasi gim yang sudah terpasang *English Patch*.
 2. **Hierarki Terminologi 3-Tier HoK Ace Indonesia:**
-   - **Tier 1 (Utama):** Kamus komunitas Indonesia [hok-ace-translate-id.netlify.app](https://hok-ace-translate-id.netlify.app/) (`#data` & `#lords-data`, mencakup Lord/Penguasa, Talent, Equipment, Efek, dan Hero) dengan penyelarasan ulang (*re-injection*) kerangka tag Unity (`<color=...>`, `<a href=...>`, `<b>`), *placeholder* (`{0}`), token kontrol (`╫`), serta titik koma (`;`).
-   - **Tier 2 (Referensi Kedua):** Ensiklopedia [hokace.wiki](https://hokace.wiki/search/) (`624` entri istilah resmi *Hero*, *Artifact*, *Spell*, *Scroll*, dan *Trait* yang diadaptasi ke Bahasa Indonesia).
-   - **Tier 3 (Cakupan Menyeluruh):** Lokalisasi seluruh sisa dialog, antarmuka, pencapaian (*achievement*), dan deskripsi sistem dengan kepatuhan 100% terhadap 7 aturan `validate_translation`.
+   - **Tier 1 (Utama):** Kamus komunitas Indonesia [hok-ace-translate-id.netlify.app](https://hok-ace-translate-id.netlify.app/) (`#data` & `#lords-data`, mencakup `1.696` entri Hero/Skill/Talent/Equipment/Efek/Lord yang selaras termasuk `234` rumus dinamis Skill Hero) dengan penyelarasan ulang (*re-injection*) kerangka tag Unity (`<color=...>`, `<a href=...>`, `<b>`), *placeholder* (`{0}`, `[194010p1q2/100]`), token kontrol (`╫`), serta titik koma (`;`).
+   - **Tier 2 (Referensi Kedua):** Ensiklopedia [hokace.wiki](https://hokace.wiki/search/) (`624` halaman detail dwibahasa `EN`/`ZH` mencakup *Hero*, *Summon*, *Equipment*, *Effect Card*, *Talent*, *Chess Player*, dan *Mechanic*).
+   - **Tier 3 (Cakupan Menyeluruh):** Mesin leksikon & tata bahasa Indonesia (`lexicon_id.py`) untuk seluruh sisa dialog, antarmuka, pencapaian (*achievement*), dan deskripsi sistem dengan `0` kebocoran *stopword* bahasa Inggris (`Indlish`) dan kepatuhan 100% terhadap 7 aturan `validate_translation`.
 3. **Dual-State Engine & Pemulihan Otomatis Cadangan Mandarin (`originals/`):**
    - Jika gim Anda **masih berbahasa Mandarin asli**, *patcher* langsung mencadangkan berkas asli dan memasang Bahasa Indonesia.
    - Jika gim Anda **sudah terpasang English Patcher 1.4.12**, *patcher* secara otomatis memulihkan cadangan Mandarin terverifikasi di `%LOCALAPPDATA%\HoK Ace English Patch\adaptive` terlebih dahulu sebelum memasang Bahasa Indonesia (menjaga keutuhan cadangan asli gim Anda), serta menyediakan *fallback* langsung `EN -> ID` apabila cadangan lokal tidak ditemukan.
@@ -48,7 +48,8 @@ Repositori ini menyimpan kode sumber kakas rekayasa balik, penyelarasan tag Unit
 │   └── 06_publish_github_release.py     # Publikasi rilis GitHub v1.4.12-id.1 beserta aset .exe & SHA256SUMS.txt
 ├── src/acepatchindo/
 │   ├── validator.py                     # Implementasi ketat 7 aturan validate_translation
-│   ├── tag_aligner.py                   # Penyelaras kerangka tag Unity (<a href>, <color>, placeholder, ╫, ;)
+│   ├── tag_aligner.py                   # Penyelaras kerangka tag Unity & rumus dinamis Skill Hero
+│   ├── lexicon_id.py                    # Mesin leksikon, morfologi, & tata bahasa Inggris -> Indonesia
 │   ├── glossary.py                      # Mesin glosarium & penerjemah 3-Tier Bahasa Indonesia
 │   └── dual_state_patch.py              # Generator bytecode mandiri untuk PyInstaller PYZ.pyz
 └── tests/                             # Rangkaian pengujian unit & integrasi QtsVFS / CArchive
@@ -66,7 +67,7 @@ uv run --python 3.12 --with lz4 --with httpx --with pytest pytest -v
 
 | Berkas / Komponen | Ukuran (Byte) | SHA-256 |
 | :--- | ---: | :--- |
-| `Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe` | `59.877.888` | `f98af7f76b4b9ae8a250637895c8f57318daf0d95838833f2defb175db9bf293` |
-| `ace-worker.exe` (*embedded* `0x4CAC4A..0x3838C00`) | `53.927.862` | `2c9952158ff04be043117c9b3cb71ff3db0ac3fef4537b91ee17fccf9946dd11` |
+| `Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe` | `59.877.888` | `3baffa77dd167f88c440af370edd747d4c686d8306e3e0823510de02a20c8a50` |
+| `ace-worker.exe` (*embedded* `0x4CAC4A..0x3838C00`) | `53.927.862` | `08f4e0bfe896aae037a06b2f612cf9c0bf7140623c6bb320401b826aaa1f8f6a` |
 
 

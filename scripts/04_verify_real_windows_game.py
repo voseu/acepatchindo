@@ -178,8 +178,8 @@ def run_verification() -> tuple[dict, dict, list[dict]]:
             WINDOWS_LIVE_WXQ, assets_dir, STAGE_DIR / "en_stage", materialize=False
         )
         print(f"Live English-Patched Game Counts: {dict(counts_en)}")
-        assert counts_en.get("translated", 0) > 100000, (
-            f"Expected >100,000 EN->ID translated records on live English game, got {counts_en.get('translated')}"
+        assert counts_en.get("translated", 0) > 150000, (
+            f"Expected >150,000 EN->ID translated records on live English game, got {counts_en.get('translated')}"
         )
         assert counts_en.get("invalid_translation", 0) == 0, (
             f"Expected 0 invalid_translation on live English game, got {counts_en.get('invalid_translation')}"

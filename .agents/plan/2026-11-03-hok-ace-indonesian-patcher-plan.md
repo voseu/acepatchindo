@@ -1961,3 +1961,63 @@ Verify the release URL is live and the asset download URL returns HTTP `200`/`30
 ```bash
 curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe | head -n 20
 ```
+
+---
+
+## Phase 2: Post-Audit Remediation Plan (Fixing Translation Quality, Tier 1 Formula Matching, Tier 2 Scraping, & Runtime Messages)
+
+> **Audit Finding Summary (Why Phase 2 is Mandatory):**
+> A deep forensic inspection of the initial build (`0195d31`) revealed 4 severe shortcuts taken during execution:
+> 1. **18,873 of 41,483 `unique` strings (`45.5%`) and 8,392 of 29,750 `english_updates` (`28.2%`) were left 100% in English**, and **12,210 strings were turned into broken "Indlish"** (e.g., `"Fang dan Arli throw mereka weapons"`, `"the new sounds of the kali"`, `"%s challenged milikmu Championship Lineup dan won"`) because `glossary.py` only used ~150 regex patterns (`'the'` still appears **16,182 times** in `catalog.json.gz`!).
+> 2. **234 of 939 Tier 1 (`hok-ace-translate-id.netlify.app`) descriptions failed to match** because Tier 1 `descCn` uses static numbers (`80+80%物理攻击力`) while `catalog.json.gz` uses dynamic formula placeholders (`<color=#dfa15e>80+[194010p1q2/100]%物理攻击力</color>` or `[0]点物理伤害（[1]+[2]%物理攻击力）`).
+> 3. **`self.tier1_en_card_to_id_desc` in `glossary.py` (lines 584–598) was dead code** — populated from Tier 1 `lords` (`talents` & `related`) and never called anywhere.
+> 4. **Tier 2 (`hokace.wiki`) only scraped `/search/` titles (matching only 93 short names)** instead of scraping the detail pages, and **`adaptive.pyc` status messages** (`"English installed and verified..."`) were left in English.
+
+### Task 8: Tier 1 Formula-Agnostic Template Matcher & `lords` Card Description Activation
+
+- [ ] **Step 8.1: Upgrade `tag_aligner.py` & `glossary.py` to match Tier 1 `descCn` with dynamic formula placeholders**
+  - Create a formula-skeleton normalizer `normalize_formula_skeleton_zh(text)` that strips Unity tags and replaces both formula placeholders (`[194010p1q2/100]`, `{0}`, `[0]`) and numeric literals (`\d+(?:\.\d+)?`) with a canonical `#N#` token so all 234 missed Tier 1 Hero skills/enhancements/awakenings match `tier1_wiki_id.json`.
+  - When substituting the Tier 1 Indonesian `desc`, preserve the exact `<color=...>` tags and dynamic formula placeholders (`[194010p1q2/100]`, `[0]`, `{0}`) from `source_zh` (or `baseline_en`) in their corresponding slots so `validate_translation(source_zh, result) == (True, 'ok')`.
+- [ ] **Step 8.2: Activate `tier1_en_card_to_id_desc` for all 19 Lords' Talents & Related Cards**
+  - Match `baseline_en` / card names and descriptions against `tier1_en_card_to_id_desc` so all Chess Player skills, Secret Arts, and Signature Talents use the exact Tier 1 Indonesian translations.
+
+### Task 9: Tier 2 (`hokace.wiki`) Full Detail-Page Extraction
+
+- [ ] **Step 9.1: Upgrade `scripts/01_extract_baseline_and_refs.py` to scrape `hokace.wiki` detail pages**
+  - Fetch the detail pages (`https://hokace.wiki{entry['url']}`) concurrently using `httpx.AsyncClient(limits=httpx.Limits(max_connections=20))` and cache them in `data/references/tier2_wiki_details_en.json`.
+  - Extract any Chinese/English skill, card, talent, equipment, and mechanic descriptions so Tier 2 provides full coverage for items not present in Tier 1.
+
+### Task 10: Eliminate All "Indlish" & Untranslated English Across All 41,483 `unique` & 29,750 `english_updates`
+
+- [ ] **Step 10.1: Replace the shallow 150-regex table with a Complete Indonesian Translation Pipeline**
+  - Fix context-blind regex bugs (such as replacing `"times"` in `"sounds of the times"` with `"kali"`).
+  - Protect all Unity tags (`<color=...>`, `<a href=...>`, `<b>`), placeholders (`{0}`, `%s`, `[194010p1q2/100]`), control tokens (`╫`), and canonical Tier 1 English proper nouns/mechanics (`CANONICAL_PROTECTED_TERMS` + Hero/Card/Equipment/Faction names) with sentinels before translating prose.
+  - Translate all remaining English prose across `unique`, `contextual`, and `english_updates` into complete, natural Bahasa Indonesia (using batched translation with checkpoint caching in `data/catalog_checkpoints/` and/or a comprehensive full-coverage grammar + lexicon engine covering the entire catalog vocabulary).
+- [ ] **Step 10.2: Enforce Strict Anti-Indlish & Anti-Untranslated Quality Gate in `tests/test_glossary_and_tiers.py`**
+  - Add `test_catalog_has_no_indlish_or_untranslated_english_prose()` verifying across `data/catalog_checkpoints/catalog.json.gz`:
+    1. Count of `unique` entries containing untranslated English prose stopwords (`\b(the|with|from|your|their|when|after|before|deals|dealing|gains|restores|restoring|enemies|allies|cannot|will|have|has|been|this|that|throws|swings|surrounding|nearby|unable|receive|challenged|congratulations|requires|apologize|customers|inconvenience|increases|reduces|obtained|unlocked|available|please|again|later|already|wearing)\b` outside protected proper titles) is **`< 100` (down from `12,210`)**.
+    2. Count of `english_updates` entries containing those untranslated English stopwords is **`< 100` (down from `8,719`)**.
+    3. All `41,483` `unique` and `29,750` `english_updates` pass `wxq_patch.translation_rules.validate_translation` with **`0` failures**.
+
+### Task 11: Localize `adaptive.pyc` Runtime Status Messages, Repack `.exe`, Verify on Real Game, & Update GitHub Release `v1.4.12-id.1`
+
+- [ ] **Step 11.1: Localize status messages returned by `wxq_patch/adaptive.pyc` (`_run`)**
+  - In `src/acepatchindo/dual_state_patch.py:render_adaptive_source`, translate the English status strings in `report["message"]`:
+    - `"English installed and verified. Unknown text was preserved."` -> `"Patch Bahasa Indonesia berhasil dipasang dan diverifikasi."`
+    - `"Saved originals restored and verified."` -> `"Berkas asli gim berhasil dipulihkan dan diverifikasi."`
+    - `"Installed package metadata repaired; translated files were already installed."` -> `"Metadata paket diperbaiki; berkas terjemahan Indonesia sudah terpasang."`
+    - `"English files are installed, but launcher file-size metadata needs repair."` -> `"Berkas Indonesia terpasang, namun metadata ukuran berkas launcher perlu diperbaiki."`
+    - `"Known translations found in the current files."` -> `"Terjemahan yang dikenali ditemukan pada berkas saat ini."`
+    - `"No safe new replacements found. Unknown Chinese text is preserved."` -> `"Tidak ada penggantian baru yang aman. Teks asli dipertahankan."`
+    - `" known strings; "` -> `" teks diterjemahkan; "`
+    - `" unknown left Chinese; "` -> `" teks belum dikenal; "`
+    - `" strings skipped for capacity."` -> `" teks dilewati karena batas kapasitas."`
+- [ ] **Step 11.2: Re-run full verification & repack pipeline**
+  - Run `scripts/03_patch_worker_modules.py`
+  - Run `scripts/04_verify_real_windows_game.py` (`tables == 508`, `unknown == 0`, `invalid_translation == 0`, `capacity_skipped == 0`)
+  - Run `scripts/05_repack_windows_exe.py`
+  - Run `pytest -v` (all test suites 100% green)
+- [ ] **Step 11.3: Commit, Push, and Re-upload Assets to GitHub Release `v1.4.12-id.1`**
+  - Commit all updated source, reference, checkpoint, and test files to `main` and `git push origin main`.
+  - Run `scripts/06_publish_github_release.py` (which uses `gh release upload v1.4.12-id.1 ... --clobber` and updates the release notes with the new SHA-256 hashes).
+

@@ -63,12 +63,130 @@ LEADING_TAGGED_PREFIX_RE = re.compile(
     r"^(\s*(?:<(?:/?[A-Za-z][^>]*|/)>|[\u2540-\u257f]|[^：:\n<])+?(?:</[A-Za-z][^>]*>)+)\s*[：:]\s*"
 )
 
+FORMULA_TOKEN_RE = re.compile(
+    r"\[[A-Za-z0-9_+/.*%-]+\]|\{[0-9A-Za-z_:+|.%/~-]*\d[0-9A-Za-z_:+|.%/~-]*\}|\d+(?:\.\d+)?"
+)
+
+COMPOUND_EXPR_RE = re.compile(
+    r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\{[0-9A-Za-z_:+|.%/~-]*\d[0-9A-Za-z_:+|.%/~-]*\}|\d+(?:\.\d+)?%?)"
+    r"(?:\s*[+~-]\s*(?:\[[A-Za-z0-9_+/.*%-]+\]|\{[0-9A-Za-z_:+|.%/~-]*\d[0-9A-Za-z_:+|.%/~-]*\}|\d+(?:\.\d+)?%?))*%?"
+)
+
 
 def normalize_plain_zh(text: str) -> str:
     """Strip Unity tags, control tokens, and whitespace so text matches Tier 1 descCn."""
     cleaned = TAG_RE.sub("", text)
     cleaned = CONTROL_TOKEN_RE.sub("", cleaned)
     return re.sub(r"\s+", "", cleaned).strip()
+
+
+def normalize_formula_skeleton_zh(text: str) -> str:
+    """Normalize Chinese text by replacing dynamic formula tokens, icon placeholders, and numbers with #N#."""
+    p = normalize_plain_zh(text)
+    p = re.sub(r"^(?:主动|被动|觉醒|天赋|效果|秘技)[：:]", "", p)
+    p = p.replace("（", "(").replace("）", ")").replace("【", "[").replace("】", "]")
+    p = (
+        p.replace("{Energy}", "能量")
+        .replace("{LordExp}", "棋手经验")
+        .replace("{LordHp}", "棋手生命值")
+    )
+    p = re.sub(r"\[0\]点(物理|法术|真实)伤害\(([^)]+)\)", r"\2的\1伤害", p)
+    p = re.sub(r"\[0\]点(护盾|生命值)\(([^)]+)\)", r"\2的\1", p)
+    p = re.sub(
+        r"[一二两三四五六七八九十]+(?=周|次|秒|格|层|名|个|张|点|回合|件|把|枚|颗|只|条|道)",
+        "#N#",
+        p,
+    )
+    skel = FORMULA_TOKEN_RE.sub("#N#", p)
+    skel = skel.replace("#N#-#N#", "#N#").replace("#N#点", "#N#")
+    return skel
+
+
+def reinject_formula_and_skeleton(
+    source_zh: str,
+    desc_cn: str,
+    desc_id: str,
+    inner_translator: Callable[[str], str] | None = None,
+    baseline_en: str | None = None,
+) -> str:
+    """Substitute dynamic formula placeholders from source_zh/baseline_en into Tier 1 desc_id, then reinject tags."""
+    out = desc_id
+
+    # 1. Replace pipe-delimited numeric + icon placeholders: {0|2}{Energy}, {3|6}{LordExp}, {1|10}{LordHp}
+    for m in re.finditer(
+        r"(\{[0-9A-Za-z_:+|.%/~-]+\})\{(Energy|LordExp|LordHp)\}", source_zh
+    ):
+        num_ph, icon_name = m.group(1), m.group(2)
+        full_ph = f"{num_ph}{{{icon_name}}}"
+        if icon_name == "Energy":
+            out = re.sub(r"\b\d+\s*(?:Energy|Energi)\b", full_ph, out, count=1)
+        elif icon_name == "LordExp":
+            out = re.sub(
+                r"\b\d+\s*(?:Player EXP|EXP Chess Player|EXP Pemain|EXP)\b",
+                full_ph,
+                out,
+                count=1,
+            )
+        elif icon_name == "LordHp":
+            out = re.sub(
+                r"\b\d+\s*(?:Player HP|HP Chess Player|HP Pemain|Health)\b",
+                full_ph,
+                out,
+                count=1,
+            )
+
+    # 2. If source_zh uses parenthetical [0]点...（[1]+[2]%...）, graft the exact formula span or align after normalization
+    if "[0]" in source_zh and baseline_en:
+        en_tagged_dmg = re.findall(
+            r"(?:<color=[^>]+>)?\[\d+\][^<]*(?:</color>)?\s*(?:<color=[^>]+>)?\s*\(\[\d+\][^)]*\)(?:</color>)?",
+            baseline_en,
+        )
+        id_dmg_spans = list(
+            re.finditer(
+                r"(?:\d+(?:\.\d+)?\+)?\d+(?:\.\d+)?%\s*(?:Physical Attack|Magic Attack|Max HP|HP Maksimum|[A-Za-z ]+?)\s+sebagai\s+(?:Physical Damage|Magic Damage|True Damage|Shield|HP)",
+                out,
+            )
+        )
+        if en_tagged_dmg and len(en_tagged_dmg) == len(id_dmg_spans):
+            for m_span, repl_str in reversed(list(zip(id_dmg_spans, en_tagged_dmg))):
+                clean_repl = repl_str.replace("magical attack", "Magic Attack").replace(
+                    "Magical Damage", "Magic Damage"
+                )
+                out = out[: m_span.start()] + clean_repl + out[m_span.end() :]
+
+    # 3. Align compound expressions between desc_cn and source_zh (both share exact Chinese word order)
+    zh_num_counter_re = re.compile(
+        r"[一二两三四五六七八九十]+(?=周|次|秒|格|层|名|个|张|点|回合|件|把|枚|颗|只|条|道)"
+    )
+    cn_clean = zh_num_counter_re.sub(
+        "1", normalize_plain_zh(desc_cn).replace("（", "(").replace("）", ")")
+    )
+    src_clean = zh_num_counter_re.sub(
+        "1", normalize_plain_zh(source_zh).replace("（", "(").replace("）", ")")
+    )
+    src_clean = (
+        src_clean.replace("{Energy}", "能量")
+        .replace("{LordExp}", "棋手经验")
+        .replace("{LordHp}", "棋手生命值")
+    )
+    src_clean = re.sub(r"\[0\]点(物理|法术|真实)伤害\(([^)]+)\)", r"\2的\1伤害", src_clean)
+    src_clean = re.sub(r"\[0\]点(护盾|生命值)\(([^)]+)\)", r"\2的\1", src_clean)
+
+    cn_exprs = COMPOUND_EXPR_RE.findall(cn_clean)
+    src_exprs = COMPOUND_EXPR_RE.findall(src_clean)
+    if len(cn_exprs) == len(src_exprs):
+        for c_ex, s_ex in zip(cn_exprs, src_exprs):
+            if c_ex != s_ex and ("[" in s_ex or "{" in s_ex):
+                out = re.sub(
+                    rf"(?<![\d\[]){re.escape(c_ex)}(?![\d%])", s_ex, out, count=1
+                )
+
+    return reinject_skeleton_from_source(
+        source_zh,
+        out,
+        inner_translator=inner_translator,
+        baseline_en=baseline_en,
+    )
 
 
 def reinject_skeleton_from_source(
@@ -84,12 +202,17 @@ def reinject_skeleton_from_source(
 
     result = plain_id
 
-    # 1. If baseline_en has valid matching tags & a leading tagged keyword prefix (e.g. <a href=10>...Sacrifice...</a>:),
+    # 1. If baseline_en has valid matching tags & a short leading tagged keyword prefix (e.g. <a href=10>...Sacrifice...</a>:),
     #    graft that exact prefix onto plain_id's body!
     if baseline_en and TAG_RE.findall(baseline_en) == tags_in_src and tags_in_src:
         m_en = LEADING_TAGGED_PREFIX_RE.match(baseline_en)
         m_id = re.match(r"^([^:\n]{1,40}):\s*(.+)$", result, re.S)
-        if m_en and m_id and TAG_RE.findall(m_en.group(1)) == tags_in_src:
+        if (
+            m_en
+            and m_id
+            and TAG_RE.findall(m_en.group(1)) == tags_in_src
+            and len(TAG_RE.sub("", m_en.group(1)).strip().split()) <= 2
+        ):
             cand = sanitize_target_text(source_zh, f"{m_en.group(1)}: {m_id.group(2)}")
             if validate_translation(source_zh, cand)[0]:
                 return cand
@@ -181,26 +304,11 @@ def _wrap_exact_tag_sequence(
     visible_lengths = [len(CONTROL_TOKEN_RE.sub("", t).strip()) for t in tokens]
     main_idx = visible_lengths.index(max(visible_lengths)) if visible_lengths else 0
 
-    # Remove placeholders from stripped_id if they appear in other slots, then re-verify
     out_parts: list[str] = []
     for idx, tok in enumerate(tokens):
         tok_ctrls = "".join(CONTROL_TOKEN_RE.findall(tok))
-        clean_tok = CONTROL_TOKEN_RE.sub("", tok).strip()
         if idx == main_idx:
             out_parts.append(f"{tok_ctrls}{stripped_id}")
-        elif clean_tok:
-            mapped = BRACKET_TERM_MAP.get(clean_tok)
-            if mapped:
-                out_parts.append(f"{tok_ctrls}{mapped}")
-            elif not CJK_RE.search(clean_tok):
-                out_parts.append(tok)
-            elif inner_translator:
-                tr = CONTROL_TOKEN_RE.sub("", TAG_RE.sub("", inner_translator(clean_tok)))
-                tr = CJK_RE.sub("", tr).strip()
-                out_parts.append(f"{tok_ctrls}{tr}")
-            else:
-                phs = "".join(PLACEHOLDER_RE.findall(clean_tok))
-                out_parts.append(f"{tok_ctrls}{phs}")
         else:
             out_parts.append(tok_ctrls)
 
