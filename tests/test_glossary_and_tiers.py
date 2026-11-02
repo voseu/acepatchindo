@@ -202,4 +202,55 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
         == "%s menantang Formasi Kejuaraan milikmu dan menang."
     )
 
+    # Phase 5 Audit Verifications:
+    # 1. Card titles
+    assert cat["unique"].get("人才储备") == "Talent Reserve" or (len(cat["unique"].get("人才储备", "")) <= 25 and not cat["unique"].get("人才储备", "").startswith("Saat Round dimulai"))
+    assert not cat["unique"].get("海的拥抱", "").startswith("Setiap 4")
+    en_map = {r[4]: r[2] for r in cat["english_updates"] if len(r) == 5}
+    for zh, id_val in cat["unique"].items():
+        orig_en = en_map.get(zh, "")
+        if len(zh) <= 6 and orig_en and len(orig_en) <= 25:
+            assert len(id_val) < 40, f"Card title '{zh}' ({orig_en}) overwritten by long description: '{id_val}'"
+
+    # 2. Roman I protection: 0 (aku) and 0 aku. <Upper>
+    assert sum(1 for v in cat["unique"].values() if re.search(r"\(\s*aku\s*\)", v)) == 0
+    assert sum(1 for r in cat["english_updates"] if re.search(r"\(\s*aku\s*\)", r[3])) == 0
+    assert sum(1 for v in cat["unique"].values() if re.search(r"(?:^|>|\n)\s*aku\.\s+[A-Z]", v)) == 0
+    assert sum(1 for r in cat["english_updates"] if re.search(r"(?:^|>|\n)\s*aku\.\s+[A-Z]", r[3])) == 0
+
+    # 3. Specific semantic and tag defects: zero occurrences
+    phase5_forbidden = [
+        "Li</color>Bai",
+        "sekutu</color>terdekat",
+        "Tempat suci Sage",
+        "Level atas",
+        "kiri dan benar",
+        "Sihir ATK",
+        "Fisik ATK",
+        "4Chang",
+        "sebuah 1",
+        "adalah digunakan",
+        "adalah dihancurkan",
+        "adalah dimainkan",
+        "adalah milikmu",
+    ]
+    for ft in phase5_forbidden:
+        ft_low = ft.lower()
+        for v in cat["unique"].values():
+            assert ft_low not in v.lower(), f"Found forbidden Phase 5 term '{ft}' in unique: {v}"
+        for r in cat["english_updates"]:
+            assert ft_low not in r[3].lower(), f"Found forbidden Phase 5 term '{ft}' in english_updates: {r[3]}"
+
+    # Less than 5 glued alphanumeric tag boundaries across unique
+    p_glued = re.compile(r"([A-Za-z0-9%])(<(?![/])(?:color|b|i|a|size)\b[^>]*>)|(</(?:color|b|i|a|size)>)([A-Za-z0-9])")
+    glued_count = sum(1 for v in cat["unique"].values() if p_glued.search(v))
+    assert glued_count < 5, f"Too many glued tag boundaries in unique: {glued_count}"
+
+    # 4. Arthur multi-tag skill semantic alignment
+    arthur_src = "举起圣剑跃向敌方人群密集处，额外造成<color=#d487e4>自身15%最大生命的法术伤害</color>并禁止范围内所有敌人恢复法力值，持续3秒"
+    assert arthur_src in cat["unique"], "Arthur skill missing in unique"
+    assert not cat["unique"][arthur_src].startswith("<color=#d487e4>Arthur")
+    assert "<color=#d487e4>Magic Damage" in cat["unique"][arthur_src]
+
+
 

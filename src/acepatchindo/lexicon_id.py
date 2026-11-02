@@ -347,6 +347,7 @@ PHRASE_4: dict[tuple[str, str, str, str], str] = {
     ("is", "about", "to", "end"): "akan segera berakhir",
     ("tap", "anywhere", "to", "close"): "ketuk di mana saja untuk menutup",
     ("click", "anywhere", "to", "close"): "klik di mana saja untuk menutup",
+    ("adjacent", "left", "and", "right"): "kiri dan kanan di sebelahnya",
 }
 
 PHRASE_3: dict[tuple[str, str, str], str] = {
@@ -429,9 +430,15 @@ PHRASE_3: dict[tuple[str, str, str], str] = {
     ("exquisite", "ancient", "coin"): "Refined Ancient Coin",
     ("exquisite", "ancient", "coins"): "Refined Ancient Coin",
     ("ancient", "coin", "machine"): "Coin Machine",
+    ("left", "and", "right"): "kiri dan kanan",
 }
 
 PHRASE_2: dict[tuple[str, str], str] = {
+    ("a", "single"): "1",
+    ("right", "side"): "sisi kanan",
+    ("right", "grid"): "petak kanan",
+    ("right", "grids"): "petak kanan",
+    ("right", "adjacent"): "sebelah kanan",
     ("ancient", "coin"): "Ancient Coin",
     ("ancient", "coins"): "Ancient Coin",
     ("coin", "machine"): "Coin Machine",
@@ -654,7 +661,9 @@ PHRASE_2: dict[tuple[str, str], str] = {
     ("team", "up"): "membentuk tim",
     ("line", "up"): "berbaris",
     ("level", "up"): "naik Level",
+    ("levels", "up"): "naik Level",
     ("leveled", "up"): "naik Level",
+    ("leveling", "up"): "naik Level",
     ("rank", "up"): "naik Rank",
     ("show", "up"): "muncul",
     ("showed", "up"): "muncul",
@@ -4171,7 +4180,7 @@ WORD_1: dict[str, str] = {
 }
 
 _TOKEN_RE = re.compile(
-    r"__WXQ[A-Z]+\d+__|[A-Za-z]+(?:'[A-Za-z]+)?|\d+(?:\.\d+)?|[^A-Za-z\d_]+"
+    r"__WXQ[A-Z]+\d+__|__ROMAN_I__|[A-Za-z]+(?:'[A-Za-z]+)?|\d+(?:\.\d+)?|[^A-Za-z\d_]+"
 )
 _WORD_CHECK_RE = re.compile(r"^[A-Za-z]+(?:'[A-Za-z]+)?$")
 
@@ -4183,9 +4192,10 @@ _POS_MAP = {
     "KITA": "kita",
     "MEREKA": "mereka",
 }
+_NON_COPULA_WORD = r"(?:__WXQ[A-Z]+\d+__|__ROMAN_I__|(?!adalah\b|akan\b|dapat\b|tidak\b|telah\b|sudah\b|sedang\b|harus\b|perlu\b|menjadi\b)[A-Za-z]+)"
 _POS_SWAP_RE = re.compile(
     r"__POS_(KU|MU|NYA|KITA|MEREKA)__\s+"
-    r"((?:__WXQ[A-Z]+\d+__|[A-Za-z]+)(?:\s+(?:__WXQ[A-Z]+\d+__|[A-Za-z]+)){0,2})"
+    rf"({_NON_COPULA_WORD}(?:\s+{_NON_COPULA_WORD}){{0,2}})"
 )
 _POS_LEFTOVER_RE = re.compile(r"__POS_(KU|MU|NYA|KITA|MEREKA)__")
 
@@ -4337,6 +4347,16 @@ def _apply_casing(orig: str, repl: str) -> str:
 def translate_segment_en_to_id(segment: str) -> str:
     """Translate an English segment (with __WXQ*__ sentinels already placed) into natural Indonesian."""
     out = segment.replace("’", "'").replace("‘", "'")
+
+    # Roman numeral I protection
+    out = re.sub(r"(?:^|(?<=[\n>(]))(\s*)I(?=\s*[.):、])", r"\1__ROMAN_I__", out)
+    out = re.sub(r"(?<=\()\s*I\s*(?=\))", "__ROMAN_I__", out)
+    out = re.sub(
+        r"\b(Stage|Phase|Tier|Part|Chapter|Act|Season|Round|Level|Lv\.?)\s+I\b",
+        r"\1 __ROMAN_I__",
+        out,
+    )
+
     for pat, repl in CLAUSE_PATTERNS:
         out = pat.sub(repl, out)
 
@@ -4424,21 +4444,30 @@ def translate_segment_en_to_id(segment: str) -> str:
     joined = re.sub(r" +([,.;:!?])", r"\1", joined)
 
     # Post-processing grammar cleanups
-    # 1. Strip unnatural English copulas
+    # 1. Passive adalah di... / adalah ter... cleanup and redundant copulas
+    joined = re.sub(r"\badalah\s+(di[a-z]{3,}\b)", r"\1", joined, flags=re.I)
+    joined = re.sub(r"\badalah\s+(ter[a-z]{3,}\b)", r"\1", joined, flags=re.I)
+    joined = re.sub(r"\bsebuah\s+(?=\d)", "", joined, flags=re.I)
+    joined = re.sub(r"\badalah\s+milikmu\b", "milikmu", joined, flags=re.I)
+    joined = re.sub(r"\b(milikku|milikmu|miliknya)\s+adalah\b", r"\1", joined, flags=re.I)
+    joined = re.sub(r"(?i)\bTemporary Level\s+atas\b", "Peningkatan Temporary Level", joined)
+    joined = re.sub(r"(?i)\bLevel\s+atas\b", "naik Level", joined)
+
+    # 2. Strip unnatural English copulas
     joined = re.sub(
         r"\b(aku|kamu|dia|kami|kita|mereka) adalah (di |ke |dari |pada |lebih |paling |sedang |sudah |telah |akan |bisa |dapat )",
         r"\1 \2",
         joined,
         flags=re.I,
     )
-    # 2. Reorder 'sebuah <adj> <noun>' -> '<noun> <adj>'
+    # 3. Reorder 'sebuah <adj> <noun>' -> '<noun> <adj>'
     joined = re.sub(
         r"\bsebuah (besar|kecil|baru|lama|hebat|indah|kuat|cepat|khusus|langka) ([A-Za-z0-9_]+)\b",
         r"\2 \1",
         joined,
         flags=re.I,
     )
-    # 3. Reorder '<verb/prep> ini/itu <noun>' -> '<verb/prep> <noun> ini/itu'
+    # 4. Reorder '<verb/prep> ini/itu <noun>' -> '<verb/prep> <noun> ini/itu'
     joined = re.sub(
         r"\b(memakai|memilih|membeli|menggunakan|dalam|dari|untuk|ke) (ini|itu) ([A-Za-z0-9_]+)\b",
         r"\1 \3 \2",
@@ -4446,4 +4475,5 @@ def translate_segment_en_to_id(segment: str) -> str:
         flags=re.I,
     )
 
+    joined = joined.replace("__ROMAN_I__", "I")
     return joined

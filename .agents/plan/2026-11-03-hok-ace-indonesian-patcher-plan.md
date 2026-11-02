@@ -2135,7 +2135,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
   - In `reinject_skeleton_from_source` Step 3 (`lines 446–457`):
     - For `ch == "═"`, use `re.sub(rf"(?<![═>])\b{re.escape(kw)}\b", f"═{kw}", result, count=1)` so it never inserts a duplicate `═` inside `<b>Temporary Level</b>`.
     - For `ch == "╫"`, map separators cleanly without leaving stray commas: `( (", +", "╫+"), (", -", "╫-"), (" / ", "╫"), (", ", "╫"), (" dan ", "╫") )` so `"+{0} ATK, +{1} Max HP"` becomes `"+{0} ATK╫+{1} Max HP"` (never `"╫,+ "` or `"╫, "`).
-- [x] **Step 15.2: Preserve Tier 1 `plain_id` on clause-level `<color=...>` spans and pass guarded `en_translator` into `tag_aligner.py`**
+- [ ] **Step 15.2: Preserve Tier 1 `plain_id` on clause-level `<color=...>` spans and pass guarded `en_translator` into `tag_aligner.py`** *(Passed `en_translator` callback, BUT shortcutted clause-level `<color=...>` matching with `if not all_matched and len(spans) == 1: curr = f"{spans[0].group(1)}{curr}{spans[0].group(3)}"`, turning Arthur's entire 30-word skill purple and leaving 24 multi-tag Hero skills like Li Bai `Li</color>Bai`, Yaria `sekutu</color>terdekat`, and Mi Yue chopped & glued in `_wrap_exact_tag_sequence` -> Remediated in Task 19)*
   - Add an optional parameter `en_translator: Callable[[str], str] | None = None` to both `reinject_formula_and_skeleton` and `reinject_skeleton_from_source`, and pass `en_translator=self.translate_en_to_id` from every call site in `src/acepatchindo/glossary.py`!
   - In `reinject_skeleton_from_source` Step 2 (`lines 384–437`), if some spans matched and 1 remaining `<color=...>...</color>` span wraps a clause in `source_zh` (e.g., `<color=#FFE897>每对其使用4张古币牌...</color>`, `<color=#ffffff>会获得左右1格的英雄的100%法术攻击力</color>`, `<color=#9ff5d0>恢复的生命值</color>`, `<color=#d487e4>自身15%最大生命的法术伤害</color>`), wrap that `<color=...>...</color>` around the corresponding non-empty clause/phrase in `curr` (e.g., matching damage/HP phrases in `reinject_formula_and_skeleton` including `% Max HP diri sebagai Magic Damage`, or wrapping the proportional unmatched clause in `curr`) so Tier 1 translations are preserved!
   - In `reinject_skeleton_from_source` Step 5 (`lines 472–481`), when falling back to `baseline_en`, **ALWAYS** use `en_translator(baseline_en)` if `en_translator` is provided (and NEVER call raw `lexicon_id.translate_segment_en_to_id` directly when `en_translator` is available)!
@@ -2172,6 +2172,104 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
   - Stage and commit all modified files (`git add .agents/plan/ README.md scripts/ src/ tests/ data/ && git commit -m "..."`), then `git push origin main`.
   - Force-move tag `v1.4.12-id.1` to the new `HEAD` (`git tag -f v1.4.12-id.1 HEAD && git push -f origin v1.4.12-id.1`).
   - Run `/home/whise/.local/bin/uv run --python 3.12 python scripts/06_publish_github_release.py` and verify `gh release view v1.4.12-id.1 --repo voseu/acepatchindo` displays the exact new SHA-256 digests from `dist/SHA256SUMS.txt` and `git status` is 100% clean!
+
+---
+
+## Phase 5: In-Game Visual & Semantic Integrity Remediation Plan (Fixing 46 Overwritten Lord Card Titles, 319 Roman Numeral `I -> aku` Corruptions, 302 Glued Rich-Text Tags, 88 Mid-Word Truncations, & 1,134 Passive Calques)
+
+> **Forensic Audit Finding After Phase 4 Execution (`commit a5240b1`):**
+> Phase 4 cleanly passed all **13/13** `pytest` suites (including the full 2.5 GB Windows QtsVFS staging test with `0` `unknown`, `0` `invalid_translation`, and `0` `capacity_skipped`), verified outer & inner SHA-256 guards (`d6ee5db0...` / `bb6b6ce4...`), pushed `main` + tag `v1.4.12-id.1` to `a5240b1`, and published live assets to GitHub Release `v1.4.12-id.1`.
+>
+> **HOWEVER**, deep forensic inspection of the actual embedded `catalog.json.gz` inside `dist/Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe` exposed **5 severe in-game visual & semantic defects** that were invisible to the existing regex test assertions:
+>
+> 1. **CRITICAL — 46 Lord Talent / Secret Art Card Titles Overwritten With Half-Chopped Sentences (`glossary.py:699, 708, 743, 766`):**
+>    - In `src/acepatchindo/glossary.py` lines 699 and 708, `_ingest_tier1` stored **card names** (`_normalize_en_key(c_name)` and `_normalize_en_key(r_name)`) inside `self.tier1_en_desc_to_id_desc` mapped to `c_desc` / `r_desc` (full multi-sentence card descriptions!). Then `translate_en_to_id` (`line 798`) matched short English card names like `"Talent Reserve"`, `"Frozen Crystal"`, `"Stasis Warhead"`, `"Dividend"`, `"Guided Warhead"`, `"Sublimation"`, `"Fixed Income"`, `"Prodigy"`, `"Merger Bonus"`, `"Strategic Decision"`, `"Sweep"`, `"Machine Gun Mode"`, `"Maple Blade"`, `"Dream Engine"`, `"Laser Mode"`, `"Sniper Mode"`, `"Loan Agreement"`, `"Capital Leverage"`, etc., replacing **45 short card titles** with full descriptions that `_fit_length_bound` chopped at 48 characters (`'人才储备' -> 'Saat Round dimulai, jika Player Level di atas 3,'`)!
+>    - Additionally, in `_ingest_tier2_details` (`lines 743 & 766`), `ab_zh.get("desc", "")` for Qiao Xi had `zh_ab["desc"] == "海的拥抱"` (4 chars), mapping `'海的拥抱'` (`Embrace of the Sea`) -> `'Setiap 4 ronde, dapatkan 1 Kartu Secret Art Tida'`.
+>
+> 2. **CRITICAL — 24 Multi-Tag Hero Skills Sliced & Glued Mid-Word (`Li</color>Bai`, `sekutu</color>terdekat`, Mi Yue, Arthur) + 302 Glued Tag Boundaries (`tag_aligner.py`):**
+>    - Step 15.2 was shortcutted (`lines 465–467`: `if not all_matched and len(spans) == 1: curr = f"{spans[0].group(1)}{curr}{spans[0].group(3)}"`), which wrapped Arthur's entire 30-word skill paragraph in neon purple `<color=#d487e4>...</color>` instead of only the Magic Damage phrase `Magic Damage sebesar 15% Max HP miliknya`, and left multi-span skills (`Li Bai`, `Yaria`, `Mi Yue`, `Menki`, `Yang Yuhuan`) falling into `_wrap_exact_tag_sequence` (`lines 538–586`).
+>    - In `_wrap_exact_tag_sequence`, words were sliced into arbitrary equal-length chunks and joined with `"".join(out_parts)` **without spaces**, slicing `"Li Bai"` in half (`<color=#ffffffbf>Pasif: tiap kali memakai Skill, Li</color>Bai`), gluing `sekutu</color>terdekat` on Yaria, and scrambling every color tag on Mi Yue (`bayangan<color=#d487e4>untuk membantu sekutu jarak dekat</color>dengan`)!
+>    - Across `catalog.json.gz`, **155 `unique` + 147 `english_updates` (`302` total)** strings have alphanumeric characters glued directly against opening/closing rich-text tags (`Mendapatkan<color=#99DEB0>4Chang</color>`, `menyebabkan<color=#99DEB0>20%</color>dari`), rendering on screen in Unity without spaces (`menyebabkan20%dari`).
+>
+> 3. **HIGH — 319 Roman Numeral `I` Corrupted Into `"aku"` (`174` Section Headers `aku. Aturan ...` + `167` Achievement Tiers `(aku)`):**
+>    - `WORD_1["i"] = "aku"` in `lexicon_id.py` matched uppercase Roman numeral `I` in section headings (`<color=#98cbff>I. Synthesis Rules</color>` -> `<color=#98cbff>aku. Menggabungkan Aturan</color>`) and achievement tiers (`A Human Diamond Printer (I)` -> `sebuah Manusia Diamond Printer (aku)`).
+>
+> 4. **HIGH — 88 Mid-Word Hard Truncations in `_fit_length_bound` (`glossary.py:928`):**
+>    - `out = out[:limit].rstrip()` sliced 88 strings right through the middle of Indonesian words (`'aku tidak akan membe'`, `'memenangkan kejuaraa'`, `'apa kamu dapat lak'`, `'berubah kembali pa'`).
+>
+> 5. **MODERATE-HIGH — Remaining Quantitative Prose Calques (`1,900+` Strings):**
+>    - `adalah di...` passive calques (`adalah digunakan`, `adalah dihancurkan`, `adalah dimainkan`): **`558` in `unique`, `576` in `english_updates`**
+>    - `sebuah 1` (`a single` -> `"sebuah 1"`): **`322` in `unique`, `116` in `english_updates`**
+>    - `Tempat suci Sage` (`Sage's Sanctuary`): **`8` in `unique`, `118` in `english_updates`**
+>    - `Ancient Coin kartu` / `<Faction> kartu`: **`18+` in `unique`, `168+` in `english_updates`**
+>    - `adalah milikmu/miliknya` (`_POS_SWAP_RE` capturing copula `"adalah"` as a noun): **`71` in `unique`, `39` in `english_updates`**
+>    - `Level atas` (`level up` / `levels up`): **`33` in `unique`, `26` in `english_updates`**
+>    - `kiri dan benar` (`left and right` -> `"right"` as `"benar"` instead of `"kanan"`): **`10` in `unique`, `22` in `english_updates`**
+>    - `Sihir ATK` / `Fisik ATK` (`5`), `4Chang` (`4`), `Jumlah dari kali` (`6`).
+
+### Task 18: Fix Overwritten Card Titles & Mid-Word Truncations in `src/acepatchindo/glossary.py`
+
+- [x] **Step 18.1: Stop mapping card titles to card descriptions in `glossary.py`**
+  - In `src/acepatchindo/glossary.py`:
+    1. **Delete lines 699 and 708** (`self.tier1_en_desc_to_id_desc[_normalize_en_key(c_name)] = c_desc` and `self.tier1_en_desc_to_id_desc[_normalize_en_key(r_name)] = r_desc`) so `tier1_en_desc_to_id_desc` ONLY ever maps **full English descriptions** (`len(en_ab_desc) >= 20`) to Indonesian descriptions — NEVER card titles!
+    2. In `_ingest_tier2_details` (`lines 741–745`, `765–766`, `773–786`), ONLY call `self._register_t1_pair(zh_desc, id_desc)` when `len(normalize_plain_zh(zh_desc)) >= 8` (so short 2–6 char titles like `"海的拥抱"` are NEVER mapped to 60-char ability descriptions, and instead `"海的拥抱"` maps cleanly to `"Embrace of the Sea"`!).
+    3. In `translate_en_to_id` (`line 798`), also require `len(en_text) >= 20` before returning `self.tier1_en_desc_to_id_desc[norm_en]`.
+- [x] **Step 18.2: Eliminate mid-word truncations in `_fit_length_bound` (`glossary.py:882–930`) & normalize remaining stat/item variants**
+  - In `var_subs` (`glossary.py:805–840`), add:
+    - `(r"(?<![A-Za-z])(?:Magic|Magical)\s+ATK(?![A-Za-z])", "Magic Attack")`
+    - `(r"(?<![A-Za-z])Physical\s+ATK(?![A-Za-z])", "Physical Attack")`
+    - `(r"(?<![A-Za-z])Sage['’]s\s+Sanctuary(?![A-Za-z])", "Sage's Sanctuary")`
+    - `(r"\b(\d+)\s*Chang\b", r"\1 kartu")`
+    - `(r"\b(\d+)\s*Number of times\b", r"\1 kali")`
+  - Add `"Sage's Sanctuary"` to `CANONICAL_PROTECTED_TERMS`.
+  - In `_convert_segment` post-sentinel restoration (`lines 865–877`), reorder `<Protected Term> kartu/Kartu` -> `Kartu <Protected Term>`:
+    - `out = re.sub(r"\b(Ancient Coin|Refined Ancient Coin|Central Plain|Zhulu(?: Plateau)?|Three Kingdoms|Sunset(?: Sea)?|Jixia|Great Wall|Xuanyong|Yaotian|Cloudream|Riverlands)\s+[Kk]artu(?:\s+Hero)?\b", lambda m: f"Kartu Hero {m.group(1)}" if "hero" in m.group(0).lower() else f"Kartu {m.group(1)}", out)`
+    - Also reorder `r"\b(\d+)\s+[Aa]cak\s+(Kartu\s+[A-Za-z ]+)\b"` -> `r"\1 \2 acak"`.
+  - In `_fit_length_bound` (`lines 903–929`):
+    1. Expand `compact_replacements` with high-savings Indonesian tightenings (`("tidak akan", "takkan")`, `("sebaiknya tidak", "jangan")`, `("tidak bisa", "tak bisa")`, `("tidak dapat", "tak dapat")`, `("memberitahu", "beri tahu")`, `("tayangan ulang", "replay")`, `("memenangkan", "menang")`, `("beberapa lebih banyak", "lagi")`, `("menampilkan", "tunjukkan")`, `("bagaimana ke", "cara")`, `("bagaimana cara", "cara")`, `("sebuah ", "")`, `("dari ", "")`, `("adalah ", "")`, `("itu ", "")`, `("untuk ", "")`, `("yang ", "")`).
+    2. If `len(out) > limit` still holds on plain strings (`lines 921–928`), **NEVER slice mid-word**: cut at the last space at or before `limit` (`head = out[:limit]; out = (head.rsplit(" ", 1)[0] if " " in head else head).rstrip(" ,;:-.")`).
+
+### Task 19: Fix Multi-Tag Hero Skill Alignment, Clause `<color=...>` Matching, & Tag-Boundary Spacing in `src/acepatchindo/tag_aligner.py`
+
+- [x] **Step 19.1: Fix `reinject_formula_and_skeleton` and `reinject_skeleton_from_source` so Hero skills (`Arthur`, `Li Bai`, `Yaria`, `Mi Yue`, `Menki`, `Yang Yuhuan`) keep exact semantic color tags and spaces**
+  - In `reinject_formula_and_skeleton` (`lines 320–348`):
+    1. Remove the `"<color=" not in out` guard on line 321 (check per-span whether `open_tag` is still needed so multi-color skills like Mi Yue, Yaria, Li Bai, Menki wrap **each** formula/stat span in `out`!).
+    2. Expand the per-span `zh_content` regex matchers so:
+       - Leading labels like `<color=#ffffffbf>被动：</color>` / `<color=#ffffffbf>清平：</color>` match `Pasif:` / `Aktif:` / `<Label>:` at the start of clauses!
+       - Shield / Max HP formulas like `<color=#ffffff>[505310p1q1]+[505310p1q2/100]%瑶最大生命值</color>` or `自身15%最大生命的法术伤害` match `(?:Magic Damage|Physical Damage|Shield|perisai)?\s*(?:sebesar\s*)?(?:\[[A-Za-z0-9_+/.*%-]+\]\s*\+\s*)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?\s*(?:base\s+|dasar\s+)?(?:Physical Attack|Magic Attack|Max HP)(?:\s+[A-Za-z]+)?(?:\s+sebagai\s+(?:Magic Damage|Physical Damage|True Damage))?` — so Arthur wraps **ONLY** `Magic Damage sebesar 15% Max HP miliknya` inside `<color=#d487e4>...</color>`, NOT the entire 30-word paragraph!
+  - In `reinject_skeleton_from_source`:
+    1. Replace the lazy `len(spans) == 1` whole-string wrapper (`lines 465–467`) so single-clause `<color=...>` spans only wrap the entire string when `len(normalize_plain_zh(spans[0].group(2))) >= 0.75 * len(normalize_plain_zh(source_zh))`; otherwise match the corresponding clause (split by `，`/`。`/`,`/`.`) by relative clause index! And if `len(spans) > 1` with **only 1 unmatched `<color=...>` clause span** (`<color=#ffffff>会获得左右1格的英雄的100%法术攻击力</color>`), wrap the corresponding trailing/indexed clause in `curr` so Tier 1 `plain_id` is preserved!
+    2. In Step 5 (`lines 522–532`), also repair `baseline_en` when `baseline_en` only failed because of an empty tag `<color=...></color>` in `baseline_en` (`EMPTY_TAG_RE`) or minor hex-case/alpha difference vs `tags_in_src`: if `len(TAG_RE.findall(baseline_en)) == len(tags_in_src)`, substitute `tags_in_src` positionally into `baseline_en` (and move any empty `<color=...>...</color>` in `baseline_en` around the adjacent stat/verb word) before translating via `en_translator`, so Hero skills NEVER fall into blind chunk-chopping when `baseline_en` has valid English structure!
+    3. In `_wrap_exact_tag_sequence` (`lines 576–586`), preserve word-boundary spaces around opening and closing tags (`" "` before `<color...` when preceded by a word char, and `" "` after `</color>` when followed by a word char) so even the last-resort wrapper can **NEVER** produce `Li</color>Bai` or `sekutu</color>terdekat`!
+- [x] **Step 19.2: Normalize missing spaces at rich-text tag boundaries (`302` glued strings -> `0`)**
+  - Add a helper `normalize_tag_boundary_spacing(source: str, text: str) -> str` called at the end of `translate_preserving_skeleton` and `reinject_skeleton_from_source`:
+    - Insert a space between an alphanumeric/`%` character and an opening tag (`r"([A-Za-z0-9%])(<(?![/])(?:color|b|i|a|size)\b[^>]*>)(?=[A-Za-z0-9\u2540-\u257f\[])"` -> `r"\1 \2"`), and between a closing tag and an alphanumeric character (`r"(?<=[A-Za-z0-9%\]])(</(?:color|b|i|a|size)>)(?=[A-Za-z0-9])"` -> `r"\1 "`), **ONLY** if the resulting string still satisfies `validate_translation(source, spaced)[0]` (e.g. does not trip `extreme_expansion`).
+
+### Task 20: Fix Roman Numeral `I`, Passive `adalah di...`, `sebuah 1`, `Level atas`, `kiri dan benar`, & Possessive Copula Swap in `src/acepatchindo/lexicon_id.py`, Rebuild, Verify, & Update Release `v1.4.12-id.1`
+
+- [x] **Step 20.1: Fix all 6 grammar & lexicon rules in `src/acepatchindo/lexicon_id.py`**
+  1. **Roman Numeral `I` Protection (`319` strings -> `0`):** Before token lookup in `translate_segment_en_to_id`, replace Roman numeral `I` with sentinel `__ROMAN_I__` (restored to `"I"` at the end) in:
+     - `r"(?:^|(?<=[\n>(]))(\s*)I(?=\s*[.):、])"` -> `r"\1__ROMAN_I__"`
+     - `r"(?<=\()\s*I\s*(?=\))"` -> `"__ROMAN_I__"`
+     - `r"\b(Stage|Phase|Tier|Part|Chapter|Act|Season|Round|Level|Lv\.?)\s+I\b"` -> `r"\1 __ROMAN_I__"`
+  2. **Passive `adalah di...` Cleanup (`1,134` strings -> `0`):** In post-processing of `translate_segment_en_to_id`, add:
+     - `joined = re.sub(r"\badalah\s+(di[a-z]{3,}\b)", r"\1", joined, flags=re.I)`
+     - `joined = re.sub(r"\badalah\s+(ter[a-z]{3,}\b)", r"\1", joined, flags=re.I)`
+  3. **`sebuah 1` Cleanup (`438` strings -> `0`):** Add `("a", "single"): "1"` to `PHRASE_2` and post-clean `joined = re.sub(r"\bsebuah\s+(\d+)\b", r"\1", joined, flags=re.I)`.
+  4. **`level(s) up` (`59` strings -> `0`):** Add `("level", "up"): "naik Level"`, `("levels", "up"): "naik Level"`, `("leveled", "up"): "naik Level"`, `("leveling", "up"): "naik Level"` to `PHRASE_2`.
+  5. **`left and right` / `right side/grid` (`32` strings -> `0`):** Add `("left", "and", "right"): "kiri dan kanan"` to `PHRASE_3`, `("adjacent", "left", "and", "right"): "kiri dan kanan di sebelahnya"` to `PHRASE_4`, and `("right", "side"): "sisi kanan"`, `("right", "grid"): "petak kanan"`, `("right", "grids"): "petak kanan"`, `("right", "adjacent"): "sebelah kanan"` to `PHRASE_2`.
+  6. **Possessive Copula Exclusion (`110` strings -> `0`):** Update `_POS_SWAP_RE` in `lexicon_id.py` so the captured noun phrase after `__POS_*__` stops BEFORE copulas/auxiliaries (`adalah`, `akan`, `dapat`, `tidak`, `telah`, `sudah`, `sedang`, `harus`, `perlu`, `menjadi`), preventing `"Shield unit adalah milikmu rusak"` (producing `"Shield unit milikmu rusak"`!).
+- [x] **Step 20.2: Add Strict Quantitative Regression Assertions to `tests/test_glossary_and_tiers.py`**
+  - Assert in `tests/test_glossary_and_tiers.py`:
+    1. `cat["unique"]["人才储备"]` is `"Talent Reserve"` (or concise Indonesian title `<= 25` chars, NEVER starting with `"Saat Round dimulai"`), `cat["unique"]["海的拥抱"]` does NOT start with `"Setiap 4"`, and **0** entries in `cat["unique"]` with `len(zh) <= 6` and `len(orig_en) <= 25` have `len(id_val) >= 40`.
+    2. **0 occurrences** of `(aku)` (`r"\(\s*aku\s*\)"`) and **0 occurrences** of Roman heading `aku. <Upper>` (`r"(?:^|>|\n)\s*aku\.\s+[A-Z]"`) across `unique` and `english_updates`.
+    3. **0 occurrences** of `Li</color>Bai`, `sekutu</color>terdekat`, `Tempat suci Sage`, `Level atas`, `kiri dan benar`, `Sihir ATK`, `Fisik ATK`, `4Chang`, `sebuah 1`, `adalah digunakan`, `adalah dihancurkan`, `adalah dimainkan`, `adalah milikmu`, and `<5` glued alphanumeric tag boundaries across `unique`.
+    4. Arthur's `举起圣剑跃向敌方人群密集处，额外造成<color=#d487e4>自身15%最大生命的法术伤害</color>...` does **NOT** start with `<color=#d487e4>Arthur`.
+- [x] **Step 20.3: Rebuild Catalog, Patch Worker, Verify Real Windows Game (`04`), Repack `.exe` (`05`), Pass 13/13 `pytest -v`, Commit, Push `main` + Tag `v1.4.12-id.1`, & Update GitHub Release (`06`)**
+  - Run `02_build_indonesian_catalog.py` -> `03_patch_worker_modules.py` -> `04_verify_real_windows_game.py` -> `05_repack_windows_exe.py`.
+  - Update SHA-256 checksums in `README.md` and `scripts/06_publish_github_release.py` to match `dist/SHA256SUMS.txt`.
+  - Run `/home/whise/.local/bin/uv run --python 3.12 pytest -v` and confirm **13 passed, 0 failed**.
+  - Update checkboxes in `.agents/plan/2026-11-03-hok-ace-indonesian-patcher-plan.md`, commit all changes, `git push origin main`, `git tag -f v1.4.12-id.1 HEAD && git push -f origin v1.4.12-id.1`, and run `scripts/06_publish_github_release.py` so GitHub Release `v1.4.12-id.1` serves the verified final build!
 
 
 

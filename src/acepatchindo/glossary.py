@@ -465,6 +465,7 @@ CANONICAL_PROTECTED_TERMS: tuple[str, ...] = (
     "Supreme Challenger",
     "Stubborn Bronze",
     "Vientiane King",
+    "Sage's Sanctuary",
     "Maple Leaf Dance",
     "Graceful Dance",
     "Gentle Call",
@@ -696,7 +697,6 @@ class ThreeTierGlossary:
                         protected_set.add(c_name)
                     if c_desc:
                         self.tier1_en_card_to_id_desc[c_name] = c_desc
-                        self.tier1_en_desc_to_id_desc[_normalize_en_key(c_name)] = c_desc
             for rel in lord.get("related", []):
                 r_name = (rel.get("name") or "").strip()
                 r_desc = (rel.get("desc") or "").strip()
@@ -705,7 +705,6 @@ class ThreeTierGlossary:
                         protected_set.add(r_name)
                     if r_desc:
                         self.tier1_en_card_to_id_desc[r_name] = r_desc
-                        self.tier1_en_desc_to_id_desc[_normalize_en_key(r_name)] = r_desc
 
     def _ingest_tier2(self, t2: list[dict], protected_set: set[str]) -> None:
         for entry in t2:
@@ -740,8 +739,10 @@ class ThreeTierGlossary:
                 ab_en_desc = (ab_en.get("desc") or "").strip()
                 if ab_en_name in self.tier1_en_card_to_id_desc:
                     id_desc = self.tier1_en_card_to_id_desc[ab_en_name]
-                    self._register_t1_pair(ab_zh.get("desc", ""), id_desc)
-                    if ab_en_desc:
+                    zh_d = ab_zh.get("desc", "")
+                    if len(normalize_plain_zh(zh_d)) >= 8:
+                        self._register_t1_pair(zh_d, id_desc)
+                    if ab_en_desc and len(ab_en_desc) >= 20:
                         self.tier1_en_desc_to_id_desc[_normalize_en_key(ab_en_desc)] = id_desc
 
         # Pair all 19 Tier 1 Lords with their corresponding Tier 2 Chess Player detail pages
@@ -762,7 +763,7 @@ class ThreeTierGlossary:
                     zh_ab = zh_abs[idx]
                     if c_name and not STOPWORD_GUARD_RE.search(c_name):
                         self._register_t1_pair(zh_ab.get("name", ""), c_name)
-                    if c_desc:
+                    if c_desc and len(normalize_plain_zh(zh_ab.get("desc", ""))) >= 8:
                         self._register_t1_pair(zh_ab.get("desc", ""), c_desc)
                     m_split = re.search(
                         r"^(.+?[。！？])\s*([^：:。]{2,12})[：:](.+)$",
@@ -770,23 +771,23 @@ class ThreeTierGlossary:
                     )
                     if m_split:
                         first_zh, sub_name_zh, sub_desc_zh = m_split.groups()
-                        if c_desc:
+                        if c_desc and len(normalize_plain_zh(first_zh)) >= 8:
                             self._register_t1_pair(first_zh, c_desc)
                         if len(rels) > 1:
                             r1_name = (rels[1].get("name") or "").strip()
                             r1_desc = (rels[1].get("desc") or "").strip()
                             if r1_name and not STOPWORD_GUARD_RE.search(r1_name):
                                 self._register_t1_pair(sub_name_zh, r1_name)
-                            if r1_desc:
+                            if r1_desc and len(normalize_plain_zh(sub_desc_zh)) >= 8:
                                 self._register_t1_pair(sub_desc_zh, r1_desc)
-                                if c_desc and r1_name:
+                                if c_desc and r1_name and len(normalize_plain_zh(zh_ab.get("desc", ""))) >= 8:
                                     self._register_t1_pair(
                                         zh_ab.get("desc", ""),
                                         f"{c_desc}\n{r1_name}: {r1_desc}",
                                     )
                 if idx < len(en_abs) and c_desc:
                     en_ab_desc = (en_abs[idx].get("desc") or "").strip()
-                    if en_ab_desc:
+                    if en_ab_desc and len(en_ab_desc) >= 20:
                         self.tier1_en_desc_to_id_desc[_normalize_en_key(en_ab_desc)] = c_desc
 
     def translate_en_to_id(self, en_text: str) -> str:
@@ -795,7 +796,12 @@ class ThreeTierGlossary:
             return en_text
 
         norm_en = _normalize_en_key(en_text)
-        if norm_en in self.tier1_en_desc_to_id_desc and not TAG_RE.findall(en_text) and not PLACEHOLDER_RE.findall(en_text):
+        if (
+            len(en_text.strip()) >= 20
+            and norm_en in self.tier1_en_desc_to_id_desc
+            and not TAG_RE.findall(en_text)
+            and not PLACEHOLDER_RE.findall(en_text)
+        ):
             return self.tier1_en_desc_to_id_desc[norm_en]
 
         def _convert_segment(seg: str) -> str:
@@ -803,6 +809,11 @@ class ThreeTierGlossary:
 
             # Normalize English baseline variants to canonical Tier 1 terms
             var_subs = [
+                (r"(?<![A-Za-z])(?:Magic|Magical)\s+ATK(?![A-Za-z])", "Magic Attack"),
+                (r"(?<![A-Za-z])Physical\s+ATK(?![A-Za-z])", "Physical Attack"),
+                (r"(?<![A-Za-z])Sage['’]s\s+Sanctuary(?![A-Za-z])", "Sage's Sanctuary"),
+                (r"\b(\d+)\s*Chang\b", r"\1 kartu"),
+                (r"\b(\d+)\s*Number of times\b", r"\1 kali"),
                 (r"(?<![A-Za-z])Magical Attack(?![A-Za-z])", "Magic Attack"),
                 (r"(?<![A-Za-z])Magical Damage(?![A-Za-z])", "Magic Damage"),
                 (r"(?<![A-Za-z])Magical Defense(?![A-Za-z])", "Magic Defense"),
@@ -828,6 +839,7 @@ class ThreeTierGlossary:
                     "Kartu Equipment",
                 ),
                 (r"(?<![A-Za-z])(?:Hero Vouchers|Hero Voucher)(?![A-Za-z])", "Voucher Hero"),
+                (r"(?<![A-Za-z])Temporary Levels?\s+up(?![A-Za-z])", "Peningkatan Temporary Level"),
                 (r"(?<![A-Za-z])Temporary Levels(?![A-Za-z])", "Temporary Level"),
                 (r"(?<![A-Za-z])real (?:Level|Tier)s?(?![A-Za-z])", "True Level"),
                 (
@@ -862,6 +874,13 @@ class ThreeTierGlossary:
             for tok, orig_val in sentinels:
                 out = out.replace(tok, orig_val, 1)
 
+            out = re.sub(
+                r"\b(Ancient Coin|Refined Ancient Coin|Central Plain|Zhulu(?: Plateau)?|Three Kingdoms|Sunset(?: Sea)?|Jixia|Great Wall|Xuanyong|Yaotian|Cloudream|Riverlands)\s+[Kk]artu(?:\s+Hero)?\b",
+                lambda m: f"Kartu Hero {m.group(1)}" if "hero" in m.group(0).lower() else f"Kartu {m.group(1)}",
+                out,
+            )
+            out = re.sub(r"\b(\d+)\s+[Aa]cak\s+(Kartu\s+[A-Za-z ]+)\b", r"\1 \2 acak", out)
+
             for old_ft, new_ft in (
                 ("Kartu Effect", "Kartu Efek"),
                 ("kartu Effect", "kartu Efek"),
@@ -874,6 +893,9 @@ class ThreeTierGlossary:
             ):
                 out = out.replace(old_ft, new_ft)
             out = re.sub(r"(?i)sempurna kebangkitan", "Perfect Revive", out)
+            out = re.sub(r"(?i)\bTemporary Level\s+atas\b", "Peningkatan Temporary Level", out)
+            out = re.sub(r"\bsebuah\s+(?=\d)", "", out, flags=re.I)
+            out = re.sub(r"\badalah\s+milikmu\b", "milikmu", out, flags=re.I)
 
             return out
 
@@ -893,6 +915,9 @@ class ThreeTierGlossary:
         ):
             candidate = candidate.replace(old_ft, new_ft)
         candidate = re.sub(r"(?i)sempurna kebangkitan", "Perfect Revive", candidate)
+        candidate = re.sub(r"(?i)\bTemporary Level\s+atas\b", "Peningkatan Temporary Level", candidate)
+        candidate = re.sub(r"\bsebuah\s+(?=\d)", "", candidate, flags=re.I)
+        candidate = re.sub(r"\badalah\s+milikmu\b", "milikmu", candidate, flags=re.I)
 
         if len(source_zh) < 4:
             return candidate
@@ -901,6 +926,23 @@ class ThreeTierGlossary:
             return candidate
 
         compact_replacements = (
+            ("tidak akan", "takkan"),
+            ("sebaiknya tidak", "jangan"),
+            ("tidak bisa", "tak bisa"),
+            ("tidak dapat", "tak dapat"),
+            ("memberitahu", "beri tahu"),
+            ("tayangan ulang", "replay"),
+            ("memenangkan", "menang"),
+            ("beberapa lebih banyak", "lagi"),
+            ("menampilkan", "tunjukkan"),
+            ("bagaimana ke", "cara"),
+            ("bagaimana cara", "cara"),
+            ("sebuah ", ""),
+            ("dari ", ""),
+            ("adalah ", ""),
+            ("itu ", ""),
+            ("untuk ", ""),
+            ("yang ", ""),
             ("secara permanen", "permanen"),
             ("secara acak", "acak"),
             ("untuk pertama kalinya", "pertama kali"),
@@ -925,7 +967,8 @@ class ThreeTierGlossary:
             and not CONTROL_TOKEN_RE.findall(source_zh)
             and ";" not in source_zh
         ):
-            out = out[:limit].rstrip()
+            head = out[:limit]
+            out = (head.rsplit(" ", 1)[0] if " " in head else head).rstrip(" ,;:-.")
         return out
 
     def translate_entry(

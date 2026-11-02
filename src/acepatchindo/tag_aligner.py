@@ -318,10 +318,20 @@ def reinject_formula_and_skeleton(
     # Wrap formula and stat spans if source_zh had them inside <color=...>...</color>
     # e.g. <color=#dfa15e>80+[194010p1q2/100]%物理攻击力的物理伤害</color> and <color=#dfa15e>[194011p1q2]点物理防御</color>
     color_spans = re.findall(r"(<color=[^>]+>)([^<]+)(</color>)", source_zh)
-    if color_spans and "<color=" not in out:
+    if color_spans:
         for open_tag, zh_content, close_tag in color_spans:
             pattern = None
-            if "物理伤害" in zh_content or "物理攻击力" in zh_content:
+            if zh_content.endswith(("：", ":")) or any(k in zh_content for k in ("被动", "主动", "清平", "Pasif", "Aktif")):
+                label_zh = zh_content.rstrip("：: ")
+                label_trans = (
+                    "Pasif" if "被动" in label_zh
+                    else "Aktif" if "主动" in label_zh
+                    else (inner_translator(label_zh) if inner_translator else label_zh)
+                )
+                pattern = rf"\b(?:Pasif|Aktif|{re.escape(label_trans)})\s*[:：]"
+            elif "自身" in zh_content or ("生命" in zh_content and ("法术伤害" in zh_content or "物理伤害" in zh_content)):
+                pattern = r"(?:Magic Damage|Physical Damage|Shield|perisai)?\s*(?:sebesar\s*)?(?:\[[A-Za-z0-9_+/.*%-]+\]\s*\+\s*)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?\s*(?:base\s+|dasar\s+)?(?:Physical Attack|Magic Attack|Max HP)(?:\s+[A-Za-z]+)?(?:\s+sebagai\s+(?:Magic Damage|Physical Damage|True Damage))?"
+            elif "物理伤害" in zh_content or "物理攻击力" in zh_content:
                 pattern = r"(?:(?:\d+(?:\.\d+)?\+)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)(?:%|\s*persen)?\s*(?:Physical Attack|Magic Attack)?\s*(?:sebagai\s+)?(?:Physical Damage|Damage))"
             elif "物理防御" in zh_content:
                 pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*Physical Defense"
@@ -330,7 +340,7 @@ def reinject_formula_and_skeleton(
             elif "法术防御" in zh_content:
                 pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*Magic Defense"
             elif "生命" in zh_content or "HP" in zh_content:
-                pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?%?)\s*(?:Max HP|HP|Health)(?:\s*(?:diri|sekutu))?(?:\s*sebagai\s*(?:Magic Damage|Physical Damage|True Damage))?"
+                pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?%?)\s*(?:Max HP|HP|Health)(?:\s*(?:diri|sekutu|miliknya))?(?:\s*sebagai\s*(?:Magic Damage|Physical Damage|True Damage))?"
             elif "移动速度" in zh_content:
                 pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?%?)\s*Movement Speed"
             elif "攻击速度" in zh_content:
@@ -341,10 +351,17 @@ def reinject_formula_and_skeleton(
                 pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?%?)\s*Physical Penetration"
 
             if pattern:
-                m = re.search(pattern, out)
-                if m:
-                    span_text = m.group(0)
-                    out = out[: m.start()] + f"{open_tag}{span_text}{close_tag}" + out[m.end() :]
+                for m in re.finditer(pattern, out):
+                    span_text = m.group(0).strip()
+                    if not span_text:
+                        continue
+                    before = out[: m.start()]
+                    if before.rfind("<color=") > before.rfind("</color>"):
+                        continue
+                    s_idx = m.start() + m.group(0).find(span_text)
+                    e_idx = s_idx + len(span_text)
+                    out = out[:s_idx] + f"{open_tag}{span_text}{close_tag}" + out[e_idx:]
+                    break
 
     # Restore sentinels
     for tok, full_ph in sentinels_icon:
@@ -357,6 +374,30 @@ def reinject_formula_and_skeleton(
         baseline_en=baseline_en,
         en_translator=en_translator,
     )
+
+
+def normalize_tag_boundary_spacing(source: str, text: str) -> str:
+    """Ensure natural single space between words/numbers and rich-text tags without breaking validation."""
+    if not text or "<" not in text:
+        return text
+
+    # Space between alphanumeric/%/] and opening tag: Mendapatkan<color=... -> Mendapatkan <color=...
+    spaced = re.sub(
+        r"([A-Za-z0-9%\]])(<(?![/])(?:color|b|i|a|size)\b[^>]*>)",
+        r"\1 \2",
+        text,
+    )
+    # Space between closing tag and alphanumeric: ...</color>dari -> ...</color> dari
+    spaced = re.sub(
+        r"(</(?:color|b|i|a|size)>)([A-Za-z0-9])",
+        r"\1 \2",
+        spaced,
+    )
+    # Collapse any accidental double spaces created
+    spaced = re.sub(r"[ ]{2,}", " ", spaced)
+
+    ok, _ = validate_translation(source, spaced)
+    return spaced if ok else text
 
 
 def reinject_skeleton_from_source(
@@ -460,11 +501,113 @@ def reinject_skeleton_from_source(
                     matched_this = True
                     break
             if not matched_this:
+                # Check formula / stat pattern for color spans
+                pattern = None
+                if zh_inner.endswith(("：", ":")) or any(k in zh_inner for k in ("被动", "主动", "清平", "Pasif", "Aktif")):
+                    label_zh = zh_inner.rstrip("：: ")
+                    label_trans = (
+                        "Pasif" if "被动" in label_zh
+                        else "Aktif" if "主动" in label_zh
+                        else (inner_translator(label_zh) if inner_translator else label_zh)
+                    )
+                    pattern = rf"\b(?:Pasif|Aktif|{re.escape(label_trans)})\s*[:：]"
+                elif "自身" in zh_inner or ("生命" in zh_inner and ("法术伤害" in zh_inner or "物理伤害" in zh_inner)):
+                    pattern = r"(?:Magic Damage|Physical Damage|Shield|perisai)?\s*(?:sebesar\s*)?(?:\[[A-Za-z0-9_+/.*%-]+\]\s*\+\s*)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?\s*(?:base\s+|dasar\s+)?(?:Physical Attack|Magic Attack|Max HP)(?:\s+[A-Za-z]+)?(?:\s+sebagai\s+(?:Magic Damage|Physical Damage|True Damage))?"
+                elif "物理伤害" in zh_inner or "物理攻击力" in zh_inner:
+                    pattern = r"(?:(?:\d+(?:\.\d+)?\+)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)(?:%|\s*persen)?\s*(?:Physical Attack|Magic Attack)?\s*(?:sebagai\s+)?(?:Physical Damage|Damage))"
+                elif "物理防御" in zh_inner:
+                    pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*Physical Defense"
+                elif "法术伤害" in zh_inner or "法术攻击力" in zh_inner:
+                    pattern = r"(?:(?:\d+(?:\.\d+)?\+)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)(?:%|\s*persen)?\s*(?:Magic Attack)?\s*(?:sebagai\s+)?(?:Magic Damage|Damage))"
+                elif "法术防御" in zh_inner:
+                    pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*Magic Defense"
+                elif "生命" in zh_inner or "HP" in zh_inner:
+                    pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?%?)\s*(?:Max HP|HP|Health)(?:\s*(?:diri|sekutu|miliknya))?(?:\s*sebagai\s*(?:Magic Damage|Physical Damage|True Damage))?"
+                elif "移动速度" in zh_inner:
+                    pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?%?)\s*Movement Speed"
+                elif "攻击速度" in zh_inner:
+                    pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?%?)\s*Attack Speed"
+                elif "法术穿透" in zh_inner:
+                    pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?%?)\s*Magic Penetration"
+                elif "物理穿透" in zh_inner:
+                    pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?%?)\s*Physical Penetration"
+
+                if pattern:
+                    for m in re.finditer(pattern, curr):
+                        span_text = m.group(0).strip()
+                        if not span_text or m.start() < cursor:
+                            continue
+                        before = curr[: m.start()]
+                        if before.rfind("<color=") > before.rfind("</color>"):
+                            continue
+                        s_idx = m.start() + m.group(0).find(span_text)
+                        e_idx = s_idx + len(span_text)
+                        tagged = f"{open_part}{span_text}{close_part}"
+                        curr = curr[:s_idx] + tagged + curr[e_idx:]
+                        cursor = s_idx + len(tagged)
+                        matched_this = True
+                        break
+
+            if not matched_this:
                 all_matched = False
 
         if not all_matched and len(spans) == 1 and "<" not in curr and curr.strip():
-            curr = f"{spans[0].group(1)}{curr}{spans[0].group(3)}"
-            all_matched = True
+            span_zh = spans[0].group(2)
+            if len(normalize_plain_zh(span_zh)) >= 0.75 * len(normalize_plain_zh(source_zh)):
+                curr = f"{spans[0].group(1)}{curr}{spans[0].group(3)}"
+                all_matched = True
+            else:
+                zh_clauses = [c for c in re.split(r"[，。！？；\n]+", source_zh) if c.strip()]
+                target_idx = next((i for i, c in enumerate(zh_clauses) if span_zh in c), -1)
+                id_clauses = re.split(r"([,.;!?\n]+)", curr)
+                content_clause_indices = [
+                    i for i in range(0, len(id_clauses), 2) if id_clauses[i].strip()
+                ]
+                if target_idx != -1 and content_clause_indices:
+                    mapped_idx = int(
+                        round(
+                            target_idx
+                            / max(1, len(zh_clauses) - 1)
+                            * (len(content_clause_indices) - 1)
+                        )
+                    )
+                    actual_idx = content_clause_indices[
+                        min(mapped_idx, len(content_clause_indices) - 1)
+                    ]
+                    id_clauses[actual_idx] = (
+                        f"{spans[0].group(1)}{id_clauses[actual_idx].strip()}{spans[0].group(3)}"
+                    )
+                    curr = "".join(id_clauses)
+                    all_matched = True
+        elif not all_matched and len(spans) > 1:
+            unmatched_spans = [s for s in spans if s.group(0) not in curr]
+            if len(unmatched_spans) == 1:
+                u_span = unmatched_spans[0]
+                u_zh = u_span.group(2)
+                zh_clauses = [c for c in re.split(r"[，。！？；\n]+", source_zh) if c.strip()]
+                target_idx = next((i for i, c in enumerate(zh_clauses) if u_zh in c), len(zh_clauses) - 1)
+                id_clauses = re.split(r"([,.;!?\n]+)", curr)
+                untagged_indices = [
+                    i
+                    for i in range(0, len(id_clauses), 2)
+                    if id_clauses[i].strip() and "<" not in id_clauses[i]
+                ]
+                if untagged_indices:
+                    mapped_idx = int(
+                        round(
+                            target_idx
+                            / max(1, len(zh_clauses) - 1)
+                            * (len(untagged_indices) - 1)
+                        )
+                    )
+                    actual_idx = untagged_indices[
+                        min(mapped_idx, len(untagged_indices) - 1)
+                    ]
+                    id_clauses[actual_idx] = (
+                        f"{u_span.group(1)}{id_clauses[actual_idx].strip()}{u_span.group(3)}"
+                    )
+                    curr = "".join(id_clauses)
+                    all_matched = True
 
         if all_matched:
             result = curr
@@ -516,23 +659,47 @@ def reinject_skeleton_from_source(
     ):
         ok, _ = validate_translation(source_zh, cand)
         if ok:
-            return cand
+            return normalize_tag_boundary_spacing(source_zh, cand)
 
     # 5. Deterministic fallback: NEVER emit empty tags
-    if baseline_en and TAG_RE.findall(baseline_en) == tags_in_src:
-        from acepatchindo.lexicon_id import translate_segment_en_to_id
-        cand_en = translate_preserving_skeleton(
-            baseline_en,
-            en_translator or translate_segment_en_to_id,
-        )
-        cand_en = sanitize_target_text(source_zh, cand_en)
-        ok, _ = validate_translation(source_zh, cand_en)
-        if ok:
-            return cand_en
+    if baseline_en:
+        b_tags = TAG_RE.findall(baseline_en)
+        if b_tags == tags_in_src or len(b_tags) == len(tags_in_src):
+            repaired_en = baseline_en
+            repaired_en = re.sub(
+                r"(<color=[^>]+>)\s*(</color>)\s*([A-Za-z0-9+%-]+)",
+                r"\1\3\2",
+                repaired_en,
+            )
+            repaired_en = re.sub(
+                r"([A-Za-z0-9+%-]+)\s*(<color=[^>]+>)\s*(</color>)",
+                r"\2\1\3",
+                repaired_en,
+            )
+            if len(TAG_RE.findall(repaired_en)) == len(tags_in_src):
+                parts = TAG_RE.split(repaired_en)
+                rebuilt_en: list[str] = []
+                for p_i, p_text in enumerate(parts):
+                    rebuilt_en.append(p_text)
+                    if p_i < len(tags_in_src):
+                        rebuilt_en.append(tags_in_src[p_i])
+                repaired_en = "".join(rebuilt_en)
+
+            from acepatchindo.lexicon_id import translate_segment_en_to_id
+            cand_en = translate_preserving_skeleton(
+                repaired_en,
+                en_translator or translate_segment_en_to_id,
+            )
+            cand_en = sanitize_target_text(source_zh, cand_en)
+            cand_en = normalize_tag_boundary_spacing(source_zh, cand_en)
+            ok, _ = validate_translation(source_zh, cand_en)
+            if ok:
+                return cand_en
 
     stripped_result = CONTROL_TOKEN_RE.sub("", TAG_RE.sub("", result)).strip()
     wrapped = _wrap_exact_tag_sequence(source_zh, stripped_result, inner_translator)
-    return sanitize_target_text(source_zh, wrapped)
+    final_cand = sanitize_target_text(source_zh, wrapped)
+    return normalize_tag_boundary_spacing(source_zh, final_cand)
 
 
 def _wrap_exact_tag_sequence(
@@ -576,14 +743,21 @@ def _wrap_exact_tag_sequence(
     for idx, tok in enumerate(tokens):
         tok_ctrls = "".join(CONTROL_TOKEN_RE.findall(tok))
         if idx in chunk_map:
-            out_parts.append(f"{tok_ctrls}{chunk_map[idx]}")
+            content = f"{tok_ctrls}{chunk_map[idx]}"
+            if out_parts and out_parts[-1].endswith(">") and content and content[0].isalnum():
+                out_parts.append(" ")
+            out_parts.append(content)
         else:
             out_parts.append(tok_ctrls)
 
         if idx < len(tags):
-            out_parts.append(tags[idx])
+            cur_tag = tags[idx]
+            if out_parts and out_parts[-1] and out_parts[-1][-1].isalnum() and not cur_tag.startswith("</"):
+                out_parts.append(" ")
+            out_parts.append(cur_tag)
 
     rebuilt = "".join(out_parts)
+    rebuilt = normalize_tag_boundary_spacing(source_zh, rebuilt)
 
     # Reconcile placeholders exactly
     src_ph = Counter(PLACEHOLDER_RE.findall(source_zh))
@@ -625,10 +799,12 @@ def translate_preserving_skeleton(
             _translate_single_skeleton(p, segment_translator) for p in parts
         ]
         candidate = ";".join(translated_parts)
-        return sanitize_target_text(source, candidate)
-    return sanitize_target_text(
+        cand = sanitize_target_text(source, candidate)
+        return normalize_tag_boundary_spacing(source, cand)
+    cand = sanitize_target_text(
         source, _translate_single_skeleton(source, segment_translator)
     )
+    return normalize_tag_boundary_spacing(source, cand)
 
 
 def _translate_single_skeleton(
