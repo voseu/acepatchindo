@@ -57,6 +57,84 @@ BRACKET_TERM_MAP: dict[str, str] = {
     "刷新": "Refresh",
     "临时等级": "Temporary Level",
     "真实等级": "True Level",
+    "阿科米亚核心": "Akomia Core",
+    "古币": "Ancient Coin",
+    "精炼古币": "Refined Ancient Coin",
+    "开团": "Engage",
+    "退场": "Exit",
+    "合成": "Synthesis",
+    "夺取": "Steal",
+    "凯旋": "Triumph",
+    "唯一": "Unik",
+}
+
+BADGE_ALIAS_MAP: dict[str, list[str]] = {
+    "闪现": ["Flash.", "Flash"],
+    "整备": ["Preparation:", "Preparation", "Prepare"],
+    "筹备": ["Preparation:", "Preparation", "Prepare"],
+    "登场": ["Deploy:", "Deploy", "On Play"],
+    "开团": ["Engage:", "Engage", "Initiate"],
+    "牺牲": ["Sacrifice:", "Sacrifice"],
+    "复生": ["Revive:", "Revive"],
+    "完美复生": ["Perfect Revive:", "Perfect Revive", "Perfect Resurrection"],
+    "临时等级": ["Temporary Level", "Level Sementara"],
+    "真实等级": ["True Level", "Level Nyata"],
+    "阿科米亚核心": ["Akomia Core", "Arcomia Core", "Core Akomia"],
+    "古币": ["Ancient Coin", "Koin Kuno"],
+    "精炼古币": ["Refined Ancient Coin", "Koin Kuno Murni"],
+    "光环": ["Aura"],
+    "激发": ["Inspire", "Trigger"],
+    "连携": ["Synergy", "Combo"],
+    "变身": ["Transform"],
+    "召唤": ["Summon"],
+    "回手": ["Bounce"],
+    "摧毁": ["Destroy"],
+    "吞噬": ["Devour"],
+    "护盾": ["Shield"],
+    "刷新": ["Refresh"],
+    "退场": ["Exit:", "Exit"],
+    "合成": ["Synthesis", "Merge"],
+    "转瞬": ["Fleet", "Instant"],
+    "图腾系列": ["Totem Series", "Seri Totem"],
+    "图腾": ["Totem"],
+    "夺取": ["Steal"],
+    "凯旋": ["Triumph"],
+    "开局": ["Game Start", "Start"],
+    "唯一": ["Unique", "Unik"],
+    "主动": ["Aktif:", "Aktif", "Active"],
+    "被动": ["Pasif:", "Pasif", "Passive"],
+    "主动技能变为融合技": [
+        "Skill Aktif menjadi sebuah Skill Gabungan",
+        "Skill Aktif menjadi Skill Gabungan",
+    ],
+    "击退": ["Knockback", "knockback"],
+    "眩晕": ["Stun", "stun"],
+    "击飞": ["Knock-up", "Knock up", "knock-up"],
+    "河洛": ["Central Plain"],
+    "逐鹿": ["Zhulu"],
+    "三分": ["Three Kingdoms"],
+    "日落海": ["Sunset Sea", "Sunset"],
+    "稷下": ["Jixia"],
+    "长城": ["Great Wall"],
+    "玄雍": ["Xuanyong"],
+    "尧天": ["Yaotian"],
+    "云梦泽": ["Cloudream"],
+    "大河": ["Great River"],
+    "【逐鹿】英雄牌": ["Kartu Hero [Zhulu]", "Kartu Hero Zhulu", "[Zhulu]"],
+    "【河洛】英雄牌": ["Kartu Hero [Central Plain]", "Kartu Hero Central Plain", "[Central Plain]"],
+    "【日落海】英雄牌": [
+        "Kartu Hero [Sunset Sea]",
+        "Kartu Hero [Sunset]",
+        "Kartu Hero Sunset",
+        "[Sunset Sea]",
+        "[Sunset]",
+    ],
+    "【三分】英雄牌": ["Kartu Hero [Three Kingdoms]", "[Three Kingdoms]"],
+    "【稷下】英雄牌": ["Kartu Hero [Jixia]", "[Jixia]"],
+    "【长城】英雄牌": ["Kartu Hero [Great Wall]", "[Great Wall]"],
+    "【玄雍】英雄牌": ["Kartu Hero [Xuanyong]", "[Xuanyong]"],
+    "【尧天】英雄牌": ["Kartu Hero [Yaotian]", "[Yaotian]"],
+    "【云梦泽】英雄牌": ["Kartu Hero [Cloudream]", "[Cloudream]"],
 }
 
 LEADING_TAGGED_PREFIX_RE = re.compile(
@@ -64,12 +142,16 @@ LEADING_TAGGED_PREFIX_RE = re.compile(
 )
 
 FORMULA_TOKEN_RE = re.compile(
-    r"\[[A-Za-z0-9_+/.*%-]+\]|\{[0-9A-Za-z_:+|.%/~-]*\d[0-9A-Za-z_:+|.%/~-]*\}|\d+(?:\.\d+)?"
+    r"\[[A-Za-z0-9_+/.*%-]+\]|\{[^{}]*\d[^{}]*\}|\d+(?:\.\d+)?"
 )
 
 COMPOUND_EXPR_RE = re.compile(
-    r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\{[0-9A-Za-z_:+|.%/~-]*\d[0-9A-Za-z_:+|.%/~-]*\}|\d+(?:\.\d+)?%?)"
-    r"(?:\s*[+~-]\s*(?:\[[A-Za-z0-9_+/.*%-]+\]|\{[0-9A-Za-z_:+|.%/~-]*\d[0-9A-Za-z_:+|.%/~-]*\}|\d+(?:\.\d+)?%?))*%?"
+    r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\{[^{}]*\d[^{}]*\}|\d+(?:\.\d+)?%?)"
+    r"(?:\s*[+~-]\s*(?:\[[A-Za-z0-9_+/.*%-]+\]|\{[^{}]*\d[^{}]*\}|\d+(?:\.\d+)?%?))*%?"
+)
+
+ATOMIC_TAGGED_SPAN_RE = re.compile(
+    r"((?:<(?![/])[A-Za-z][^>]*>|[\u2540-\u257f])+)([^<>]+?)((?:</[A-Za-z][^>]*>)+)"
 )
 
 
@@ -108,32 +190,77 @@ def reinject_formula_and_skeleton(
     desc_id: str,
     inner_translator: Callable[[str], str] | None = None,
     baseline_en: str | None = None,
+    en_translator: Callable[[str], str] | None = None,
 ) -> str:
     """Substitute dynamic formula placeholders from source_zh/baseline_en into Tier 1 desc_id, then reinject tags."""
     out = desc_id
 
-    # 1. Replace pipe-delimited numeric + icon placeholders: {0|2}{Energy}, {3|6}{LordExp}, {1|10}{LordHp}
+    # 1. Protect pipe-delimited numeric + icon placeholders and standalone icons with sentinels
+    sentinels_icon: list[tuple[str, str]] = []
     for m in re.finditer(
         r"(\{[0-9A-Za-z_:+|.%/~-]+\})\{(Energy|LordExp|LordHp)\}", source_zh
     ):
         num_ph, icon_name = m.group(1), m.group(2)
         full_ph = f"{num_ph}{{{icon_name}}}"
+        tok = f"__WXQICONPH{len(sentinels_icon)}__"
         if icon_name == "Energy":
-            out = re.sub(r"\b\d+\s*(?:Energy|Energi)\b", full_ph, out, count=1)
+            subbed, count = re.subn(r"\b\d+\s*(?:Energy|Energi)\b", tok, out, count=1)
+            if count > 0:
+                out = subbed
+                sentinels_icon.append((tok, full_ph))
         elif icon_name == "LordExp":
-            out = re.sub(
+            subbed, count = re.subn(
                 r"\b\d+\s*(?:Player EXP|EXP Chess Player|EXP Pemain|EXP)\b",
-                full_ph,
+                tok,
                 out,
                 count=1,
             )
+            if count > 0:
+                out = subbed
+                sentinels_icon.append((tok, full_ph))
         elif icon_name == "LordHp":
-            out = re.sub(
+            subbed, count = re.subn(
                 r"\b\d+\s*(?:Player HP|HP Chess Player|HP Pemain|Health)\b",
-                full_ph,
+                tok,
                 out,
                 count=1,
             )
+            if count > 0:
+                out = subbed
+                sentinels_icon.append((tok, full_ph))
+
+    # Also handle standalone {Energy}, {LordExp}, {LordHp} in source_zh when not preceded by {num_ph}
+    standalone_icons = re.findall(
+        r"(?<!\})(?:\{(Energy|LordExp|LordHp)\})", source_zh
+    )
+    for icon_name in standalone_icons:
+        tok = f"__WXQICONPH{len(sentinels_icon)}__"
+        full_ph = f"{{{icon_name}}}"
+        if icon_name == "Energy":
+            subbed, count = re.subn(r"\b(?:Energy|Energi)\b", tok, out, count=1)
+            if count > 0:
+                out = subbed
+                sentinels_icon.append((tok, full_ph))
+        elif icon_name == "LordExp":
+            subbed, count = re.subn(
+                r"\b(?:Player EXP|EXP Chess Player|EXP Pemain)\b",
+                tok,
+                out,
+                count=1,
+            )
+            if count > 0:
+                out = subbed
+                sentinels_icon.append((tok, full_ph))
+        elif icon_name == "LordHp":
+            subbed, count = re.subn(
+                r"\b(?:Player HP|HP Chess Player|HP Pemain)\b",
+                tok,
+                out,
+                count=1,
+            )
+            if count > 0:
+                out = subbed
+                sentinels_icon.append((tok, full_ph))
 
     # 2. If source_zh uses parenthetical [0]点...（[1]+[2]%...）, graft the exact formula span or align after normalization
     if "[0]" in source_zh and baseline_en:
@@ -172,20 +299,63 @@ def reinject_formula_and_skeleton(
     src_clean = re.sub(r"\[0\]点(物理|法术|真实)伤害\(([^)]+)\)", r"\2的\1伤害", src_clean)
     src_clean = re.sub(r"\[0\]点(护盾|生命值)\(([^)]+)\)", r"\2的\1", src_clean)
 
+    ph_map = {re.sub(r"\s+", "", ph): ph for ph in PLACEHOLDER_RE.findall(source_zh)}
     cn_exprs = COMPOUND_EXPR_RE.findall(cn_clean)
     src_exprs = COMPOUND_EXPR_RE.findall(src_clean)
     if len(cn_exprs) == len(src_exprs):
         for c_ex, s_ex in zip(cn_exprs, src_exprs):
-            if c_ex != s_ex and ("[" in s_ex or "{" in s_ex):
+            if c_ex != s_ex:
+                clean_s = re.sub(r"\s+", "", s_ex)
+                if clean_s in ph_map:
+                    s_ex = ph_map[clean_s]
                 out = re.sub(
-                    rf"(?<![\d\[]){re.escape(c_ex)}(?![\d%])", s_ex, out, count=1
+                    rf"(?<![\d\[{{|A-Za-z]){re.escape(c_ex)}(?![\d%\]}}|A-Za-z])",
+                    s_ex,
+                    out,
+                    count=1,
                 )
+
+    # Wrap formula and stat spans if source_zh had them inside <color=...>...</color>
+    # e.g. <color=#dfa15e>80+[194010p1q2/100]%物理攻击力的物理伤害</color> and <color=#dfa15e>[194011p1q2]点物理防御</color>
+    color_spans = re.findall(r"(<color=[^>]+>)([^<]+)(</color>)", source_zh)
+    if color_spans and "<color=" not in out:
+        for open_tag, zh_content, close_tag in color_spans:
+            pattern = None
+            if "物理伤害" in zh_content or "物理攻击力" in zh_content:
+                pattern = r"(?:(?:\d+(?:\.\d+)?\+)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)(?:%|\s*persen)?\s*(?:Physical Attack|Magic Attack)?\s*(?:sebagai\s+)?(?:Physical Damage|Damage))"
+            elif "物理防御" in zh_content:
+                pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*Physical Defense"
+            elif "法术伤害" in zh_content or "法术攻击力" in zh_content:
+                pattern = r"(?:(?:\d+(?:\.\d+)?\+)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)(?:%|\s*persen)?\s*(?:Magic Attack)?\s*(?:sebagai\s+)?(?:Magic Damage|Damage))"
+            elif "法术防御" in zh_content:
+                pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*Magic Defense"
+            elif "生命" in zh_content or "HP" in zh_content:
+                pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?%?)\s*(?:Max HP|HP|Health)(?:\s*(?:diri|sekutu))?(?:\s*sebagai\s*(?:Magic Damage|Physical Damage|True Damage))?"
+            elif "移动速度" in zh_content:
+                pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?%?)\s*Movement Speed"
+            elif "攻击速度" in zh_content:
+                pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?%?)\s*Attack Speed"
+            elif "法术穿透" in zh_content:
+                pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?%?)\s*Magic Penetration"
+            elif "物理穿透" in zh_content:
+                pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?%?)\s*Physical Penetration"
+
+            if pattern:
+                m = re.search(pattern, out)
+                if m:
+                    span_text = m.group(0)
+                    out = out[: m.start()] + f"{open_tag}{span_text}{close_tag}" + out[m.end() :]
+
+    # Restore sentinels
+    for tok, full_ph in sentinels_icon:
+        out = out.replace(tok, full_ph, 1)
 
     return reinject_skeleton_from_source(
         source_zh,
         out,
         inner_translator=inner_translator,
         baseline_en=baseline_en,
+        en_translator=en_translator,
     )
 
 
@@ -194,6 +364,7 @@ def reinject_skeleton_from_source(
     plain_id: str,
     inner_translator: Callable[[str], str] | None = None,
     baseline_en: str | None = None,
+    en_translator: Callable[[str], str] | None = None,
 ) -> str:
     """Re-inject exact tags, placeholders, and control tokens from source_zh into plain_id."""
     tags_in_src = TAG_RE.findall(source_zh)
@@ -202,8 +373,7 @@ def reinject_skeleton_from_source(
 
     result = plain_id
 
-    # 1. If baseline_en has valid matching tags & a short leading tagged keyword prefix (e.g. <a href=10>...Sacrifice...</a>:),
-    #    graft that exact prefix onto plain_id's body!
+    # 1. If baseline_en has valid matching tags & a short leading tagged keyword prefix
     if baseline_en and TAG_RE.findall(baseline_en) == tags_in_src and tags_in_src:
         m_en = LEADING_TAGGED_PREFIX_RE.match(baseline_en)
         m_id = re.match(r"^([^:\n]{1,40}):\s*(.+)$", result, re.S)
@@ -217,64 +387,126 @@ def reinject_skeleton_from_source(
             if validate_translation(source_zh, cand)[0]:
                 return cand
 
-    # 2. Replace bracketed or plain keyword terms in plain_id with exact tagged equivalents from source_zh
-    m_src_lead = LEADING_TAGGED_PREFIX_RE.match(source_zh)
-    m_id_lead = re.match(r"^([^:\n]{1,40}):\s*(.+)$", result, re.S)
-    if m_src_lead and m_id_lead:
-        src_prefix = m_src_lead.group(1)
-        id_kw, id_body = m_id_lead.group(1).strip(), m_id_lead.group(2)
-        # Rebuild src_prefix replacing visible Chinese keyword with id_kw while preserving tags & control tokens
-        prefix_tags = TAG_RE.findall(src_prefix)
-        prefix_parts = TAG_RE.split(src_prefix)
-        vis_slots = [
-            i
-            for i, p in enumerate(prefix_parts)
-            if CONTROL_TOKEN_RE.sub("", p).strip()
-        ]
-        if len(vis_slots) == 1:
-            slot_i = vis_slots[0]
-            ctrl_only = "".join(CONTROL_TOKEN_RE.findall(prefix_parts[slot_i]))
-            rebuilt_prefix_parts: list[str] = []
-            for idx, part in enumerate(prefix_parts):
-                if idx == slot_i:
-                    rebuilt_prefix_parts.append(f"{ctrl_only}{id_kw}")
-                else:
-                    rebuilt_prefix_parts.append(part)
-                if idx < len(prefix_tags):
-                    rebuilt_prefix_parts.append(prefix_tags[idx])
-            result = f"{''.join(rebuilt_prefix_parts)}: {id_body}"
-
-    for m in re.finditer(
-        r"((?:<(?:/?[A-Za-z][^>]*|/)>)+)"
-        r"([\u2540-\u257f]*\[[^\]]+\][\u2540-\u257f]*)"
-        r"((?:</[A-Za-z][^>]*>)+)",
-        source_zh,
-    ):
-        open_tags, zh_inner, close_tags = m.groups()
-        ctrls_before = "".join(CONTROL_TOKEN_RE.findall(zh_inner))
-        zh_bracket = CONTROL_TOKEN_RE.sub("", zh_inner).strip()
-        id_bracket = BRACKET_TERM_MAP.get(
-            zh_bracket,
-            inner_translator(zh_bracket) if inner_translator else zh_bracket,
+    # 2. Match all atomic tagged spans in source_zh and wrap corresponding terms in result
+    spans = list(ATOMIC_TAGGED_SPAN_RE.finditer(source_zh))
+    if spans and "<" not in result:
+        en_spans = (
+            list(ATOMIC_TAGGED_SPAN_RE.finditer(baseline_en))
+            if baseline_en and len(TAG_RE.findall(baseline_en)) == len(tags_in_src)
+            else []
         )
-        tagged_id = f"{open_tags}{ctrls_before}{id_bracket}{close_tags}"
-        if id_bracket in result and tagged_id not in result:
-            result = result.replace(id_bracket, tagged_id, 1)
+        curr = result
+        cursor = 0
+        all_matched = True
+        for idx, m_span in enumerate(spans):
+            open_part = m_span.group(1)
+            zh_inner = m_span.group(2).strip()
+            close_part = m_span.group(3)
 
-    # 3. Restore control tokens (e.g. ╫) if source had them
+            aliases: list[str] = []
+            has_brackets = (zh_inner.startswith("[") and zh_inner.endswith("]")) or (
+                zh_inner.startswith("【") and zh_inner.endswith("】")
+            )
+            bracket_clean = zh_inner.strip("[]【】")
+
+            # Priority 1: Exact bracketed term check FIRST
+            if zh_inner in BRACKET_TERM_MAP:
+                aliases.append(BRACKET_TERM_MAP[zh_inner])
+            if bracket_clean in BRACKET_TERM_MAP:
+                term = BRACKET_TERM_MAP[bracket_clean]
+                if has_brackets:
+                    aliases.append(f"[{term}]")
+                    aliases.append(f"【{term}】")
+                aliases.append(term)
+            if zh_inner in BADGE_ALIAS_MAP:
+                aliases.extend(BADGE_ALIAS_MAP[zh_inner])
+            if bracket_clean in BADGE_ALIAS_MAP:
+                for b_alias in BADGE_ALIAS_MAP[bracket_clean]:
+                    if has_brackets:
+                        aliases.append(f"[{b_alias}]")
+                        aliases.append(f"【{b_alias}】")
+                    aliases.append(b_alias)
+            if idx < len(en_spans):
+                en_inner = en_spans[idx].group(2).strip()
+                if en_inner and en_inner not in aliases:
+                    if has_brackets and not (
+                        en_inner.startswith("[") and en_inner.endswith("]")
+                    ):
+                        aliases.append(f"[{en_inner}]")
+                    aliases.extend([f"{en_inner}:", f"{en_inner}.", en_inner])
+            if inner_translator:
+                t_inner = inner_translator(zh_inner)
+                if t_inner and t_inner not in aliases:
+                    if has_brackets and not (
+                        t_inner.startswith("[") and t_inner.endswith("]")
+                    ):
+                        aliases.append(f"[{t_inner}]")
+                    aliases.extend([f"{t_inner}:", f"{t_inner}.", t_inner])
+            if zh_inner not in aliases:
+                aliases.append(zh_inner)
+
+            matched_this = False
+            for alias in aliases:
+                f_idx = curr.find(alias, cursor)
+                if f_idx != -1:
+                    if alias.endswith((".", ":", "\n")):
+                        kw = alias[:-1]
+                        punct = alias[-1]
+                        tagged = f"{open_part}{kw}{close_part}{punct}"
+                    else:
+                        tagged = f"{open_part}{alias}{close_part}"
+                    curr = curr[:f_idx] + tagged + curr[f_idx + len(alias) :]
+                    cursor = f_idx + len(tagged)
+                    matched_this = True
+                    break
+            if not matched_this:
+                all_matched = False
+
+        if not all_matched and len(spans) == 1 and "<" not in curr and curr.strip():
+            curr = f"{spans[0].group(1)}{curr}{spans[0].group(3)}"
+            all_matched = True
+
+        if all_matched:
+            result = curr
+
+    # 3. Restore untagged control tokens (e.g. ═ before Temporary Level or ╫ between stats)
+    # NEVER replace spaces or commas with control tokens!
     if ctrls_in_src and Counter(CONTROL_TOKEN_RE.findall(result)) != Counter(ctrls_in_src):
         src_ctrl_counts = Counter(ctrls_in_src)
         cur_ctrl_counts = Counter(CONTROL_TOKEN_RE.findall(result))
         for ch, target_cnt in src_ctrl_counts.items():
             needed = target_cnt - cur_ctrl_counts[ch]
-            for sep in (", ", " / ", " dan ", " "):
-                while needed > 0 and sep in result:
-                    result = result.replace(sep, ch, 1)
-                    needed -= 1
             if needed > 0:
-                result = result + (ch * needed)
+                if ch == "═":
+                    for kw in ("Temporary Level", "Level Sementara"):
+                        while needed > 0 and kw in result and f"═{kw}" not in result:
+                            subbed, cnt = re.subn(
+                                rf"(?<![═>])\b{re.escape(kw)}\b",
+                                f"═{kw}",
+                                result,
+                                count=1,
+                            )
+                            if cnt:
+                                result = subbed
+                                needed -= 1
+                            else:
+                                break
+                elif ch == "╫":
+                    sep_maps = (
+                        (", +", "╫+"),
+                        (", -", "╫-"),
+                        (" / ", "╫"),
+                        (", ", "╫"),
+                        (" dan ", "╫"),
+                    )
+                    for src_sep, dst_sep in sep_maps:
+                        while needed > 0 and src_sep in result:
+                            result = result.replace(src_sep, dst_sep, 1)
+                            needed -= 1
+                if needed > 0 and (ch not in result or result.count(ch) < target_cnt):
+                    result = (ch * needed) + result
 
-    # 4. Check if candidate already passes all 7 rules
+    # 4. Check if candidate already passes all rules
     cand = sanitize_target_text(source_zh, result)
     if (
         TAG_RE.findall(cand) == tags_in_src
@@ -286,8 +518,19 @@ def reinject_skeleton_from_source(
         if ok:
             return cand
 
-    # 5. Deterministic skeleton wrapper guaranteeing exact tag, placeholder, and control token parity
-    stripped_result = CONTROL_TOKEN_RE.sub("", TAG_RE.sub("", result))
+    # 5. Deterministic fallback: NEVER emit empty tags
+    if baseline_en and TAG_RE.findall(baseline_en) == tags_in_src:
+        from acepatchindo.lexicon_id import translate_segment_en_to_id
+        cand_en = translate_preserving_skeleton(
+            baseline_en,
+            en_translator or translate_segment_en_to_id,
+        )
+        cand_en = sanitize_target_text(source_zh, cand_en)
+        ok, _ = validate_translation(source_zh, cand_en)
+        if ok:
+            return cand_en
+
+    stripped_result = CONTROL_TOKEN_RE.sub("", TAG_RE.sub("", result)).strip()
     wrapped = _wrap_exact_tag_sequence(source_zh, stripped_result, inner_translator)
     return sanitize_target_text(source_zh, wrapped)
 
@@ -297,18 +540,43 @@ def _wrap_exact_tag_sequence(
     stripped_id: str,
     inner_translator: Callable[[str], str] | None = None,
 ) -> str:
-    """Guarantee TAG_RE, PLACEHOLDER_RE, and CONTROL_TOKEN_RE match source_zh."""
+    """Guarantee TAG_RE, PLACEHOLDER_RE, and CONTROL_TOKEN_RE match source_zh while NEVER emitting empty tags."""
     tokens = TAG_RE.split(source_zh)
     tags = TAG_RE.findall(source_zh)
 
-    visible_lengths = [len(CONTROL_TOKEN_RE.sub("", t).strip()) for t in tokens]
-    main_idx = visible_lengths.index(max(visible_lengths)) if visible_lengths else 0
+    vis_indices = [
+        idx for idx, t in enumerate(tokens)
+        if CONTROL_TOKEN_RE.sub("", t).strip()
+    ]
+    if not vis_indices:
+        vis_indices = [0]
+
+    words = stripped_id.split()
+    if not words:
+        words = ["."]
+
+    k = len(vis_indices)
+    chunks: list[str] = []
+    if k == 1:
+        chunks = [" ".join(words)]
+    else:
+        n = len(words)
+        chunk_size = max(1, n // k)
+        for i in range(k):
+            start = i * chunk_size
+            end = (i + 1) * chunk_size if i < k - 1 else n
+            if start < n:
+                chunks.append(" ".join(words[start:end]) if start < end else words[-1])
+            else:
+                chunks.append(words[-1])
 
     out_parts: list[str] = []
+    chunk_map = {idx: chunks[c_i] for c_i, idx in enumerate(vis_indices)}
+
     for idx, tok in enumerate(tokens):
         tok_ctrls = "".join(CONTROL_TOKEN_RE.findall(tok))
-        if idx == main_idx:
-            out_parts.append(f"{tok_ctrls}{stripped_id}")
+        if idx in chunk_map:
+            out_parts.append(f"{tok_ctrls}{chunk_map[idx]}")
         else:
             out_parts.append(tok_ctrls)
 
@@ -321,12 +589,10 @@ def _wrap_exact_tag_sequence(
     src_ph = Counter(PLACEHOLDER_RE.findall(source_zh))
     cur_ph = Counter(PLACEHOLDER_RE.findall(rebuilt))
     if cur_ph != src_ph:
-        # Remove excess placeholders if duplicated
         for ph, cnt in list(cur_ph.items()):
             while cnt > src_ph[ph]:
                 rebuilt = rebuilt.replace(ph, "", 1)
                 cnt -= 1
-        # Append any missing placeholders
         cur_ph = Counter(PLACEHOLDER_RE.findall(rebuilt))
         for ph, cnt in src_ph.items():
             if cur_ph[ph] < cnt:

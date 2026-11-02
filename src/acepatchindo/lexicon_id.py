@@ -8,6 +8,76 @@ import re
 # Stage 1: Context-sensitive clause, idiom, contraction & genitive patterns
 # ---------------------------------------------------------------------------
 CLAUSE_PATTERNS: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(r"\breceive in order:\b", re.I), "memperoleh secara berurutan:"),
+    # Conversational, social & UI idioms
+    (re.compile(r"\(Optional\)", re.I), "(Opsional)"),
+    (re.compile(r"\[Optional\]", re.I), "[Opsional]"),
+    (
+        re.compile(r"\bI am over (__WXQ[A-Z]+\d+__|\{[0-9]+\}|\d+) years old\b", re.I),
+        r"Aku berusia di atas \1 tahun",
+    ),
+    (
+        re.compile(r"\bI am under (__WXQ[A-Z]+\d+__|\{[0-9]+\}|\d+) years old\b", re.I),
+        r"Aku berusia di bawah \1 tahun",
+    ),
+    (
+        re.compile(r"\bover (__WXQ[A-Z]+\d+__|\{[0-9]+\}|\d+) years old\b", re.I),
+        r"berusia di atas \1 tahun",
+    ),
+    (
+        re.compile(r"\bunder (__WXQ[A-Z]+\d+__|\{[0-9]+\}|\d+) years old\b", re.I),
+        r"berusia di bawah \1 tahun",
+    ),
+    (
+        re.compile(r"\b(__WXQ[A-Z]+\d+__|\{[0-9]+\}|\d+) years old\b", re.I),
+        r"berusia \1 tahun",
+    ),
+    (re.compile(r"\byears old\b", re.I), "tahun"),
+    (re.compile(r"\bSee you next time\b", re.I), "Sampai jumpa lagi"),
+    (re.compile(r"\(See you next time\)", re.I), "(Sampai jumpa lagi)"),
+    (re.compile(r"\bthe next time\b", re.I), "kali berikutnya"),
+    (re.compile(r"\bnext time\b", re.I), "lain kali"),
+    (
+        re.compile(r"\bI will definitely give you a big gacha\b", re.I),
+        "aku pasti akan memberimu gacha besar",
+    ),
+    (
+        re.compile(
+            r"\b(\d+)-Kill Streak!\s*(\{HeroName\}|\S+)\s+just created a Career-defining moment!",
+            re.I,
+        ),
+        r"\1 Kill Beruntun! \2 baru saja mencetak momen terbaik sepanjang karier!",
+    ),
+    (re.compile(r"\b(\d+)-Kill Streak\b", re.I), r"\1 Kill Beruntun"),
+    (
+        re.compile(r"\bCareer-defining moment\b", re.I),
+        "momen terbaik sepanjang karier",
+    ),
+    (
+        re.compile(r"\bAlready wearing this personalized poke\b", re.I),
+        "Sudah memakai colekan kustom ini",
+    ),
+    (
+        re.compile(r"\bpersonalized poke\b", re.I),
+        "colekan kustom",
+    ),
+    (
+        re.compile(r"\bVoice recognition failed\b", re.I),
+        "Pengenalan suara gagal",
+    ),
+    (
+        re.compile(r"\bcompetition information officer invited\b", re.I),
+        "petugas informasi kompetisi mengundang",
+    ),
+    (
+        re.compile(r"\bto join the group chat\b", re.I),
+        "untuk bergabung ke obrolan grup",
+    ),
+    (re.compile(r"\bgroup chat\b", re.I), "obrolan grup"),
+    (
+        re.compile(r"\bRefresh in (\{[0-9]+\}|\d+)\s*s\b", re.I),
+        r"Refresh dalam \1 detik",
+    ),
     # Specific HoK Ace templates & audit-flagged idioms
     (re.compile(r"\bAI impersonates avatar\s*(\d+)", re.I), r"Avatar Bot AI \1"),
     (re.compile(r"\bAI impersonates avatar\b", re.I), "Avatar Bot AI"),
@@ -354,9 +424,64 @@ PHRASE_3: dict[tuple[str, str, str], str] = {
     ("transforms", "into", "a"): "berubah menjadi",
     ("transform", "into", "a"): "berubah menjadi",
     ("transformed", "into", "a"): "berubah menjadi",
+    ("refined", "ancient", "coin"): "Refined Ancient Coin",
+    ("refined", "ancient", "coins"): "Refined Ancient Coin",
+    ("exquisite", "ancient", "coin"): "Refined Ancient Coin",
+    ("exquisite", "ancient", "coins"): "Refined Ancient Coin",
+    ("ancient", "coin", "machine"): "Coin Machine",
 }
 
 PHRASE_2: dict[tuple[str, str], str] = {
+    ("ancient", "coin"): "Ancient Coin",
+    ("ancient", "coins"): "Ancient Coin",
+    ("coin", "machine"): "Coin Machine",
+    ("temporary", "level"): "Temporary Level",
+    ("temporary", "levels"): "Temporary Level",
+    ("true", "level"): "True Level",
+    ("true", "levels"): "True Level",
+    ("real", "level"): "True Level",
+    ("real", "levels"): "True Level",
+    ("real", "tier"): "True Level",
+    ("real", "tiers"): "True Level",
+    ("faster", "growth"): "pertumbuhan lebih cepat",
+    ("growth", "method"): "metode pertumbuhan",
+    ("growth", "methods"): "metode pertumbuhan",
+    ("growth", "rate"): "laju pertumbuhan",
+    ("magic", "attack"): "Magic Attack",
+    ("magical", "attack"): "Magic Attack",
+    ("magic", "damage"): "Magic Damage",
+    ("magical", "damage"): "Magic Damage",
+    ("magic", "defense"): "Magic Defense",
+    ("magical", "defense"): "Magic Defense",
+    ("magic", "penetration"): "Magic Penetration",
+    ("spell", "penetration"): "Magic Penetration",
+    ("physical", "penetration"): "Physical Penetration",
+    ("rapid", "growth"): "Rapid Growth",
+    ("perfect", "revive"): "Perfect Revive",
+    ("perfect", "revival"): "Perfect Revive",
+    ("perfect", "revivals"): "Perfect Revive",
+    ("perfect", "resurrection"): "Perfect Revive",
+    ("perfect", "resurrections"): "Perfect Revive",
+    ("steal", "fire"): "Steal Fire",
+    ("fire", "thief"): "Steal Fire",
+    ("talent", "card"): "Kartu Talent",
+    ("talent", "cards"): "Kartu Talent",
+    ("effect", "card"): "Kartu Efek",
+    ("effect", "cards"): "Kartu Efek",
+    ("equipment", "card"): "Kartu Equipment",
+    ("equipment", "cards"): "Kartu Equipment",
+    ("hero", "voucher"): "Voucher Hero",
+    ("hero", "vouchers"): "Voucher Hero",
+    ("max", "hp"): "Max HP",
+    ("maximum", "hp"): "Max HP",
+    ("max", "health"): "Max HP",
+    ("maximum", "health"): "Max HP",
+    ("max", "mana"): "Max Mana",
+    ("maximum", "mana"): "Max Mana",
+    ("in", "order"): "secara berurutan",
+    ("count", "as"): "dihitung sebagai",
+    ("counts", "as"): "dihitung sebagai",
+    ("counted", "as"): "dihitung sebagai",
     ("allied", "heroes"): "Hero sekutu",
     ("allied", "hero"): "Hero sekutu",
     ("friendly", "heroes"): "Hero sekutu",
@@ -672,6 +797,60 @@ PHRASE_2: dict[tuple[str, str], str] = {
 # Note: Possessive determiners map to __POS_*__ so Stage 4 flips [POS + Noun] -> [Noun + POS].
 # Definite article "the" maps to "" (empty) so English "the Umbrella" -> "Payung" naturally!
 WORD_1: dict[str, str] = {
+    # Explicit collision overrides
+    "career": "karier",
+    "caring": "peduli",
+    "cared": "peduli",
+    "noted": "dicatat",
+    "pasted": "ditempel",
+    "bearer": "pembawa",
+    "bother": "mengganggu",
+    "caller": "pemanggil",
+    "caster": "perapal",
+    "catcher": "penangkap",
+    "clearer": "lebih jelas",
+    "defeater": "penakluk",
+    "former": "mantan",
+    "founder": "pendiri",
+    "keeper": "penjaga",
+    "killer": "pembunuh",
+    "older": "lebih tua",
+    "owner": "pemilik",
+    "shooter": "penembak",
+    "closely": "secara erat",
+    "heavenly": "surgawi",
+    "increasingly": "semakin",
+    "lightly": "dengan ringan",
+    "namely": "yaitu",
+    "newly": "baru",
+    "secondly": "kedua",
+    "subsequently": "selanjutnya",
+    "timely": "tepat waktu",
+    "worldly": "duniawi",
+    "beings": "makhluk",
+    "hundreds": "ratusan",
+    "longs": "merindukan",
+    "longed": "merindukan",
+    "finals": "babak final",
+    "experiencing": "mengalami",
+    "experienced": "berpengalaman",
+    "issuing": "mengeluarkan",
+    "issued": "diterbitkan",
+    "entranced": "terpesona",
+    "packed": "dipadati",
+    "boxing": "tinju",
+    "landing": "mendarat",
+    "landed": "mendarat",
+    "lighting": "pencahayaan",
+    "ordered": "memerintahkan",
+    "pointed": "menunjuk",
+    "recognition": "pengenalan",
+    "optional": "opsional",
+    "personalized": "kustom",
+    "poke": "colekan",
+    "patted": "menepuk",
+    "officer": "petugas",
+    "invited": "mengundang",
     # Articles, determiners & possessives
     "the": "",
     "a": "sebuah",
@@ -4011,6 +4190,28 @@ _POS_SWAP_RE = re.compile(
 _POS_LEFTOVER_RE = re.compile(r"__POS_(KU|MU|NYA|KITA|MEREKA)__")
 
 
+_GRADABLE_ADJ_STEMS: set[str] = {
+    "bright", "calm", "cheap", "clean", "cold", "cool", "dark", "deep",
+    "easy", "fast", "few", "fine", "fresh", "great", "hard", "high",
+    "hot", "kind", "large", "late", "light", "long", "loud", "low",
+    "near", "new", "nice", "old", "poor", "pure", "quick", "quiet",
+    "rare", "rich", "safe", "sharp", "short", "slow", "small", "smart",
+    "smooth", "soft", "soon", "strong", "sweet", "tall", "thick", "thin",
+    "tight", "tough", "warm", "weak", "wide", "wild", "wise", "young",
+}
+
+_BLOCKED_SHORT_STEMS: set[str] = {
+    "car", "not", "past", "arm", "art", "ear", "end", "law", "low",
+    "old", "own", "red", "sea", "war", "win", "bear", "both", "form",
+    "found", "box", "issue", "being", "hundred", "point",
+}
+
+_BLOCKED_LY_STEMS: set[str] = {
+    "close", "light", "name", "second", "time", "world", "heaven",
+    "increase", "live", "friend", "man", "order",
+}
+
+
 def _stem_lookup(word_lower: str) -> str | None:
     """Resolve English inflected word (-ies, -es, -s, -ing, -ed, -ly, -er, -est) to Indonesian."""
     if word_lower in WORD_1:
@@ -4029,22 +4230,27 @@ def _stem_lookup(word_lower: str) -> str | None:
     # -es -> base or base+e
     if word_lower.endswith("es") and n > 4:
         for cand in (word_lower[:-2], word_lower[:-1]):
-            if cand in WORD_1:
+            if cand in WORD_1 and cand not in _BLOCKED_SHORT_STEMS:
                 return WORD_1[cand]
 
     # -s -> base (avoid -ss, -us, -is)
     if word_lower.endswith("s") and not word_lower.endswith(("ss", "us", "is")):
         cand = word_lower[:-1]
-        if cand in WORD_1:
+        if cand in WORD_1 and cand not in _BLOCKED_SHORT_STEMS:
             return WORD_1[cand]
 
     # -ing -> base, base+e, or undoubled consonant
     if word_lower.endswith("ing") and n > 5:
         stem = word_lower[:-3]
         for cand in (stem, stem + "e"):
-            if cand in WORD_1:
+            if cand in WORD_1 and cand not in _BLOCKED_SHORT_STEMS:
                 return WORD_1[cand]
-        if len(stem) >= 3 and stem[-1] == stem[-2] and stem[:-1] in WORD_1:
+        if (
+            len(stem) >= 3
+            and stem[-1] == stem[-2]
+            and stem[:-1] in WORD_1
+            and stem[:-1] not in _BLOCKED_SHORT_STEMS
+        ):
             return WORD_1[stem[:-1]]
 
     # -ied -> -y
@@ -4057,30 +4263,65 @@ def _stem_lookup(word_lower: str) -> str | None:
     if word_lower.endswith("ed") and n > 4:
         stem = word_lower[:-2]
         for cand in (stem, word_lower[:-1]):
-            if cand in WORD_1:
+            if cand in WORD_1 and cand not in _BLOCKED_SHORT_STEMS:
                 return WORD_1[cand]
-        if len(stem) >= 3 and stem[-1] == stem[-2] and stem[:-1] in WORD_1:
+        if (
+            len(stem) >= 3
+            and stem[-1] == stem[-2]
+            and stem[:-1] in WORD_1
+            and stem[:-1] not in _BLOCKED_SHORT_STEMS
+        ):
             return WORD_1[stem[:-1]]
 
-    # -ly -> secara + adj
+    # -ly -> secara + adj (strictly when not blocked)
     if word_lower.endswith("ly") and n > 4:
         stem = word_lower[:-2]
-        if stem in WORD_1 and WORD_1[stem]:
+        if stem in WORD_1 and WORD_1[stem] and stem not in _BLOCKED_LY_STEMS:
             return f"secara {WORD_1[stem]}"
-        if stem.endswith("i") and (stem[:-1] + "y") in WORD_1:
+        if (
+            stem.endswith("i")
+            and (stem[:-1] + "y") in WORD_1
+            and (stem[:-1] + "y") not in _BLOCKED_LY_STEMS
+        ):
             return f"secara {WORD_1[stem[:-1] + 'y']}"
 
-    # -er -> lebih + adj
+    # -er -> lebih + adj (STRICTLY for gradable adjectives)
     if word_lower.endswith("er") and n > 4:
         stem = word_lower[:-2]
-        if stem in WORD_1 and WORD_1[stem]:
+        if stem in _GRADABLE_ADJ_STEMS and stem in WORD_1:
             return f"lebih {WORD_1[stem]}"
+        if (
+            stem.endswith("i")
+            and (stem[:-1] + "y") in _GRADABLE_ADJ_STEMS
+            and (stem[:-1] + "y") in WORD_1
+        ):
+            return f"lebih {WORD_1[stem[:-1] + 'y']}"
+        if (
+            len(stem) >= 3
+            and stem[-1] == stem[-2]
+            and stem[:-1] in _GRADABLE_ADJ_STEMS
+            and stem[:-1] in WORD_1
+        ):
+            return f"lebih {WORD_1[stem[:-1]]}"
 
-    # -est -> paling + adj
+    # -est -> paling + adj (STRICTLY for gradable adjectives)
     if word_lower.endswith("est") and n > 5:
         stem = word_lower[:-3]
-        if stem in WORD_1 and WORD_1[stem]:
+        if stem in _GRADABLE_ADJ_STEMS and stem in WORD_1:
             return f"paling {WORD_1[stem]}"
+        if (
+            stem.endswith("i")
+            and (stem[:-1] + "y") in _GRADABLE_ADJ_STEMS
+            and (stem[:-1] + "y") in WORD_1
+        ):
+            return f"paling {WORD_1[stem[:-1] + 'y']}"
+        if (
+            len(stem) >= 3
+            and stem[-1] == stem[-2]
+            and stem[:-1] in _GRADABLE_ADJ_STEMS
+            and stem[:-1] in WORD_1
+        ):
+            return f"paling {WORD_1[stem[:-1]]}"
 
     return None
 
@@ -4181,4 +4422,28 @@ def translate_segment_en_to_id(segment: str) -> str:
     # Clean up redundant spaces
     joined = re.sub(r" {2,}", " ", joined)
     joined = re.sub(r" +([,.;:!?])", r"\1", joined)
+
+    # Post-processing grammar cleanups
+    # 1. Strip unnatural English copulas
+    joined = re.sub(
+        r"\b(aku|kamu|dia|kami|kita|mereka) adalah (di |ke |dari |pada |lebih |paling |sedang |sudah |telah |akan |bisa |dapat )",
+        r"\1 \2",
+        joined,
+        flags=re.I,
+    )
+    # 2. Reorder 'sebuah <adj> <noun>' -> '<noun> <adj>'
+    joined = re.sub(
+        r"\bsebuah (besar|kecil|baru|lama|hebat|indah|kuat|cepat|khusus|langka) ([A-Za-z0-9_]+)\b",
+        r"\2 \1",
+        joined,
+        flags=re.I,
+    )
+    # 3. Reorder '<verb/prep> ini/itu <noun>' -> '<verb/prep> <noun> ini/itu'
+    joined = re.sub(
+        r"\b(memakai|memilih|membeli|menggunakan|dalam|dari|untuk|ke) (ini|itu) ([A-Za-z0-9_]+)\b",
+        r"\1 \3 \2",
+        joined,
+        flags=re.I,
+    )
+
     return joined

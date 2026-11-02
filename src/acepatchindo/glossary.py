@@ -470,6 +470,19 @@ CANONICAL_PROTECTED_TERMS: tuple[str, ...] = (
     "Gentle Call",
     "Tidal Symphony",
     "Tri-Point Banner",
+    "Ancient Coin",
+    "Refined Ancient Coin",
+    "Coin Machine",
+    "Rapid Growth",
+    "Perfect Revive",
+    "Akomia Core",
+    "Steal Fire",
+    "Magic Penetration",
+    "Physical Penetration",
+    "Kartu Talent",
+    "Kartu Efek",
+    "Kartu Equipment",
+    "Voucher Hero",
 )
 
 STOPWORD_GUARD_RE = re.compile(
@@ -511,6 +524,8 @@ TIER1_EMBEDDED_EN_CLEANUP: tuple[tuple[str, str], ...] = (
     ("Muster the Troops", "Kumpulkan Pasukan"),
     ("Power of the Source", "Kekuatan Sumber"),
     ("Bane of the Mighty", "Kutukan Sang Perkasa"),
+    ("Kartu Effect", "Kartu Efek"),
+    ("kartu Effect", "kartu Efek"),
 )
 
 
@@ -524,7 +539,7 @@ def _normalize_en_key(text: str) -> str:
 class ThreeTierGlossary:
     tier1_exact_zh_to_id: dict[str, str] = field(default_factory=dict)
     tier1_plain_zh_to_id: dict[str, str] = field(default_factory=dict)
-    tier1_formula_zh_to_id: dict[str, tuple[str, str]] = field(default_factory=dict)
+    tier1_formula_zh_to_id: dict[str, list[tuple[str, str]]] = field(default_factory=dict)
     tier1_en_card_to_id_desc: dict[str, str] = field(default_factory=dict)
     tier1_en_desc_to_id_desc: dict[str, str] = field(default_factory=dict)
     tier2_zh_to_en: dict[str, str] = field(default_factory=dict)
@@ -592,7 +607,9 @@ class ThreeTierGlossary:
             self.tier1_plain_zh_to_id[norm] = id_val
         skel = normalize_formula_skeleton_zh(zh)
         if skel and len(skel) >= 6:
-            self.tier1_formula_zh_to_id[skel] = (zh, id_val)
+            cands = self.tier1_formula_zh_to_id.setdefault(skel, [])
+            if (zh, id_val) not in cands:
+                cands.append((zh, id_val))
 
     def _register_t2_pair(self, zh: str, en_val: str) -> None:
         zh = zh.strip()
@@ -783,6 +800,46 @@ class ThreeTierGlossary:
 
         def _convert_segment(seg: str) -> str:
             out = seg.replace("The First Lands", "First Lands")
+
+            # Normalize English baseline variants to canonical Tier 1 terms
+            var_subs = [
+                (r"(?<![A-Za-z])Magical Attack(?![A-Za-z])", "Magic Attack"),
+                (r"(?<![A-Za-z])Magical Damage(?![A-Za-z])", "Magic Damage"),
+                (r"(?<![A-Za-z])Magical Defense(?![A-Za-z])", "Magic Defense"),
+                (r"(?<![A-Za-z])Spell Penetration(?![A-Za-z])", "Magic Penetration"),
+                (
+                    r"(?<![A-Za-z])(?:Maximum HP|Max Health|Maximum Health)(?![A-Za-z])",
+                    "Max HP",
+                ),
+                (r"(?<![A-Za-z])Maximum Mana(?![A-Za-z])", "Max Mana"),
+                (
+                    r"(?<![A-Za-z])(?:Exquisite Ancient Coins|Exquisite Ancient Coin|Refined Ancient Coins)(?![A-Za-z])",
+                    "Refined Ancient Coin",
+                ),
+                (r"(?<![A-Za-z])Ancient Coin Machine(?![A-Za-z])", "Coin Machine"),
+                (r"(?<![A-Za-z])Ancient Coins(?![A-Za-z])", "Ancient Coin"),
+                (r"(?<![A-Za-z])Perfect Resurrection(?![A-Za-z])", "Perfect Revive"),
+                (r"(?<![A-Za-z])Arcomia Core(?![A-Za-z])", "Akomia Core"),
+                (r"(?<![A-Za-z])Fire Thief(?![A-Za-z])", "Steal Fire"),
+                (r"(?<![A-Za-z])(?:Talent Cards|Talent Card)(?![A-Za-z])", "Kartu Talent"),
+                (r"(?<![A-Za-z])(?:Effect Cards|Effect Card)(?![A-Za-z])", "Kartu Efek"),
+                (
+                    r"(?<![A-Za-z])(?:Equipment Cards|Equipment Card)(?![A-Za-z])",
+                    "Kartu Equipment",
+                ),
+                (r"(?<![A-Za-z])(?:Hero Vouchers|Hero Voucher)(?![A-Za-z])", "Voucher Hero"),
+                (r"(?<![A-Za-z])Temporary Levels(?![A-Za-z])", "Temporary Level"),
+                (r"(?<![A-Za-z])real (?:Level|Tier)s?(?![A-Za-z])", "True Level"),
+                (
+                    r"(?<![A-Za-z])(?:Perfect Revivals?|Perfect Resurrections?)(?![A-Za-z])",
+                    "Perfect Revive",
+                ),
+                (r"(?<![A-Za-z])faster growth(?![A-Za-z])", "pertumbuhan lebih cepat"),
+                (r"(?<![A-Za-z])growth methods?(?![A-Za-z])", "metode pertumbuhan"),
+            ]
+            for pat, repl in var_subs:
+                out = re.sub(pat, repl, out, flags=re.IGNORECASE)
+
             sentinels: list[tuple[str, str]] = []
             if self._protected_re is not None:
                 def _protect_match(m: re.Match[str]) -> str:
@@ -804,12 +861,39 @@ class ThreeTierGlossary:
 
             for tok, orig_val in sentinels:
                 out = out.replace(tok, orig_val, 1)
+
+            for old_ft, new_ft in (
+                ("Kartu Effect", "Kartu Efek"),
+                ("kartu Effect", "kartu Efek"),
+                ("Sementara Level", "Temporary Level"),
+                ("sementara Level", "Temporary Level"),
+                ("Nyata Level", "True Level"),
+                ("nyata Level", "True Level"),
+                ("Cepat Growth", "pertumbuhan lebih cepat"),
+                ("cepat growth", "pertumbuhan lebih cepat"),
+            ):
+                out = out.replace(old_ft, new_ft)
+            out = re.sub(r"(?i)sempurna kebangkitan", "Perfect Revive", out)
+
             return out
 
         return translate_preserving_skeleton(en_text, _convert_segment)
 
     def _fit_length_bound(self, source_zh: str, candidate: str) -> str:
         """Guarantee candidate satisfies len(candidate) <= max(len(source_zh) * 8, 48) when len(source_zh) >= 4."""
+        for old_ft, new_ft in (
+            ("Kartu Effect", "Kartu Efek"),
+            ("kartu Effect", "kartu Efek"),
+            ("Sementara Level", "Temporary Level"),
+            ("sementara Level", "Temporary Level"),
+            ("Nyata Level", "True Level"),
+            ("nyata Level", "True Level"),
+            ("Cepat Growth", "pertumbuhan lebih cepat"),
+            ("cepat growth", "pertumbuhan lebih cepat"),
+        ):
+            candidate = candidate.replace(old_ft, new_ft)
+        candidate = re.sub(r"(?i)sempurna kebangkitan", "Perfect Revive", candidate)
+
         if len(source_zh) < 4:
             return candidate
         limit = max(len(source_zh) * 8, 48)
@@ -864,6 +948,7 @@ class ThreeTierGlossary:
                     raw_t1,
                     inner_translator=self._translate_raw_zh_to_id,
                     baseline_en=baseline_en,
+                    en_translator=self.translate_en_to_id,
                 ),
             )
             ok, _ = validate_translation(source_zh, cand)
@@ -880,6 +965,7 @@ class ThreeTierGlossary:
                     self.tier1_plain_zh_to_id[norm_zh],
                     inner_translator=self._translate_raw_zh_to_id,
                     baseline_en=baseline_en,
+                    en_translator=self.translate_en_to_id,
                 ),
             )
             ok, _ = validate_translation(source_zh, cand)
@@ -889,7 +975,17 @@ class ThreeTierGlossary:
         # 2b. Tier 1 formula-skeleton match (handles all 234 dynamic formula Hero skills/enhancements/awakenings)
         skel_zh = normalize_formula_skeleton_zh(source_zh)
         if skel_zh and skel_zh in self.tier1_formula_zh_to_id:
-            t1_desc_cn, t1_desc_id = self.tier1_formula_zh_to_id[skel_zh]
+            cands = self.tier1_formula_zh_to_id[skel_zh]
+            src_nums = re.findall(r"\d+(?:\.\d+)?", normalize_plain_zh(source_zh))
+            best_cand = cands[0]
+            best_score = -1
+            for c_cn, c_id in cands:
+                c_nums = re.findall(r"\d+(?:\.\d+)?", normalize_plain_zh(c_cn))
+                score = sum(1 for a, b in zip(src_nums, c_nums) if a == b)
+                if score > best_score:
+                    best_score = score
+                    best_cand = (c_cn, c_id)
+            t1_desc_cn, t1_desc_id = best_cand
             cand = self._fit_length_bound(
                 source_zh,
                 reinject_formula_and_skeleton(
@@ -898,6 +994,7 @@ class ThreeTierGlossary:
                     t1_desc_id,
                     inner_translator=self._translate_raw_zh_to_id,
                     baseline_en=baseline_en,
+                    en_translator=self.translate_en_to_id,
                 ),
             )
             ok, _ = validate_translation(source_zh, cand)
@@ -915,6 +1012,7 @@ class ThreeTierGlossary:
                         self.tier1_en_card_to_id_desc[clean_en],
                         inner_translator=self._translate_raw_zh_to_id,
                         baseline_en=baseline_en,
+                        en_translator=self.translate_en_to_id,
                     ),
                 )
                 if validate_translation(source_zh, cand)[0]:
@@ -929,6 +1027,7 @@ class ThreeTierGlossary:
                         self.tier1_en_desc_to_id_desc[norm_en],
                         inner_translator=self._translate_raw_zh_to_id,
                         baseline_en=baseline_en,
+                        en_translator=self.translate_en_to_id,
                     ),
                 )
                 if validate_translation(source_zh, cand)[0]:
@@ -947,6 +1046,7 @@ class ThreeTierGlossary:
                     t2_id,
                     inner_translator=self._translate_raw_zh_to_id,
                     baseline_en=baseline_en,
+                    en_translator=self.translate_en_to_id,
                 ),
             )
             ok, _ = validate_translation(source_zh, cand)
@@ -970,6 +1070,7 @@ class ThreeTierGlossary:
                     TAG_RE.sub("", cand),
                     inner_translator=self._translate_raw_zh_to_id,
                     baseline_en=baseline_en,
+                    en_translator=self.translate_en_to_id,
                 ),
             )
             ok2, _ = validate_translation(source_zh, repaired)
@@ -1104,6 +1205,10 @@ class ThreeTierGlossary:
         cand = translate_preserving_skeleton(source_zh, _seg_fn)
         ok, _ = validate_translation(source_zh, cand)
         if not ok:
-            cand = reinject_skeleton_from_source(source_zh, TAG_RE.sub("", cand))
+            cand = reinject_skeleton_from_source(
+                source_zh,
+                TAG_RE.sub("", cand),
+                en_translator=self.translate_en_to_id,
+            )
         return cand
 

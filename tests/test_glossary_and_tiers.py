@@ -128,10 +128,61 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
         "苏烈旋转一周，对周围敌人造成<color=#dfa15e>80+[194010p1q2/100]%物理攻击力的物理伤害"
         "</color>，并降低其<color=#dfa15e>[194011p1q2]点物理防御</color>，持续5秒。"
     )
-    assert "Su Lie berputar satu putaran" in cat["unique"][sulie_zh]
-    assert "80+[194010p1q2/100]%" in cat["unique"][sulie_zh]
+    sulie_val = cat["unique"][sulie_zh]
+    assert "Su Lie berputar satu putaran" in sulie_val
+    assert "80+[194010p1q2/100]%" in sulie_val
+    assert "<color=#dfa15e>[194011p1q2] Physical Defense</color>" in sulie_val
+    assert "<color=#dfa15e></color>" not in sulie_val
 
-    # Verify audit-flagged sentences have zero Indlish
+    # Phase 3 Audit Verifications: zero nested placeholders, zero empty tags, zero glued words
+    nested_re = re.compile(r"\{[^{}]*\{|\}[^{}]*\}")
+    assert sum(1 for v in cat["unique"].values() if nested_re.search(v)) == 0
+    assert sum(1 for r in cat["english_updates"] if nested_re.search(r[3])) == 0
+
+    empty_tag_re = re.compile(r"<(color=[^>]+|b|i|a[^>]*|size=[^>]+)>\s*</(?:color|b|i|a|size)>")
+    for zh_src, id_val in cat["unique"].items():
+        if empty_tag_re.search(id_val) and not empty_tag_re.search(zh_src):
+            raise AssertionError(f"Empty tag shell in unique: {id_val!r} for {zh_src!r}")
+    for r in cat["english_updates"]:
+        src_val = r[4] if len(r) == 5 else r[2]
+        id_val = r[3]
+        if empty_tag_re.search(id_val) and not empty_tag_re.search(src_val):
+            raise AssertionError(f"Empty tag shell in english_updates: {id_val!r} for {src_val!r}")
+
+    glued_words = ["untuksetiap", "secaraacak", "sebelumnyaLevel", "KartuAncientCoin", "SetiapkaliHero"]
+    for gw in glued_words:
+        for v in cat["unique"].values():
+            assert gw not in v, f"Found glued word {gw} in unique: {v}"
+        for r in cat["english_updates"]:
+            assert gw not in r[3], f"Found glued word {gw} in english_updates: {r[3]}"
+
+    # Phase 4 Audit Verifications: zero occurrences of corrupted canonical terms and broken tokens
+    forbidden_terms = [
+        "Kuno Koin",
+        "Sementara Level",
+        "Nyata Level",
+        "Sihir Menyerang",
+        "Sihir Damage",
+        "Sihir Defense",
+        "Mantra Penetrasi",
+        "Cepat Growth",
+        "di ketertiban",
+        "jumlah sebagai",
+        "Sempurna Kebangkitan",
+        "Api Thief",
+        "Kartu Effect",
+        "Talent Kartu",
+        "Equipment Kartu",
+        "Hero Kupon",
+        "<b>═",
+        "╫,",
+    ]
+    for ft in forbidden_terms:
+        ft_low = ft.lower()
+        for v in cat["unique"].values():
+            assert ft_low not in v.lower(), f"Found forbidden term '{ft}' in unique: {v}"
+        for r in cat["english_updates"]:
+            assert ft_low not in r[3].lower(), f"Found forbidden term '{ft}' in english_updates: {r[3]}"
     glossary = ThreeTierGlossary.from_reference_files(
         REFS_DIR / "tier1_wiki_id.json",
         REFS_DIR / "tier2_wiki_en.json",
@@ -139,6 +190,13 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
     assert "kali" not in glossary.translate_en_to_id(
         "the new sounds of the times flow in the heart"
     )
+    assert "momen terbaik sepanjang karier" in glossary.translate_en_to_id("Career-defining moment")
+    assert "(Opsional) Aku berusia di atas {0} tahun" in glossary.translate_en_to_id("(Optional) I am over {0} years old")
+    assert "(Sampai jumpa lagi), aku pasti akan memberimu gacha besar!" in glossary.translate_en_to_id("(See you next time), I will definitely give you a big gacha!")
+    assert "Sudah memakai colekan kustom ini" in glossary.translate_en_to_id("Already wearing this personalized poke")
+    assert "Pengenalan suara gagal" in glossary.translate_en_to_id("#? (Voice recognition failed)")
+    assert "mobil" not in glossary.translate_en_to_id("caring for allies")
+    assert "lebih beruang" not in glossary.translate_en_to_id("the bearer of the flame")
     assert (
         glossary.translate_en_to_id("%s challenged your Championship Lineup and won.")
         == "%s menantang Formasi Kejuaraan milikmu dan menang."

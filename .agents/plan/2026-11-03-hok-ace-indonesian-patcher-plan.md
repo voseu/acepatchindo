@@ -1975,25 +1975,25 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
 
 ### Task 8: Tier 1 Formula-Agnostic Template Matcher & `lords` Card Description Activation
 
-- [ ] **Step 8.1: Upgrade `tag_aligner.py` & `glossary.py` to match Tier 1 `descCn` with dynamic formula placeholders**
+- [ ] **Step 8.1: Upgrade `tag_aligner.py` & `glossary.py` to match Tier 1 `descCn` with dynamic formula placeholders** *(Matched 234 formulas, but introduced empty tags & `{0|{0|2}}` nested placeholders -> Remediated in Task 12)*
   - Create a formula-skeleton normalizer `normalize_formula_skeleton_zh(text)` that strips Unity tags and replaces both formula placeholders (`[194010p1q2/100]`, `{0}`, `[0]`) and numeric literals (`\d+(?:\.\d+)?`) with a canonical `#N#` token so all 234 missed Tier 1 Hero skills/enhancements/awakenings match `tier1_wiki_id.json`.
   - When substituting the Tier 1 Indonesian `desc`, preserve the exact `<color=...>` tags and dynamic formula placeholders (`[194010p1q2/100]`, `[0]`, `{0}`) from `source_zh` (or `baseline_en`) in their corresponding slots so `validate_translation(source_zh, result) == (True, 'ok')`.
-- [ ] **Step 8.2: Activate `tier1_en_card_to_id_desc` for all 19 Lords' Talents & Related Cards**
+- [x] **Step 8.2: Activate `tier1_en_card_to_id_desc` for all 19 Lords' Talents & Related Cards**
   - Match `baseline_en` / card names and descriptions against `tier1_en_card_to_id_desc` so all Chess Player skills, Secret Arts, and Signature Talents use the exact Tier 1 Indonesian translations.
 
 ### Task 9: Tier 2 (`hokace.wiki`) Full Detail-Page Extraction
 
-- [ ] **Step 9.1: Upgrade `scripts/01_extract_baseline_and_refs.py` to scrape `hokace.wiki` detail pages**
+- [x] **Step 9.1: Upgrade `scripts/01_extract_baseline_and_refs.py` to scrape `hokace.wiki` detail pages**
   - Fetch the detail pages (`https://hokace.wiki{entry['url']}`) concurrently using `httpx.AsyncClient(limits=httpx.Limits(max_connections=20))` and cache them in `data/references/tier2_wiki_details_en.json`.
   - Extract any Chinese/English skill, card, talent, equipment, and mechanic descriptions so Tier 2 provides full coverage for items not present in Tier 1.
 
 ### Task 10: Eliminate All "Indlish" & Untranslated English Across All 41,483 `unique` & 29,750 `english_updates`
 
-- [ ] **Step 10.1: Replace the shallow 150-regex table with a Complete Indonesian Translation Pipeline**
+- [ ] **Step 10.1: Replace the shallow 150-regex table with a Complete Indonesian Translation Pipeline** *(Built 4,184-line `lexicon_id.py`, but suffix stemmer caused false-positive collisions like `cared -> mobil`, `career -> lebih peduli` -> Remediated in Task 13)*
   - Fix context-blind regex bugs (such as replacing `"times"` in `"sounds of the times"` with `"kali"`).
   - Protect all Unity tags (`<color=...>`, `<a href=...>`, `<b>`), placeholders (`{0}`, `%s`, `[194010p1q2/100]`), control tokens (`╫`), and canonical Tier 1 English proper nouns/mechanics (`CANONICAL_PROTECTED_TERMS` + Hero/Card/Equipment/Faction names) with sentinels before translating prose.
   - Translate all remaining English prose across `unique`, `contextual`, and `english_updates` into complete, natural Bahasa Indonesia (using batched translation with checkpoint caching in `data/catalog_checkpoints/` and/or a comprehensive full-coverage grammar + lexicon engine covering the entire catalog vocabulary).
-- [ ] **Step 10.2: Enforce Strict Anti-Indlish & Anti-Untranslated Quality Gate in `tests/test_glossary_and_tiers.py`**
+- [x] **Step 10.2: Enforce Strict Anti-Indlish & Anti-Untranslated Quality Gate in `tests/test_glossary_and_tiers.py`**
   - Add `test_catalog_has_no_indlish_or_untranslated_english_prose()` verifying across `data/catalog_checkpoints/catalog.json.gz`:
     1. Count of `unique` entries containing untranslated English prose stopwords (`\b(the|with|from|your|their|when|after|before|deals|dealing|gains|restores|restoring|enemies|allies|cannot|will|have|has|been|this|that|throws|swings|surrounding|nearby|unable|receive|challenged|congratulations|requires|apologize|customers|inconvenience|increases|reduces|obtained|unlocked|available|please|again|later|already|wearing)\b` outside protected proper titles) is **`< 100` (down from `12,210`)**.
     2. Count of `english_updates` entries containing those untranslated English stopwords is **`< 100` (down from `8,719`)**.
@@ -2001,7 +2001,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
 
 ### Task 11: Localize `adaptive.pyc` Runtime Status Messages, Repack `.exe`, Verify on Real Game, & Update GitHub Release `v1.4.12-id.1`
 
-- [ ] **Step 11.1: Localize status messages returned by `wxq_patch/adaptive.pyc` (`_run`)**
+- [x] **Step 11.1: Localize status messages returned by `wxq_patch/adaptive.pyc` (`_run`)**
   - In `src/acepatchindo/dual_state_patch.py:render_adaptive_source`, translate the English status strings in `report["message"]`:
     - `"English installed and verified. Unknown text was preserved."` -> `"Patch Bahasa Indonesia berhasil dipasang dan diverifikasi."`
     - `"Saved originals restored and verified."` -> `"Berkas asli gim berhasil dipulihkan dan diverifikasi."`
@@ -2012,12 +2012,166 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
     - `" known strings; "` -> `" teks diterjemahkan; "`
     - `" unknown left Chinese; "` -> `" teks belum dikenal; "`
     - `" strings skipped for capacity."` -> `" teks dilewati karena batas kapasitas."`
-- [ ] **Step 11.2: Re-run full verification & repack pipeline**
+- [x] **Step 11.2: Re-run full verification & repack pipeline**
   - Run `scripts/03_patch_worker_modules.py`
   - Run `scripts/04_verify_real_windows_game.py` (`tables == 508`, `unknown == 0`, `invalid_translation == 0`, `capacity_skipped == 0`)
   - Run `scripts/05_repack_windows_exe.py`
   - Run `pytest -v` (all test suites 100% green)
-- [ ] **Step 11.3: Commit, Push, and Re-upload Assets to GitHub Release `v1.4.12-id.1`**
+- [x] **Step 11.3: Commit, Push, and Re-upload Assets to GitHub Release `v1.4.12-id.1`**
   - Commit all updated source, reference, checkpoint, and test files to `main` and `git push origin main`.
   - Run `scripts/06_publish_github_release.py` (which uses `gh release upload v1.4.12-id.1 ... --clobber` and updates the release notes with the new SHA-256 hashes).
+
+---
+
+## Phase 3: Post-Phase-2 Forensic Remediation Plan (Eliminating Empty Tag Shells, Corrupted Nested Placeholders `{0|{0|2}}`, Glued Words, & Stemmer Hallucinations)
+
+> **Forensic Audit Finding of Commit `9720b5f` (Why Phase 3 is Mandatory):**
+> While Phase 2 (`9720b5f`) scraped all 624 `hokace.wiki` detail pages, localized `adaptive.pyc` runtime messages, and lowered the naive stopword count to `0`, a deep structural & linguistic audit of `data/catalog_checkpoints/catalog.json.gz` exposed **4 critical defects** introduced by shortcuts in `tag_aligner.py`, `glossary.py`, and `lexicon_id.py`:
+>
+> 1. **506 Corrupted Nested Placeholders (`{0|{0|2}}`) — `43` in `unique` and `463` in `english_updates`:**
+>    - In `src/acepatchindo/tag_aligner.py:reinject_formula_and_skeleton`, Step 1 (lines 115–136) replaces `"2 Energy"` in `out` with `"{0|2}{Energy}"`.
+>    - Immediately afterward, Step 3 (lines 175–182) aligns `c_ex = "2"` (from `desc_cn`) with `s_ex = "{0|2}"` (from `source_zh`) and runs `re.sub(rf"(?<![\d\[]){re.escape(c_ex)}(?![\d%])", s_ex, out, count=1)`, which matches the `2` **inside** `{0|2}` (right after `|`) and replaces it with `{0|2}`, corrupting `"{0|2}{Energy}"` into **`"{0|{0|2}}{Energy}"`**!
+>    - Furthermore, `FORMULA_TOKEN_RE` and `COMPOUND_EXPR_RE` (lines 66–73) excluded spaces inside `{...}` (`\{[0-9A-Za-z_:+|.%/~-]*\d...\}`), so placeholders like `{xuanceKill1951: 0}` were torn apart and appended after the final period (`(jumlah kalahkan: ).{xuanceKill1951: 0}`), and standalone `{LordHp}` / `{Energy}` / `{LordExp}` without a preceding `{0|2}` were ignored in Step 1 and dumped at the end of the sentence (`...ulangi 1 kali.{LordHp}`).
+>
+> 2. **5,720 Empty / Stripped Tag Shells (`739` in `unique` and `4,981` in `english_updates`) + Glued Words (`untuksetiap`, `secaraacak`, `sebelumnyaLevel`, `KartuAncientCoin`):**
+>    - In `src/acepatchindo/tag_aligner.py:reinject_skeleton_from_source`:
+>      - Step 2 (lines 247–263) only matched bracketed terms `\[[^\]]+\]` where control tokens were inside the innermost tag. It failed to match standard HoK Ace badge spans like `<a href=100><color=#ffffff>╋<b>闪现</b></color></a>` (where `╋` is between `<color=#ffffff>` and `<b>`, and `闪现` -> `Flash`, `整备` -> `Preparation`, `登场` -> `Deploy`, `开团` -> `Engage`, `临时等级` -> `Temporary Level`, `阿科米亚核心` -> `Akomia Core`, `古币` -> `Ancient Coin`, etc. have no brackets).
+>      - Worse, Step 3 (lines 265–275) mutated `result` by replacing the first $N$ commas `", "` and spaces `" "` with control tokens (`╋`, `╬`, `═`). When Step 4 then failed tag parity, Step 5 (`line 290`) ran `CONTROL_TOKEN_RE.sub("", TAG_RE.sub("", result))` on the **mutated `result`**, deleting the control tokens that had replaced the spaces/commas and gluing words together into `"untuksetiapHero"`, `"secaraacak"`, `"sebelumnyaLevel"`, `"KartuAncientCoin"`!
+>      - Finally, `_wrap_exact_tag_sequence` (lines 295–318) dumped the entire sentence into a single `main_idx` slot and wiped every other tag slot to `""`, creating **5,720 empty tags** (`<a href=100><color=#ffffff>╋<b></b></color></a>`, `<color=#FFE897></color>`, `<color=#dfa15e></color>`) and wrapping entire multi-tag skill paragraphs (like Su Lie's `苏烈旋转1周...`) inside a single `<color=#dfa15e>...</color>` with a trailing `<color=#dfa15e></color>`!
+>      - Even worse, in `glossary.py:595`, `self.tier1_formula_zh_to_id[skel] = (zh, id_val)` overwrote Lv.1 cards (`+1`) with Lv.2 cards (`+2`) because both shared the same `#N#` skeleton and `reinject_formula_and_skeleton` only substituted `s_ex` when `"[" in s_ex or "{" in s_ex`!
+>
+> 3. **Destructive Suffix Stemmer Collisions & Literal Calques in `src/acepatchindo/lexicon_id.py`:**
+>    - `_stem_lookup` blindly strips `-er`, `-est`, `-ly`, `-ing`, `-ed`, `-s` from English words and looks up the truncated string in `WORD_1`, producing absurd errors in `catalog.json.gz`:
+>      - `"caring"` / `"cared"` -> stripped `-ing`/`-ed` to `"car"` -> **`"mobil"`** (car!)
+>      - `"noted"` -> stripped `-ed` to `"not"` -> **`"tidak"`**
+>      - `"pasted"` -> stripped `-ed` to `"past"` -> **`"masa lalu"`**
+>      - `"career"` -> stripped `-er` to `"care"` -> **`"lebih peduli"`** (`"Career-defining moment"` -> **`"Lebih peduli-defining moment"`**!)
+>      - `"bearer"` -> stripped `-er` to `"bear"` -> **`"lebih beruang"`** (more bear!)
+>      - `"bother"` -> stripped `-er` to `"both"` -> **`"lebih kedua"`**
+>      - `"former"` -> stripped `-er` to `"form"` -> **`"lebih wujud"`**
+>      - `"founder"` -> stripped `-er` to `"found"` -> **`"lebih ditemukan"`**
+>      - `"owner"` -> stripped `-er` to `"own"` -> **`"lebih sendiri"`**
+>      - `"clearer"` -> **`"lebih menghapus"`**, `"caller"` -> **`"lebih memanggil"`**, `"caster"` -> **`"lebih menggunakan"`**, `"catcher"` -> **`"lebih menangkap"`**, `"defeater"` -> **`"lebih mengalahkan"`**, `"killer"` -> **`"lebih mengalahkan"`**, `"keeper"` -> **`"lebih menyimpan"`**, `"shooter"` -> **`"lebih menembak"`**
+>      - `"secondly"` -> stripped `-ly` to `"second"` -> **`"secara detik"`**, `"lightly"` -> **`"secara cahaya"`**, `"closely"` -> **`"secara menutup"`**, `"timely"` -> **`"secara waktu"`**, `"namely"` -> **`"secara nama"`**, `"increasingly"` -> **`"secara meningkatkan"`**, `"heavenly"` -> **`"secara langit"`**, `"worldly"` -> **`"secara dunia"`**
+>      - `"beings"` -> stripped `-s` to `"being"` -> **`"sedang"`**, `"hundreds"` -> **`"100"`**, `"longs"` -> **`"panjang"`**, `"experiencing"` / `"experienced"` -> **`"EXP"`**, `"issuing"` / `"issued"` -> **`"masalah"`**, `"entranced"` -> **`"pintu masuk"`**, `"packed"` -> **`"kawanan"`**, `"boxing"` -> **`"kotak"`**
+>    - Plus literal word-by-word English calques: `"(Optional) I am over {0} years old"` -> `"(Optional) aku adalah di atas {0} tahun lama"`, `"(See you next time), I will definitely give you a big gacha!"` -> `"(Melihat kamu berikutnya waktu), aku akan pasti memberikan kamu sebuah besar gacha!"`, `"Already wearing this personalized poke"` -> `"Sudah memakai ini personalisasi poke"`, `"#? (Voice recognition failed)"` -> `"#? (Suara recognition gagal)"`.
+>
+> 4. **Git Tag `v1.4.12-id.1` Left on Old Commit `0195d31`:**
+>    - `git tag v1.4.12-id.1` still points to `0195d31` instead of the latest `HEAD` on `main`.
+
+### Task 12: Fix Tag Alignment, Formula Skeleton Collisions, & Nested Placeholders in `tag_aligner.py`, `glossary.py`, and `validator.py`
+
+- [x] **Step 12.1: Harden `src/acepatchindo/validator.py` to reject nested braces and empty formatting tags**
+  - In `validator.py:validate_translation(source, translated)`:
+    1. Reject any corrupted nested brace placeholder (`re.search(r"\{[^{}]*\{|\}[^{}]*\}", translated)`) with `(False, "nested_placeholder")` unless also present in `source`.
+    2. Reject any empty formatting tag (`re.search(r"<(color=[^>]+|b|i|a[^>]*|size=[^>]+)>\s*</(?:color|b|i|a|size)>", translated)`) with `(False, "empty_tag")` unless also present in `source`.
+- [x] **Step 12.2: Fix `reinject_formula_and_skeleton` and `tier1_formula_zh_to_id` in `tag_aligner.py` & `glossary.py`**
+  - In `glossary.py`:
+    - Change `tier1_formula_zh_to_id` from `dict[str, tuple[str, str]]` to `dict[str, list[tuple[str, str]]]` so Lv.1 (`+1`) and Lv.2 (`+2`) card variants with the same `#N#` skeleton are **both** stored instead of overwriting each other.
+    - When looking up `skel_zh` in `tier1_formula_zh_to_id`, pick the `(desc_cn, desc_id)` candidate whose static numbers (`re.findall(r"\d+(?:\.\d+)?", normalize_plain_zh(desc_cn))`) have the highest positional overlap with `source_zh`'s static numbers.
+  - In `tag_aligner.py`:
+    - Update `FORMULA_TOKEN_RE` and `COMPOUND_EXPR_RE` to allow spaces inside `{...}` (`r"\{[^{}]*\d[^{}]*\}"`) so placeholders like `{xuanceKill1951: 0}` are matched intact and substituted directly into `(jumlah kalahkan: {xuanceKill1951: 0})` instead of being torn apart.
+    - In `reinject_formula_and_skeleton` Step 1:
+      - First replace pipe-delimited `{num_ph}{Energy|LordExp|LordHp}` with temporary sentinels (`__WXQICONPH0__`, etc.) so Step 3's `COMPOUND_EXPR_RE` substitution **cannot** match numbers inside `{0|2}` and can never produce `{0|{0|2}}`!
+      - Also handle standalone `{Energy}`, `{LordExp}`, `{LordHp}` in `source_zh` (when not preceded by `{num_ph}`) by replacing `Player HP` / `HP Chess Player` -> `{LordHp}`, `Player EXP` / `EXP Chess Player` -> `{LordExp}`, and `Energy` / `Energi` -> `{Energy}` in `out`.
+    - In `reinject_formula_and_skeleton` Step 3 (`cn_exprs` vs `src_exprs`):
+      - Replace `c_ex` with `s_ex` whenever `c_ex != s_ex` (including when `c_ex` and `s_ex` are different static numbers like `2` vs `1` AND when `s_ex` contains `[` or `{`), using negative lookbehind/lookahead `(?<![\d\[{|A-Za-z])` and `(?![\d%\]}|A-Za-z])` so it never corrupts an existing placeholder.
+      - If `source_zh` wraps `s_ex` (plus its trailing stat term, e.g. `<color=#dfa15e>80+[194010p1q2/100]%物理攻击力的物理伤害</color>` and `<color=#dfa15e>[194011p1q2]点物理防御</color>`) inside `<color=...>...</color>`, wrap the corresponding substituted formula + stat span in `out` with that exact `<color=...>...</color>` tag during Step 3!
+- [ ] **Step 12.3: Fix `reinject_skeleton_from_source` in `tag_aligner.py` so ZERO empty tags (`<b></b>`, `<color=...></color>`) or glued words (`untuksetiap`) are ever produced** *(Eliminated all 5,720 empty tags & glued words, BUT introduced bracket-outside-tag regression `[<a ...><b>Aura</b></a>]`, `╫,+` control-token regression breaking `test_validator_and_aligner.py`, and raw unguarded `translate_segment_en_to_id` fallback in line 474 -> Remediated in Task 15)*
+  - **Delete the destructive Step 3 space-replacement loop** (`result.replace(sep, ch, 1)`) before Step 5 so spaces and commas in `plain_id` are NEVER replaced by control tokens and stripped into `untuksetiap` / `secaraacak`!
+  - Expand `BRACKET_TERM_MAP` in `tag_aligner.py` with all unbracketed Tier 1 badge & keyword terms and a multi-alias lookup list.
+  - Match **all atomic tagged spans** in `source_zh` using `ATOMIC_TAGGED_SPAN_RE`.
+  - **NEVER emit an empty `<color=...></color>` or `<b></b>` tag!**
+
+### Task 13: Fix Stemmer Hallucinations & English-Order Calques in `src/acepatchindo/lexicon_id.py`
+
+- [x] **Step 13.1: Eliminate all false-positive stemmer collisions in `lexicon_id.py`**
+- [x] **Step 13.2: Add Indonesian Grammar & Word-Order Rules (`CLAUSE_PATTERNS` + Post-Order Swaps) in `lexicon_id.py`**
+
+### Task 14: Full Rebuild, Structural & Linguistic Verification, Repack `.exe`, Move Tag `v1.4.12-id.1`, & Update GitHub Release
+
+- [x] **Step 14.1: Expand `tests/test_glossary_and_tiers.py` with strict assertions for all 4 Phase 2 Audit Findings**
+- [ ] **Step 14.2: Run the complete build, real-Windows-game verification, and `.exe` repack pipeline** *(Rebuilt catalog & `.exe`, BUT skipped running full `pytest -v`, leaving `test_reinject_skeleton_preserves_tags_placeholders_and_tokens` FAILING -> Remediated in Task 17)*
+- [ ] **Step 14.3: Commit, Push `main`, Force-Update Tag `v1.4.12-id.1` to `HEAD`, and Clobber-Upload GitHub Release Assets** *(SKIPPED COMPLETELY: 8 modified files left uncommitted, `main` not pushed, tag `v1.4.12-id.1` still on `0195d31`, and GitHub Release still serving old Phase 2 binary `3baffa77...` -> Remediated in Task 17)*
+
+---
+
+## Phase 4: Final Forensic Remediation Plan (Fixing Failing Unit Test, Unguarded Canonical Term Corruption, Tier 1 Clause Tag Preservation, & Skipped Git/GitHub Release Step)
+
+> **Forensic Audit Finding After Phase 3 Execution (Why Phase 4 is Mandatory):**
+> Phase 3 successfully eliminated **all 506 nested `{0|{0|2}}` placeholders (`0` left)**, **all 5,720 empty tag shells (`0` left)**, **all glued words (`0` left)**, and **all stemmer hallucinations (`cared -> mobil`, `career -> lebih peduli`)**.
+> HOWEVER, deep inspection of the working tree, `pytest -v`, `catalog.json.gz`, and GitHub Release `v1.4.12-id.1` exposed **4 remaining defects / skipped tasks**:
+>
+> 1. **`pytest -v` Fails (`tests/test_validator_and_aligner.py::test_reinject_skeleton_preserves_tags_placeholders_and_tokens FAILED`) + Control-Token Placement Bugs:**
+>    - In `src/acepatchindo/tag_aligner.py` lines 399–406, `reinject_skeleton_from_source` checks `bracket_clean = zh_inner.strip("[]【】")` in `BADGE_ALIAS_MAP` **before** checking `if zh_inner in BRACKET_TERM_MAP:`. As a result, `<a href=2><color=#708090ff><b>[光环]</b></color></a>` wraps `"Aura"` **inside** `"[Aura]"` -> `[<a href=2><color=#708090ff><b>Aura</b></color></a>]` instead of `<a href=2><color=#708090ff><b>[Aura]</b></color></a>`!
+>    - In `tag_aligner.py` lines 448–455:
+>      - `result.replace(kw, f"═{kw}", 1)` inserts a duplicate `═` **inside** an already-tagged `<a href=3130011><color=#ffffff>═<b>═Temporary Level</b></color></a>`!
+>      - `result.replace(sep, f"╫{sep.strip()} ", 1)` replaces `", +"` with `"╫,+ "` (`"+{0} ATK╫,+ {1} Max HP"`) and `", "` with `"╫, "` (`"terpicu╫, Temporary Level"`), leaving stray commas after `╫`!
+>
+> 2. **Unguarded Raw `translate_segment_en_to_id` Fallback in `tag_aligner.py:474` + Missing Canonical Term Protections Corrupted 2,000+ Canonical Game Terms & Discarded 44 Tier 1 Translations:**
+>    - In `src/acepatchindo/tag_aligner.py` lines 472–481, whenever `source_zh` has a clause-level `<color=...>...</color>` tag not in `BADGE_ALIAS_MAP`, Step 5 discards the Tier 1 Indonesian translation and calls `lexicon_id.translate_segment_en_to_id` **RAW** instead of `glossary.translate_en_to_id`!
+>    - Calling `translate_segment_en_to_id` without `CANONICAL_PROTECTED_TERMS` sentinel protection (plus missing variants in `glossary.py` and `lexicon_id.py`) produced broken literal calques across `catalog.json.gz`:
+>      - `'Kuno Koin'` (`Ancient Coin`): `113` in `unique`, `558` in `english_updates` (`671` total)
+>      - `'Sementara Level'` / `'Nyata Level'` (`Temporary Level` / `True Level`): `31` in `unique`, `247` in `english_updates`
+>      - `'Maks HP'` / `'Maks Mana'` (`Max HP` / `Max Mana`): `63` in `unique`, `231` in `english_updates`
+>      - `'Sihir Damage'` / `'Sihir Menyerang'` / `'Sihir Defense'` / `'Mantra Penetrasi'` (`Magic Damage` / `Magic Attack` / `Magic Defense` / `Magic Penetration`): `113` in `unique`, `242` in `english_updates`
+>      - `'Cepat Growth'` (`Rapid Growth`): `30` in `unique`, `121` in `english_updates`
+>      - `'Talent Kartu'` / `'Kartu Effect'` / `'Hero Kupon'` / `'Equipment Kartu'`: `65` in `unique`, `402` in `english_updates`
+>      - `'di ketertiban'` (`in order`): `10` in `unique`, `132` in `english_updates`
+>      - `'jumlah sebagai'` (`count as` / `counts as`): `5` in `unique`, `125` in `english_updates`
+>      - `'Sempurna Kebangkitan'` (`Perfect Revive` / `Perfect Resurrection`): `9` in `unique`, `28` in `english_updates`
+>      - `'Api Thief'` (`Steal Fire` / `Fire Thief`): `2` in `unique`, `39` in `english_updates`
+>
+> 3. **Hardcoded `/tmp/wxq_id_verify_stage` Race Condition in `scripts/04_verify_real_windows_game.py`:**
+>    - `STAGE_DIR = Path("/tmp/wxq_id_verify_stage")` causes `FileNotFoundError` if `04_verify_real_windows_game.py` and `pytest` overlap. Use `tempfile.TemporaryDirectory(prefix="wxq_id_verify_stage_")`.
+>
+> 4. **Step 14.3 Completely Skipped (Uncommitted Code, Unpushed `main`, Unmoved Tag `v1.4.12-id.1`, & Unuploaded GitHub Release Binary):**
+>    - All 8 modified files are still uncommitted in `git status`, `HEAD` is still `9720b5f`, tag `v1.4.12-id.1` still points to `0195d31`, and GitHub Release `v1.4.12-id.1` still serves the old Phase 2 binary (`3baffa77...`) instead of the updated build!
+
+### Task 15: Fix Bracket Wrapping, Control-Token Restoration, Clause `<color=...>` Preservation, & Guarded `en_translator` Callback in `tag_aligner.py`
+
+- [x] **Step 15.1: Fix bracketed badge matching and `═`/`╫` control-token restoration in `src/acepatchindo/tag_aligner.py`**
+  - In `reinject_skeleton_from_source` Step 2 (`lines 399–407`), check `if zh_inner in BRACKET_TERM_MAP: aliases.append(BRACKET_TERM_MAP[zh_inner])` **FIRST** (before `BADGE_ALIAS_MAP` and before `zh_inner.strip("[]【】")`) so `<a href=2><color=#708090ff><b>[光环]</b></color></a>` wraps `[Aura]` -> `<a href=2><color=#708090ff><b>[Aura]</b></color></a>` (fixing `test_reinject_skeleton_preserves_tags_placeholders_and_tokens`).
+  - In `reinject_skeleton_from_source` Step 3 (`lines 446–457`):
+    - For `ch == "═"`, use `re.sub(rf"(?<![═>])\b{re.escape(kw)}\b", f"═{kw}", result, count=1)` so it never inserts a duplicate `═` inside `<b>Temporary Level</b>`.
+    - For `ch == "╫"`, map separators cleanly without leaving stray commas: `( (", +", "╫+"), (", -", "╫-"), (" / ", "╫"), (", ", "╫"), (" dan ", "╫") )` so `"+{0} ATK, +{1} Max HP"` becomes `"+{0} ATK╫+{1} Max HP"` (never `"╫,+ "` or `"╫, "`).
+- [x] **Step 15.2: Preserve Tier 1 `plain_id` on clause-level `<color=...>` spans and pass guarded `en_translator` into `tag_aligner.py`**
+  - Add an optional parameter `en_translator: Callable[[str], str] | None = None` to both `reinject_formula_and_skeleton` and `reinject_skeleton_from_source`, and pass `en_translator=self.translate_en_to_id` from every call site in `src/acepatchindo/glossary.py`!
+  - In `reinject_skeleton_from_source` Step 2 (`lines 384–437`), if some spans matched and 1 remaining `<color=...>...</color>` span wraps a clause in `source_zh` (e.g., `<color=#FFE897>每对其使用4张古币牌...</color>`, `<color=#ffffff>会获得左右1格的英雄的100%法术攻击力</color>`, `<color=#9ff5d0>恢复的生命值</color>`, `<color=#d487e4>自身15%最大生命的法术伤害</color>`), wrap that `<color=...>...</color>` around the corresponding non-empty clause/phrase in `curr` (e.g., matching damage/HP phrases in `reinject_formula_and_skeleton` including `% Max HP diri sebagai Magic Damage`, or wrapping the proportional unmatched clause in `curr`) so Tier 1 translations are preserved!
+  - In `reinject_skeleton_from_source` Step 5 (`lines 472–481`), when falling back to `baseline_en`, **ALWAYS** use `en_translator(baseline_en)` if `en_translator` is provided (and NEVER call raw `lexicon_id.translate_segment_en_to_id` directly when `en_translator` is available)!
+
+### Task 16: Protect All Canonical HoK Ace Terms & Idioms in `glossary.py` and `lexicon_id.py`
+
+- [x] **Step 16.1: Normalize English stat/card variants and expand `CANONICAL_PROTECTED_TERMS` in `src/acepatchindo/glossary.py`**
+  - Before sentinel protection in `translate_en_to_id` (`_convert_segment`), normalize English baseline variants to canonical Tier 1 terms:
+    - `Magical Attack` -> `Magic Attack`, `Magical Damage` -> `Magic Damage`, `Magical Defense` -> `Magic Defense`
+    - `Spell Penetration` -> `Magic Penetration`
+    - `Maximum HP` / `Max Health` / `Maximum Health` -> `Max HP`, `Maximum Mana` -> `Max Mana`
+    - `Exquisite Ancient Coins` / `Exquisite Ancient Coin` / `Refined Ancient Coins` -> `Refined Ancient Coin`
+    - `Ancient Coins` -> `Ancient Coin`, `Ancient Coin Machine` -> `Coin Machine`
+    - `Perfect Resurrection` -> `Perfect Revive`, `Arcomia Core` -> `Akomia Core`, `Fire Thief` -> `Steal Fire`
+    - `Talent Cards` / `Talent Card` -> `Kartu Talent`, `Effect Cards` / `Effect Card` -> `Kartu Efek`, `Equipment Cards` / `Equipment Card` -> `Kartu Equipment`, `Hero Vouchers` / `Hero Voucher` -> `Voucher Hero`
+  - Add `"Ancient Coin"`, `"Refined Ancient Coin"`, `"Coin Machine"`, `"Rapid Growth"`, `"Perfect Revive"`, `"Akomia Core"`, `"Steal Fire"`, `"Magic Penetration"`, `"Physical Penetration"`, `"Kartu Talent"`, `"Kartu Efek"`, `"Kartu Equipment"`, `"Voucher Hero"` to `CANONICAL_PROTECTED_TERMS`.
+- [x] **Step 16.2: Fix `"in order"` and `"count(s) as"` in `src/acepatchindo/lexicon_id.py`**
+  - Add `("in", "order"): "secara berurutan"`, `("count", "as"): "dihitung sebagai"`, `("counts", "as"): "dihitung sebagai"`, `("counted", "as"): "dihitung sebagai"` to `PHRASE_2` (and `r"\breceive in order:"` -> `"memperoleh secara berurutan:"` in `CLAUSE_PATTERNS`) so `"in order"` is never translated as `"di ketertiban"` and `"count as"` is never translated as `"jumlah sebagai"`.
+
+### Task 17: Isolate Verification Temp Dir, Pass 100% of `pytest -v`, Commit, Push, Move Tag `v1.4.12-id.1`, & Publish GitHub Release
+
+- [x] **Step 17.1: Use `tempfile.TemporaryDirectory` in `scripts/04_verify_real_windows_game.py` & add Canonical-Term Guard assertions to `tests/test_glossary_and_tiers.py`**
+  - Replace hardcoded `STAGE_DIR = Path("/tmp/wxq_id_verify_stage")` in `scripts/04_verify_real_windows_game.py` with `tempfile.TemporaryDirectory(prefix="wxq_id_verify_stage_")`.
+  - In `tests/test_glossary_and_tiers.py`, assert **0 occurrences** across `unique` and `english_updates` of `"Kuno Koin"`, `"Sementara Level"`, `"Nyata Level"`, `"Sihir Menyerang"`, `"Sihir Damage"`, `"Sihir Defense"`, `"Mantra Penetrasi"`, `"Cepat Growth"`, `"di ketertiban"`, `"jumlah sebagai"`, `"Sempurna Kebangkitan"`, `"Api Thief"`, `"Kartu Effect"`, `"Talent Kartu"`, `"Equipment Kartu"`, `"Hero Kupon"`, `"<b>═"`, and `"╫,"`.
+- [x] **Step 17.2: Rebuild, Repack, and Run Full `pytest -v` (All 13/13 Tests Must Pass)**
+  - Run `scripts/02_build_indonesian_catalog.py`
+  - Run `scripts/03_patch_worker_modules.py`
+  - Run `scripts/04_verify_real_windows_game.py`
+  - Run `scripts/05_repack_windows_exe.py`
+  - Update SHA-256 digests in `README.md` and `scripts/06_publish_github_release.py` to match `dist/SHA256SUMS.txt`.
+  - Run `/home/whise/.local/bin/uv run --python 3.12 pytest -v` and verify **13 passed, 0 failed**.
+- [x] **Step 17.3: Commit All Changes, Push `main`, Force-Update Tag `v1.4.12-id.1` to `HEAD`, & Upload Assets to GitHub Release `v1.4.12-id.1`**
+  - Update checkboxes in `.agents/plan/2026-11-03-hok-ace-indonesian-patcher-plan.md`.
+  - Stage and commit all modified files (`git add .agents/plan/ README.md scripts/ src/ tests/ data/ && git commit -m "..."`), then `git push origin main`.
+  - Force-move tag `v1.4.12-id.1` to the new `HEAD` (`git tag -f v1.4.12-id.1 HEAD && git push -f origin v1.4.12-id.1`).
+  - Run `/home/whise/.local/bin/uv run --python 3.12 python scripts/06_publish_github_release.py` and verify `gh release view v1.4.12-id.1 --repo voseu/acepatchindo` displays the exact new SHA-256 digests from `dist/SHA256SUMS.txt` and `git status` is 100% clean!
+
+
 

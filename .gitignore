@@ -16,6 +16,7 @@ skills-lock.json
 
 # Generated catalog build checkpoints (reproducible via scripts/02 & 03)
 data/catalog_checkpoints/
+.stage_verify/
 
 # Keep structured JSON references tracked
 !data/references/*.json

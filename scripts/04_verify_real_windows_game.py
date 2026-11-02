@@ -9,6 +9,7 @@ import json
 import shutil
 import struct
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,7 +27,6 @@ ORIG_CATALOG_DIR = (
 )
 ID_CATALOG_GZ = ROOT / "data" / "catalog_checkpoints" / "catalog.json.gz"
 EN_TO_ID_JSON = ROOT / "data" / "catalog_checkpoints" / "en_to_id_map.json"
-STAGE_DIR = Path("/tmp/wxq_id_verify_stage")
 
 
 def prepare_staged_assets_dir(stage_root: Path) -> Path:
@@ -55,17 +55,14 @@ def prepare_staged_assets_dir(stage_root: Path) -> Path:
 
 
 def run_verification() -> tuple[dict, dict, list[dict]]:
-    if STAGE_DIR.exists():
-        shutil.rmtree(STAGE_DIR)
-    STAGE_DIR.mkdir(parents=True, exist_ok=True)
-
-    try:
-        assets_dir = prepare_staged_assets_dir(STAGE_DIR)
+    with tempfile.TemporaryDirectory(prefix="wxq_id_verify_stage_") as stage_tmp_str:
+        stage_dir = Path(stage_tmp_str)
+        assets_dir = prepare_staged_assets_dir(stage_dir)
 
         # 1. Verify against unpatched Chinese game originals (all 6 QtsVFS packages, 508 tables)
         print("=== [1/2] Scanning & Staging Unpatched Chinese Game Backups (originals/) ===")
         plans_zh, fps_zh, counts_zh, _skipped_zh = adaptive.scan(
-            WINDOWS_ORIGINALS, assets_dir, STAGE_DIR / "zh_stage", materialize=True
+            WINDOWS_ORIGINALS, assets_dir, stage_dir / "zh_stage", materialize=True
         )
 
         # Stage every modified QtsVFS package using exact runtime adaptive._run parameters
@@ -132,11 +129,11 @@ def run_verification() -> tuple[dict, dict, list[dict]]:
                     }
                 return out
 
-            pkg_stage_dir = STAGE_DIR / "zh_stage" / "staged" / pkg.package_id
+            stage_root = stage_dir / "zh_stage" / "staged"
             staged_rep = unity_package_installer.stage_unity_package(
                 WINDOWS_ORIGINALS,
                 replacement_dir,
-                pkg_stage_dir,
+                stage_root,
                 source_package_dir=pkg.package_dir,
                 metadata_builder=_linux_metadata_builder,
                 global_donations=True,
@@ -151,8 +148,8 @@ def run_verification() -> tuple[dict, dict, list[dict]]:
                 f"donations={len(staged_rep['slot_donation_updates'])}, "
                 f"files={len(staged_rep['files'])})"
             )
-            # Immediately free staged .db shard disk space in /tmp after package verification
-            shutil.rmtree(pkg_stage_dir, ignore_errors=True)
+            # Immediately free staged .db shard disk space after package verification
+            shutil.rmtree(stage_root / pkg.package_id, ignore_errors=True)
 
         print(f"Chinese Game Counts: {dict(counts_zh)}")
         print(f"Capacity Overflow / Skipped Count: {counts_zh.get('capacity_skipped', 0)}")
@@ -175,7 +172,7 @@ def run_verification() -> tuple[dict, dict, list[dict]]:
             "\n=== [2/2] Scanning Live English-Patched Game (C:\\Program Files\\WXQLauncher\\WXQ) ==="
         )
         _plans_en, _fps_en, counts_en, _skipped_en = adaptive.scan(
-            WINDOWS_LIVE_WXQ, assets_dir, STAGE_DIR / "en_stage", materialize=False
+            WINDOWS_LIVE_WXQ, assets_dir, stage_dir / "en_stage", materialize=False
         )
         print(f"Live English-Patched Game Counts: {dict(counts_en)}")
         assert counts_en.get("translated", 0) > 150000, (
@@ -189,8 +186,6 @@ def run_verification() -> tuple[dict, dict, list[dict]]:
             "\n[SUCCESS] Both Chinese and English-patched Windows game states verified with 0 errors!"
         )
         return dict(counts_zh), dict(counts_en), stage_reports
-    finally:
-        shutil.rmtree(STAGE_DIR, ignore_errors=True)
 
 
 if __name__ == "__main__":

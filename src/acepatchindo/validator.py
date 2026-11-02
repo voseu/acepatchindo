@@ -11,6 +11,10 @@ PLACEHOLDER_RE = re.compile(
     r"\{[^{}]*\}|%(?:\d+\$)?[-+0 #]*(?:\d+|\*)?(?:\.\d+)?[diuoxXfFeEgGaAcspn%](?![A-Za-z])"
 )
 CONTROL_TOKEN_RE = re.compile(r"[\u2540-\u257f]")
+EMPTY_TAG_RE = re.compile(
+    r"<(color=[^>]+|b|i|a[^>]*|size=[^>]+)>\s*</(?:color|b|i|a|size)>"
+)
+NESTED_BRACE_RE = re.compile(r"\{[^{}]*\{|\}[^{}]*\}")
 
 
 def strip_non_text(value: str) -> str:
@@ -37,6 +41,10 @@ def validate_translation(source: str, translated: object) -> tuple[bool, str]:
         CONTROL_TOKEN_RE.findall(translated)
     ):
         return (False, "control_tokens_changed")
+    if NESTED_BRACE_RE.search(translated) and not NESTED_BRACE_RE.search(source):
+        return (False, "nested_placeholder")
+    if EMPTY_TAG_RE.search(translated) and not EMPTY_TAG_RE.search(source):
+        return (False, "empty_tag")
     if ";" in source and source.count(";") != translated.count(";"):
         return (False, "semicolons_changed")
     if len(source) >= 4 and len(translated) > max(len(source) * 8, 48):

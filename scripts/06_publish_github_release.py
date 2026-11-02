@@ -32,8 +32,8 @@ Rilis pemasang *patch* Bahasa Indonesia mandiri (*standalone*) untuk **Honor of 
 
 ### Verifikasi SHA-256
 ```text
-3baffa77dd167f88c440af370edd747d4c686d8306e3e0823510de02a20c8a50  Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe
-08f4e0bfe896aae037a06b2f612cf9c0bf7140623c6bb320401b826aaa1f8f6a  ace-worker.exe (embedded @ 0x4CAC4A..0x3838C00)
+d6ee5db051aac8835eb3f2073a203b359550cd0acec4d01cef7d1c523e60d7c6  Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe
+bb6b6ce4b6b78a4786d543b6556dc33ffb03ccd479dadde367450235fa7f694f  ace-worker.exe (embedded @ 0x4CAC4A..0x3838C00)
 ```
 """
 
