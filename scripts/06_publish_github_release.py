@@ -16,24 +16,35 @@ EXE_ASSET = DIST_DIR / "Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe"
 SUMS_ASSET = DIST_DIR / "SHA256SUMS.txt"
 
 REPO = "voseu/acepatchindo"
-TAG = "v1.4.12-id.1"
-TITLE = "Honor of Kings: Ace Indonesian Patcher v1.4.12-id.1"
+TAG = "v1.4.12-id.2"
+TITLE = "Honor of Kings: Ace Indonesian Patcher v1.4.12-id.2 (Hybrid Gameplay Edition)"
 
-RELEASE_NOTES = """## Honor of Kings: Ace — Patch Bahasa Indonesia (`v1.4.12-id.1`)
+RELEASE_NOTES = """## Honor of Kings: Ace — Patch Bahasa Indonesia (`v1.4.12-id.2` — Hybrid Gameplay Edition)
 
-Rilis pemasang *patch* Bahasa Indonesia mandiri (*standalone*) untuk **Honor of Kings: Ace (`WXQ.exe`)** berbasis arsitektur QtsVFS `1.4.12`.
+Rilis pemasang *patch* Bahasa Indonesia **Hybrid Gameplay Edition** untuk **Honor of Kings: Ace (`WXQ.exe`)** berbasis arsitektur QtsVFS `1.4.12`.
 
-### Ringkasan Pembaruan & Verifikasi
-- **41.483** entri kamus utama (`unique`), termasuk **108 string Mandarin (`409` record)** yang sebelumnya terlewat pada *English Patcher 1.4.12*.
-- **29.750** entri pembaruan kontekstual (`english_updates`) dan **38.828** pemetaan pembalik tervalidasi (`en_to_id`, dari `42.773` kandidat).
-- **Hierarki Terminologi 3-Tier & Bebas Indlish (`0` Stopword Hits):** Mengutamakan kamus komunitas Indonesia (`hok-ace-translate-id.netlify.app` termasuk penyelarasan `234` rumus dinamis Skill Hero dan `19` Chess Player/Lord), `624` halaman detail dwibahasa `hokace.wiki`, mesin leksikon & tata bahasa Indonesia (`lexicon_id.py`), serta pelestarian 100% kerangka tag Unity (`<a href=...>`, `<color=...>`, `<b>`), *placeholder* (`{0}`, `[194010p1q2/100]`), token kontrol (`╫`), dan titik koma (`;`).
-- **Dual-State Engine & Auto-Restore:** Otomatis memulihkan cadangan Mandarin (`originals/`) sebelum memasang Bahasa Indonesia apabila mendeteksi instalasi *English Patcher 1.4.12* aktif, serta mendukung *fallback* langsung `Inggris -> Indonesia` dengan pesan status runtime berbahasa Indonesia.
-- **Verifikasi Penuh QtsVFS:** `508/508` tabel Protobuf `.bytes`, `unknown = 0`, `invalid_translation = 0`, `capacity_skipped = 0` di seluruh 6 paket QtsVFS (`1`, `4`, `15`, `19`, `20`, `21`).
+### Fitur & Spesifikasi Hybrid Edition
+1. **Bahasa Indonesia (`ID`) Khusus Deskripsi Gameplay Inti:**
+   - **Kartu Hero:** Seluruh efek kartu hero (*On Play*, *Sacrifice*, *Prepare*, *Awaken*, dan mekanik kartu).
+   - **Skill Hero:** Deskripsi skill penuh, ringkasan skill pendek (*collapsed skill*), peningkatan skill Lv.10/40/100, *Combine Skills*, dan *Summon Skills*.
+   - **Talent:** *Standard Talents*, *Contestant Lv.6 Exclusive Talents*, mode/brawl talents, dan deskripsi *Talent Cards*.
+   - **Kontestan / Lord:** Deskripsi skill aktif/pasif kontestan, aturan misi *Secret Art*, *Secret Art Cards*, dan kartu kemampuan kontestan.
+2. **Bahasa Inggris Standar (`EN`) untuk Seluruh Nama & Sistem Non-Gameplay:**
+   - **Nama & Judul Entitas:** Seluruh nama Hero, Skill, Talent, dan Kontestan tetap dalam bahasa Inggris resmi, baik sebagai judul kartu maupun saat dirujuk di dalam kalimat deskripsi (misalnya `<color=#FFE897>Symphony of Tides</color>`, `<color=#FFE897>Three Kingdoms Banner</color>`, `<color=#FFE897>Super Copier</color>`, `<color=#FFE897>Build Upgrade</color>`).
+   - **Sistem Non-Gameplay:** Antarmuka (UI), Menu, Pengaturan, Lobi, Toko, Tutorial, Loading Tips, Acara, Misi, Pencapaian (*Achievements*), Obrolan Singkat, Gelar Rank, Kosmetik/Skin, serta nama & efek kartu perlengkapan mandiri tetap dalam bahasa Inggris standar.
+3. **Pemisahan Presisi 108 String Mandarin Tambahan:**
+   - **18 deskripsi gameplay inti** diterjemahkan ke Bahasa Indonesia berkualitas tinggi.
+   - **90 string non-target** diterjemahkan ke Bahasa Inggris alami dan terverifikasi.
+4. **Pembaruan Satu-Klik Tanpa Kerumitan (*One-Click Auto-Restore*):**
+   - Mesin *patcher* secara otomatis mendeteksi dan memulihkan berkas asli Mandarin (`originals/`) terlebih dahulu sebelum memasang versi hybrid apabila mendeteksi rilis sebelumnya (`v1.4.12-id.1` atau *English Patch*), memastikan ~38.000 string UI kembali ke bahasa Inggris tanpa sisa terjemahan lama.
+5. **Verifikasi Penuh QtsVFS & Runtime Integrity:**
+   - `508/508` tabel Protobuf `.bytes`, `unknown = 0`, `invalid_translation = 0`, `capacity_skipped = 0` di seluruh paket QtsVFS.
+   - Integritas penjaga SHA-256 binary GUI Rust dan bootloader CArchive PyInstaller 100% valid.
 
 ### Verifikasi SHA-256
 ```text
-82632a3fbffb11a143b7d5304d0e32a0fc42573c2c4c8f8a4226512175f64a3e  Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe
-14ce9a8d71cff7e53b01eba43bf18f03452eb91dcf50b63833c8d63f515f6dfc  ace-worker.exe (embedded @ 0x4CAC4A..0x3838C00)
+5ab4a346b5effdb5a871f6cf3059f36b5e6d9bf8724c0239e3f0c4da193acea5  Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe
+8a2f2675cdcc104710200885d6c822f6a2b5f92a9acad51a324a9190abdcf3e1  ace-worker.exe (embedded @ 0x4CAC4A..0x3838C00)
 ```
 """
 

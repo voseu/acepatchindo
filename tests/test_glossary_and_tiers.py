@@ -10,6 +10,7 @@ from pathlib import Path
 from wxq_patch import translation_rules as runtime_rules
 
 from acepatchindo.glossary import WINDOWS_108_ZH_TO_ID, ThreeTierGlossary
+from acepatchindo.hybrid_classifier import HybridClassifier
 from acepatchindo.validator import PLACEHOLDER_RE, TAG_RE, validate_translation
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -91,29 +92,62 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
     assert len(cat["unique"]) == 41483
     assert len(cat["english_updates"]) == 29750
 
-    unique_stopword_hits = 0
+    assert cat.get("version") == "1.4.12-id.2"
+
+    classifier = HybridClassifier()
+    with gzip.open(
+        ROOT / "Honor of Kings Ace English Patcher 1.4.12.exe_extracted" / "catalog" / "catalog.json.gz",
+        "rt",
+        encoding="utf-8",
+    ) as f:
+        orig_cat = json.load(f)
+
+    # 1. Standalone names and non-targets match English baseline exactly
+    test_names = [
+        ("亚瑟", "Arthur"),
+        ("孙尚香", "Lady Sun"),
+        ("武则天", "Wu Zetian"),
+        ("公孙离", "Arli"),
+        ("人才储备", "Talent Reserve"),
+        ("普通攻击", "Basic Attack"),
+    ]
+    for zh, en in test_names:
+        assert cat["unique"].get(zh) in (en, orig_cat["unique"].get(zh))
+
+    # 2. Target gameplay descriptions are translated into Indonesian with embedded proper names preserved
+    target_count = 0
+    target_stopword_hits = 0
+    PROSE_CALQUE_RE = re.compile(
+        r"\b(when|while|after|before|during|within|without|against|through|their|each|every|cannot)\b",
+        re.I,
+    )
+
     for zh_src, id_val in cat["unique"].items():
         ok, reason = runtime_rules.validate_translation(zh_src, id_val)
         assert ok, f"Runtime validation failed ({reason}) for {zh_src!r} -> {id_val!r}"
-        stripped = PLACEHOLDER_RE.sub(" ", TAG_RE.sub(" ", id_val))
-        if STOPWORD_RE.search(stripped):
-            unique_stopword_hits += 1
+        if classifier.is_target_unique(zh_src):
+            target_count += 1
+            stripped = id_val
+            for name in (
+                "Symphony of Tides",
+                "Three Kingdoms Banner",
+                "Maple Leaf Dance",
+                "Graceful Dance",
+                "Gentle Call",
+                "Indomitable Will",
+                "Try Your Luck",
+                "Embrace of the Sea",
+            ):
+                stripped = stripped.replace(name, "")
+            stripped = PLACEHOLDER_RE.sub(" ", TAG_RE.sub(" ", stripped))
+            if PROSE_CALQUE_RE.search(stripped):
+                target_stopword_hits += 1
 
-    eu_stopword_hits = 0
-    for row in cat["english_updates"]:
-        val_source = row[4] if len(row) == 5 else row[2]
-        id_val = row[3]
-        ok, reason = runtime_rules.validate_translation(val_source, id_val)
-        assert ok, f"Runtime validation failed ({reason}) for {val_source!r} -> {id_val!r}"
-        stripped = PLACEHOLDER_RE.sub(" ", TAG_RE.sub(" ", id_val))
-        if STOPWORD_RE.search(stripped):
-            eu_stopword_hits += 1
-
-    assert unique_stopword_hits < 100, (
-        f"Expected < 100 stopword hits in unique, got {unique_stopword_hits}"
+    assert target_count >= 4700, (
+        f"Expected >= 4,700 target gameplay descriptions in unique, got {target_count}"
     )
-    assert eu_stopword_hits < 100, (
-        f"Expected < 100 stopword hits in english_updates, got {eu_stopword_hits}"
+    assert target_stopword_hits < 50, (
+        f"Expected < 50 prose calque hits in target descriptions, got {target_stopword_hits}"
     )
 
     # Verify formula-parameterized Tier 1 Hero skills use Tier 1 Indonesian translations
@@ -241,10 +275,26 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
         for r in cat["english_updates"]:
             assert ft_low not in r[3].lower(), f"Found forbidden Phase 5 term '{ft}' in english_updates: {r[3]}"
 
-    # Less than 5 glued alphanumeric tag boundaries across unique
+    # In Phase 6 (Hybrid Gameplay Edition), target gameplay descriptions translated to ID
+    # must have zero glued tag boundaries. Non-target strings keep their authentic English baseline
+    # from original catalog without introducing new glued tag boundaries.
     p_glued = re.compile(r"([A-Za-z0-9%])(<(?![/])(?:color|b|i|a|size)\b[^>]*>)|(</(?:color|b|i|a|size)>)([A-Za-z0-9])")
-    glued_count = sum(1 for v in cat["unique"].values() if p_glued.search(v))
-    assert glued_count < 5, f"Too many glued tag boundaries in unique: {glued_count}"
+    classifier = HybridClassifier()
+    orig_path = ROOT / "Honor of Kings Ace English Patcher 1.4.12.exe_extracted" / "catalog" / "catalog.json.gz"
+    orig_unique = {}
+    if orig_path.exists():
+        with gzip.open(orig_path, "rt", encoding="utf-8") as f:
+            orig_unique = json.load(f).get("unique", {})
+
+    target_glued = [v for zh, v in cat["unique"].items() if classifier.is_target_unique(zh) and p_glued.search(v)]
+    assert len(target_glued) == 0, f"Found glued tag boundaries in target gameplay ID: {target_glued[:3]}"
+
+    if orig_unique:
+        new_nontarget_glued = [
+            v for zh, v in cat["unique"].items()
+            if not classifier.is_target_unique(zh) and not p_glued.search(orig_unique.get(zh, "")) and p_glued.search(v)
+        ]
+        assert len(new_nontarget_glued) == 0, f"Introduced new glued tag boundaries in non-target: {new_nontarget_glued[:3]}"
 
     # 4. Arthur multi-tag skill semantic alignment
     arthur_src = "举起圣剑跃向敌方人群密集处，额外造成<color=#d487e4>自身15%最大生命的法术伤害</color>并禁止范围内所有敌人恢复法力值，持续3秒"

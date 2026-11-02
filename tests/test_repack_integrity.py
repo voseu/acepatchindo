@@ -11,7 +11,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_EXE = ROOT / "dist" / "Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe"
-PYINSTXTRACTOR = Path("/tmp/pyinstxtractor.py")
+PYINSTXTRACTOR = ROOT / "tools" / "pyinstxtractor.py"
+if not PYINSTXTRACTOR.exists():
+    PYINSTXTRACTOR = Path("/tmp/pyinstxtractor.py")
 
 SHA256_OFFSET = 0x4CABFA
 WORKER_START = 0x4CAC4A
@@ -70,7 +72,8 @@ def test_repacked_exe_sizes_sha256_guard_and_pyinstaller_unpack() -> None:
             cat = json.load(f)
         assert len(cat["unique"]) == 41_483
         assert len(cat["english_updates"]) == 29_750
-        assert len(cat["en_to_id"]) > 20_000
+        # Phase 6 (Hybrid): en_to_id only maps target gameplay descriptions (approx 5,000 - 8,000)
+        assert 5_000 <= len(cat["en_to_id"]) <= 10_000
 
         tc_pyc = ext_dir / "PYZ.pyz_extracted" / "wxq_patch" / "table_catalog.pyc"
         ad_pyc = ext_dir / "PYZ.pyz_extracted" / "wxq_patch" / "adaptive.pyc"

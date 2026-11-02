@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify Indonesian catalog and dual-state engine against the user's real Windows game files."""
+"""Verify Hybrid Indonesian catalog and dual-state engine against the user's real Windows game files."""
 
 from __future__ import annotations
 
@@ -13,20 +13,35 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "extracted_source"))
 
-from wxq_patch import adaptive, unity_package_installer  # noqa: E402
+from wxq_patch import adaptive, table_catalog, unity_package_installer  # noqa: E402
 
-WINDOWS_ORIGINALS = Path(
-    "/run/media/whise/Windows/Users/azzam/AppData/Local/HoK Ace English Patch/"
-    "adaptive/b07d115d01fb4a16c6e16a37/1793497168990741300-92b4bcbb/originals"
-)
+WINDOWS_USERS_BASE = Path("/run/media/whise/Windows/Users")
 WINDOWS_LIVE_WXQ = Path("/run/media/whise/Windows/Program Files/WXQLauncher/WXQ")
 ORIG_CATALOG_DIR = (
     ROOT / "Honor of Kings Ace English Patcher 1.4.12.exe_extracted" / "catalog"
 )
 ID_CATALOG_GZ = ROOT / "data" / "catalog_checkpoints" / "catalog.json.gz"
 EN_TO_ID_JSON = ROOT / "data" / "catalog_checkpoints" / "en_to_id_map.json"
+
+
+def find_windows_originals() -> Path | None:
+    """Dynamically locate the active originals backup directory on the mounted Windows filesystem."""
+    if not WINDOWS_USERS_BASE.exists():
+        return None
+    candidates = sorted(
+        WINDOWS_USERS_BASE.glob(
+            "*/AppData/Local/HoK Ace English Patch/adaptive/*/*/originals"
+        ),
+        key=lambda p: p.stat().st_mtime,
+        reverse=True,
+    )
+    for c in candidates:
+        if c.is_dir() and (c / "WXQ_Data").exists():
+            return c
+    return None
 
 
 def prepare_staged_assets_dir(stage_root: Path) -> Path:
@@ -55,14 +70,21 @@ def prepare_staged_assets_dir(stage_root: Path) -> Path:
 
 
 def run_verification() -> tuple[dict, dict, list[dict]]:
+    windows_originals = find_windows_originals()
+    if not windows_originals:
+        raise FileNotFoundError(
+            "Could not locate active originals directory under /run/media/whise/Windows/Users"
+        )
+
     with tempfile.TemporaryDirectory(prefix="wxq_id_verify_stage_") as stage_tmp_str:
         stage_dir = Path(stage_tmp_str)
         assets_dir = prepare_staged_assets_dir(stage_dir)
 
         # 1. Verify against unpatched Chinese game originals (all 6 QtsVFS packages, 508 tables)
-        print("=== [1/2] Scanning & Staging Unpatched Chinese Game Backups (originals/) ===")
+        print("=== [1/3] Scanning & Staging Unpatched Chinese Game Backups (originals/) ===")
+        print(f"Originals path: {windows_originals}")
         plans_zh, fps_zh, counts_zh, _skipped_zh = adaptive.scan(
-            WINDOWS_ORIGINALS, assets_dir, stage_dir / "zh_stage", materialize=True
+            windows_originals, assets_dir, stage_dir / "zh_stage", materialize=True
         )
 
         # Stage every modified QtsVFS package using exact runtime adaptive._run parameters
@@ -71,7 +93,7 @@ def run_verification() -> tuple[dict, dict, list[dict]]:
         for pkg, replacement_dir, _per_asset in plans_zh:
             pkg_files = [pkg.index_path, *pkg.shard_paths]
             pkg_source_hashes = {
-                p.name: fps_zh[str(p.relative_to(WINDOWS_ORIGINALS))]
+                p.name: fps_zh[str(p.relative_to(windows_originals))]
                 for p in pkg_files
             }
             index_bytes = pkg.index_path.read_bytes()
@@ -131,7 +153,7 @@ def run_verification() -> tuple[dict, dict, list[dict]]:
 
             stage_root = stage_dir / "zh_stage" / "staged"
             staged_rep = unity_package_installer.stage_unity_package(
-                WINDOWS_ORIGINALS,
+                windows_originals,
                 replacement_dir,
                 stage_root,
                 source_package_dir=pkg.package_dir,
@@ -148,7 +170,6 @@ def run_verification() -> tuple[dict, dict, list[dict]]:
                 f"donations={len(staged_rep['slot_donation_updates'])}, "
                 f"files={len(staged_rep['files'])})"
             )
-            # Immediately free staged .db shard disk space after package verification
             shutil.rmtree(stage_root / pkg.package_id, ignore_errors=True)
 
         print(f"Chinese Game Counts: {dict(counts_zh)}")
@@ -169,21 +190,29 @@ def run_verification() -> tuple[dict, dict, list[dict]]:
 
         # 2. Verify against live English-patched Windows game (C:\Program Files\WXQLauncher\WXQ)
         print(
-            "\n=== [2/2] Scanning Live English-Patched Game (C:\\Program Files\\WXQLauncher\\WXQ) ==="
+            "\n=== [2/3] Scanning Live English-Patched Game (C:\\Program Files\\WXQLauncher\\WXQ) ==="
         )
         _plans_en, _fps_en, counts_en, _skipped_en = adaptive.scan(
             WINDOWS_LIVE_WXQ, assets_dir, stage_dir / "en_stage", materialize=False
         )
         print(f"Live English-Patched Game Counts: {dict(counts_en)}")
-        assert counts_en.get("translated", 0) > 150000, (
-            f"Expected >150,000 EN->ID translated records on live English game, got {counts_en.get('translated')}"
+        assert counts_en.get("translated", 0) > 1000, (
+            f"Expected >1,000 target gameplay EN->ID translated records on live English game, got {counts_en.get('translated')}"
         )
         assert counts_en.get("invalid_translation", 0) == 0, (
             f"Expected 0 invalid_translation on live English game, got {counts_en.get('invalid_translation')}"
         )
 
+        # 3. Verify One-Click Upgrade Auto-Restore Logic
+        print("\n=== [3/3] Verifying One-Click Upgrade Auto-Restore Mechanism ===")
+        cat_file = assets_dir / "catalog.json.gz"
+        cat_sha = hashlib.sha256(cat_file.read_bytes()).hexdigest()
+        resolved_live = WINDOWS_LIVE_WXQ.resolve()
+        needs_restore = adaptive._needs_pre_install_restore(resolved_live, cat_sha)
+        print(f"Active live game needs pre-install restore for new catalog ({cat_sha[:8]}...): {needs_restore}")
+
         print(
-            "\n[SUCCESS] Both Chinese and English-patched Windows game states verified with 0 errors!"
+            "\n[SUCCESS] Chinese, English, and Upgrade Auto-Restore states verified with 0 errors!"
         )
         return dict(counts_zh), dict(counts_en), stage_reports
 

@@ -2271,5 +2271,158 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
   - Run `/home/whise/.local/bin/uv run --python 3.12 pytest -v` and confirm **13 passed, 0 failed**.
   - Update checkboxes in `.agents/plan/2026-11-03-hok-ace-indonesian-patcher-plan.md`, commit all changes, `git push origin main`, `git tag -f v1.4.12-id.1 HEAD && git push -f origin v1.4.12-id.1`, and run `scripts/06_publish_github_release.py` so GitHub Release `v1.4.12-id.1` serves the verified final build!
 
+---
+
+## Phase 6: Hybrid Gameplay Description Localization (`v1.4.12-id.2`)
+
+> [!IMPORTANT]
+> **User Post-Testing Specification (After Live Windows Verification of `v1.4.12-id.1`):**
+> 1. **PERTAHANKAN BAHASA INDONESIA (`ID`):** **HANYA deskripsi** untuk **4 kategori gameplay**:
+>    - **Kartu Hero** (*Hero Cards*, termasuk efek *On Play / Sacrifice / Prepare / Awaken* & mekanik kartu hero)
+>    - **Skill** (*Hero Skills*, ringkasan skill pendek saat kartu ditutup / *collapsed skill summaries*, *Lv.10/40/100 Skill Enhancements*, *Combine Skills*, dan *Summon Skills*)
+>    - **Talent** (*Standard Talents*, *Contestant Lv.6 Exclusive Talents*, *Mode/Brawl/Class Talents*, serta deskripsi *Talent Cards* yang dihasilkan Talent)
+>    - **Kontestan** (*Contestants / Chess Players / Lords / 棋手*, termasuk deskripsi skill aktif/pasif kontestan, aturan misi *Secret Art*, deskripsi *Secret Art Cards*, dan deskripsi kartu kemampuan kontestan)
+> 2. **PERTAHANKAN BAHASA INGGRIS (`EN` — JANGAN DITERJEMAHKAN KE ID):**
+>    - **SEMUA Nama / Judul** pada **Kartu Hero**, **Skill**, **Talent**, dan **Kontestan** (termasuk nama kartu *Secret Art* / kemampuan kontestan), **baik** saat berdiri sendiri sebagai *record* Nama **maupun** saat disebut di dalam kalimat deskripsi Bahasa Indonesia (seperti `<color=#FFE897>Symphony of Tides</color>`, `<color=#FFE897>Super Copier</color>`, `<b>Maple Leaf Dance</b>`, `<b>Graceful Dance</b>`, `Indomitable Will`, `Try Your Luck`, dll.).
+> 3. **KEMBALIKAN SISANYA KE BAHASA INGGRIS (`EN`):**
+>    - Seluruh string lain di dalam game: **UI, Menu, Pengaturan, Lobby, Toko, Tutorial, Loading Tips, Event, Misi, Achievement, Quick-Chat, Gelar Rank, Kosmetik/Skin/Avatar, Nama & Deskripsi Equipment mandiri, serta Nama & Deskripsi Effect Card mandiri** wajib dikembalikan ke **Bahasa Inggris (`EN`)** bersih!
+>    - Khusus **90 string non-target** di dalam `WINDOWS_108` (string Mandarin yang dulu terlewat oleh *English Patcher 1.4.12*, seperti menu *Image Cache Directory*, *Download Manager*, misi event, kupon Diamond, quick-chat, deskripsi *Three Kingdoms Banner*), **JANGAN** dihapus begitu saja (karena akan kembali menjadi huruf Mandarin dan merusak `unknown == 0`), melainkan wajib diterjemahkan ke **Bahasa Inggris (`EN`)** yang rapi dan tervalidasi!
+> 4. **Seamless One-Click Upgrade di Windows Live (`v1.4.12-id.1` -> `v1.4.12-id.2`) + Rilis GitHub Baru (`v1.4.12-id.2`):**
+>    - Game Windows milik user (`C:\Program Files\WXQLauncher\WXQ`) saat ini sedang terpasang patch penuh `v1.4.12-id.1` dengan cadangan Mandarin asli di `1793628251781039400-c81278c0/originals`. Saat user menjalankan `Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe` versi `v1.4.12-id.2` dan menekan **Install**, patcher **WAJIB** otomatis memulihkan `originals/` terlebih dahulu berdasarkan ketidakcocokan SHA-256 katalog pada direktori *receipt* sebelum memasang katalog Hybrid `v1.4.12-id.2`!
+
+> [!CAUTION]
+> **5 Jebakan Arsitektur Hasil Audit Forensik 508 Tabel QtsVFS (DILARANG DILANGGAR):**
+> 1. **JEBAKAN TABEL PALSU `hero_skill_summaries_a/b` (`#ADCF`, `#D891`, `#C32E`, `#1881`):**
+>    Di `wxq_patch/pipeline.py`, tabel `#ADCF` dinamai secara keliru sebagai `hero_skill_summaries_a`. Hasil bedah biner membuktikan `#ADCF`, `#D891`, `#C32E`, dan `#1881` adalah **100% Tabel Equipment** (`灵泉法杖` / *Spirit Spring Staff*, `普通装备│唯一`, `不祥征兆`, `博学者之怒`). **DILARANG KERAS** mengklasifikasikan `#ADCF/#D891/#C32E/#1881` sebagai Skill — seluruh Equipment harus berbahasa **Inggris (`EN`)**!
+> 2. **KUNCI EMAS 48-BIT (`key[5:17]`) UNTUK 424 KARTU HERO:**
+>    Tabel kartu monolitik (`#23F7`, `#8E55`, `#FBF3`, `#5AD1`, `#801D`, `#BC6D`, `#5A2E`, `#1825`, `#FCC7`, `#6D3B`, `#6E60`) mencampur Kartu Hero, Effect Card, Equipment Card, Talent Card, dan Kartu Kontestan. Namun tabel pasangan metadata `#60D2` (`zh_hash = 36B258373DA34185`) menyimpan label `'阵营   职业'` (mis. `'三分   射手'`, `'长城   战士'`, `'混沌裂隙   法师'`) **persis pada suffix 12-hex (`key[5:17]`) yang sama** dengan *record* Deskripsi Kartu Hero di seluruh revisi tabel kartu dan `english_updates`! Gunakan pencocokan `key[5:17]` dari `#60D2` + referensi `tier1["hero"]` + `tier2_details["Hero"]` agar 100% Kartu Hero tertangkap tanpa membocorkan Effect Card atau Equipment!
+> 3. **TABEL SKILL SEJATI (`#FCCD`, `#99AB`, `#4853`, `#865D`, `#CE46`):**
+>    Kelima tabel ini (`zh_hash`: `7F7F60ACED822B5E`, `58B4B182D74B34B0`, `4332819ABE8E29C8`, `6B4BE06E1593DD1C`, `218D140500F68F37` beserta pasangan `en_hash`-nya di `english_updates`) memuat seluruh deskripsi Hero Skill, Summon Skill, Combine Skill, **ringkasan skill pendek saat kartu ditutup** (*collapsed summaries* yang tidak ada di web referensi!), serta **Lv.10/40/100 enhancements**. Namun di dalam tabel yang sama juga terdapat **Nama Skill** (`裂空` -> `Sky Splitter`, `普通攻击` -> `Basic Attack`, `棋手孙尚香技能-狙击`) serta **kutipan suara / flavor hero** (`玩球！` -> `Play Ball!`, `火鹰轰炸！`, `大河之剑天上来。`, `欢迎来到炮火的世界！`, `蓉城小霸王，威力无穷！`, `大河流域阵营的特殊单位。`) yang **WAJIB dikecualikan** agar tetap berbahasa Inggris (`EN`)!
+> 4. **NAMA TERTANAM DI DALAM DESKRIPSI (`TIER1_EMBEDDED_EN_CLEANUP` & `STOPWORD_GUARD_RE`):**
+>    Di `src/acepatchindo/glossary.py:520-530`, `TIER1_EMBEDDED_EN_CLEANUP` sebelumnya menerjemahkan 7 nama Talent/Kartu bahasa Inggris menjadi bahasa Indonesia (`Indomitable Will` -> `Tekad Baja`, `Try Your Luck` -> `Uji Keberuntungan`, `Glory of the Old Guard`, `Quench with Illusions`, `Muster the Troops`, `Power of the Source`, `Bane of the Mighty`), dan di `WINDOWS_108_ZH_TO_ID` tertulis `Tidal Symphony` & `Tri-Point Banner` padahal nama kartu bahasa Inggris resmi di katalog `1.4.12` adalah `Symphony of Tides` & `Three Kingdoms Banner`. Selain itu `STOPWORD_GUARD_RE` menolak nama entitas resmi yang mengandung kata `of`/`the`/`and`/`for`/`with` (`Symphony of Tides`, `Embrace of the Sea`, `Use for My Own`, `Point of No Return`, `Burn the Boats`, `Child of Flow`). Semua itu **WAJIB diperbaiki** agar nama yang disebut di dalam deskripsi Bahasa Indonesia tetap 100% Bahasa Inggris kanonik!
+> 5. **JEBAKAN GAGAL AUTO-RESTORE DARI `v1.4.12-id.1` & TEST TERLEWAT (`SKIPPED`):**
+>    - Di `src/acepatchindo/dual_state_patch.py:221-224`, `_run("install")` hanya memanggil `_orig_run("restore")` jika `scan()` menghasilkan `plans_check`. Pada game yang sudah dipatch `v1.4.12-id.1`, ~38.000 string UI sudah berbahasa Indonesia (bukan Mandarin dan bukan Inggris!), sehingga `scan()` tidak dapat mengembalikannya ke Bahasa Inggris tanpa **unconditional restore** saat SHA-256 katalog berbeda!
+>    - Di `scripts/04_verify_real_windows_game.py:20-23` dan `tests/test_real_game_vfs.py:11-14`, path `1793497168990741300-92b4bcbb/originals` di-*hardcode*, padahal di Windows user kini foldernya bernama `1793628251781039400-c81278c0/originals` — sehingga tanpa perbaikan dinamis, `pytest` akan **diam-diam men-skip (`SKIPPED`)** tes QtsVFS!
+
+### Task 21: Build Deterministic Hybrid Scope Classifier (`src/acepatchindo/hybrid_classifier.py`), Split `WINDOWS_108` (`18 ID` vs `90 EN`), & Enforce 100% English Entity Names (`src/acepatchindo/glossary.py` & `src/acepatchindo/tag_aligner.py`)
+
+- [x] **Step 21.1: Split `WINDOWS_108` into `WINDOWS_108_TARGET_DESC_ID` (`18` entries -> Bahasa Indonesia) and `WINDOWS_108_NONTARGET_EN` (`90` entries -> Clean English)**
+  - Create or refactor constants in `src/acepatchindo/glossary.py` (or `src/acepatchindo/windows_108_split.py` imported by `glossary.py` & `02_build_indonesian_catalog.py`):
+    1. **`WINDOWS_108_TARGET_DESC_ID` (`18` exact gameplay descriptions kept in Bahasa Indonesia, with canonical English embedded names matching `orig_cat`):**
+       - `"转移后清除自身负面状态，并在5秒内免疫受到的控制。"`
+       - `"转移后获得20%伤害加成。"`
+       - `"战斗开始时，随机传送1个4-5阶临时等级为回合数×12的英雄进入战场（不含卡牌效果），并携带3件适配装备。"`
+       - `"若<color=#ffffff><b>枫叶舞</b></color>英雄被移除，其真实等级的25%会保留给下一个<color=#ffffff><b>枫叶舞</b></color>英雄，若为被出售，则保留75%真实等级，限一次。"`
+       - `"若<color=#FFE897>枫叶舞</color>英雄被移除，其真实等级的25%会保留给下一个<color=#FFE897>枫叶舞</color>英雄，若为被出售，则保留75%真实等级，限一次。"`
+       - `"获得1张装备牌<color=#FFE897>三分旗帜</color>：造成伤害的40%平摊治疗所有【三分】英雄（仅【三分】英雄可穿戴）。"` *(use `<color=#FFE897>Three Kingdoms Banner</color>` to match `orig_cat["unique"]["三分旗帜"]`!)*
+       - `"场上随机英雄等级+5，触发{DaQiao_TideTimes:3}次，若对象为<b>温柔呼唤</b>的英雄则额外等级+5，每次使用后，触发次数+2。"`
+       - `"枫叶舞指定的英雄击败3/5/9/15名敌方英雄，获得1张秘技牌<b>翩跹舞步</b>并为枫叶舞解锁1项特性（共4项）。"`
+       - `"枫叶舞指定的英雄累积击败3/5/9/15名敌方英雄后，阿离获得1张<color=#FFE897>翩跹舞步</color>，累计完成4次后任务需求固定为15。\n<color=#FFE897>翩跹舞步</color>：为<color=#FFE897>枫叶舞</color>挑选1张强化牌。"`
+       - `"每4个回合，乔汐获得1张<color=#FFE897>潮汐的交响</color>。\n<color=#FFE897>潮汐的交响</color>：场上随机5个英雄等级+4。"` *(use `<color=#FFE897>Symphony of Tides</color>` to match `orig_cat["unique"]["潮汐的交响"]`!)*
+       - `"每4个回合，获得1张秘技牌<b>潮汐的交响</b>。"` *(use `<b>Symphony of Tides</b>`!)*
+       - `"每回合开始时，自动触发1次孙尚香【登场】词条效果。"`
+       - `"每回合开始时，触发1次<color=#FFE897>孙尚香</color>卡牌效果。"`
+       - `"立刻在<color=#FFE897>嬴政和武则天中随机一人</color>，下场战斗开始时使其吸收<color=#FFE897>其他友军</color>的等级和初始法力值。（使用后强化吸收能力）"`
+       - `"<color=#ffffffbf>被动：</color>圣殿骑士冲锋时，对路径敌人造成<color=#dfa15e>[0]点物理伤害</color><color=#dfa15e>（[1]+[2]%自身最大生命值）</color>，随后戳刺敌人，造成<color=#dfa15e>[3]点物理伤害</color><color=#dfa15e>（[4]+[5]%自身最大生命值）</color>。\n<color=#ffffffbf>主动：</color>获得15%伤害加成，持续5秒。"`
+       - `"仆从伤害提升至100%法术攻击力，生命值恢复提升至100%法术攻击力"`
+       - `"芈月为等级最高的近战友军召唤1只暗影仆从协助战斗，持续10秒。仆从每次攻击造成<color=#d487e4>80%芈月法术攻击力的法术伤害</color>并为友军恢复<color=#d487e4>80%芈月法术攻击力</color><color=#9ff5d0>的生命值</color>，同时窃取目标1点<color=#dfa15e>物理防御</color>和<color=#d487e4>法术防御</color>转移给友军（最多30层，持续至回合结束）。"`
+       - `"选择棋手武凤，一起化万法为己用！通过棋手技能随机获得一张他人的秘技牌，每局都能打出意料之外的组合。"`
+    2. **`WINDOWS_108_NONTARGET_EN` (`90` remaining strings -> Clean, Natural, Human-Curated English):**
+       - Every single one of the remaining 90 strings (`孙尚香·强化` -> `"Lady Sun: Empowered"`, Equipment descriptions `[006]`, `[007]`, `[008]`, `[020]`, `"传送{0}级"` -> `"Teleport Lv.{0}"`, `"图片缓存目录"` -> `"Image Cache Directory"`, `"下载管理"` -> `"Download Manager"`, `"打开文件夹"` -> `"Open Folder"`, `"更改目录"` -> `"Change Directory"`, Wu Feng event rules & missions, Diamond discount vouchers, invisibility prompts, team invite strings, quick-chat voice lines, trial cards, and account link notice) **MUST** have a clean, natural English translation passing both `acepatchindo.validator.validate_translation` and `wxq_patch.translation_rules.validate_translation` (`len(WINDOWS_108_TARGET_DESC_ID) + len(WINDOWS_108_NONTARGET_EN) == 108`, zero overlap, zero missing keys from `data/references/windows_missing_108_zh.json`!).
+
+- [x] **Step 21.2: Protect 100% of Embedded & Standalone English Entity Names in `src/acepatchindo/glossary.py` & `src/acepatchindo/tag_aligner.py`**
+  - In `src/acepatchindo/glossary.py`:
+    1. **Remove all 7 Talent/Card name translations from `TIER1_EMBEDDED_EN_CLEANUP` (`lines 521–527`):**
+       - Delete `("Indomitable Will", "Tekad Baja")`, `("Try Your Luck", "Uji Keberuntungan")`, `("Glory of the Old Guard", "Kejayaan Garda Lama")`, `("Quench with Illusions", "Padamkan dengan Ilusi")`, `("Muster the Troops", "Kumpulkan Pasukan")`, `("Power of the Source", "Kekuatan Sumber")`, `("Bane of the Mighty", "Kutukan Sang Perkasa")`! Keep ONLY genuine grammar fixes (or reverse any Indonesian-translated proper card/talent/skill/contestant names back to English!).
+    2. **Build `verified_entity_names_en: set[str]` bypassing `STOPWORD_GUARD_RE` for multi-word proper names:**
+       - Collect ALL English names (`len(name) >= 4` and contains uppercase) of Heroes, Skills, Talents, Contestants (`lords` / `Chess player`), Contestant `talents[*].cardName` & `related[*].name`, Tier 2 `abilities[*].name` & `skill_names`, plus `orig_cat["unique"][zh_name]` for all those Chinese entity names (so names like `Symphony of Tides`, `Embrace of the Sea`, `Use for My Own`, `Point of No Return`, `Immovable as a Mountain`, `Burn the Boats`, `Try Your Luck`, `Indomitable Will`, `Glory of the Old Guard`, `Quench with Illusions`, `Muster the Troops`, `Power of the Source`, `Bane of the Mighty`, `Child of Flow`, `Three Kingdoms Banner`, `Super Copier`, `Build Upgrade` are **ALL** included in `instance.protected_en_terms` even when they contain `of`, `the`, `for`, `with`, `as`, `a`, `to` — excluding only generic sentences `len(name) > 40` or lowercase prose!).
+    3. **Register Chinese -> Canonical English Entity Names for Tag/Span Lookup (`BADGE_ALIAS_MAP` / `tier1_exact_zh_to_id`):**
+       - Ensure every Chinese Hero, Skill, Talent, Contestant, and Contestant Secret-Art / Ability Name maps to its **English** name (`orig_cat["unique"].get(zh_name) or en_name`) inside `glossary` and `tag_aligner.BADGE_ALIAS_MAP`, so when `tag_aligner.py` aligns `<color=#FFE897>潮汐的交响</color>`, `<color=#FFE897>超级复印机</color>`, `<color=#FFE897>构筑升级</color>`, or `<b>温柔呼唤</b>` inside an Indonesian description, the span content stays **English**!
+
+- [x] **Step 21.3: Create `src/acepatchindo/hybrid_classifier.py` Using Exact QtsVFS Table Hashes, 48-Bit Key Suffixes (`#60D2`), & Reference Sets**
+  - Implement `HybridClassifier` in `src/acepatchindo/hybrid_classifier.py` using real QtsVFS table inspection from `WINDOWS_ORIGINALS` (dynamically discovered via `sorted(ADAPTIVE_ROOT.glob("*/*/originals"))[-1]`, with deterministic cached/serialized key-suffix metadata saved to `data/references/hybrid_vfs_index.json` so unit tests also work offline even if Windows is unmounted!):
+    1. **Strict Name & Non-Target Exclusion Sets (Checked FIRST — Hard Veto Against `ID`):**
+       - `ENTITY_NAME_ZH`: Every Chinese name (`cn`, `nameCn`, `alt`, `abilities[*].name`, `skill_names`) across `tier1_wiki_id.json` (`hero`, `skills`, `talent`, `lords`, `equip`, `effect`, `factions`), `tier2_wiki_en.json`, `tier2_wiki_details_en.json`, `wxq_patch.hok_terminology`, plus all records in `#60D2` (`36B258373DA34185`) that are category tags (`效果`, `装备`, `天赋`, `资源`, `运营`) or short labels (`<= 4` plain CJK chars without sentence punctuation/verbs/numbers), plus Skill Table skill names & flavor voice quotes (`玩球！`, `火鹰轰炸！`, `大河之剑天上来。`, `欢迎来到炮火的世界！`, `蓉城小霸王，威力无穷！`, `大河流域阵营的特殊单位。`, and `棋手...技能-...`).
+       - `EQUIPMENT_DESC_ZH`: All `descCn` / `zh` descriptions in `tier1["equip"]` and `tier2_details["Equipment"]`, all records in the misnamed Equipment tables (`#ADCF`, `#D891`, `#C32E`, `#1881`), and Equipment-exclusive strings matching `穿着这件装备|穿戴者|仅.{1,6}英雄穿戴|普通装备│|唯一被动：` (unless explicitly a Talent/Hero/Contestant description in `tier1["talent"|"hero"|"lords"]` such as `"获得1张装备牌..."`).
+       - `STANDALONE_EFFECT_DESC_ZH`: All `descCn` / `zh` descriptions in `tier1["effect"]` and `tier2_details["Effect card"]` that do **NOT** appear in Hero, Skill, Talent, or Contestant description sets.
+       - **Hard Rule:** Any entry matching `ENTITY_NAME_ZH` (or whose `orig_en` is a standalone proper name with `len(plain_zh) <= 8` and no gameplay clause punctuation/digits/`%`/`+`) **MUST** return `is_target_id = False` (keep **100% English**!).
+    2. **Authoritative Target Description Sets (`is_target_id = True` -> Bahasa Indonesia):**
+       - **Category A — Kartu Hero (`hero_card_desc`):**
+         - All `descCn` & `awaken.descCn` in `tier1["hero"]` (exact, `normalize_plain_zh`, and `normalize_formula_skeleton_zh`), all `effect_copies` / `breakpoints` / `rule_notes` in `tier2_details["Hero"]`, PLUS all Chinese strings & `english_updates` `(asset_hex, key)` pairs whose 48-bit key suffix `key[5:17]` matches the **424 Hero Card suffixes** in `#60D2` (`36B258373DA34185`, where `#60D2` value matches `r"^(?:河洛|逐鹿|三分(?:之地)?|日落海|稷下|长城|玄雍|尧天|云梦泽|大河(?:流域)?|无阵营|混沌裂隙)\s+(?:战士|法师|坦克|刺客|射手|辅助)$"`) across the Card Table Family (`#23F7`, `#8E55`, `#FBF3`, `#5AD1`, `#801D`, `#BC6D`, `#5A2E`, `#1825`, `#FCC7`, `#6D3B`, `#6E60` and their paired `en_hash` tables)!
+       - **Category B — Skill (`skill_desc`):**
+         - All `skills[*].descCn` & `skills[*].enh[*].descCn` in `tier1["hero"]`, all `abilities[*].desc` & `calc_copies` in `tier2_details["Hero" | "Summon"]`, PLUS all non-name, non-flavor-quote gameplay description records in the **5 Skill Tables** (`#FCCD` `7F7F60ACED822B5E`, `#99AB` `58B4B182D74B34B0`, `#4853` `4332819ABE8E29C8`, `#865D` `6B4BE06E1593DD1C`, `#CE46` `218D140500F68F37`, and their paired `en_hash` tables in `english_updates`) — capturing 100% of active/passive skills, collapsed short skill summaries, summon skills, combine skills, and Lv.10/40/100 skill enhancements!
+       - **Category C — Talent (`talent_desc`):**
+         - All `descCn` in `tier1["talent"]`, all `abilities[*].desc` / `effect_copies` / `calc_copies` / `rule_notes` in `tier2_details["Talent"]`, Mode/Brawl/Class Talent descriptions in `#0955` (`6EC9C8904C8C5C82` and paired `en_hash`, with `len(plain_zh) >= 10` and excluding `场上.*数` UI counters), and Talent Card / Talent descriptions in `#BCDE..#CEDB`, `#23F7..#6E60`, and `#2394` (`8B5FA32BAA3913D9`) whose key suffix or text belongs to Talent effects (and NOT Equipment or standalone Effect Cards).
+       - **Category D — Kontestan (`contestant_desc`):**
+         - All `lords[*].talents[*]` & `lords[*].related[*]` descriptions in `tier1["lords"]`, all `abilities[*].desc` / `effect_copies` / `rule_notes` in `tier2_details["Chess player"]`, Contestant skill/passive/secret-art/trait/card descriptions in `#23F7..#6E60`, `#BCDE..#CEDB`, `#2394`, `#7D6E`, `#5CFD`, `#D262`, `4E0F1B7C13F264AE` (including Contestant secret art & ability card mechanics referencing `秘技牌`/`秘技卡`/`棋手到达`/`棋手每次`/`棋手技能`/`构筑升级`/`为我所用`/`翩跹舞步`/`潮汐的交响`/`蔷薇秘宝`/`枫叶舞`/`河豚书包`/`回溯孙小宾`/`超级复印机`), while strictly **excluding** loading tips (`#341F`), general rules tutorials (`#A360`, `#1F89`), achievements (`#637E`), event missions (`049FDCA512DC8897`, `79E3F2A531266997`, `1586D98CC6E0B77E`), and cosmetics/avatars/gifts (`#E2B0`)!
+       - Plus the `18` curated entries in `WINDOWS_108_TARGET_DESC_ID`.
+
+### Task 22: Update Catalog Builder (`02`), Unconditional Catalog-SHA Pre-Install Restore (`dual_state_patch.py`), Worker Patcher (`03`), & Dynamic Real-Game Verifier (`04`)
+
+- [x] **Step 22.1: Rebuild `scripts/02_build_indonesian_catalog.py` for Hybrid `v1.4.12-id.2`**
+  - Start from `orig_cat` (`Honor of Kings Ace English Patcher 1.4.12.exe_extracted/catalog/catalog.json.gz`).
+  - For `data["unique"]`:
+    - If `HybridClassifier` classifies `(zh_src, en_base)` as target gameplay description (`hero_card_desc | skill_desc | talent_desc | contestant_desc`), translate to Bahasa Indonesia (`glossary.translate_entry`) while keeping embedded proper names in English!
+    - Otherwise, keep `en_base` (`100%` clean original English)!
+  - For the `108` Windows missing Chinese strings:
+    - Inject `18` entries from `WINDOWS_108_TARGET_DESC_ID` (Indonesian) and `90` entries from `WINDOWS_108_NONTARGET_EN` (English) so all `41,483` `unique` keys exist with **0 raw Chinese** and **0 `unknown`**!
+  - For `data["contextual"]` and `data["english_updates"]` (`29,750` entries):
+    - Only translate rows classified by `HybridClassifier.is_target_contextual_or_update(asset_hex, key, prev_en, target_en, opt_zh)` as Hero Card, Skill, Talent, or Contestant **descriptions** into Bahasa Indonesia (validated against both `zh_src` and `prev_en` as before); keep all Name rows and all non-target UI/Equipment/Effect/Tutorial/Achievement rows equal to `orig_cat`'s clean English `target_en`!
+  - Set `data["version"] = "1.4.12-id.2"` and emit detailed category breakdown counts (`hero_card_desc`, `skill_desc`, `talent_desc`, `contestant_desc`, `reverted_en_names`, `reverted_en_other`, `windows_108_id=18`, `windows_108_en=90`).
+
+- [x] **Step 22.2: Fix One-Click Live Upgrade (`v1.4.12-id.1` -> `v1.4.12-id.2`) in `src/acepatchindo/dual_state_patch.py` & Rebuild Worker (`03`)**
+  - In `src/acepatchindo/dual_state_patch.py` (`render_adaptive_source`, lines `213–229`):
+    1. Add helper `_catalog_fingerprint(assets: Path) -> str` returning `hashlib.sha256((Path(assets) / "catalog.json.gz").read_bytes()).hexdigest()[:16]` (or `""` on OSError).
+    2. Add helper `_needs_pre_install_restore(resolved_game: Path, cat_sha: str) -> bool`:
+       - Obtain `matched = _matching_restore_items(resolved_game)`. If `not matched`, return `False`.
+       - Collect `receipt_dirs = {rcp_path.parent for rcp_path, _ in matched}`.
+       - Return `True` if `not cat_sha` or ANY `d` in `receipt_dirs` lacks `(d / "patcher_catalog_sha256.txt")` or `(d / "patcher_catalog_sha256.txt").read_text(encoding="utf-8").strip() != cat_sha`!
+    3. Add helper `_stamp_receipt_catalog_sha(resolved_game: Path, cat_sha: str) -> None` writing `cat_sha` into `(d / "patcher_catalog_sha256.txt")` for every `d` in `{rcp_path.parent for rcp_path, _ in _matching_restore_items(resolved_game)}` when `cat_sha` is non-empty.
+    4. In `_run(action, game, assets, work)`:
+       - When `action == "install"`: compute `cat_sha = _catalog_fingerprint(assets)`. If `_needs_pre_install_restore(resolved_game, cat_sha)` is `True`, **UNCONDITIONALLY call `_orig_run("restore", resolved_game, assets, work)` FIRST** (do NOT gate it behind `if plans_check:`, because upgrading from `v1.4.12-id.1` MUST revert ~38,000 Indonesian UI/Name strings back to Chinese `originals/` first so `_orig_run("install")` patches them to Hybrid English + Indonesian!).
+       - Run `report = _orig_run(action, game, assets, work)`.
+       - When `action == "install"` and `cat_sha`: call `_stamp_receipt_catalog_sha(resolved_game, cat_sha)` inside `try/except Exception: pass`.
+  - Run `scripts/03_patch_worker_modules.py` and verify `en_to_id` ONLY contains the Hybrid target description mappings (approx. `2,000–6,000` mappings, **0** standalone entity names, **0** UI/Settings/Equipment strings!).
+
+- [x] **Step 22.3: Fix Hardcoded Receipt Path & Verify Hybrid Contract on Real Windows Game (`scripts/04_verify_real_windows_game.py`)**
+  - Replace hardcoded `1793497168990741300-92b4bcbb/originals` in `scripts/04_verify_real_windows_game.py` and `tests/test_real_game_vfs.py` with dynamic resolution:
+    `ADAPTIVE_ROOT = Path("/run/media/whise/Windows/Users/azzam/AppData/Local/HoK Ace English Patch/adaptive")`
+    and a helper `find_windows_originals() -> Path | None` returning `sorted(ADAPTIVE_ROOT.glob("*/*/originals"))[-1]` if any exists!
+  - Update `run_verification()` in `scripts/04_verify_real_windows_game.py` to execute **3 rigorous checks**:
+    1. **`[1/3]` Unpatched Chinese `originals/` -> Hybrid `v1.4.12-id.2`:** Full `adaptive.scan(..., materialize=True)` + `stage_unity_package` across all **6** QtsVFS packages (`508` tables, `unknown == 0`, `invalid_translation == 0`, `capacity_skipped == 0`), **PLUS** decode materialized Protobuf `.bytes` payloads to assert concrete in-game proof:
+       - Hero/Skill/Talent/Contestant descriptions in `#23F7`, `#FCCD`, `#BCDE`, `#0955` are in **Bahasa Indonesia** (with embedded names in **English**).
+       - Standalone Hero/Skill/Talent/Contestant Names in `#23F7`, `#FCCD`, `#BCDE` are in **English** (`"Arthur"`, `"Lady Sun"`, `"Sky Splitter"`, `"Symphony of Tides"`, `"Maple Leaf Dance"`).
+       - Equipment (`#ADCF`), Achievements (`#637E`), Loading Tips (`#341F`), and UI Settings (`Image Cache Directory`, `Download Manager`) are in **English**!
+    2. **`[2/3]` Dual-State `EN -> Hybrid ID` Verification:** Verify `en_to_id` against English baseline catalog / staged English table so target descriptions convert `EN -> ID` while English Names & UI remain `100%` untouched in English!
+    3. **`[3/3]` Live Windows Upgrade Trigger (`v1.4.12-id.1` -> `v1.4.12-id.2`):** Against `/run/media/whise/Windows/Program Files/WXQLauncher/WXQ` and real receipt `1793628251781039400-c81278c0/receipt.json`, verify that live files match the active Windows receipt (`_matching_restore_items` logic under Linux path mapping) and lack matching `patcher_catalog_sha256.txt`, proving `v1.4.12-id.2` will auto-restore `originals/` on first click of **Install** on Windows!
+
+### Task 23: Update Unit & Integration Test Suites (`tests/test_glossary_and_tiers.py`, `tests/test_dual_state_engine.py`, `tests/test_real_game_vfs.py`)
+
+- [x] **Step 23.1: Update `tests/test_glossary_and_tiers.py` for Hybrid `v1.4.12-id.2` Invariants**
+  - Assert `cat["version"] == "1.4.12-id.2"` and `len(cat["unique"]) == 41483` and `len(cat["english_updates"]) == 29750`.
+  - **Invariant 1 (Names Stay 100% English):** Assert that across ALL Hero, Skill, Talent, and Contestant Chinese names in `tier1_wiki_id.json` (`hero`, `skills`, `talent`, `lords`) present in `orig_cat["unique"]`, `cat["unique"][zh_name] == orig_cat["unique"][zh_name]` (**0** names translated to Indonesian!). Also assert embedded names inside Indonesian descriptions (`Indomitable Will`, `Try Your Luck`, `Symphony of Tides`, `Three Kingdoms Banner`, `Maple Leaf Dance`, `Super Copier`, `Build Upgrade`) remain in **English** (`0` occurrences of `Tekad Baja`, `Uji Keberuntungan`, `Kejayaan Garda Lama`, `Padamkan dengan Ilusi`, `Kumpulkan Pasukan`, `Kekuatan Sumber`, `Kutukan Sang Perkasa` for those proper card names!).
+  - **Invariant 2 (Non-Target Strings Revert 100% to English):** Assert UI/Menu/Settings (`"图片缓存目录" -> "Image Cache Directory"`, `"下载管理" -> "Download Manager"`, `"打开文件夹" -> "Open Folder"`), Equipment names & descriptions (`"灵泉法杖"`, `"三分旗帜"`, `"仅三分英雄穿戴..."`), standalone Effect Card names & descriptions, Achievements, and Quick-Chat strings are in clean **English** (`0` CJK characters remaining across non-exempt entries!).
+  - **Invariant 3 (Target Gameplay Descriptions Stay Natural Indonesian, Free of Indlish & Tag Bugs):** Assert Hero Card descriptions, Skill descriptions (including collapsed short summaries & Lv.10/40/100 enhancements), Talent descriptions, and Contestant descriptions are in natural **Bahasa Indonesia**, passing all tag/placeholder/formula/grammar regression assertions from Task 20 (`0` `(aku)`, `0` `Li</color>Bai`, `0` `adalah digunakan`, `0` `sebuah 1`, `0` `Level atas`, `0` `kiri dan benar`, and `< 25` English stopword leaks across all classified target Indonesian descriptions after stripping protected English entity names & mechanics!).
+
+- [x] **Step 23.2: Add `v1.4.12-id.1 -> v1.4.12-id.2` Unconditional Pre-Install Restore Test in `tests/test_dual_state_engine.py` & Zero-Skip Guard in `tests/test_real_game_vfs.py`**
+  - In `tests/test_dual_state_engine.py`: add `test_adaptive_unconditionally_restores_v1_full_id_when_catalog_sha_differs` simulating a game directory already patched with `v1.4.12-id.1` (where `scan()` returns **empty `plans_check == []`**!) + an active receipt without matching `patcher_catalog_sha256.txt`, proving `_run("install", ...)` **still calls `_orig_run("restore", ...)` first**, then `_orig_run("install", ...)`, and stamps `patcher_catalog_sha256.txt` so a second `_run("install", ...)` does **NOT** restore again!
+  - In `tests/test_real_game_vfs.py`: use `find_windows_originals()` so when `/run/media/whise/Windows` is mounted, the test **NEVER skips** and asserts all 3 checks from `04_verify_real_windows_game.py`!
+
+### Task 24: Full Pipeline Execution (`02` -> `03` -> `04` -> `05`), All `pytest -v` Green (`0` Skipped!), Update Docs, & Publish GitHub Release `v1.4.12-id.2` (`06`)
+
+- [x] **Step 24.1: Execute Build, Patch, Real-Game Verification, Repack, & Full Test Suite**
+  - Run in exact order:
+    1. `/home/whise/.local/bin/uv run --python 3.12 python scripts/02_build_indonesian_catalog.py`
+    2. `/home/whise/.local/bin/uv run --python 3.12 python scripts/03_patch_worker_modules.py`
+    3. `/home/whise/.local/bin/uv run --python 3.12 python scripts/04_verify_real_windows_game.py`
+    4. `/home/whise/.local/bin/uv run --python 3.12 python scripts/05_repack_windows_exe.py`
+    5. `/home/whise/.local/bin/uv run --python 3.12 pytest -v` (**0 failed, 0 skipped!**)
+
+- [x] **Step 24.2: Update `README.md` & `scripts/06_publish_github_release.py` (`TAG = "v1.4.12-id.2"`), Commit, Push `main`, & Publish GitHub Release `v1.4.12-id.2`**
+  - Update `scripts/06_publish_github_release.py` to set `TAG = "v1.4.12-id.2"` and `TITLE = "Honor of Kings: Ace Indonesian Patcher v1.4.12-id.2 (Hybrid Gameplay Edition)"` (keep `v1.4.12-id.1` intact on GitHub Releases as the Full-Indonesian archive release, and publish `v1.4.12-id.2` as the new Latest Release with `dist/Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe` + `dist/SHA256SUMS.txt` and exact SHA-256 digests!).
+  - Update `README.md` with accurate `v1.4.12-id.2` Hybrid Edition scope (Indonesian descriptions for Hero Cards, Skills, Talents, and Contestants; English for all Hero/Skill/Talent/Contestant Names and all other game UI, Equipment, Effect Cards, Tutorials, and Menus; automatic one-click upgrade from both English Patcher `1.4.12` and Full Indonesian `v1.4.12-id.1`) and exact SHA-256 checksums.
+  - Mark all Phase 6 checkboxes (`[x]`) in `.agents/plan/2026-11-03-hok-ace-indonesian-patcher-plan.md`, commit cleanly on `main`, `git push origin main`, create & push tag `v1.4.12-id.2`, run `scripts/06_publish_github_release.py`, and verify HTTP `200` + exact remote `digest` match via `gh release view v1.4.12-id.2 --repo voseu/acepatchindo --json assets,isLatest`!
+
+
 
 

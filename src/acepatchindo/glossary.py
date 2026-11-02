@@ -16,6 +16,11 @@ from acepatchindo.tag_aligner import (
     reinject_skeleton_from_source,
     translate_preserving_skeleton,
 )
+from acepatchindo.windows_108_split import (
+    WINDOWS_108_HYBRID_MAP,
+    WINDOWS_108_NONTARGET_EN,
+    WINDOWS_108_TARGET_DESC_ID,
+)
 from acepatchindo.validator import (
     CJK_RE,
     CONTROL_TOKEN_RE,
@@ -25,118 +30,8 @@ from acepatchindo.validator import (
     validate_translation,
 )
 
-# Exact, human-verified Indonesian translations for all 108 Chinese strings missed by English Patcher 1.4.12
-# in the user's real Windows game installation (409 records across 6 QtsVFS packages).
-WINDOWS_108_ZH_TO_ID: dict[str, str] = {
-    "孙尚香·强化": "Lady Sun: Empowered",
-    "转移后清除自身负面状态，并在5秒内免疫受到的控制。": "Setelah berpindah, menghapus debuff diri sendiri dan kebal terhadap Crowd Control selama 5 detik.",
-    "转移后获得20%伤害加成。": "Setelah berpindah, dapatkan +20% Bonus Damage.",
-    "战斗开始时，随机传送1个4-5阶临时等级为回合数×12的英雄进入战场（不含卡牌效果），并携带3件适配装备。": "Saat Combat dimulai, pindahkan secara acak 1 Hero Tier 4-5 dengan Temporary Level sebesar (Round x12) ke medan tempur (tanpa efek kartu), membawa 3 Equipment yang sesuai.",
-    "若<color=#ffffff><b>枫叶舞</b></color>英雄被移除，其真实等级的25%会保留给下一个<color=#ffffff><b>枫叶舞</b></color>英雄，若为被出售，则保留75%真实等级，限一次。": "Jika Hero <color=#ffffff><b>Maple Leaf Dance</b></color> dihapus, 25% True Level-nya diwariskan ke Hero <color=#ffffff><b>Maple Leaf Dance</b></color> berikutnya; jika dijual, mewariskan 75% True Level (maks 1 kali).",
-    "获得1张装备牌<color=#FFE897>三分旗帜</color>：造成伤害的40%平摊治疗所有【三分】英雄（仅【三分】英雄可穿戴）。": "Dapatkan 1 Kartu Equipment <color=#FFE897>Tri-Point Banner</color>: memulihkan HP semua Hero [Three Kingdoms] secara merata sebesar 40% dari Damage yang diberikan (hanya untuk Hero [Three Kingdoms]).",
-    "<color=#ffffff><color=#ffffff><b>唯一</b></color></color>\n攻击速度+30%。攻速上限改为5.0。战斗期间，每获得2点法力值，提升1%攻击速度。": "<color=#ffffff><color=#ffffff><b>Unik</b></color></color>\nAttack Speed +30%. Batas Attack Speed menjadi 5.0. Selama Combat, setiap memperoleh 2 Mana, meningkatkan 1% Attack Speed.",
-    "仅三分英雄穿戴。将受到伤害的40%转化为治疗量，平摊给所有场上【三分】英雄。": "Khusus Hero Three Kingdoms. Mengubah 40% Damage yang diterima menjadi pemulihan HP yang dibagi rata ke semua Hero [Three Kingdoms] di medan tempur.",
-    "仅三分英雄穿戴。将造成伤害的40%转化为治疗量，平摊给所有【三分】英雄。": "Khusus Hero Three Kingdoms. Mengubah 40% Damage yang diberikan menjadi pemulihan HP yang dibagi rata ke semua Hero [Three Kingdoms].",
-    "传送{0}级": "Teleportasi Lv.{0}",
-    "场上随机英雄等级+5，触发{DaQiao_TideTimes:3}次，若对象为<b>温柔呼唤</b>的英雄则额外等级+5，每次使用后，触发次数+2。": "Hero acak di medan tempur mendapat Level +5, terpicu {DaQiao_TideTimes:3} kali; jika target adalah Hero <b>Gentle Call</b>, mendapat tambahan Level +5. Setiap digunakan, jumlah picuan +2.",
-    "枫叶舞指定的英雄击败3/5/9/15名敌方英雄，获得1张秘技牌<b>翩跹舞步</b>并为枫叶舞解锁1项特性（共4项）。": "Hero yang ditunjuk Maple Leaf Dance mengalahkan 3/5/9/15 Hero musuh, dapatkan 1 Kartu Secret Art <b>Graceful Dance</b> dan buka 1 trait untuk Maple Leaf Dance (total 4 trait).",
-    "枫叶舞指定的英雄累积击败3/5/9/15名敌方英雄后，阿离获得1张<color=#FFE897>翩跹舞步</color>，累计完成4次后任务需求固定为15。\n<color=#FFE897>翩跹舞步</color>：为<color=#FFE897>枫叶舞</color>挑选1张强化牌。": "Setelah Hero yang ditunjuk Maple Leaf Dance mengalahkan total 3/5/9/15 Hero musuh, Arli mendapat 1 <color=#FFE897>Graceful Dance</color>; setelah selesai 4 kali, syarat misi tetap 15.\n<color=#FFE897>Graceful Dance</color>: Pilih 1 kartu penguat untuk <color=#FFE897>Maple Leaf Dance</color>.",
-    "每4个回合，乔汐获得1张<color=#FFE897>潮汐的交响</color>。\n<color=#FFE897>潮汐的交响</color>：场上随机5个英雄等级+4。": "Setiap 4 Round, Qiao Xi mendapat 1 <color=#FFE897>Tidal Symphony</color>.\n<color=#FFE897>Tidal Symphony</color>: 5 Hero acak di medan tempur mendapat Level +4.",
-    "每4个回合，获得1张秘技牌<b>潮汐的交响</b>。": "Setiap 4 Round, dapatkan 1 Kartu Secret Art <b>Tidal Symphony</b>.",
-    "每回合开始时，自动触发1次孙尚香【登场】词条效果。": "Di awal setiap Round, otomatis memicu efek [On Play] Lady Sun 1 kali.",
-    "每回合开始时，触发1次<color=#FFE897>孙尚香</color>卡牌效果。": "Di awal setiap Round, memicu efek kartu <color=#FFE897>Lady Sun</color> 1 kali.",
-    "立刻在<color=#FFE897>嬴政和武则天中随机一人</color>，下场战斗开始时使其吸收<color=#FFE897>其他友军</color>的等级和初始法力值。（使用后强化吸收能力）": "Segera pilih acak 1 dari <color=#FFE897>Ying Zheng atau Wu Zetian</color>; saat Combat berikutnya dimulai, ia menyerap Level dan Mana awal <color=#FFE897>sekutu lainnya</color>. (Memperkuat daya serap setelah dipakai)",
-    "若<color=#FFE897>枫叶舞</color>英雄被移除，其真实等级的25%会保留给下一个<color=#FFE897>枫叶舞</color>英雄，若为被出售，则保留75%真实等级，限一次。": "Jika Hero <color=#FFE897>Maple Leaf Dance</color> dihapus, 25% True Level-nya diwariskan ke Hero <color=#FFE897>Maple Leaf Dance</color> berikutnya; jika dijual, mewariskan 75% True Level (maks 1 kali).",
-    "<color=#ffffffbf>被动：</color>圣殿骑士冲锋时，对路径敌人造成<color=#dfa15e>[0]点物理伤害</color><color=#dfa15e>（[1]+[2]%自身最大生命值）</color>，随后戳刺敌人，造成<color=#dfa15e>[3]点物理伤害</color><color=#dfa15e>（[4]+[5]%自身最大生命值）</color>。\n<color=#ffffffbf>主动：</color>获得15%伤害加成，持续5秒。": "<color=#ffffffbf>Pasif:</color> Saat Templar Knight menerjang, memberikan <color=#dfa15e>[0] Physical Damage</color><color=#dfa15e> ([1]+[2]% Max HP diri)</color> ke musuh di jalur, lalu menusuk musuh sebesar <color=#dfa15e>[3] Physical Damage</color><color=#dfa15e> ([4]+[5]% Max HP diri)</color>.\n<color=#ffffffbf>Aktif:</color> Dapatkan +15% Bonus Damage selama 5 detik.",
-    "将造成伤害的40%转化为治疗量，平摊给所有【三分】英雄。": "Mengubah 40% Damage yang diberikan menjadi pemulihan HP yang dibagi rata ke semua Hero [Three Kingdoms].",
-    "万象大赛每个英雄首次达100级可领取奖励": "Klaim hadiah saat setiap Hero pertama kali mencapai Lv.100 di Turnamen ACE",
-    "图片缓存目录": "Direktori Cache Gambar",
-    "完成任务获取棋手武凤奖励": "Selesaikan misi untuk mendapatkan hadiah Chess Player Wu Feng",
-    "应援失败，请重新尝试": "Dukungan gagal, silakan coba lagi",
-    "您已经隐身2天啦，需要解除吗?": "Kamu sudah mode tak terlihat selama 2 hari, matikan sekarang?",
-    "竞猜总数": "Total Tebakan",
-    "钻石消耗": "Pemakaian Diamond",
-    "<color=#98cbff>一、活动规则</color>\n<color=#FFFFFF>1、完成任务可领取武凤信物，足够的信物可兑换奖励。</color>\n<color=#FFFFFF>2、每日任务将于每天0点刷新，棋手任务仅可完成1次。</color>\n<color=#FFFFFF>3、若进行消极对局如挂机等行为，则无法完成对局任务哦。</color>": "<color=#98cbff>I. Aturan Event</color>\n<color=#FFFFFF>1. Selesaikan misi untuk klaim Token Wu Feng dan tukarkan dengan hadiah.</color>\n<color=#FFFFFF>2. Misi harian direset pukul 00:00 setiap hari; misi Chess Player hanya 1 kali.</color>\n<color=#FFFFFF>3. Perilaku pasif seperti AFK tidak akan menyelesaikan misi pertandingan.</color>",
-    "<color=#FFFFFFFF>[组队]{0}:</color>": "<color=#FFFFFFFF>[Tim]{0}:</color>",
-    "[系统]组队邀约": "[Sistem] Undangan Tim",
-    "【有分同享】组队邀请：万象大赛-排位": "[Berbagi Poin] Undangan Tim: Turnamen ACE - Ranked",
-    "万象大赛将棋手武凤升至6级": "Naikkan Chess Player Wu Feng ke Lv.6 di Turnamen ACE",
-    "万象大赛用棋手武凤获得前三名": "Raih Top 3 menggunakan Chess Player Wu Feng di Turnamen ACE",
-    "万象大赛用棋手武凤获得第一名": "Raih Peringkat 1 menggunakan Chess Player Wu Feng di Turnamen ACE",
-    "万象王者{0}": "Vientiane King {0}",
-    "下局是否继续和当前队友一起玩？": "Lanjut bermain bersama rekan tim saat ini di pertandingan berikutnya?",
-    "下载管理": "Manajemen Unduhan",
-    "仆从伤害提升至100%法术攻击力，生命值恢复提升至100%法术攻击力": "Damage Minion meningkat jadi 100% Magic Attack, pemulihan HP meningkat jadi 100% Magic Attack",
-    "今日可上架价格范围：{0}-{1}": "Rentang harga jual hari ini: {0}-{1}",
-    "今日宜摸鱼7天限时卡": "Kartu Trial 7 Hari: Santai Hari Ini",
-    "你去争第一吧，算我让你的。": "Ambil saja juara satunya, anggap aku mengalah.",
-    "使用棋手【乔汐】，在万象大赛中召唤1名临时等级为200级的英雄": "Gunakan Chess Player [Qiao Xi] dan panggil 1 Hero dengan Temporary Level 200 di Turnamen ACE",
-    "公共": "Publik",
-    "再上<color=#ffffff>{0}</color>分可获得<color=#ffffff>{1}</color>": "Naik <color=#ffffff>{0}</color> poin lagi untuk mendapatkan <color=#ffffff>{1}</color>",
-    "再上<color=#ffffff>{0}</color>分超过": "Naik <color=#ffffff>{0}</color> poin lagi untuk melampaui",
-    "再盈利<color=#ffffff>{0}</color>可获得<color=#ffffff>{1}</color>": "Profit <color=#ffffff>{0}</color> lagi untuk mendapatkan <color=#ffffff>{1}</color>",
-    "再盈利<color=#ffffff>{0}</color>超过": "Profit <color=#ffffff>{0}</color> lagi untuk melampaui",
-    "可上架价格范围已更新，请稍后再试": "Rentang harga jual telah diperbarui, silakan coba lagi nanti",
-    "咱们同心协力，先把其他人送走。": "Ayo kerja sama, singkirkan pemain lain dulu.",
-    "图片已保存至<color=#98CBFF>{0}</color>": "Gambar disimpan ke <color=#98CBFF>{0}</color>",
-    "在钻石狂潮、王牌对决和棋手竞猜玩法中，可使用本抵扣券减免1000钻石。（钻石狂潮每次限用1张）": "Gunakan kupon diskon ini untuk potongan 1000 Diamond di mode Diamond Frenzy, Ace Duel, dan Tebakan Chess Player. (Maks 1 kupon per sesi Diamond Frenzy)",
-    "在钻石狂潮、王牌对决和棋手竞猜玩法中，可使用本抵扣券减免5000钻石。（钻石狂潮每次限用1张）": "Gunakan kupon diskon ini untuk potongan 5000 Diamond di mode Diamond Frenzy, Ace Duel, dan Tebakan Chess Player. (Maks 1 kupon per sesi Diamond Frenzy)",
-    "在钻石狂潮、王牌对决和棋手竞猜玩法中，可使用本抵扣券减免500钻石。（钻石狂潮每次限用1张）": "Gunakan kupon diskon ini untuk potongan 500 Diamond di mode Diamond Frenzy, Ace Duel, dan Tebakan Chess Player. (Maks 1 kupon per sesi Diamond Frenzy)",
-    "士别三日，技术暴涨这么多？": "Baru sebentar tak bertemu, kemampuanmu sudah sehebat ini?",
-    "巅峰王者{0}": "Peak King {0}",
-    "已使用抵扣券": "Kupon Diskon Digunakan",
-    "已放弃常规奖励": "Hadiah Reguler Dilewati",
-    "已放弃常规奖励，获得特邀额外奖励": "Hadiah reguler dilewati, memperoleh hadiah ekstra undangan khusus",
-    "当前无法购买积分保护卡": "Saat ini tidak dapat membeli Kartu Pelindung Poin",
-    "您已经隐身3天啦，好友都看不到你哦~需要解除吗?": "Kamu sudah mode tak terlihat 3 hari, temanmu tidak bisa melihatmu~ Matikan sekarang?",
-    "您已隐身{0}天啦，好友们都在等你上线呢，需要解除吗?": "Kamu sudah mode tak terlihat {0} hari, teman-teman menunggumu online. Matikan sekarang?",
-    "您已隐身{0}天啦，好友都很想念你哦，需要解除吗?": "Kamu sudah mode tak terlihat {0} hari, teman-teman merindukanmu. Matikan sekarang?",
-    "您正处于隐身状态哦，需要解除吗?": "Kamu sedang dalam mode tak terlihat, matikan sekarang?",
-    "感觉这把有高手啊？": "Sepertinya ada pemain pro di pertandingan ini?",
-    "我要开始表演了，好好看，好好学。": "Saatnya aku beraksi, perhatikan dan pelajari baik-baik.",
-    "战力前列的棋手": "Chess Player dengan Power Tertinggi",
-    "打开文件夹": "Buka Folder",
-    "打开礼包，必定获得爱心投放1天限时卡，并且随机获得以下奖励：\n夺宝币*2、香香·热情轰炸(30天)*1、常小娥·月之祈福(30天)*1、白歌·剑意纵横(30天)*1、趣味桌游*1、100%黑巧克力*1、小鹿玩偶*1、小动物捏捏*1、赢律（棋手）、渡梦传送特效。\n打开第50个礼包必定获得：渡梦传送特效！": "Buka bundel untuk pasti mendapat Kartu Trial 1 Hari Heart Drop, serta acak salah satu hadiah berikut:\nKoin Harta*2, Lady Sun: Fiery Barrage (30 Hari)*1, Little Chang'e: Moon Blessing (30 Hari)*1, Bai Ge: Sword Intent (30 Hari)*1, Board Game Seru*1, Cokelat Hitam 100%*1, Boneka Rusa*1, Squishy Hewan*1, Ying Lu (Chess Player), Efek Teleportasi Dream Crossing.\nBuka bundel ke-50 dijamin mendapat: Efek Teleportasi Dream Crossing!",
-    "抵扣钻石": "Potongan Diamond",
-    "放弃翻牌将不会消耗每月翻牌次数，但也无法获得常规翻牌奖励（特邀额外奖励可正常获得）。确定放弃？": "Melewati buka kartu tidak mengurangi kuota bulanan, namun hadiah reguler tidak diperoleh (hadiah ekstra undangan khusus tetap diperoleh). Yakin lewati?",
-    "数据资源损坏！您需要重启游戏客户端进行资源修复。": "Data resource rusak! Mulai ulang klien game untuk memperbaiki resource.",
-    "新闻": "Berita",
-    "是否授权《王者万象棋》绑定您同平台的《王者荣耀》账号，获取账号信息以提供更好的游戏体验。\n授权内容：将《王者荣耀》好友关系与好友亲密度继承至《王者万象棋》。\n<color=#98CBFFFF>特别声明：亲密度仅首次授权时进行同步，后续不会再同步；继承的数值以本周一王者荣耀内亲密度数值为准（不同账号同步时间存在延迟）。</color>": "Izinkan Honor of Kings: Ace menautkan akun Honor of Kings di platform yang sama untuk meningkatkan pengalaman bermain?\nIsi Izin: Mewariskan daftar teman dan Keakraban dari Honor of Kings ke Honor of Kings: Ace.\n<color=#98CBFFFF>Catatan: Keakraban hanya disinkronkan saat otorisasi pertama dan tidak disinkronkan lagi setelahnya, berdasarkan nilai Senin minggu ini di Honor of Kings (mungkin ada jeda antar akun).</color>",
-    "更改目录": "Ubah Direktori",
-    "最强王者{0}": "Strongest King {0}",
-    "朋友们，下局我们继续排啊~": "Teman-teman, ayo lanjut main bareng di ronde berikutnya~",
-    "朋友们，打完这局我有点事儿，下局不一起排了~": "Teman-teman, habis match ini aku ada urusan, belum bisa lanjut bareng~",
-    "栏位扩充卡物品获取配置失败，请稍后再试": "Gagal memuat konfigurasi Kartu Ekspansi Slot, coba lagi nanti",
-    "棋手武凤攻略": "Panduan Chess Player Wu Feng",
-    "武凤攻略": "Panduan Wu Feng",
-    "段位需达到倔强青铜方可发布招募！": "Capai Rank Stubborn Bronze untuk membuat rekrutmen!",
-    "渡梦传送特效7天限时卡": "Kartu Trial 7 Hari: Efek Teleportasi Dream Crossing",
-    "渡梦传送特效礼包": "Bundel Efek Teleportasi Dream Crossing",
-    "玉环幻彩音阶7天限时卡": "Kartu Trial 7 Hari: Yu Huan Prismatic Scale",
-    "玩家间亲密度值需高于{0}": "Keakraban antar pemain harus lebih dari {0}",
-    "由于您在刚刚的对局中选择了不继续游戏，返回时是否要退出队伍？": "Karena kamu memilih tidak lanjut di pertandingan tadi, keluar dari tim saat kembali?",
-    "留在队内": "Tetap di Tim",
-    "系统会按照最优方案自动扣除抵扣券": "Sistem otomatis memakai kupon diskon paling optimal",
-    "自己人，下手轻点。": "Kita teman sendiri, jangan keras-keras.",
-    "芈月为等级最高的近战友军召唤1只暗影仆从协助战斗，持续10秒。仆从每次攻击造成<color=#d487e4>80%芈月法术攻击力的法术伤害</color>并为友军恢复<color=#d487e4>80%芈月法术攻击力</color><color=#9ff5d0>的生命值</color>，同时窃取目标1点<color=#dfa15e>物理防御</color>和<color=#d487e4>法术防御</color>转移给友军（最多30层，持续至回合结束）。": "Mi Yue memanggil 1 Shadow Servant bagi sekutu Melee berlevel tertinggi selama 10 detik. Setiap serangan Servant memberikan <color=#d487e4>Magic Damage sebesar 80% Magic Attack Mi Yue</color> dan memulihkan <color=#d487e4>80% Magic Attack Mi Yue</color><color=#9ff5d0> sebagai HP</color> ke sekutu, serta mencuri 1 <color=#dfa15e>Physical Defense</color> dan <color=#d487e4>Magic Defense</color> target untuk sekutu (maks 30 stack hingga akhir Round).",
-    "获得棋盘【今日宜摸鱼】7天限时体验。": "Dapatkan Trial 7 Hari Papan Catur [Santai Hari Ini].",
-    "获得特效【渡梦传送特效】7天限时体验。": "Dapatkan Trial 7 Hari Efek [Dream Crossing].",
-    "获得皮肤【玉环幻彩音阶】7天限时体验。": "Dapatkan Trial 7 Hari Skin [Yu Huan Prismatic Scale].",
-    "该亲密度下的选手可在王者{0}分以内有分同享": "Pada level Keakraban ini, pemain dapat Berbagi Poin hingga {0} poin King",
-    "该阵容已收藏至我的阵容": "Lineup berhasil disimpan ke Lineup Saya",
-    "请拖放下方已获取碎片到格内": "Seret dan lepaskan kepingan yang diperoleh di bawah ke dalam kotak",
-    "赛事": "Turnamen",
-    "超级周末：有分同享不限亲密度": "Super Weekend: Berbagi Poin tanpa batas Keakraban",
-    "近期成交均价{0}，今日可上架价格范围：{1}-{2}": "Harga rata-rata terkini {0}, rentang harga jual hari ini: {1}-{2}",
-    "这把我躺了，等你带飞。": "Match ini aku santai ya, gendong aku!",
-    "这能输？我不服！": "Masa begini kalah? Aku tak terima!",
-    "退出队伍": "Keluar Tim",
-    "选择棋手武凤，一起化万法为己用！通过棋手技能随机获得一张他人的秘技牌，每局都能打出意料之外的组合。": "Pilih Chess Player Wu Feng dan kuasai segala jurus! Lewat Skill Chess Player, dapatkan acak 1 Kartu Secret Art milik lawan untuk menciptakan kombo tak terduga di setiap pertandingan.",
-    "通关棋手武凤训练关卡": "Selesaikan stage latihan Chess Player Wu Feng",
-    "道具数量不足，是否使用快捷购买？": "Jumlah item tidak cukup, gunakan Pembelian Cepat?",
-    "部分购买成功": "Pembelian Sebagian Berhasil",
-    "钻石抵扣券": "Kupon Diskon Diamond",
-    # Common entity names
+# Common Chinese entity names mapping to English proper names
+COMMON_ZH_ENTITY_NAMES: dict[str, str] = {
     "武凤": "Wu Feng",
     "三分": "Three Kingdoms",
     "三分之地": "Three Kingdoms",
@@ -152,6 +47,11 @@ WINDOWS_108_ZH_TO_ID: dict[str, str] = {
     "苍": "Cang",
     "元流之子": "Child of Flow",
 }
+
+# The 108 Chinese strings missed by English Patcher 1.4.12
+# Cleanly split into 18 target gameplay descriptions (ID) and 90 non-target strings (EN)
+WINDOWS_108_ZH_TO_ID: dict[str, str] = dict(WINDOWS_108_HYBRID_MAP)
+WINDOWS_108_ZH_TO_ID.update(COMMON_ZH_ENTITY_NAMES)
 
 # Ordered English -> Indonesian rules following Tier 1 hybrid HoK Ace terminology:
 # Proper names (Heroes, Factions, Cards, Equipment) and Tier 1 English mechanics
@@ -478,6 +378,20 @@ CANONICAL_PROTECTED_TERMS: tuple[str, ...] = (
     "Perfect Revive",
     "Akomia Core",
     "Steal Fire",
+    "Symphony of Tides",
+    "Three Kingdoms Banner",
+    "Super Copier",
+    "Build Upgrade",
+    "Indomitable Will",
+    "Try Your Luck",
+    "Embrace of the Sea",
+    "Use for My Own",
+    "Lady Sun: Empowered",
+    "Glory of the Old Guard",
+    "Quench with Illusions",
+    "Muster the Troops",
+    "Power of the Source",
+    "Bane of the Mighty",
     "Magic Penetration",
     "Physical Penetration",
     "Kartu Talent",
@@ -518,13 +432,8 @@ LORD_NAME_TO_T2_ALT: dict[str, str] = {
 }
 
 TIER1_EMBEDDED_EN_CLEANUP: tuple[tuple[str, str], ...] = (
-    ("Indomitable Will", "Tekad Baja"),
-    ("Try Your Luck", "Uji Keberuntungan"),
-    ("Glory of the Old Guard", "Kejayaan Garda Lama"),
-    ("Quench with Illusions", "Padamkan dengan Ilusi"),
-    ("Muster the Troops", "Kumpulkan Pasukan"),
-    ("Power of the Source", "Kekuatan Sumber"),
-    ("Bane of the Mighty", "Kutukan Sang Perkasa"),
+    ("Tidal Symphony", "Symphony of Tides"),
+    ("Tri-Point Banner", "Three Kingdoms Banner"),
     ("Kartu Effect", "Kartu Efek"),
     ("kartu Effect", "kartu Efek"),
 )
@@ -557,34 +466,60 @@ class ThreeTierGlossary:
     ) -> "ThreeTierGlossary":
         instance = cls()
         protected_set: set[str] = set(CANONICAL_PROTECTED_TERMS)
+        verified_entity_names_en: set[str] = {
+            "Symphony of Tides",
+            "Three Kingdoms Banner",
+            "Super Copier",
+            "Build Upgrade",
+            "Maple Leaf Dance",
+            "Graceful Dance",
+            "Gentle Call",
+            "Indomitable Will",
+            "Try Your Luck",
+            "Embrace of the Sea",
+            "Use for My Own",
+            "Lady Sun: Empowered",
+            "Glory of the Old Guard",
+            "Quench with Illusions",
+            "Muster the Troops",
+            "Power of the Source",
+            "Bane of the Mighty",
+            "Tidal Symphony",
+        }
+        for term in CANONICAL_PROTECTED_TERMS:
+            verified_entity_names_en.add(term)
 
         t1_data: dict = {}
         if tier1_path.exists():
             t1_data = json.loads(tier1_path.read_text(encoding="utf-8"))
-            instance._ingest_tier1(t1_data, protected_set)
+            instance._ingest_tier1(t1_data, protected_set, verified_entity_names_en)
         if tier2_path.exists():
             t2 = json.loads(tier2_path.read_text(encoding="utf-8"))
-            instance._ingest_tier2(t2, protected_set)
+            instance._ingest_tier2(t2, protected_set, verified_entity_names_en)
 
         if tier2_details_path is None:
             tier2_details_path = tier2_path.with_name("tier2_wiki_details_en.json")
         if tier2_details_path.exists():
             t2_details = json.loads(tier2_details_path.read_text(encoding="utf-8"))
-            instance._ingest_tier2_details(t1_data, t2_details, protected_set)
+            instance._ingest_tier2_details(t1_data, t2_details, protected_set, verified_entity_names_en)
 
         for zh_k, id_v in BRACKET_TERM_MAP.items():
             instance.tier1_exact_zh_to_id.setdefault(zh_k, id_v)
         for zh_k, id_v in WINDOWS_108_ZH_TO_ID.items():
             instance._register_t1_pair(zh_k, id_v)
 
-        # Sort protected multi-word proper names longest-first, excluding any phrase with English stopwords
+        # Sort protected multi-word proper names longest-first
+        # Verified entity names bypass STOPWORD_GUARD_RE
         instance.protected_en_terms = sorted(
             (
                 t
                 for t in protected_set
-                if len(t) >= 5
+                if (
+                    t in verified_entity_names_en
+                    or (len(t) >= 5 and any(c.isupper() for c in t) and not STOPWORD_GUARD_RE.search(t))
+                )
+                and len(t) >= 3
                 and any(c.isupper() for c in t)
-                and not STOPWORD_GUARD_RE.search(t)
             ),
             key=len,
             reverse=True,
@@ -622,7 +557,7 @@ class ThreeTierGlossary:
         if norm:
             self.tier2_plain_zh_to_en.setdefault(norm, en_val)
 
-    def _ingest_tier1(self, t1: dict, protected_set: set[str]) -> None:
+    def _ingest_tier1(self, t1: dict, protected_set: set[str], verified_entity_names_en: set[str] | None = None) -> None:
         # 1. Factions & Keywords (stored as dicts on hok-ace-translate-id.netlify.app)
         factions = t1.get("factions", {})
         if isinstance(factions, dict):
@@ -706,7 +641,7 @@ class ThreeTierGlossary:
                     if r_desc:
                         self.tier1_en_card_to_id_desc[r_name] = r_desc
 
-    def _ingest_tier2(self, t2: list[dict], protected_set: set[str]) -> None:
+    def _ingest_tier2(self, t2: list[dict], protected_set: set[str], verified_entity_names_en: set[str] | None = None) -> None:
         for entry in t2:
             alt_zh = (entry.get("alt") or "").strip()
             name_en = (entry.get("name") or "").strip()
@@ -716,7 +651,7 @@ class ThreeTierGlossary:
                     protected_set.add(name_en)
 
     def _ingest_tier2_details(
-        self, t1: dict, t2_details: list[dict], protected_set: set[str]
+        self, t1: dict, t2_details: list[dict], protected_set: set[str], verified_entity_names_en: set[str] | None = None
     ) -> None:
         t2_players_by_alt: dict[str, dict] = {}
         for item in t2_details:

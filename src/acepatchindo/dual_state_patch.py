@@ -210,20 +210,74 @@ def _localize_report_message(report: dict) -> dict:
     return report
 
 
+def _catalog_fingerprint(assets: Path) -> str:
+    cat_path = (assets / "catalog.json.gz") if assets.is_dir() else assets
+    if cat_path.exists():
+        import hashlib
+        return hashlib.sha256(cat_path.read_bytes()).hexdigest()
+    return "legacy"
+
+
+def _needs_pre_install_restore(resolved_game: Path, cat_sha: str) -> bool:
+    try:
+        matches = _matching_restore_items(resolved_game)
+        if not matches:
+            return False
+        receipt_dirs: set[Path] = set()
+        for item in matches:
+            if isinstance(item, tuple) and len(item) >= 1 and isinstance(item[0], Path):
+                receipt_dirs.add(item[0].parent)
+            elif isinstance(item, Path):
+                receipt_dirs.add(item.parent if item.is_file() else item)
+
+        if not receipt_dirs:
+            root = receipt_root(resolved_game)
+            if root.exists():
+                for r_json in root.glob("*/receipt.json"):
+                    receipt_dirs.add(r_json.parent)
+
+        if not receipt_dirs:
+            return False
+
+        for r_dir in receipt_dirs:
+            sha_file = r_dir / "patcher_catalog_sha256.txt"
+            if sha_file.exists() and sha_file.read_text(encoding="utf-8").strip() == cat_sha:
+                return False
+
+        return True
+    except Exception:
+        return False
+
+
+def _stamp_receipt_catalog_sha(resolved_game: Path, cat_sha: str) -> None:
+    try:
+        root = receipt_root(resolved_game)
+        if not root.exists():
+            return
+        for r_json in root.glob("*/receipt.json"):
+            sha_file = r_json.parent / "patcher_catalog_sha256.txt"
+            sha_file.write_text(cat_sha, encoding="utf-8")
+    except Exception:
+        pass
+
+
 def _run(action: str, game: Path, assets: Path, work: Path) -> dict:
     if action == "install":
         resolved_game = Path(game).resolve()
-        # If live files currently match an active English Patcher receipt in
-        # %LOCALAPPDATA%\\HoK Ace English Patch\\adaptive and still have pending
-        # Indonesian translations, restore the verified Chinese originals first
-        # so prune_stale_state() never deletes the true Chinese backup!
         try:
-            if _matching_restore_items(resolved_game):
-                plans_check, _, _, _ = scan(resolved_game, assets, work, materialize=False)
-                if plans_check:
-                    _orig_run("restore", resolved_game, assets, work)
+            cat_sha = _catalog_fingerprint(assets)
+            if _needs_pre_install_restore(resolved_game, cat_sha):
+                _orig_run("restore", resolved_game, assets, work)
         except Exception:
             pass
     report = _orig_run(action, game, assets, work)
+    if action == "install":
+        try:
+            cat_sha = _catalog_fingerprint(assets)
+            if cat_sha:
+                resolved_game = Path(game).resolve()
+                _stamp_receipt_catalog_sha(resolved_game, cat_sha)
+        except Exception:
+            pass
     return _localize_report_message(report)
 '''

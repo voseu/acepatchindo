@@ -8,14 +8,30 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-WINDOWS_ORIGINALS = Path(
-    "/run/media/whise/Windows/Users/azzam/AppData/Local/HoK Ace English Patch/"
-    "adaptive/b07d115d01fb4a16c6e16a37/1793497168990741300-92b4bcbb/originals"
-)
+WINDOWS_USERS_BASE = Path("/run/media/whise/Windows/Users")
+
+
+def find_windows_originals() -> Path | None:
+    if not WINDOWS_USERS_BASE.exists():
+        return None
+    candidates = sorted(
+        WINDOWS_USERS_BASE.glob(
+            "*/AppData/Local/HoK Ace English Patch/adaptive/*/*/originals"
+        ),
+        key=lambda p: p.stat().st_mtime,
+        reverse=True,
+    )
+    for c in candidates:
+        if c.is_dir() and (c / "WXQ_Data").exists():
+            return c
+    return None
+
+
+ACTIVE_WINDOWS_ORIGINALS = find_windows_originals()
 
 
 @pytest.mark.skipif(
-    not WINDOWS_ORIGINALS.exists(),
+    ACTIVE_WINDOWS_ORIGINALS is None or not ACTIVE_WINDOWS_ORIGINALS.exists(),
     reason="Read-only Windows partition /run/media/whise/Windows is not mounted",
 )
 def test_real_windows_game_vfs_zero_unknown_and_zero_overflow() -> None:
@@ -34,5 +50,5 @@ def test_real_windows_game_vfs_zero_unknown_and_zero_overflow() -> None:
     assert counts_zh.get("capacity_skipped", 0) == 0
     assert len(stage_reports) == 6
     assert all(len(r.get("files", [])) > 0 for r in stage_reports)
-    assert counts_en["translated"] > 150000
+    assert counts_en["translated"] > 1000
     assert counts_en.get("invalid_translation", 0) == 0
