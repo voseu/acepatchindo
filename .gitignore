@@ -1,0 +1,21 @@
+# Large reference binaries and unpacked artifacts
+reff/
+*_extracted/
+extracted_source/
+build/
+dist/
+*.exe
+*.pyz
+*.pyc
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.venv/
+.cline/
+skills-lock.json
+
+# Generated catalog build checkpoints (reproducible via scripts/02 & 03)
+data/catalog_checkpoints/
+
+# Keep structured JSON references tracked
+!data/references/*.json

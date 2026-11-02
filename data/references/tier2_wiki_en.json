@@ -1,0 +1,5618 @@
+[
+  {
+    "name": "Alessio",
+    "alt": "莱西奥",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/alessio/",
+    "asset": "/assets/hero/5451/hero-5451-thumbnail.webp",
+    "search": "莱西奥 Alessio 日落海"
+  },
+  {
+    "name": "Allain",
+    "alt": "亚连",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/allain/",
+    "asset": "/assets/hero/5141/hero-5141-thumbnail.webp",
+    "search": "亚连 Allain 日落海"
+  },
+  {
+    "name": "Angela",
+    "alt": "安琪拉",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/angela/",
+    "asset": "/assets/hero/1421/hero-1421-thumbnail.webp",
+    "search": "安琪拉 Angela 日落海"
+  },
+  {
+    "name": "Ao'yin",
+    "alt": "敖隐",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/ao-yin/",
+    "asset": "/assets/hero/5191/hero-5191-thumbnail.webp",
+    "search": "敖隐 Ao'yin 大河流域"
+  },
+  {
+    "name": "Arke",
+    "alt": "阿轲",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/arke/",
+    "asset": "/assets/hero/1161/hero-1161-thumbnail.webp",
+    "search": "阿轲 Arke 无阵营"
+  },
+  {
+    "name": "Arli",
+    "alt": "公孙离",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/arli/",
+    "asset": "/assets/hero/1991/hero-1991-thumbnail.webp",
+    "search": "公孙离 Arli 无阵营"
+  },
+  {
+    "name": "Arthur",
+    "alt": "亚瑟",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/arthur/",
+    "asset": "/assets/hero/1661/hero-1661-thumbnail.webp",
+    "search": "亚瑟 Arthur 日落海"
+  },
+  {
+    "name": "Athena",
+    "alt": "雅典娜",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/athena/",
+    "asset": "/assets/hero/1831/hero-1831-thumbnail.webp",
+    "search": "雅典娜 Athena 日落海"
+  },
+  {
+    "name": "Augran",
+    "alt": "大司命",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/augran/",
+    "asset": "/assets/hero/5171/hero-5171-thumbnail.webp",
+    "search": "大司命 Augran 大河流域"
+  },
+  {
+    "name": "Bai Qi",
+    "alt": "白起",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/bai-qi/",
+    "asset": "/assets/hero/1201/hero-1201-thumbnail.webp",
+    "search": "白起 Bai Qi 逐鹿"
+  },
+  {
+    "name": "Biron",
+    "alt": "狂铁",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/biron/",
+    "asset": "/assets/hero/5031/hero-5031-thumbnail.webp",
+    "search": "狂铁 Biron 日落海"
+  },
+  {
+    "name": "Cai Yan",
+    "alt": "蔡文姬",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/cai-yan/",
+    "asset": "/assets/hero/1841/hero-1841-thumbnail.webp",
+    "search": "蔡文姬 Cai Yan 三分之地"
+  },
+  {
+    "name": "Cao Cao",
+    "alt": "曹操",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/cao-cao/",
+    "asset": "/assets/hero/1281/hero-1281-thumbnail.webp",
+    "search": "曹操 Cao Cao 三分之地"
+  },
+  {
+    "name": "Chano",
+    "alt": "苍",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/chano/",
+    "asset": "/assets/hero/1771/hero-1771-thumbnail.webp",
+    "search": "苍 Chano 无阵营"
+  },
+  {
+    "name": "Cheng Yaojin",
+    "alt": "程咬金",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/cheng-yaojin/",
+    "asset": "/assets/hero/1441/hero-1441-thumbnail.webp",
+    "search": "程咬金 Cheng Yaojin 河洛"
+  },
+  {
+    "name": "Cirrus",
+    "alt": "云中君",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/cirrus/",
+    "asset": "/assets/hero/5061/hero-5061-thumbnail.webp",
+    "search": "云中君 Cirrus 大河流域"
+  },
+  {
+    "name": "Consort Yu",
+    "alt": "虞姬",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/consort-yu/",
+    "asset": "/assets/hero/1741/hero-1741-thumbnail.webp",
+    "search": "虞姬 Consort Yu 大河流域"
+  },
+  {
+    "name": "Da Qiao",
+    "alt": "大乔",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/da-qiao/",
+    "asset": "/assets/hero/1911/hero-1911-thumbnail.webp",
+    "search": "大乔 Da Qiao 三分之地"
+  },
+  {
+    "name": "Di Renjie",
+    "alt": "狄仁杰",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/di-renjie/",
+    "asset": "/assets/hero/1331/hero-1331-thumbnail.webp",
+    "search": "狄仁杰 Di Renjie 河洛"
+  },
+  {
+    "name": "Diaochan",
+    "alt": "貂蝉",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/diaochan/",
+    "asset": "/assets/hero/1411/hero-1411-thumbnail.webp",
+    "search": "貂蝉 Diaochan 三分之地"
+  },
+  {
+    "name": "Dolia",
+    "alt": "朵莉亚",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/dolia/",
+    "asset": "/assets/hero/1591/hero-1591-thumbnail.webp",
+    "search": "朵莉亚 Dolia 日落海"
+  },
+  {
+    "name": "Donghuang",
+    "alt": "东皇太一",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/donghuang/",
+    "asset": "/assets/hero/1871/hero-1871-thumbnail.webp",
+    "search": "东皇太一 Donghuang 大河流域"
+  },
+  {
+    "name": "Dr Bian",
+    "alt": "扁鹊",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/dr-bian/",
+    "asset": "/assets/hero/1191/hero-1191-thumbnail.webp",
+    "search": "扁鹊 Dr Bian 逐鹿"
+  },
+  {
+    "name": "Dunshan",
+    "alt": "盾山",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/dunshan/",
+    "asset": "/assets/hero/5091/hero-5091-thumbnail.webp",
+    "search": "盾山 Dunshan 河洛"
+  },
+  {
+    "name": "Dyadia",
+    "alt": "少司缘",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/dyadia/",
+    "asset": "/assets/hero/5771/hero-5771-thumbnail.webp",
+    "search": "少司缘 Dyadia 大河流域"
+  },
+  {
+    "name": "Erin",
+    "alt": "艾琳",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/erin/",
+    "asset": "/assets/hero/3551/hero-3551-thumbnail.webp",
+    "search": "艾琳 Erin 日落海"
+  },
+  {
+    "name": "Fang",
+    "alt": "李元芳",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/fang/",
+    "asset": "/assets/hero/1731/hero-1731-thumbnail.webp",
+    "search": "李元芳 Fang 河洛"
+  },
+  {
+    "name": "Fuzi",
+    "alt": "老夫子",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/fuzi/",
+    "asset": "/assets/hero/1391/hero-1391-thumbnail.webp",
+    "search": "老夫子 Fuzi 逐鹿"
+  },
+  {
+    "name": "Gan & Mo",
+    "alt": "干将莫邪",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/gan-mo/",
+    "asset": "/assets/hero/1821/hero-1821-thumbnail.webp",
+    "search": "干将莫邪 Gan & Mo 大河流域"
+  },
+  {
+    "name": "Guiguzi",
+    "alt": "鬼谷子",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/guiguzi/",
+    "asset": "/assets/hero/1891/hero-1891-thumbnail.webp",
+    "search": "鬼谷子 Guiguzi 大河流域"
+  },
+  {
+    "name": "Han Xin",
+    "alt": "韩信",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/han-xin/",
+    "asset": "/assets/hero/1501/hero-1501-thumbnail.webp",
+    "search": "韩信 Han Xin 大河流域"
+  },
+  {
+    "name": "Haya",
+    "alt": "海月",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/haya/",
+    "asset": "/assets/hero/5211/hero-5211-thumbnail.webp",
+    "search": "海月 Haya 无阵营"
+  },
+  {
+    "name": "Heino",
+    "alt": "海诺",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/heino/",
+    "asset": "/assets/hero/5631/hero-5631-thumbnail.webp",
+    "search": "海诺 Heino 日落海"
+  },
+  {
+    "name": "Jing",
+    "alt": "镜",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/jing/",
+    "asset": "/assets/hero/5311/hero-5311-thumbnail.webp",
+    "search": "镜 Jing 逐鹿"
+  },
+  {
+    "name": "Kaizer",
+    "alt": "铠",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/kaizer/",
+    "asset": "/assets/hero/1931/hero-1931-thumbnail.webp",
+    "search": "铠 Kaizer 河洛"
+  },
+  {
+    "name": "Kongming",
+    "alt": "诸葛亮",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/kongming/",
+    "asset": "/assets/hero/1901/hero-1901-thumbnail.webp",
+    "search": "诸葛亮 Kongming 三分之地"
+  },
+  {
+    "name": "Kui",
+    "alt": "钟馗",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/kui/",
+    "asset": "/assets/hero/1751/hero-1751-thumbnail.webp",
+    "search": "钟馗 Kui 河洛"
+  },
+  {
+    "name": "Lady Sun",
+    "alt": "孙尚香",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/lady-sun/",
+    "asset": "/assets/hero/1111/hero-1111-thumbnail.webp",
+    "search": "孙尚香 Lady Sun 三分之地"
+  },
+  {
+    "name": "Lady Zhen",
+    "alt": "甄姬",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/lady-zhen/",
+    "asset": "/assets/hero/1271/hero-1271-thumbnail.webp",
+    "search": "甄姬 Lady Zhen 三分之地"
+  },
+  {
+    "name": "Li Bai",
+    "alt": "李白",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/li-bai/",
+    "asset": "/assets/hero/1311/hero-1311-thumbnail.webp",
+    "search": "李白 Li Bai 河洛"
+  },
+  {
+    "name": "Li Xin",
+    "alt": "李信",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/li-xin/",
+    "asset": "/assets/hero/5071/hero-5071-thumbnail.webp",
+    "search": "李信 Li Xin 河洛"
+  },
+  {
+    "name": "Lian Po",
+    "alt": "廉颇",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/lian-po/",
+    "asset": "/assets/hero/1051/hero-1051-thumbnail.webp",
+    "search": "廉颇 Lian Po 逐鹿"
+  },
+  {
+    "name": "Liang",
+    "alt": "张良",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/liang/",
+    "asset": "/assets/hero/1561/hero-1561-thumbnail.webp",
+    "search": "张良 Liang 大河流域"
+  },
+  {
+    "name": "Liu Bang",
+    "alt": "刘邦",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/liu-bang/",
+    "asset": "/assets/hero/1491/hero-1491-thumbnail.webp",
+    "search": "刘邦 Liu Bang 大河流域"
+  },
+  {
+    "name": "Liu Shan",
+    "alt": "刘禅",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/liu-shan/",
+    "asset": "/assets/hero/1141/hero-1141-thumbnail.webp",
+    "search": "刘禅 Liu Shan 三分之地"
+  },
+  {
+    "name": "Lu Bu",
+    "alt": "吕布",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/lu-bu/",
+    "asset": "/assets/hero/1231/hero-1231-thumbnail.webp",
+    "search": "吕布 Lu Bu 三分之地"
+  },
+  {
+    "name": "Luban Master",
+    "alt": "鲁班大师",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/luban-master/",
+    "asset": "/assets/hero/5251/hero-5251-thumbnail.webp",
+    "search": "鲁班大师 Luban Master 逐鹿"
+  },
+  {
+    "name": "Luban No.7",
+    "alt": "鲁班七号",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/luban-no-7/",
+    "asset": "/assets/hero/1121/hero-1121-thumbnail.webp",
+    "search": "鲁班七号 Luban No.7 逐鹿"
+  },
+  {
+    "name": "Luna",
+    "alt": "露娜",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/luna/",
+    "asset": "/assets/hero/1461/hero-1461-thumbnail.webp",
+    "search": "露娜 Luna 日落海"
+  },
+  {
+    "name": "Ma Chao",
+    "alt": "马超",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/ma-chao/",
+    "asset": "/assets/hero/5181/hero-5181-thumbnail.webp",
+    "search": "马超 Ma Chao 三分之地"
+  },
+  {
+    "name": "Marco Polo",
+    "alt": "马可波罗",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/marco-polo/",
+    "asset": "/assets/hero/1321/hero-1321-thumbnail.webp",
+    "search": "马可波罗 Marco Polo 日落海"
+  },
+  {
+    "name": "Mayene",
+    "alt": "姬小满",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/mayene/",
+    "asset": "/assets/hero/5641/hero-5641-thumbnail.webp",
+    "search": "姬小满 Mayene 日落海"
+  },
+  {
+    "name": "Meng Tian",
+    "alt": "蒙恬",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/meng-tian/",
+    "asset": "/assets/hero/5271/hero-5271-thumbnail.webp",
+    "search": "蒙恬 Meng Tian 逐鹿"
+  },
+  {
+    "name": "Meng Ya",
+    "alt": "蒙犽",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/meng-ya/",
+    "asset": "/assets/hero/5241/hero-5241-thumbnail.webp",
+    "search": "蒙犽 Meng Ya 逐鹿"
+  },
+  {
+    "name": "Menki",
+    "alt": "梦奇",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/menki/",
+    "asset": "/assets/hero/1981/hero-1981-thumbnail.webp",
+    "search": "梦奇 Menki 无阵营"
+  },
+  {
+    "name": "Mi Yue",
+    "alt": "芈月",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/mi-yue/",
+    "asset": "/assets/hero/1211/hero-1211-thumbnail.webp",
+    "search": "芈月 Mi Yue 逐鹿"
+  },
+  {
+    "name": "Milady",
+    "alt": "米莱狄",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/milady/",
+    "asset": "/assets/hero/5041/hero-5041-thumbnail.webp",
+    "search": "米莱狄 Milady 日落海"
+  },
+  {
+    "name": "Ming",
+    "alt": "明世隐",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/ming/",
+    "asset": "/assets/hero/5011/hero-5011-thumbnail.webp",
+    "search": "明世隐 Ming 无阵营"
+  },
+  {
+    "name": "Mozi",
+    "alt": "墨子",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/mozi/",
+    "asset": "/assets/hero/1081/hero-1081-thumbnail.webp",
+    "search": "墨子 Mozi 逐鹿"
+  },
+  {
+    "name": "Mulan",
+    "alt": "花木兰",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/mulan/",
+    "asset": "/assets/hero/1541/hero-1541-thumbnail.webp",
+    "search": "花木兰 Mulan 河洛"
+  },
+  {
+    "name": "Niu Mo",
+    "alt": "牛魔",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/niu-mo/",
+    "asset": "/assets/hero/1681/hero-1681-thumbnail.webp",
+    "search": "牛魔 Niu Mo 无阵营"
+  },
+  {
+    "name": "Pei",
+    "alt": "裴擒虎",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/pei/",
+    "asset": "/assets/hero/5021/hero-5021-thumbnail.webp",
+    "search": "裴擒虎 Pei 无阵营"
+  },
+  {
+    "name": "Shangguan",
+    "alt": "上官婉儿",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/shangguan/",
+    "asset": "/assets/hero/5131/hero-5131-thumbnail.webp",
+    "search": "上官婉儿 Shangguan 河洛"
+  },
+  {
+    "name": "Shen Mengxi",
+    "alt": "沈梦溪",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/shen-mengxi/",
+    "asset": "/assets/hero/3121/hero-3121-thumbnail.webp",
+    "search": "沈梦溪 Shen Mengxi 河洛"
+  },
+  {
+    "name": "Shi",
+    "alt": "西施",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/shi/",
+    "asset": "/assets/hero/5231/hero-5231-thumbnail.webp",
+    "search": "西施 Shi 逐鹿"
+  },
+  {
+    "name": "Shouyue",
+    "alt": "百里守约",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/shouyue/",
+    "asset": "/assets/hero/1961/hero-1961-thumbnail.webp",
+    "search": "百里守约 Shouyue 河洛"
+  },
+  {
+    "name": "Sikong Zhen",
+    "alt": "司空震",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/sikong-zhen/",
+    "asset": "/assets/hero/5371/hero-5371-thumbnail.webp",
+    "search": "司空震 Sikong Zhen 河洛"
+  },
+  {
+    "name": "Su Lie",
+    "alt": "苏烈",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/su-lie/",
+    "asset": "/assets/hero/1941/hero-1941-thumbnail.webp",
+    "search": "苏烈 Su Lie 河洛"
+  },
+  {
+    "name": "Sun Bin",
+    "alt": "孙膑",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/sun-bin/",
+    "asset": "/assets/hero/1181/hero-1181-thumbnail.webp",
+    "search": "孙膑 Sun Bin 逐鹿"
+  },
+  {
+    "name": "Taiyi Zhenren",
+    "alt": "太乙真人",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/taiyi-zhenren/",
+    "asset": "/assets/hero/1861/hero-1861-thumbnail.webp",
+    "search": "太乙真人 Taiyi Zhenren 无阵营"
+  },
+  {
+    "name": "Wang Wei",
+    "alt": "王维",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/wang-wei/",
+    "asset": "/assets/hero/1381/hero-1381-thumbnail.webp",
+    "search": "王维 Wang Wei 河洛"
+  },
+  {
+    "name": "Wu Zetian",
+    "alt": "武则天",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/wu-zetian/",
+    "asset": "/assets/hero/1361/hero-1361-thumbnail.webp",
+    "search": "武则天 Wu Zetian 河洛"
+  },
+  {
+    "name": "Wukong",
+    "alt": "孙悟空",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/wukong/",
+    "asset": "/assets/hero/1671/hero-1671-thumbnail.webp",
+    "search": "孙悟空 Wukong 无阵营"
+  },
+  {
+    "name": "Xiang Yu",
+    "alt": "项羽",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/xiang-yu/",
+    "asset": "/assets/hero/1351/hero-1351-thumbnail.webp",
+    "search": "项羽 Xiang Yu 大河流域"
+  },
+  {
+    "name": "Xiao Qiao",
+    "alt": "小乔",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/xiao-qiao/",
+    "asset": "/assets/hero/1061/hero-1061-thumbnail.webp",
+    "search": "小乔 Xiao Qiao 三分之地"
+  },
+  {
+    "name": "Xuance",
+    "alt": "百里玄策",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/xuance/",
+    "asset": "/assets/hero/1951/hero-1951-thumbnail.webp",
+    "search": "百里玄策 Xuance 河洛"
+  },
+  {
+    "name": "Yao",
+    "alt": "曜",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/yao/",
+    "asset": "/assets/hero/5221/hero-5221-thumbnail.webp",
+    "search": "曜 Yao 逐鹿"
+  },
+  {
+    "name": "Yaria",
+    "alt": "瑶",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/yaria/",
+    "asset": "/assets/hero/5051/hero-5051-thumbnail.webp",
+    "search": "瑶 Yaria 大河流域"
+  },
+  {
+    "name": "Ying Zheng",
+    "alt": "嬴政",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/ying-zheng/",
+    "asset": "/assets/hero/1101/hero-1101-thumbnail.webp",
+    "search": "嬴政 Ying Zheng 逐鹿"
+  },
+  {
+    "name": "Yixing",
+    "alt": "弈星",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/yixing/",
+    "asset": "/assets/hero/1971/hero-1971-thumbnail.webp",
+    "search": "弈星 Yixing 无阵营"
+  },
+  {
+    "name": "Yuhuan",
+    "alt": "杨玉环",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/yuhuan/",
+    "asset": "/assets/hero/1761/hero-1761-thumbnail.webp",
+    "search": "杨玉环 Yuhuan 无阵营"
+  },
+  {
+    "name": "Zhou Yu",
+    "alt": "周瑜",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/zhou-yu/",
+    "asset": "/assets/hero/1241/hero-1241-thumbnail.webp",
+    "search": "周瑜 Zhou Yu 三分之地"
+  },
+  {
+    "name": "Zhu Bajie",
+    "alt": "猪八戒",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/zhu-bajie/",
+    "asset": "/assets/hero/5111/hero-5111-thumbnail.webp",
+    "search": "猪八戒 Zhu Bajie 无阵营"
+  },
+  {
+    "name": "Zhuangzi",
+    "alt": "庄周",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/zhuangzi/",
+    "asset": "/assets/hero/1131/hero-1131-thumbnail.webp",
+    "search": "庄周 Zhuangzi 逐鹿"
+  },
+  {
+    "name": "Zilong",
+    "alt": "赵云",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/zilong/",
+    "asset": "/assets/hero/1071/hero-1071-thumbnail.webp",
+    "search": "赵云 Zilong 三分之地"
+  },
+  {
+    "name": "Ziya",
+    "alt": "姜子牙",
+    "type": "Hero",
+    "group": "Heroes",
+    "url": "/heroes/ziya/",
+    "asset": "/assets/hero/1481/hero-1481-thumbnail.webp",
+    "search": "姜子牙 Ziya 无阵营"
+  },
+  {
+    "name": "Templar Knight",
+    "alt": "圣殿骑士",
+    "type": "Summon",
+    "group": "Summons",
+    "url": "/summons/templar-knight/",
+    "asset": "/assets/summons/units/temple-knight.png",
+    "search": "圣殿骑士 Templar Knight 当前公开规则文本记录：场上每存在一名其他圣殿骑士，最大生命值增加10%；关联亚瑟的技能突破天赋，独立基础属性仍待核验。"
+  },
+  {
+    "name": "Rebirth Totem (Mountain Spirit Form)",
+    "alt": "往生图腾（山鬼形态）",
+    "type": "Summon",
+    "group": "Summons",
+    "url": "/summons/rebirth-totem-mountain-spirit-form/",
+    "asset": "https://assets.wanxiangqiwiki.com/assets/official/2026-09-29/63eb736413348d29c36747c2c53b5d2c406a3655f1c168d255d395079eb8f412.webp",
+    "search": "往生图腾（山鬼形态） Rebirth Totem (Mountain Spirit Form) 大司命灵体以外的1-3阶己方召唤物上场时，吸收该单位使往生图腾等级永久+1并获得15点法力值。"
+  },
+  {
+    "name": "Wolf Spirit",
+    "alt": "狼魂",
+    "type": "Summon",
+    "group": "Summons",
+    "url": "/summons/wolf-spirit/",
+    "asset": "/assets/summons/units/wolf-soul.png",
+    "search": "狼魂 Wolf Spirit 苍的技能召唤单位；狼魂继承苍的攻击速度并可为苍提供攻击力。"
+  },
+  {
+    "name": "Fate Totem",
+    "alt": "因缘图腾",
+    "type": "Summon",
+    "group": "Summons",
+    "url": "/summons/fate-totem/",
+    "asset": "https://assets.wanxiangqiwiki.com/assets/official/2026-09-29/b8acbdb68d3b7923a54bac071d42029eafaeabda4ec30ef22512c1e9a506c064.webp",
+    "search": "因缘图腾 Fate Totem 你的单位每合计进行25次普攻，所有己方英雄等级永久+1。"
+  },
+  {
+    "name": "Oracle Totem",
+    "alt": "先知图腾",
+    "type": "Summon",
+    "group": "Summons",
+    "url": "/summons/oracle-totem/",
+    "asset": "https://assets.wanxiangqiwiki.com/assets/official/2026-10-27/57efec0f2ea65052db851fac.webp",
+    "search": "先知图腾 Oracle Totem 开团：距离最近的2名己方英雄获得装备玄微之种。"
+  },
+  {
+    "name": "Mechanized Puppet",
+    "alt": "机关傀儡",
+    "type": "Summon",
+    "group": "Summons",
+    "url": "/summons/mechanized-puppet/",
+    "asset": "https://assets.wanxiangqiwiki.com/assets/official/2026-09-29/c1725353bb7e0042d5d43b227bd1b1286fe7798befdc1fe288d7ca7be1c10520.webp",
+    "search": "机关傀儡 Mechanized Puppet 获得等同于你场上【逐鹿】英雄或召唤单位中最高等级一半的临时等级。"
+  },
+  {
+    "name": "Xuan Yong Soldier",
+    "alt": "玄雍士兵",
+    "type": "Summon",
+    "group": "Summons",
+    "url": "/summons/xuan-yong-soldier/",
+    "asset": "https://assets.wanxiangqiwiki.com/assets/official/2026-09-29/70143f59339342c0065c6cb988724097f04d69fe6cf31a3fb57b8fb1ed9493ac.webp",
+    "search": "玄雍士兵 Xuan Yong Soldier “令则行，禁则止，无有所怠！”"
+  },
+  {
+    "name": "Mechanical Minion",
+    "alt": "机械仆从",
+    "type": "Summon",
+    "group": "Summons",
+    "url": "/summons/mechanical-minion/",
+    "asset": "/assets/summons/units/mechanical-minion.png",
+    "search": "机械仆从 Mechanical Minion 米莱狄技能召唤的机械单位；继承米莱狄的法术攻击力。"
+  },
+  {
+    "name": "Ancestor Bear Spirit",
+    "alt": "始祖熊灵",
+    "type": "Summon",
+    "group": "Summons",
+    "url": "/summons/ancestor-bear-spirit/",
+    "asset": "/assets/summons/units/ancestor-bear-spirit.png",
+    "search": "始祖熊灵 Ancestor Bear Spirit 始祖熊灵天赋关联单位，视为大河英雄且不占人口。"
+  },
+  {
+    "name": "Magic Book",
+    "alt": "魔法书",
+    "type": "Summon",
+    "group": "Summons",
+    "url": "/summons/magic-book/",
+    "asset": "/assets/summons/units/magic-book.png",
+    "search": "魔法书 Magic Book 百变魔法书效果关联的特殊召唤单位；独立基础属性尚待核验。"
+  },
+  {
+    "name": "Storm Greatsword",
+    "alt": "风暴巨剑",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/storm-greatsword/",
+    "asset": "/assets/equipment/643100/equipment-643100-thumbnail.webp",
+    "search": "风暴巨剑 Storm Greatsword 穿戴给英雄，可以铸造成1件输出型普通装备。"
+  },
+  {
+    "name": "Codex of Saints",
+    "alt": "圣者法典",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/codex-of-saints/",
+    "asset": "/assets/equipment/643800/equipment-643800-thumbnail.webp",
+    "search": "圣者法典 Codex of Saints 穿戴给英雄，可以铸造成1件法术型普通装备。"
+  },
+  {
+    "name": "Thunder Blade",
+    "alt": "雷鸣刃",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/thunder-blade/",
+    "asset": "/assets/equipment/643700/equipment-643700-thumbnail.webp",
+    "search": "雷鸣刃 Thunder Blade 穿戴给英雄，可以铸造成1件输出型普通装备。"
+  },
+  {
+    "name": "Guardian Armor",
+    "alt": "守护者之铠",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/guardian-armor/",
+    "asset": "/assets/equipment/643600/equipment-643600-thumbnail.webp",
+    "search": "守护者之铠 Guardian Armor 穿戴给英雄，可以铸造成1件防御型普通装备。"
+  },
+  {
+    "name": "Strength Belt",
+    "alt": "力量腰带",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/strength-belt/",
+    "asset": "/assets/equipment/643500/equipment-643500-thumbnail.webp",
+    "search": "力量腰带 Strength Belt 穿戴给英雄，可以铸造成1件防御型普通装备。"
+  },
+  {
+    "name": "Broken Holy Grail",
+    "alt": "破碎圣杯",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/broken-holy-grail/",
+    "asset": "/assets/equipment/643400/equipment-643400-thumbnail.webp",
+    "search": "破碎圣杯 Broken Holy Grail 穿戴给英雄，可以铸造成1件功能型普通装备。"
+  },
+  {
+    "name": "Swiftfire Spear",
+    "alt": "速击之枪",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/swiftfire-spear/",
+    "asset": "/assets/equipment/643300/equipment-643300-thumbnail.webp",
+    "search": "速击之枪 Swiftfire Spear 穿戴给英雄，可以铸造成1件输出型普通装备。"
+  },
+  {
+    "name": "Great Rod",
+    "alt": "大棒",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/great-rod/",
+    "asset": "/assets/equipment/643200/equipment-643200-thumbnail.webp",
+    "search": "大棒 Great Rod 穿戴给英雄，可以铸造成1件输出型普通装备。"
+  },
+  {
+    "name": "Witch's Cloak",
+    "alt": "魔女斗篷",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/witch-s-cloak/",
+    "asset": "/assets/equipment/643503/equipment-643503-thumbnail.webp",
+    "search": "魔女斗篷 Witch's Cloak 法术防御力+30。战斗开始时，获得等级x5点法术护盾。"
+  },
+  {
+    "name": "Arctic Storm",
+    "alt": "极寒风暴",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/arctic-storm/",
+    "asset": "/assets/equipment/643602/equipment-643602-thumbnail.webp",
+    "search": "极寒风暴 Arctic Storm 唯一。受到普攻时，降低目标20%攻击速度，持续2秒。被单一目标普攻5次后，远程目标将被冻结1秒，近战目标减半。"
+  },
+  {
+    "name": "Spirit Veil",
+    "alt": "御灵之纱",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/spirit-veil/",
+    "asset": "/assets/equipment/643805/equipment-643805-thumbnail.webp",
+    "search": "御灵之纱 Spirit Veil 唯一。战斗开始时，获得等级×15点护盾。护盾被击破时对周围1格敌人造成1秒眩晕，击破者翻倍。"
+  },
+  {
+    "name": "Life Grimoire",
+    "alt": "生命魔典",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/life-grimoire/",
+    "asset": "/assets/equipment/643804/equipment-643804-thumbnail.webp",
+    "search": "生命魔典 Life Grimoire 唯一。受到伤害时会为自身和周围1格的己方单位恢复5%最大生命值，冷却2秒。"
+  },
+  {
+    "name": "Blazing Dominator",
+    "alt": "炽热支配者",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/blazing-dominator/",
+    "asset": "/assets/equipment/643803/equipment-643803-thumbnail.webp",
+    "search": "炽热支配者 Blazing Dominator 唯一。首次受到控制效果时，获得300点护盾并在接下来的15秒内免疫控制效果（压制除外）。"
+  },
+  {
+    "name": "Sage's Book",
+    "alt": "贤者之书",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/sage-s-book/",
+    "asset": "/assets/equipment/643802/equipment-643802-thumbnail.webp",
+    "search": "贤者之书 Sage's Book 唯一。法力值上限-10。释放技能后获得20%基础法术攻击力，最多叠加6层。"
+  },
+  {
+    "name": "Dreamforge: Windchaser",
+    "alt": "铸梦·逐风",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/dreamforge-windchaser/",
+    "asset": "/assets/equipment/643304/equipment-643304-thumbnail.webp",
+    "search": "铸梦·逐风 Dreamforge: Windchaser 唯一。战斗开始及之后每过8秒，快速进行4次普通攻击。"
+  },
+  {
+    "name": "Endless Greatsword",
+    "alt": "无尽巨剑",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/endless-greatsword/",
+    "asset": "/assets/equipment/643103/equipment-643103-thumbnail.webp",
+    "search": "无尽巨剑 Endless Greatsword 暴击率+30%，暴击效果+60%。暴击效果不可叠加。"
+  },
+  {
+    "name": "Sanction Sword",
+    "alt": "制裁之剑",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/sanction-sword/",
+    "asset": "/assets/equipment/643104/equipment-643104-thumbnail.webp",
+    "search": "制裁之剑 Sanction Sword 唯一。造成伤害时降低目标30%生命恢复及护盾效果，持续10秒，不可叠加。若为普通攻击，效果提升至70%。"
+  },
+  {
+    "name": "Pure Sky",
+    "alt": "纯净苍穹",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/pure-sky/",
+    "asset": "/assets/equipment/643105/equipment-643105-thumbnail.webp",
+    "search": "纯净苍穹 Pure Sky 唯一。每2秒获得10点法术攻击力，同时清除自身负面状态。"
+  },
+  {
+    "name": "Arcane Blade",
+    "alt": "魔律之刃",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/arcane-blade/",
+    "asset": "/assets/equipment/643705/equipment-643705-thumbnail.webp",
+    "search": "魔律之刃 Arcane Blade 唯一。释放技能时，35%概率重复释放一次。每有7级，额外提升1%概率。近战英雄总上限70%。"
+  },
+  {
+    "name": "Void Staff",
+    "alt": "虚无法杖",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/void-staff/",
+    "asset": "/assets/equipment/643202/equipment-643202-thumbnail.webp",
+    "search": "虚无法杖 Void Staff 唯一。获得15点法术防御穿透。"
+  },
+  {
+    "name": "Frost Assault",
+    "alt": "寒霜侵袭",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/frost-assault/",
+    "asset": "/assets/equipment/643205/equipment-643205-thumbnail.webp",
+    "search": "寒霜侵袭 Frost Assault 唯一。普通攻击减少目标15%移速，持续5秒，最多叠加5层。叠满后目标受到的伤害提高20%，持续5秒，冷却时间10秒。"
+  },
+  {
+    "name": "Nature Staff",
+    "alt": "自然法杖",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/nature-staff/",
+    "asset": "/assets/equipment/643208/equipment-643208-thumbnail.webp",
+    "search": "自然法杖 Nature Staff 唯一。法术攻击力+20%，远程穿戴者每消耗40点法力值（近战80点法力值）会将随机1名敌人变成小猪，持续2秒。"
+  },
+  {
+    "name": "Golden Sacred Sword",
+    "alt": "金色圣剑",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/golden-sacred-sword/",
+    "asset": "/assets/equipment/643207/equipment-643207-thumbnail.webp",
+    "search": "金色圣剑 Golden Sacred Sword 唯一。获得30%（+15%法术攻击力）攻击速度。每次普通攻击附带20（+30%法术攻击力）点法术伤害。"
+  },
+  {
+    "name": "Crimson Devil",
+    "alt": "红魔",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/crimson-devil/",
+    "asset": "/assets/equipment/643704/equipment-643704-thumbnail.webp",
+    "search": "红魔 Crimson Devil 唯一。周围1格没有友军时，获得25%伤害加成。每承受3%最大生命值的伤害，获得1%伤害加成，上限100%。"
+  },
+  {
+    "name": "Shadowfang",
+    "alt": "影牙",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/shadowfang/",
+    "asset": "/assets/equipment/643301/equipment-643301-thumbnail.webp",
+    "search": "影牙 Shadowfang 攻击速度+50%。"
+  },
+  {
+    "name": "Dawn",
+    "alt": "破晓",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/dawn/",
+    "asset": "/assets/equipment/643302/equipment-643302-thumbnail.webp",
+    "search": "破晓 Dawn 每次普通攻击降低目标3点物防，持续5秒。目标物防首次降为0时，附加1次目标15%最大生命值的物理伤害。"
+  },
+  {
+    "name": "Deep Rift",
+    "alt": "凝渊",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/deep-rift/",
+    "asset": "/assets/equipment/641010/equipment-641010-thumbnail.webp",
+    "search": "凝渊 Deep Rift 唯一。暴击率+20%。每次受击时提升1%暴击率，暴击率达到100%时提升100%移动速度。"
+  },
+  {
+    "name": "Sunrift",
+    "alt": "日渊",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/sunrift/",
+    "asset": "/assets/equipment/641015/equipment-641015-thumbnail.webp",
+    "search": "日渊 Sunrift 唯一，限定远程英雄。普通攻击会释放飞箭，对生命值最低的2名敌人造成55%物理攻击力的物理伤害。"
+  },
+  {
+    "name": "Lifebound Blade",
+    "alt": "名刀·司命",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/lifebound-blade/",
+    "asset": "/assets/equipment/643703/equipment-643703-thumbnail.webp",
+    "search": "名刀·司命 Lifebound Blade 唯一。穿戴者首次受到致命伤害时会进入无敌和不可选中状态，持续1.5秒。"
+  },
+  {
+    "name": "Pain Mask",
+    "alt": "痛苦面具",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/pain-mask/",
+    "asset": "/assets/equipment/643401/equipment-643401-thumbnail.webp",
+    "search": "痛苦面具 Pain Mask 唯一。单次魔法伤害超过目标最大生命值的8%时会使目标点燃：每秒造成75%法术攻击力的真实伤害，持续3秒。"
+  },
+  {
+    "name": "Sourcewell Chalice",
+    "alt": "法源之杯",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/sourcewell-chalice/",
+    "asset": "/assets/equipment/643402/equipment-643402-thumbnail.webp",
+    "search": "法源之杯 Sourcewell Chalice 唯一。每秒回复5点法力值。"
+  },
+  {
+    "name": "Cocoonweave",
+    "alt": "破茧之衣",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/cocoonweave/",
+    "asset": "/assets/equipment/643403/equipment-643403-thumbnail.webp",
+    "search": "破茧之衣 Cocoonweave 唯一。战斗开始时，法力值+15，同时眩晕敌方等级最高3名英雄中的随机1名，持续1秒。目标每有10级，眩晕时间增加0.5秒，上限5秒。"
+  },
+  {
+    "name": "Spirit Gathering Crystal",
+    "alt": "聚灵水晶",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/spirit-gathering-crystal/",
+    "asset": "/assets/equipment/643404/equipment-643404-thumbnail.webp",
+    "search": "聚灵水晶 Spirit Gathering Crystal 唯一。受击时额外获得10点法力值，最多100点。达到上限后恢复20%最大生命值。"
+  },
+  {
+    "name": "Hades",
+    "alt": "冥王",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/hades/",
+    "asset": "/assets/equipment/643702/equipment-643702-thumbnail.webp",
+    "search": "冥王 Hades 唯一。穿戴者周围1格每有1个敌方单位，获得10点物理防御和15%基础物理攻击力。"
+  },
+  {
+    "name": "Overlord's Armor",
+    "alt": "霸者重铠",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/overlord-s-armor/",
+    "asset": "/assets/equipment/643501/equipment-643501-thumbnail.webp",
+    "search": "霸者重铠 Overlord's Armor 唯一。生命值高于70%时获得40%伤害减免。"
+  },
+  {
+    "name": "Phoenix Eye",
+    "alt": "不死鸟之眼",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/phoenix-eye/",
+    "asset": "/assets/equipment/643502/equipment-643502-thumbnail.webp",
+    "search": "不死鸟之眼 Phoenix Eye 唯一。增加15%基础生命值，生命恢复和护盾效果提升30%。"
+  },
+  {
+    "name": "Counterguard Armor",
+    "alt": "反伤重甲",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/counterguard-armor/",
+    "asset": "/assets/equipment/643604/equipment-643604-thumbnail.webp",
+    "search": "反伤重甲 Counterguard Armor 唯一。将受到伤害的30%以真实伤害回敬给目标。"
+  },
+  {
+    "name": "Crimson Lotus Armor",
+    "alt": "红莲炎甲",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/crimson-lotus-armor/",
+    "asset": "/assets/equipment/643504/equipment-643504-thumbnail.webp",
+    "search": "红莲炎甲 Crimson Lotus Armor 唯一。每2秒对周围1格敌人造成20（+5%穿戴者最大生命值）点法术伤害，并降低目标50%生命恢复和护盾效果，持续3秒。"
+  },
+  {
+    "name": "Vanguard Glory",
+    "alt": "近卫荣耀",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/vanguard-glory/",
+    "asset": "/assets/equipment/643603/equipment-643603-thumbnail.webp",
+    "search": "近卫荣耀 Vanguard Glory 唯一。战斗开始时，周围1格己方单位获得10点物理和法术防御，穿戴者获得双倍效果，不可叠加。"
+  },
+  {
+    "name": "Ominous Sign",
+    "alt": "不祥征兆",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/ominous-sign/",
+    "asset": "/assets/equipment/643601/equipment-643601-thumbnail.webp",
+    "search": "不祥征兆 Ominous Sign 唯一。战斗前15秒，格挡50%普通攻击伤害，若攻击者攻速不低于1.5，则格挡70%普通攻击伤害。"
+  },
+  {
+    "name": "Severed Thought",
+    "alt": "断念",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/severed-thought/",
+    "asset": "/assets/equipment/644103/equipment-644103-thumbnail.webp",
+    "search": "断念 Severed Thought 唯一。造成伤害时，本场战斗降低敌方单位20%最大生命值上限（不可叠加）。"
+  },
+  {
+    "name": "Inspiration Ring",
+    "alt": "鼓舞之戒",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/inspiration-ring/",
+    "asset": "/assets/equipment/641006/equipment-641006-thumbnail.webp",
+    "search": "鼓舞之戒 Inspiration Ring 唯一。战斗开始时，与穿戴者同阵营的英雄，提升30%最大生命值。"
+  },
+  {
+    "name": "Nightmare Fang",
+    "alt": "梦魇之牙",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/nightmare-fang/",
+    "asset": "/assets/equipment/643206/equipment-643206-thumbnail.webp",
+    "search": "梦魇之牙 Nightmare Fang 唯一。法术攻击力+35%。造成法术伤害时添加梦魇印记，持续5秒。带有印记的单位阵亡时，对周围1格敌方单位造成穿戴者法术攻击力×2的法术伤害。"
+  },
+  {
+    "name": "Tri-Point Banner",
+    "alt": "三分旗帜",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/tri-point-banner/",
+    "asset": "/assets/equipment/6363182/equipment-6363182-thumbnail.webp",
+    "search": "三分旗帜 Tri-Point Banner 仅三分英雄穿戴。将造成伤害的40%转化为治疗量，平摊给所有【三分】英雄。\n治疗分摊时会排除满血的【三分】英雄。"
+  },
+  {
+    "name": "Wrath God's Necklace",
+    "alt": "怒神项链",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/wrath-god-s-necklace/",
+    "asset": "/assets/equipment/644111/equipment-644111-thumbnail.webp",
+    "search": "怒神项链 Wrath God's Necklace 唯一。暴击率+50%，法术伤害可以暴击。"
+  },
+  {
+    "name": "Soulreaper Crown",
+    "alt": "魂灭灵冠",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/soulreaper-crown/",
+    "asset": "/assets/equipment/644110/equipment-644110-thumbnail.webp",
+    "search": "魂灭灵冠 Soulreaper Crown 唯一。阵亡时，对周围1格敌人造成目标35%最大生命值的真实伤害。"
+  },
+  {
+    "name": "Spiritwell Necklace",
+    "alt": "灵泉项链",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/spiritwell-necklace/",
+    "asset": "/assets/equipment/644109/equipment-644109-thumbnail.webp",
+    "search": "灵泉项链 Spiritwell Necklace 唯一。战斗开始时，周围1格的单位每秒回复4点法力值。穿戴者法力值上限-10。"
+  },
+  {
+    "name": "Soul Offering Blade",
+    "alt": "魂祭绝刃",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/soul-offering-blade/",
+    "asset": "/assets/equipment/644107/equipment-644107-thumbnail.webp",
+    "search": "魂祭绝刃 Soul Offering Blade 唯一。攻击速度+50%，物理和法术吸血+30%。战斗开始时，扣除50%最大生命值。"
+  },
+  {
+    "name": "Formation Breaker",
+    "alt": "破阵战芒",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/formation-breaker/",
+    "asset": "/assets/equipment/644102/equipment-644102-thumbnail.webp",
+    "search": "破阵战芒 Formation Breaker 唯一。仅1-3阶英雄可穿戴。战斗开始时，获得等级×1%的伤害加成和攻速，上限50%。"
+  },
+  {
+    "name": "Tidecaller Staff",
+    "alt": "法潮灵杖",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/tidecaller-staff/",
+    "asset": "/assets/equipment/644104/equipment-644104-thumbnail.webp",
+    "search": "法潮灵杖 Tidecaller Staff 唯一。法术攻击力+25%。战斗开始，会获得左右1格的英雄的100%法术攻击力。"
+  },
+  {
+    "name": "End of the World",
+    "alt": "末世",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/end-of-the-world/",
+    "asset": "/assets/equipment/643303/equipment-643303-thumbnail.webp",
+    "search": "末世 End of the World 唯一。普通攻击会减少目标2%最大生命值并恢复等量生命值。穿戴者为近战英雄时，效果翻倍。"
+  },
+  {
+    "name": "Radiant Holy Armor",
+    "alt": "光辉圣铠",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/radiant-holy-armor/",
+    "asset": "/assets/equipment/644106/equipment-644106-thumbnail.webp",
+    "search": "光辉圣铠 Radiant Holy Armor 唯一。每秒恢复50+4%最大生命值。"
+  },
+  {
+    "name": "Lifeguard Bead",
+    "alt": "护命灵珠",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/lifeguard-bead/",
+    "asset": "/assets/equipment/644105/equipment-644105-thumbnail.webp",
+    "search": "护命灵珠 Lifeguard Bead 唯一。每4秒获得基础生命值25%的护盾。拥有护盾时伤害提升25%，护盾被击破则移除。"
+  },
+  {
+    "name": "Spiritwell Staff",
+    "alt": "灵泉法杖",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/spiritwell-staff/",
+    "asset": "/assets/equipment/644004/equipment-644004-thumbnail.webp",
+    "search": "灵泉法杖 Spiritwell Staff 唯一。获得闪现，每次闪现后普攻附带一次重击：造成300%伤害并且眩晕敌方1秒，每次击败敌方单位再次触发闪现。"
+  },
+  {
+    "name": "Delusionbreaker",
+    "alt": "破妄之刃",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/delusionbreaker/",
+    "asset": "/assets/equipment/644101/equipment-644101-thumbnail.webp",
+    "search": "破妄之刃 Delusionbreaker 唯一。移动速度提升60%，造成伤害的50%会转化为真实伤害。免疫减速效果。"
+  },
+  {
+    "name": "Unyielding Will",
+    "alt": "不屈意志",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/unyielding-will/",
+    "asset": "/assets/equipment/641023/equipment-641023-thumbnail.webp",
+    "search": "不屈意志 Unyielding Will 唯一。战斗开始及之后每3秒获得场上友军穿戴不屈意志数量x2的临时等级。阵亡时，将自身等级的30%平均分配给穿戴不屈意志的友军。"
+  },
+  {
+    "name": "Knowledge Gem",
+    "alt": "学识宝石",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/knowledge-gem/",
+    "asset": "/assets/equipment/641001/equipment-641001-thumbnail.webp",
+    "search": "学识宝石 Knowledge Gem 唯一 每回合开始时等级+8%（至少+3级）并减少2点法力值上限。"
+  },
+  {
+    "name": "Lotus of Wrath",
+    "alt": "怒莲之刺",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/lotus-of-wrath/",
+    "asset": "/assets/equipment/644114/equipment-644114-thumbnail.webp",
+    "search": "怒莲之刺 Lotus of Wrath 唯一。提升100%攻速，受到的全部伤害转移给穿戴银莲庇佑的单位。"
+  },
+  {
+    "name": "God-Eater's Tome",
+    "alt": "噬神之书",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/god-eater-s-tome/",
+    "asset": "/assets/equipment/643801/equipment-643801-thumbnail.webp",
+    "search": "噬神之书 God-Eater's Tome 法术攻击力+100，法术吸血+60%。"
+  },
+  {
+    "name": "Conquest Sword",
+    "alt": "征服之剑",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/conquest-sword/",
+    "asset": "/assets/equipment/643701/equipment-643701-thumbnail.webp",
+    "search": "征服之剑 Conquest Sword 物理吸血+30%。生命值低于50%时，此吸血效果翻倍。"
+  },
+  {
+    "name": "Shenghua",
+    "alt": "盛华",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/shenghua/",
+    "asset": "/assets/equipment/641014/equipment-641014-thumbnail.webp",
+    "search": "盛华 Shenghua 唯一，无法拆卸。每次战斗结束后永久增加200点生命值，战斗胜利翻倍。增加生命值超过2000时，额外增加15%生命值上限。"
+  },
+  {
+    "name": "Bell of Silence",
+    "alt": "静谧之铃",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/bell-of-silence/",
+    "asset": "/assets/equipment/641009/equipment-641009-thumbnail.webp",
+    "search": "静谧之铃 Bell of Silence 唯一。敌方等级最高的两名英雄释放技能后5秒内无法恢复法力值，在此期间每0.5秒受到穿戴者20%法术攻击力的法术伤害。"
+  },
+  {
+    "name": "Energy Capture Gloves",
+    "alt": "捕能手套",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/energy-capture-gloves/",
+    "asset": "/assets/equipment/641005/equipment-641005-thumbnail.webp",
+    "search": "捕能手套 Energy Capture Gloves 唯一。每击败1名英雄，获得1能量。单回合击败不少于5名英雄时，获得能量转换。能量转换：消耗3能量，获得与棋手等级相对应的效果锦囊牌（不超过5阶）。"
+  },
+  {
+    "name": "Mirror Splitter",
+    "alt": "分身镜",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/mirror-splitter/",
+    "asset": "/assets/equipment/641004/equipment-641004-thumbnail.webp",
+    "search": "分身镜 Mirror Splitter 唯一。战斗开始时，召唤1个承受350%伤害的复制体（无卡牌效果）。"
+  },
+  {
+    "name": "Thunderbane",
+    "alt": "驱雷",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/thunderbane/",
+    "asset": "/assets/equipment/644113/equipment-644113-thumbnail.webp",
+    "search": "驱雷 Thunderbane 唯一。每2秒召唤2道雷电轰击敌我双方任意2名单位（穿戴者除外）。造成目标30%最大生命值的法术伤害（命中友军不触发吸血）。若命中司空震则改为使其快速攻击4次。"
+  },
+  {
+    "name": "Azure Lotus Manual",
+    "alt": "青莲剑谱",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/azure-lotus-manual/",
+    "asset": "/assets/equipment/641021/equipment-641021-thumbnail.webp",
+    "search": "青莲剑谱 Azure Lotus Manual 唯一，限定近战英雄。暴击率+40%。穿戴者释放的技能替换为青莲剑歌。"
+  },
+  {
+    "name": "Silver Lotus Blessing",
+    "alt": "银莲庇佑",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/silver-lotus-blessing/",
+    "asset": "/assets/equipment/644115/equipment-644115-thumbnail.webp",
+    "search": "银莲庇佑 Silver Lotus Blessing 唯一。提升10点物理及法术防御力，替穿戴怒莲之刺的英雄承担伤害。"
+  },
+  {
+    "name": "Machine Head",
+    "alt": "机器头",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/machine-head/",
+    "asset": "/assets/equipment/644116/equipment-644116-thumbnail.webp",
+    "search": "机器头 Machine Head 唯一。战斗开始，英雄固定0.4的攻击速度，获得60%伤害加成。免疫负面效果。"
+  },
+  {
+    "name": "Child of Acomia",
+    "alt": "阿科米亚之子",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/child-of-acomia/",
+    "asset": "/assets/equipment/644117/equipment-644117-thumbnail.webp",
+    "search": "阿科米亚之子 Child of Acomia 唯一。参与阿科米亚核心的等级分配。穿戴者及周围1格单位每秒恢复4法力值与2%最大生命值。友军经过时获得同等效果，持续8秒。"
+  },
+  {
+    "name": "Heart of Stone",
+    "alt": "磐石之心",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/heart-of-stone/",
+    "asset": "/assets/equipment/644119/equipment-644119-thumbnail.webp",
+    "search": "磐石之心 Heart of Stone 唯一。每次受到伤害不会超过15%最大生命值。"
+  },
+  {
+    "name": "Hundred-Forged Knife",
+    "alt": "百锻刀",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/hundred-forged-knife/",
+    "asset": "/assets/equipment/641002/equipment-641002-thumbnail.webp",
+    "search": "百锻刀 Hundred-Forged Knife 唯一，无法拆卸。物理攻击力+30。每击败1名英雄，永久获得5点物理攻击力，战斗胜利翻倍（已击败：0）。"
+  },
+  {
+    "name": "Fawn's Refuge",
+    "alt": "小鹿的庇护",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/fawn-s-refuge/",
+    "asset": "/assets/equipment/641008/equipment-641008-thumbnail.webp",
+    "search": "小鹿的庇护 Fawn's Refuge 唯一。穿戴者所受伤害的30%将转移到小鹿身上。"
+  },
+  {
+    "name": "Spiritgathering Staff",
+    "alt": "聚灵法杖",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/spiritgathering-staff/",
+    "asset": "/assets/equipment/641003/equipment-641003-thumbnail.webp",
+    "search": "聚灵法杖 Spiritgathering Staff 唯一，无法拆卸。法术攻击力+30，普攻附带自身70%法术攻击力。每击败1名英雄，永久获得5点法术攻击力，战斗胜利翻倍（已击败：0)。"
+  },
+  {
+    "name": "Starforged Armor",
+    "alt": "星源装甲",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/starforged-armor/",
+    "asset": "/assets/equipment/41124/equipment-41124-thumbnail.webp",
+    "search": "星源装甲 Starforged Armor 【日落海】专属装备 物理和法术吸血+20%。唯一被动：释放技能后的2秒内免疫控制。"
+  },
+  {
+    "name": "Starforged Hunting Gun",
+    "alt": "星源狩枪",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/starforged-hunting-gun/",
+    "asset": "/assets/equipment/41125/equipment-41125-thumbnail.webp",
+    "search": "星源狩枪 Starforged Hunting Gun 【日落海】专属装备 物理和法术攻击力+20%。唯一被动：法力值上限-20，且技能会直接击败生命值10%以下的敌人。"
+  },
+  {
+    "name": "Starforged Crest",
+    "alt": "星源星徽",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/starforged-crest/",
+    "asset": "/assets/equipment/41126/equipment-41126-thumbnail.webp",
+    "search": "星源星徽 Starforged Crest 【日落海】专属装备 唯一被动：该英雄不会被阿科米亚核心分配等级。"
+  },
+  {
+    "name": "Starforged Alloy Shield",
+    "alt": "星源合金盾",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/starforged-alloy-shield/",
+    "asset": "/assets/equipment/41127/equipment-41127-thumbnail.webp",
+    "search": "星源合金盾 Starforged Alloy Shield 【日落海】专属装备 物理和法术防御力+20。唯一被动：受到的伤害-20%。"
+  },
+  {
+    "name": "Moonshadow's Power",
+    "alt": "月影之力",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/moonshadow-s-power/",
+    "asset": "/assets/equipment/41128/equipment-41128-thumbnail.webp",
+    "search": "月影之力 Moonshadow's Power 【日落海】专属装备 生命值上限+15%。唯一被动：露娜释放2次技能后，将释放1次【月下无限连】（仅露娜穿戴时生效，每场战斗限1次）。"
+  },
+  {
+    "name": "Seed of Xuanwei",
+    "alt": "玄微之种",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/seed-of-xuanwei/",
+    "asset": "/assets/equipment/42101/equipment-42101-thumbnail.webp",
+    "search": "玄微之种 Seed of Xuanwei 穿戴者获得牺牲：生命值百分比最低的己方英雄恢复200（+20%最大生命值）点生命值。"
+  },
+  {
+    "name": "Twin Blades: Yang",
+    "alt": "双剑·雄",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/twin-blades-yang/",
+    "asset": "/assets/equipment/42102/equipment-42102-thumbnail.webp",
+    "search": "双剑·雄 Twin Blades: Yang 攻击速度+30%。若穿戴者为干将莫邪，其法力值上限降低至10。"
+  },
+  {
+    "name": "Twin Blades: Yin",
+    "alt": "双剑·雌",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/twin-blades-yin/",
+    "asset": "/assets/equipment/42103/equipment-42103-thumbnail.webp",
+    "search": "双剑·雌 Twin Blades: Yin 法术攻击力+15%，穿戴者击败敌方英雄时，自身等级永久+1，若穿戴者为干将莫邪，等级额外+1。"
+  },
+  {
+    "name": "Cloudstream Thorn",
+    "alt": "流云之刺",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/cloudstream-thorn/",
+    "asset": "/assets/equipment/6365172/equipment-6365172-thumbnail.webp",
+    "search": "流云之刺 Cloudstream Thorn 唯一。攻击速度+30%。每对目标进行3次普通攻击，会召唤云中君灵体对其造成4%最大生命值的物理伤害并降低其5点护甲。"
+  },
+  {
+    "name": "Winged Skyshield",
+    "alt": "翼苍穹盾",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/winged-skyshield/",
+    "asset": "/assets/equipment/6365173/equipment-6365173-thumbnail.webp",
+    "search": "翼苍穹盾 Winged Skyshield 唯一。物理和法术防御力+10。敌方每阵亡1个单位，再各提升10点，上限100点。"
+  },
+  {
+    "name": "Soulreaver Claw",
+    "alt": "掠魂爪",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/soulreaver-claw/",
+    "asset": "/assets/equipment/6365174/equipment-6365174-thumbnail.webp",
+    "search": "掠魂爪 Soulreaver Claw 唯一。物理和法术吸血+50%。普通攻击额外造成目标8%当前生命值的物理伤害。"
+  },
+  {
+    "name": "Everfrost Feather",
+    "alt": "永冻霜羽",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/everfrost-feather/",
+    "asset": "/assets/equipment/6365175/equipment-6365175-thumbnail.webp",
+    "search": "永冻霜羽 Everfrost Feather 唯一。法术攻击力+100 。对每个目标首次造成法术伤害时，将冻结目标2秒。"
+  },
+  {
+    "name": "Skybound Sovereignty",
+    "alt": "苍穹王权",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/skybound-sovereignty/",
+    "asset": "/assets/equipment/6365176/equipment-6365176-thumbnail.webp",
+    "search": "苍穹王权 Skybound Sovereignty 唯一。受到致命伤害时，免疫此次伤害，持续1秒。并对全部敌人造成100+其已损失30%生命值的法术伤害。"
+  },
+  {
+    "name": "Eaglebone Flute",
+    "alt": "唤鹰骨笛",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/eaglebone-flute/",
+    "asset": "/assets/equipment/6365177/equipment-6365177-thumbnail.webp",
+    "search": "唤鹰骨笛 Eaglebone Flute 战斗开始后每8秒，召唤一名等级为自身一半的云中君，迅速冲向最远处的敌人。"
+  },
+  {
+    "name": "Bloodrush Gauntlets",
+    "alt": "热血拳套",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/bloodrush-gauntlets/",
+    "asset": "/assets/equipment/641007/equipment-641007-thumbnail.webp",
+    "search": "热血拳套 Bloodrush Gauntlets 唯一。攻击速度+30%。攻速上限改为5.0。战斗期间，每获得2点法力值，提升1%攻击速度。"
+  },
+  {
+    "name": "Wise One's Sanctuary",
+    "alt": "贤者的庇护",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/wise-one-s-sanctuary/",
+    "asset": "/assets/equipment/641016/equipment-641016-thumbnail.webp",
+    "search": "贤者的庇护 Wise One's Sanctuary 可穿戴给【河洛】英雄，穿戴者会在首次被击败的2秒后复生，仅恢复30%生命值。"
+  },
+  {
+    "name": "Rootforce",
+    "alt": "根源之力",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/rootforce/",
+    "asset": "/assets/equipment/644108/equipment-644108-thumbnail.webp",
+    "search": "根源之力 Rootforce 唯一。每4秒对生命值最低的敌方单位造成600%法术攻击力的法术伤害。"
+  },
+  {
+    "name": "Nemesis of the Strong",
+    "alt": "强敌克星",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/nemesis-of-the-strong/",
+    "asset": "/assets/equipment/644112/equipment-644112-thumbnail.webp",
+    "search": "强敌克星 Nemesis of the Strong 唯一。造成伤害的15%转化为真实伤害。对目标每普通攻击4次，会眩晕目标1秒。"
+  },
+  {
+    "name": "Matryoshka Gun",
+    "alt": "套娃枪",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/matryoshka-gun/",
+    "asset": "/assets/equipment/644118/equipment-644118-thumbnail.webp",
+    "search": "套娃枪 Matryoshka Gun 唯一。每次普攻30%概率产生1个无法释放技能的分身，持续2秒。造成50%伤害，承受500%的伤害（分身继承此效果）。"
+  },
+  {
+    "name": "Stasis Vortex",
+    "alt": "停滞漩涡",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/stasis-vortex/",
+    "asset": "/assets/equipment/644120/equipment-644120-thumbnail.webp",
+    "search": "停滞漩涡 Stasis Vortex 唯一。敌方单位被控制时，每0.2秒偷取其1+1%物理与法术攻击力，持续到战斗结束。"
+  },
+  {
+    "name": "Polymorph Grimoire",
+    "alt": "百变魔法书",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/polymorph-grimoire/",
+    "asset": "/assets/equipment/644121/equipment-644121-thumbnail.webp",
+    "search": "百变魔法书 Polymorph Grimoire 击败敌方时，在其阵位上召唤魔法书（根据穿戴者的阵营和等级召唤）对随机敌人释放1道炽热光辉，持续3秒。"
+  },
+  {
+    "name": "Mechanism Casket",
+    "alt": "机关匣",
+    "type": "Equipment",
+    "group": "Equipment",
+    "url": "/equipment/mechanism-casket/",
+    "asset": "/assets/equipment/7542/equipment-7542-thumbnail.webp",
+    "search": "机关匣 Mechanism Casket 唯一。可穿戴给【逐鹿】英雄，使其获得效果：战斗开始时，召唤2个拥有你等级最高英雄一半等级的“故障机器人”。"
+  },
+  {
+    "name": "Recruit Talent",
+    "alt": "吸纳人才",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/recruit-talent/",
+    "asset": "/assets/effect/7038/effect-7038-thumbnail.webp",
+    "search": "吸纳人才 Recruit Talent 卡牌4选1（英雄牌）。 把效果牌事件转换成通用 4 选 1 找牌权。"
+  },
+  {
+    "name": "Tier One Hero Voucher",
+    "alt": "1阶英雄兑换券",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/tier-one-hero-voucher/",
+    "asset": "/assets/effect/7051/effect-7051-thumbnail.webp",
+    "search": "1阶英雄兑换券 Tier One Hero Voucher 卡牌3选1（1阶英雄牌）。 "
+  },
+  {
+    "name": "Study Session",
+    "alt": "研读会",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/study-session/",
+    "asset": "/assets/effect/7059/effect-7059-thumbnail.webp",
+    "search": "研读会 Study Session 获得3棋手经验。 把一张低费效果牌转换成棋手等级轴的提前。"
+  },
+  {
+    "name": "Advanced Recruitment",
+    "alt": "高级人才",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/advanced-recruitment/",
+    "asset": "/assets/effect/7002/effect-7002-thumbnail.webp",
+    "search": "高级人才 Advanced Recruitment 随机获得1张特定品阶（棋手等级+1）的英雄牌。 "
+  },
+  {
+    "name": "Support Tactics",
+    "alt": "援护战术",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/support-tactics/",
+    "asset": "/assets/effect/313001/effect-313001-thumbnail.webp",
+    "search": "援护战术 Support Tactics 转瞬 全体【逐鹿】英雄本回合获得50（+25×战术牌打出次数，当前：75）点护盾。 把战术牌次数结算成全队生存窗口。"
+  },
+  {
+    "name": "Ancient Coin",
+    "alt": "古币",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/ancient-coin/",
+    "asset": "/assets/effect/311002/effect-311002-thumbnail.webp",
+    "search": "古币 Ancient Coin 转瞬 指定1名【河洛】英雄等级+2。 把效果牌事件压缩成定向永久等级，是河洛成长链的标准结算单位。"
+  },
+  {
+    "name": "Surprise Subsidy",
+    "alt": "惊喜补贴",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/surprise-subsidy/",
+    "asset": "/assets/effect/7087/effect-7087-thumbnail.webp",
+    "search": "惊喜补贴 Surprise Subsidy 获得3次免费刷新。 "
+  },
+  {
+    "name": "Level Jump",
+    "alt": "跳级",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/level-jump/",
+    "asset": "/assets/effect/7541/effect-7541-thumbnail.webp",
+    "search": "跳级 Level Jump 使1名英雄夺取阿科米亚核心至多5级。 "
+  },
+  {
+    "name": "Totem Rite",
+    "alt": "图腾仪式",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/totem-rite/",
+    "asset": "/assets/effect/7523/effect-7523-thumbnail.webp",
+    "search": "图腾仪式 Totem Rite 随机获得1张与图腾相关的【大河流域】英雄牌。 "
+  },
+  {
+    "name": "Two Jie Hero",
+    "alt": "2阶英雄",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/two-jie-hero/",
+    "asset": "/assets/effect/7519/effect-7519-thumbnail.webp",
+    "search": "2阶英雄 Two Jie Hero 获得2张2阶英雄牌。 "
+  },
+  {
+    "name": "Ancient Coin Duo Duo",
+    "alt": "古币多多",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/ancient-coin-duo-duo/",
+    "asset": "/assets/effect/7502/effect-7502-thumbnail.webp",
+    "search": "古币多多 Ancient Coin Duo Duo 获得2张古币。 "
+  },
+  {
+    "name": "Xian Yin",
+    "alt": "弦音",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/xian-yin/",
+    "asset": "/assets/effect/307001/effect-307001-thumbnail.webp",
+    "search": "弦音 Xian Yin 指定1名1-3阶英雄，使其觉醒进度+1。 "
+  },
+  {
+    "name": "Two Jie Herovoucher",
+    "alt": "2阶英雄兑换券",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/two-jie-herovoucher/",
+    "asset": "/assets/effect/7052/effect-7052-thumbnail.webp",
+    "search": "2阶英雄兑换券 Two Jie Herovoucher 卡牌3选1（2阶英雄牌）。 "
+  },
+  {
+    "name": "Lin Zhen Mo Qiang",
+    "alt": "临阵磨枪",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/lin-zhen-mo-qiang/",
+    "asset": "/assets/effect/7073/effect-7073-thumbnail.webp",
+    "search": "临阵磨枪 Lin Zhen Mo Qiang 指定1名英雄，触发其整备效果。 "
+  },
+  {
+    "name": "Huan Xing",
+    "alt": "唤醒",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/huan-xing/",
+    "asset": "/assets/effect/7074/effect-7074-thumbnail.webp",
+    "search": "唤醒 Huan Xing 指定1名英雄，触发其登场效果。 "
+  },
+  {
+    "name": "Yan Lian Tactics",
+    "alt": "演练战术",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/yan-lian-tactics/",
+    "asset": "/assets/effect/313013/effect-313013-thumbnail.webp",
+    "search": "演练战术 Yan Lian Tactics 转瞬 所有英雄等级+1。 把战术牌事件转换成全队永久等级，抬高多承接位底盘。"
+  },
+  {
+    "name": "Tui Yan Tactics",
+    "alt": "推演战术",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/tui-yan-tactics/",
+    "asset": "/assets/effect/313011/effect-313011-thumbnail.webp",
+    "search": "推演战术 Tui Yan Tactics 转瞬 指定1名【逐鹿】英雄，使其本回合法力值上限{推演战术:-5}（每次使用此牌都会提升效果，上限20点）。 "
+  },
+  {
+    "name": "Te Xun Tactics",
+    "alt": "特训战术",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/te-xun-tactics/",
+    "asset": "/assets/effect/313007/effect-313007-thumbnail.webp",
+    "search": "特训战术 Te Xun Tactics 转瞬 指定1名英雄等级+4。 "
+  },
+  {
+    "name": "Recruittactics",
+    "alt": "招募战术",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/recruittactics/",
+    "asset": "/assets/effect/313003/effect-313003-thumbnail.webp",
+    "search": "招募战术 Recruittactics 转瞬 随机获得1张【逐鹿】英雄牌。 "
+  },
+  {
+    "name": "Jian Yi Xie Zuo",
+    "alt": "简易协作",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/jian-yi-xie-zuo/",
+    "asset": "/assets/effect/7040/effect-7040-thumbnail.webp",
+    "search": "简易协作 Jian Yi Xie Zuo 指定1名英雄等级+3，随机1名英雄等级+2。 "
+  },
+  {
+    "name": "Jing Zhi Ancient Coin",
+    "alt": "精致古币",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/jing-zhi-ancient-coin/",
+    "asset": "/assets/effect/311003/effect-311003-thumbnail.webp",
+    "search": "精致古币 Jing Zhi Ancient Coin 转瞬 指定1名【河洛】英雄等级+4。 "
+  },
+  {
+    "name": "Wu Zhen Ying Zheng Zhao Ling",
+    "alt": "无阵营征召令",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/wu-zhen-ying-zheng-zhao-ling/",
+    "asset": "/assets/effect/7511/effect-7511-thumbnail.webp",
+    "search": "无阵营征召令 Wu Zhen Ying Zheng Zhao Ling 获得2张无阵营英雄牌。 "
+  },
+  {
+    "name": "Jing Mi Xie Zuo",
+    "alt": "精密协作",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/jing-mi-xie-zuo/",
+    "asset": "/assets/effect/7062/effect-7062-thumbnail.webp",
+    "search": "精密协作 Jing Mi Xie Zuo 指定1名英雄等级+4，随机1名英雄等级+3。 "
+  },
+  {
+    "name": "Jing Dian Study Session",
+    "alt": "经典研读会",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/jing-dian-study-session/",
+    "asset": "/assets/effect/7061/effect-7061-thumbnail.webp",
+    "search": "经典研读会 Jing Dian Study Session 获得4棋手经验。 "
+  },
+  {
+    "name": "Ba Fang Lai Yuan",
+    "alt": "八方来援",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/ba-fang-lai-yuan/",
+    "asset": "/assets/effect/7537/effect-7537-thumbnail.webp",
+    "search": "八方来援 Ba Fang Lai Yuan 指定1名英雄等级+2。场上每有1种阵营，额外触发1次此效果。 "
+  },
+  {
+    "name": "Three Jie Herovoucher",
+    "alt": "3阶英雄兑换券",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/three-jie-herovoucher/",
+    "asset": "/assets/effect/7053/effect-7053-thumbnail.webp",
+    "search": "3阶英雄兑换券 Three Jie Herovoucher 卡牌3选1（3阶英雄牌）。 "
+  },
+  {
+    "name": "Wu Zhuang Of Li",
+    "alt": "武装之力",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/wu-zhuang-of-li/",
+    "asset": "/assets/effect/7533/effect-7533-thumbnail.webp",
+    "search": "武装之力 Wu Zhuang Of Li 所有英雄获得等同于自身装备数量的等级。 "
+  },
+  {
+    "name": "Yi Zhi",
+    "alt": "遗志",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/yi-zhi/",
+    "asset": "/assets/effect/7041/effect-7041-thumbnail.webp",
+    "search": "遗志 Yi Zhi 指定场上1名英雄将其移除，并转移其等级（临时等级除外）给1名随机英雄。 "
+  },
+  {
+    "name": "Hu Peng Huan You",
+    "alt": "呼朋唤友",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/hu-peng-huan-you/",
+    "asset": "/assets/effect/7037/effect-7037-thumbnail.webp",
+    "search": "呼朋唤友 Hu Peng Huan You 指定1名英雄，随机获得1张与其同阵营的英雄牌。 "
+  },
+  {
+    "name": "Zheng Bei Gao Shou",
+    "alt": "整备高手",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/zheng-bei-gao-shou/",
+    "asset": "/assets/effect/7513/effect-7513-thumbnail.webp",
+    "search": "整备高手 Zheng Bei Gao Shou 获得2张具有整备效果的英雄牌。 "
+  },
+  {
+    "name": "Deng Chang Ren Wu",
+    "alt": "登场人物",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/deng-chang-ren-wu/",
+    "asset": "/assets/effect/7512/effect-7512-thumbnail.webp",
+    "search": "登场人物 Deng Chang Ren Wu 获得2张具有登场效果的英雄牌。 "
+  },
+  {
+    "name": "Guang Na Liang Cai",
+    "alt": "广纳良才",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/guang-na-liang-cai/",
+    "asset": "/assets/effect/7063/effect-7063-thumbnail.webp",
+    "search": "广纳良才 Guang Na Liang Cai 卡牌5选2（英雄牌）。 "
+  },
+  {
+    "name": "Da He Liu Yu Zheng Zhao Ling",
+    "alt": "大河流域征召令",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/da-he-liu-yu-zheng-zhao-ling/",
+    "asset": "/assets/effect/7510/effect-7510-thumbnail.webp",
+    "search": "大河流域征召令 Da He Liu Yu Zheng Zhao Ling 获得2张【大河流域】英雄牌。 "
+  },
+  {
+    "name": "Ri Luo Hai Zheng Zhao Ling",
+    "alt": "日落海征召令",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/ri-luo-hai-zheng-zhao-ling/",
+    "asset": "/assets/effect/7509/effect-7509-thumbnail.webp",
+    "search": "日落海征召令 Ri Luo Hai Zheng Zhao Ling 获得2张【日落海】英雄牌。 "
+  },
+  {
+    "name": "Zhu Lu Zheng Zhao Ling",
+    "alt": "逐鹿征召令",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/zhu-lu-zheng-zhao-ling/",
+    "asset": "/assets/effect/7508/effect-7508-thumbnail.webp",
+    "search": "逐鹿征召令 Zhu Lu Zheng Zhao Ling 获得2张【逐鹿】英雄牌。 "
+  },
+  {
+    "name": "San Fen Zheng Zhao Ling",
+    "alt": "三分征召令",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/san-fen-zheng-zhao-ling/",
+    "asset": "/assets/effect/7507/effect-7507-thumbnail.webp",
+    "search": "三分征召令 San Fen Zheng Zhao Ling 获得2张【三分】英雄牌。 "
+  },
+  {
+    "name": "He Luo Zheng Zhao Ling",
+    "alt": "河洛征召令",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/he-luo-zheng-zhao-ling/",
+    "asset": "/assets/effect/7506/effect-7506-thumbnail.webp",
+    "search": "河洛征召令 He Luo Zheng Zhao Ling 获得2张【河洛】英雄牌。 "
+  },
+  {
+    "name": "Huan Shuai",
+    "alt": "换帅",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/huan-shuai/",
+    "asset": "/assets/effect/7505/effect-7505-thumbnail.webp",
+    "search": "换帅 Huan Shuai 指定1名【三分】英雄与其最近的【三分】英雄交换等级。 "
+  },
+  {
+    "name": "Zhao Ying",
+    "alt": "照影",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/zhao-ying/",
+    "asset": "/assets/effect/7032/effect-7032-thumbnail.webp",
+    "search": "照影 Zhao Ying 随机获得1张场上英雄牌。 "
+  },
+  {
+    "name": "Zhu Li He Xin",
+    "alt": "助力核心",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/zhu-li-he-xin/",
+    "asset": "/assets/effect/7501/effect-7501-thumbnail.webp",
+    "search": "助力核心 Zhu Li He Xin 阿科米亚核心等级+2，场上每有1名【日落海】英雄重复1次。 "
+  },
+  {
+    "name": "Chao Ji Bu Tie",
+    "alt": "超级补贴",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/chao-ji-bu-tie/",
+    "asset": "/assets/effect/7088/effect-7088-thumbnail.webp",
+    "search": "超级补贴 Chao Ji Bu Tie 获得4次免费刷新。 "
+  },
+  {
+    "name": "Duo Qu Of Shu",
+    "alt": "夺取之术",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/duo-qu-of-shu/",
+    "asset": "/assets/effect/7536/effect-7536-thumbnail.webp",
+    "search": "夺取之术 Duo Qu Of Shu 指定1名英雄，夺取最近1名己方英雄的等级（最多10级，不包含临时等级）。 "
+  },
+  {
+    "name": "Four Jie Hero",
+    "alt": "4阶英雄",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/four-jie-hero/",
+    "asset": "/assets/effect/7521/effect-7521-thumbnail.webp",
+    "search": "4阶英雄 Four Jie Hero 获得2张4阶英雄牌。 "
+  },
+  {
+    "name": "Gao Jie Yan Lian Tactics",
+    "alt": "高阶演练战术",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/gao-jie-yan-lian-tactics/",
+    "asset": "/assets/effect/313014/effect-313014-thumbnail.webp",
+    "search": "高阶演练战术 Gao Jie Yan Lian Tactics 转瞬 所有英雄等级+2。 "
+  },
+  {
+    "name": "Wu Zhuang Zhong Gou",
+    "alt": "武装重构",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/wu-zhuang-zhong-gou/",
+    "asset": "/assets/effect/7081/effect-7081-thumbnail.webp",
+    "search": "武装重构 Wu Zhuang Zhong Gou 指定1名英雄，摧毁其所有装备，随机获得对应数量+1的基础装备。 "
+  },
+  {
+    "name": "Zhen Ying Zhu Fu",
+    "alt": "阵营祝福",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/zhen-ying-zhu-fu/",
+    "asset": "/assets/effect/7503/effect-7503-thumbnail.webp",
+    "search": "阵营祝福 Zhen Ying Zhu Fu 各阵营中随机1名英雄等级+4。 "
+  },
+  {
+    "name": "Fa Hao Shi Ling",
+    "alt": "发号施令",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/fa-hao-shi-ling/",
+    "asset": "/assets/effect/7504/effect-7504-thumbnail.webp",
+    "search": "发号施令 Fa Hao Shi Ling 随机获得2张战术牌。 "
+  },
+  {
+    "name": "Gao Jie Recruittactics",
+    "alt": "高阶招募战术",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/gao-jie-recruittactics/",
+    "asset": "/assets/effect/313010/effect-313010-thumbnail.webp",
+    "search": "高阶招募战术 Gao Jie Recruittactics 转瞬 3选1【逐鹿】英雄牌。 "
+  },
+  {
+    "name": "Gao Jie Te Xun Tactics",
+    "alt": "高阶特训战术",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/gao-jie-te-xun-tactics/",
+    "asset": "/assets/effect/313009/effect-313009-thumbnail.webp",
+    "search": "高阶特训战术 Gao Jie Te Xun Tactics 转瞬 指定1名英雄等级+8。 "
+  },
+  {
+    "name": "Gao Jie Support Tactics",
+    "alt": "高阶援护战术",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/gao-jie-support-tactics/",
+    "asset": "/assets/effect/313008/effect-313008-thumbnail.webp",
+    "search": "高阶援护战术 Gao Jie Support Tactics 转瞬 全体【逐鹿】英雄本回合获得100（+50×战术牌打出次数，当前：150）点护盾。 "
+  },
+  {
+    "name": "Four Jie Herovoucher",
+    "alt": "4阶英雄兑换券",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/four-jie-herovoucher/",
+    "asset": "/assets/effect/7054/effect-7054-thumbnail.webp",
+    "search": "4阶英雄兑换券 Four Jie Herovoucher 卡牌3选1（4阶英雄牌）。 "
+  },
+  {
+    "name": "Fu Qing Ji Ruo",
+    "alt": "扶倾济弱",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/fu-qing-ji-ruo/",
+    "asset": "/assets/effect/7066/effect-7066-thumbnail.webp",
+    "search": "扶倾济弱 Fu Qing Ji Ruo 使场上等级最低（临时等级除外）的英雄提升9级。 "
+  },
+  {
+    "name": "Miao Yin",
+    "alt": "妙音",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/miao-yin/",
+    "asset": "/assets/effect/307002/effect-307002-thumbnail.webp",
+    "search": "妙音 Miao Yin 指定1名英雄，使其觉醒进度+1。 "
+  },
+  {
+    "name": "Luan Shi",
+    "alt": "乱世",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/luan-shi/",
+    "asset": "/assets/effect/7540/effect-7540-thumbnail.webp",
+    "search": "乱世 Luan Shi 卡牌3选1（登场英雄牌）。 "
+  },
+  {
+    "name": "Zhan Qian Xuan Shi",
+    "alt": "战前宣誓",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/zhan-qian-xuan-shi/",
+    "asset": "/assets/effect/7538/effect-7538-thumbnail.webp",
+    "search": "战前宣誓 Zhan Qian Xuan Shi 指定1名英雄，获得自身品阶×3的临时等级。 "
+  },
+  {
+    "name": "Xiao Yao Zi Zai",
+    "alt": "逍遥自在",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/xiao-yao-zi-zai/",
+    "asset": "/assets/effect/7535/effect-7535-thumbnail.webp",
+    "search": "逍遥自在 Xiao Yao Zi Zai 所有无阵营英雄获得2×场上无阵营英雄数量的等级。 "
+  },
+  {
+    "name": "Xi Sheng Pin",
+    "alt": "牺牲品",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/xi-sheng-pin/",
+    "asset": "/assets/effect/7514/effect-7514-thumbnail.webp",
+    "search": "牺牲品 Xi Sheng Pin 获得2张具有牺牲效果的英雄牌。 "
+  },
+  {
+    "name": "Shan Xian Tu Ji Zhe",
+    "alt": "闪现突击者",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/shan-xian-tu-ji-zhe/",
+    "asset": "/assets/effect/7515/effect-7515-thumbnail.webp",
+    "search": "闪现突击者 Shan Xian Tu Ji Zhe 获得2张具有闪现效果的英雄牌。 "
+  },
+  {
+    "name": "Kai Tuan Hao Ling",
+    "alt": "开团号令",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/kai-tuan-hao-ling/",
+    "asset": "/assets/effect/7516/effect-7516-thumbnail.webp",
+    "search": "开团号令 Kai Tuan Hao Ling 获得2张具有开团效果的英雄牌。 "
+  },
+  {
+    "name": "Yuan Yang Bao Zang",
+    "alt": "远洋宝藏",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/yuan-yang-bao-zang/",
+    "asset": "/assets/effect/7529/effect-7529-thumbnail.webp",
+    "search": "远洋宝藏 Yuan Yang Bao Zang 从5件【日落海】专属装备中随机获得1件（不会重复获得）。 "
+  },
+  {
+    "name": "Yin Cai Shi Jiao",
+    "alt": "因材施教",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/yin-cai-shi-jiao/",
+    "asset": "/assets/effect/7534/effect-7534-thumbnail.webp",
+    "search": "因材施教 Yin Cai Shi Jiao 随机获得1张你场上主要阵营相关的效果牌。 "
+  },
+  {
+    "name": "Chuan Cheng",
+    "alt": "传承",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/chuan-cheng/",
+    "asset": "/assets/effect/7083/effect-7083-thumbnail.webp",
+    "search": "传承 Chuan Cheng 指定场上1名10级以上的英雄，将其等级随机分配给其他英雄中等级最低的3名（不会分配给同一英雄）。 "
+  },
+  {
+    "name": "Gao Jie Tui Yan Tactics",
+    "alt": "高阶推演战术",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/gao-jie-tui-yan-tactics/",
+    "asset": "/assets/effect/313012/effect-313012-thumbnail.webp",
+    "search": "高阶推演战术 Gao Jie Tui Yan Tactics 转瞬 指定1名【逐鹿】英雄，使其本回合法力值上限{推演高级战术:-10}（每次使用此牌都会提升效果，上限40点）。 "
+  },
+  {
+    "name": "Du Ming Of Hu",
+    "alt": "度命之护",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/du-ming-of-hu/",
+    "asset": "/assets/effect/7525/effect-7525-thumbnail.webp",
+    "search": "度命之护 Du Ming Of Hu 获得1张特殊装备贤者的庇护。可穿戴给【河洛】英雄，穿戴者会在首次被击败的2秒后复生，仅恢复30%生命值。 "
+  },
+  {
+    "name": "Wu Zhuang Fen Jie",
+    "alt": "武装分解",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/wu-zhuang-fen-jie/",
+    "asset": "/assets/effect/7089/effect-7089-thumbnail.webp",
+    "search": "武装分解 Wu Zhuang Fen Jie 指定1名英雄，摧毁其所有装备： 摧毁1件获得4能量；2件获得1张妙音；3件获得1张珍品宝箱。 "
+  },
+  {
+    "name": "Jiu Jing Sha Chang",
+    "alt": "久经沙场",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/jiu-jing-sha-chang/",
+    "asset": "/assets/effect/7530/effect-7530-thumbnail.webp",
+    "search": "久经沙场 Jiu Jing Sha Chang 指定1名已觉醒的【逐鹿】英雄，获得1张该英雄牌。 "
+  },
+  {
+    "name": "Ji Guan Mi Dian",
+    "alt": "机关秘典",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/ji-guan-mi-dian/",
+    "asset": "/assets/effect/7531/effect-7531-thumbnail.webp",
+    "search": "机关秘典 Ji Guan Mi Dian 获得1件特殊装备机关匣：可穿戴给【逐鹿】英雄，使其获得效果：战斗开始时，召唤2个“故障机器人”。 "
+  },
+  {
+    "name": "Tu Teng Zhu Fu",
+    "alt": "图腾祝福",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/tu-teng-zhu-fu/",
+    "asset": "/assets/effect/7532/effect-7532-thumbnail.webp",
+    "search": "图腾祝福 Tu Teng Zhu Fu 随机1名【大河流域】英雄等级+5。场上每有1个图腾，额外触发1次此效果。 "
+  },
+  {
+    "name": "Zhen Pin Bao Xiang",
+    "alt": "珍品宝箱",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/zhen-pin-bao-xiang/",
+    "asset": "/assets/effect/7090/effect-7090-thumbnail.webp",
+    "search": "珍品宝箱 Zhen Pin Bao Xiang 卡牌3选1（特殊装备或天赋装备）。 "
+  },
+  {
+    "name": "Yi Hua Jie Mu",
+    "alt": "移花接木",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/yi-hua-jie-mu/",
+    "asset": "/assets/effect/7085/effect-7085-thumbnail.webp",
+    "search": "移花接木 Yi Hua Jie Mu 在下场战斗中，随机1名英雄获得敌方当前等级最高英雄的一半等级（包含临时等级）。 "
+  },
+  {
+    "name": "Five Jie Hero",
+    "alt": "5阶英雄",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/five-jie-hero/",
+    "asset": "/assets/effect/7522/effect-7522-thumbnail.webp",
+    "search": "5阶英雄 Five Jie Hero 获得2张5阶英雄牌。 "
+  },
+  {
+    "name": "Five Jie Herovoucher",
+    "alt": "5阶英雄兑换券",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/five-jie-herovoucher/",
+    "asset": "/assets/effect/7055/effect-7055-thumbnail.webp",
+    "search": "5阶英雄兑换券 Five Jie Herovoucher 卡牌3选1（5阶英雄牌）。 "
+  },
+  {
+    "name": "You Fu Tong Xiang",
+    "alt": "有福同享",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/you-fu-tong-xiang/",
+    "asset": "/assets/effect/7076/effect-7076-thumbnail.webp",
+    "search": "有福同享 You Fu Tong Xiang 指定1名英雄，场上和其品阶相同的英雄等级+4。 "
+  },
+  {
+    "name": "Qiu Xian",
+    "alt": "求贤",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/qiu-xian/",
+    "asset": "/assets/effect/7064/effect-7064-thumbnail.webp",
+    "search": "求贤 Qiu Xian 指定1名英雄，发现与其同阵营的3张英雄牌，从中选择1张。 "
+  },
+  {
+    "name": "Qi Mou",
+    "alt": "奇谋",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/qi-mou/",
+    "asset": "/assets/effect/7539/effect-7539-thumbnail.webp",
+    "search": "奇谋 Qi Mou 指定1名【三分】英雄，下场战斗开始时会立即释放技能。 "
+  },
+  {
+    "name": "Kai Ju Kuang Biao",
+    "alt": "开局狂飙",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/kai-ju-kuang-biao/",
+    "asset": "/assets/effect/10403/effect-10403-thumbnail.webp",
+    "search": "开局狂飙 Kai Ju Kuang Biao 指定1名英雄，本回合开战后前15秒内，可以无限释放技能。 "
+  },
+  {
+    "name": "Neng Liang Da Bao Zha",
+    "alt": "能量大爆炸",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/neng-liang-da-bao-zha/",
+    "asset": "/assets/effect/7075/effect-7075-thumbnail.webp",
+    "search": "能量大爆炸 Neng Liang Da Bao Zha 获得5能量。 "
+  },
+  {
+    "name": "Ji Ti Huan Xing",
+    "alt": "集体唤醒",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/ji-ti-huan-xing/",
+    "asset": "/assets/effect/7079/effect-7079-thumbnail.webp",
+    "search": "集体唤醒 Ji Ti Huan Xing 立即触发所有英雄的登场效果。 "
+  },
+  {
+    "name": "Quan Jun Dong Yuan",
+    "alt": "全军动员",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/quan-jun-dong-yuan/",
+    "asset": "/assets/effect/7080/effect-7080-thumbnail.webp",
+    "search": "全军动员 Quan Jun Dong Yuan 立即触发所有英雄的整备效果。 "
+  },
+  {
+    "name": "Jing Xuan Wu Zhuang",
+    "alt": "精选武装",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/jing-xuan-wu-zhuang/",
+    "asset": "/assets/effect/7082/effect-7082-thumbnail.webp",
+    "search": "精选武装 Jing Xuan Wu Zhuang 卡牌4选1（基础装备牌）。 "
+  },
+  {
+    "name": "Zhong Xing Shan Yao",
+    "alt": "众星闪耀",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/zhong-xing-shan-yao/",
+    "asset": "/assets/effect/7107/effect-7107-thumbnail.webp",
+    "search": "众星闪耀 Zhong Xing Shan Yao 全体己方英雄等级+10。每持有一回合，此效果增强5级。 "
+  },
+  {
+    "name": "Zhan Chi Teng Fei",
+    "alt": "展翅腾飞",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/zhan-chi-teng-fei/",
+    "asset": "/assets/effect/7084/effect-7084-thumbnail.webp",
+    "search": "展翅腾飞 Zhan Chi Teng Fei 本回合刷新商店不消耗能量。 "
+  },
+  {
+    "name": "Jun Xie Ku",
+    "alt": "军械库",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/jun-xie-ku/",
+    "asset": "/assets/effect/7109/effect-7109-thumbnail.webp",
+    "search": "军械库 Jun Xie Ku 随机获得3张基础装备牌。 "
+  },
+  {
+    "name": "Zhong Xing Gong Yue",
+    "alt": "众星拱月",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/zhong-xing-gong-yue/",
+    "asset": "/assets/effect/10404/effect-10404-thumbnail.webp",
+    "search": "众星拱月 Zhong Xing Gong Yue 指定1名英雄，夺取其他英雄各10级。 "
+  },
+  {
+    "name": "Divine Armament Tian Jiang",
+    "alt": "神兵天降",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/divine-armament-tian-jiang/",
+    "asset": "/assets/effect/7108/effect-7108-thumbnail.webp",
+    "search": "神兵天降 Divine Armament Tian Jiang 获得4张5阶英雄兑换券。 "
+  },
+  {
+    "name": "Hu Feng Huan Yu",
+    "alt": "呼风唤雨",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/hu-feng-huan-yu/",
+    "asset": "/assets/effect/7111/effect-7111-thumbnail.webp",
+    "search": "呼风唤雨 Hu Feng Huan Yu 随机获得4张5阶效果牌。 "
+  },
+  {
+    "name": "Po Jing Of Zheng",
+    "alt": "破境之证",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/po-jing-of-zheng/",
+    "asset": "/assets/effect/7102/effect-7102-thumbnail.webp",
+    "search": "破境之证 Po Jing Of Zheng 指定1名英雄立即提升20级，之后每回合提升10级。 "
+  },
+  {
+    "name": "Tian Lai Qin Yin",
+    "alt": "天籁琴音",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/tian-lai-qin-yin/",
+    "asset": "/assets/effect/7123/effect-7123-thumbnail.webp",
+    "search": "天籁琴音 Tian Lai Qin Yin 获得3张妙音（妙音：指定1名英雄，使其觉醒进度+1）。 "
+  },
+  {
+    "name": "Jue Chu Feng Sheng",
+    "alt": "绝处逢生",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/jue-chu-feng-sheng/",
+    "asset": "/assets/effect/7112/effect-7112-thumbnail.webp",
+    "search": "绝处逢生 Jue Chu Feng Sheng 棋手生命值变为1，随机获得10张效果牌。 "
+  },
+  {
+    "name": "Hua Tie Wei Jin",
+    "alt": "化铁为金",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/hua-tie-wei-jin/",
+    "asset": "/assets/effect/7113/effect-7113-thumbnail.webp",
+    "search": "化铁为金 Hua Tie Wei Jin 指定1名1-3阶的英雄随机变为不在场的5阶英雄，觉醒并保留其当前等级（包括临时等级）。 "
+  },
+  {
+    "name": "Chao Ji Fu Yin Ji",
+    "alt": "超级复印机",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/chao-ji-fu-yin-ji/",
+    "asset": "/assets/effect/7104/effect-7104-thumbnail.webp",
+    "search": "超级复印机 Chao Ji Fu Yin Ji 随机获得3张相同的场上英雄牌。 "
+  },
+  {
+    "name": "Yi Xian Sheng Ji",
+    "alt": "一线生机",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/yi-xian-sheng-ji/",
+    "asset": "/assets/effect/7115/effect-7115-thumbnail.webp",
+    "search": "一线生机 Yi Xian Sheng Ji 获得2张名刀·司命。你的棋手生命值本局第一次降至0时，不会被淘汰，并保留1棋手生命值。 "
+  },
+  {
+    "name": "Neng Liang Chao Xin Xing",
+    "alt": "能量超新星",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/neng-liang-chao-xin-xing/",
+    "asset": "/assets/effect/7116/effect-7116-thumbnail.webp",
+    "search": "能量超新星 Neng Liang Chao Xin Xing 随机获得10-20能量。 "
+  },
+  {
+    "name": "Fu Yao Zhi Shang",
+    "alt": "扶摇直上",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/fu-yao-zhi-shang/",
+    "asset": "/assets/effect/7120/effect-7120-thumbnail.webp",
+    "search": "扶摇直上 Fu Yao Zhi Shang 棋手等级提升1。如果已满级，改为获得10能量。 "
+  },
+  {
+    "name": "Kuang Biao San Bei Su",
+    "alt": "狂飙三倍速",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/kuang-biao-san-bei-su/",
+    "asset": "/assets/effect/7106/effect-7106-thumbnail.webp",
+    "search": "狂飙三倍速 Kuang Biao San Bei Su 获得3张开局狂飙（开局狂飙：指定英雄开局15秒内无限释放技能）。 "
+  },
+  {
+    "name": "Si Ren Tong Hang",
+    "alt": "四人同行",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/si-ren-tong-hang/",
+    "asset": "/assets/effect/7105/effect-7105-thumbnail.webp",
+    "search": "四人同行 Si Ren Tong Hang 卡牌5选1，并将选中的卡牌一分为四。 "
+  },
+  {
+    "name": "Xin Sheng Li Liang",
+    "alt": "新生力量",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/xin-sheng-li-liang/",
+    "asset": "/assets/effect/7121/effect-7121-thumbnail.webp",
+    "search": "新生力量 Xin Sheng Li Liang 可上阵人数+1。 "
+  },
+  {
+    "name": "Cang Hai Shi Yi",
+    "alt": "沧海拾遗",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/cang-hai-shi-yi/",
+    "asset": "/assets/effect/7122/effect-7122-thumbnail.webp",
+    "search": "沧海拾遗 Cang Hai Shi Yi 随机获得1张其他6阶效果牌。 "
+  },
+  {
+    "name": "Zhao Bing Mai Ma",
+    "alt": "招兵买马",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/zhao-bing-mai-ma/",
+    "asset": "/assets/effect/7069/effect-7069-thumbnail.webp",
+    "search": "招兵买马 Zhao Bing Mai Ma 获得1张3阶英雄兑换券。 把效果牌延迟转换成一次 3 阶英雄的可控搜索。"
+  },
+  {
+    "name": "One Jie Hero",
+    "alt": "1阶英雄",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/one-jie-hero/",
+    "asset": "/assets/effect/7518/effect-7518-thumbnail.webp",
+    "search": "1阶英雄 One Jie Hero 获得2张1阶英雄牌。 "
+  },
+  {
+    "name": "Three Jie Hero",
+    "alt": "3阶英雄",
+    "type": "Effect card",
+    "group": "Effect cards",
+    "url": "/effects/three-jie-hero/",
+    "asset": "/assets/effect/7520/effect-7520-thumbnail.webp",
+    "search": "3阶英雄 Three Jie Hero 获得2张3阶英雄牌。 "
+  },
+  {
+    "name": "Unorthodox Tactics",
+    "alt": "兵行诡招",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/unorthodox-tactics/",
+    "asset": "/assets/talent/623003/talent-623003-thumbnail.webp",
+    "search": "兵行诡招 Unorthodox Tactics 棋手生命值-10，战斗开始时，己方每名英雄+2临时等级。战斗胜利时，获得1棋手生命值，临时等级额外+1。 "
+  },
+  {
+    "name": "Milestone",
+    "alt": "里程碑",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/milestone/",
+    "asset": "/assets/talent/613003/talent-613003-thumbnail.webp",
+    "search": "里程碑 Milestone 棋手到达5级时，获得6能量、1张装备箱。 "
+  },
+  {
+    "name": "Three Kingdoms Recruit",
+    "alt": "三分新援",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/three-kingdoms-recruit/",
+    "asset": "/assets/talent/635041/talent-635041-thumbnail.webp",
+    "search": "三分新援 Three Kingdoms Recruit 获得2能量，以及随机1张2-3阶【三分】英雄牌。 "
+  },
+  {
+    "name": "Ready for Battle",
+    "alt": "整装待发",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ready-for-battle/",
+    "asset": "/assets/talent/613005/talent-613005-thumbnail.webp",
+    "search": "整装待发 Ready for Battle 若回合内没有打出英雄牌，下回合开始时，获得2能量。 "
+  },
+  {
+    "name": "Xian Ku Hou Tian",
+    "alt": "先苦后甜",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/xian-ku-hou-tian/",
+    "asset": "/assets/talent/613006/talent-613006-thumbnail.webp",
+    "search": "先苦后甜 Xian Ku Hou Tian 选取天赋后，当你输掉2场战斗时，获得6棋手经验。 "
+  },
+  {
+    "name": "Defense Ling Yu",
+    "alt": "防御领域",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/defense-ling-yu/",
+    "asset": "/assets/talent/613007/talent-613007-thumbnail.webp",
+    "search": "防御领域 Defense Ling Yu 棋手每次受到的伤害减少2点。 "
+  },
+  {
+    "name": "Ri Luo Hai Xin Yuan",
+    "alt": "日落海新援",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ri-luo-hai-xin-yuan/",
+    "asset": "/assets/talent/635036/talent-635036-thumbnail.webp",
+    "search": "日落海新援 Ri Luo Hai Xin Yuan 获得2能量，以及随机1张2-3阶【日落海】英雄牌。 "
+  },
+  {
+    "name": "Interest Income",
+    "alt": "存款利息",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/interest-income/",
+    "asset": "/assets/talent/671003/talent-671003-thumbnail.webp",
+    "search": "存款利息 Interest Income 获得3能量。回合结束时，你每有7能量，额外获得1能量。 "
+  },
+  {
+    "name": "Great River Recruit",
+    "alt": "大河新援",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/great-river-recruit/",
+    "asset": "/assets/talent/635031/talent-635031-thumbnail.webp",
+    "search": "大河新援 Great River Recruit 获得2能量，以及随机1张2-3阶【大河流域】英雄牌。 "
+  },
+  {
+    "name": "Rule Breaker",
+    "alt": "破格",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/rule-breaker/",
+    "asset": "/assets/talent/681028/talent-681028-thumbnail.webp",
+    "search": "破格 Rule Breaker 回合开始商店自动刷新时，会出现1个高1阶英雄牌。 "
+  },
+  {
+    "name": "Zhuolu Recruit",
+    "alt": "逐鹿新援",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zhuolu-recruit/",
+    "asset": "/assets/talent/635026/talent-635026-thumbnail.webp",
+    "search": "逐鹿新援 Zhuolu Recruit 获得2能量，以及随机1张2-3阶【逐鹿】英雄牌。 "
+  },
+  {
+    "name": "Duality",
+    "alt": "二象性",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/duality/",
+    "asset": "/assets/talent/671010/talent-671010-thumbnail.webp",
+    "search": "二象性 Duality 获得1张天赋牌二象坍缩：随机生效1个获取英雄牌的效果（详情查看关联卡牌）。 "
+  },
+  {
+    "name": "Heluo Recruit",
+    "alt": "河洛新援",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/heluo-recruit/",
+    "asset": "/assets/talent/635014/talent-635014-thumbnail.webp",
+    "search": "河洛新援 Heluo Recruit 获得2能量，以及随机1张2-3阶【河洛】英雄牌。 "
+  },
+  {
+    "name": "Oracle",
+    "alt": "预言家",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/oracle/",
+    "asset": "/assets/talent/671012/talent-671012-thumbnail.webp",
+    "search": "预言家 Oracle 分别获得1张天赋牌胜利预言与失败预言：预测战斗结果，正确可获得奖励。 "
+  },
+  {
+    "name": "Thirty and Thriving",
+    "alt": "三十而立",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/thirty-and-thriving/",
+    "asset": "/assets/talent/614005/talent-614005-thumbnail.webp",
+    "search": "三十而立 Thirty and Thriving 备战阶段中，英雄总等级到达30级时，获得6棋手经验。 "
+  },
+  {
+    "name": "Parting Ways",
+    "alt": "好聚好散",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/parting-ways/",
+    "asset": "/assets/talent/681026/talent-681026-thumbnail.webp",
+    "search": "好聚好散 Parting Ways 获得1张天赋牌体面离场：指定移除一名英雄，获得能量。此英雄0/1/2/3觉醒进度时，获得3/6/9/12能量。 "
+  },
+  {
+    "name": "Person in a Bottle",
+    "alt": "瓶中人",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/person-in-a-bottle/",
+    "asset": "/assets/talent/681025/talent-681025-thumbnail.webp",
+    "search": "瓶中人 Person in a Bottle 获得1张天赋牌契约瓶：获胜时，累积3张随机英雄牌；失败时，损失所累积的一半英雄牌。 "
+  },
+  {
+    "name": "Kuang Tie: Empowered",
+    "alt": "狂铁·强化",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/kuang-tie-empowered/",
+    "asset": "/assets/talent/635603/talent-635603-thumbnail.webp",
+    "search": "狂铁·强化 Kuang Tie: Empowered 狂铁触发卡牌效果时，自身+10%攻速。 "
+  },
+  {
+    "name": "War Headliner",
+    "alt": "战争头牌",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/war-headliner/",
+    "asset": "/assets/talent/681024/talent-681024-thumbnail.webp",
+    "search": "战争头牌 War Headliner 每回合获得1个品阶数字，打出相同品阶的英雄牌时，额外+4等级。 "
+  },
+  {
+    "name": "Energy-Saving Shop",
+    "alt": "节能商店",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/energy-saving-shop/",
+    "asset": "/assets/talent/681022/talent-681022-thumbnail.webp",
+    "search": "节能商店 Energy-Saving Shop 每次手动刷新商店后，总有1张商店卡牌所需能量-1。 "
+  },
+  {
+    "name": "Random Growth",
+    "alt": "随机成长",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/random-growth/",
+    "asset": "/assets/talent/634020/talent-634020-thumbnail.webp",
+    "search": "随机成长 Random Growth 战斗开始时，你品阶最高的1名英雄等级永久+4。 "
+  },
+  {
+    "name": "Narrow Advantage",
+    "alt": "微弱优势",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/narrow-advantage/",
+    "asset": "/assets/talent/681021/talent-681021-thumbnail.webp",
+    "search": "微弱优势 Narrow Advantage 打出觉醒英雄牌时，其获得22%暴击率和11%物理及法术吸血（每名英雄仅1次）。 "
+  },
+  {
+    "name": "Two-Person Trip",
+    "alt": "双人游",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/two-person-trip/",
+    "asset": "/assets/talent/622001/talent-622001-thumbnail.webp",
+    "search": "双人游 Two-Person Trip 随机获得2张2-3阶英雄牌。 "
+  },
+  {
+    "name": "Accelerated Growth",
+    "alt": "加速成长",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/accelerated-growth/",
+    "asset": "/assets/talent/633003/talent-633003-thumbnail.webp",
+    "search": "加速成长 Accelerated Growth 获得2张天赋牌加速成长：指定1名英雄等级+5。 "
+  },
+  {
+    "name": "Boat Against the Current",
+    "alt": "刻舟减蓝",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/boat-against-the-current/",
+    "asset": "/assets/talent/681020/talent-681020-thumbnail.webp",
+    "search": "刻舟减蓝 Boat Against the Current 英雄20级后，法力值上限-10。 "
+  },
+  {
+    "name": "Little Piggy",
+    "alt": "猪猪",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/little-piggy/",
+    "asset": "/assets/talent/681009/talent-681009-thumbnail.webp",
+    "search": "猪猪 Little Piggy 战斗开始时，敌方2名随机英雄变为小猪，持续3秒。 "
+  },
+  {
+    "name": "Focused Shot",
+    "alt": "专注射击",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/focused-shot/",
+    "asset": "/assets/talent/632008/talent-632008-thumbnail.webp",
+    "search": "专注射击 Focused Shot 战斗开始时，你后两排英雄每次普攻获得3%攻速和3点物理攻击力，上限10层。 "
+  },
+  {
+    "name": "Uncle Ban's Keepsake",
+    "alt": "班叔的遗留物",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/uncle-ban-s-keepsake/",
+    "asset": "/assets/talent/681018/talent-681018-thumbnail.webp",
+    "search": "班叔的遗留物 Uncle Ban's Keepsake 获得2级电磁弹簧：在指定位置构筑1个2级电磁弹簧（敌方踩中时会被弹至战场后排）。 "
+  },
+  {
+    "name": "Silver Abacus",
+    "alt": "银算盘",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/silver-abacus/",
+    "asset": "/assets/talent/632006/talent-632006-thumbnail.webp",
+    "search": "银算盘 Silver Abacus 出售场上英雄时，随机1名英雄等级+2。 "
+  },
+  {
+    "name": "Five Blessings",
+    "alt": "五福临门",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/five-blessings/",
+    "asset": "/assets/talent/632002/talent-632002-thumbnail.webp",
+    "search": "五福临门 Five Blessings 获得1张天赋牌五福临门：随机获得5张英雄牌。 "
+  },
+  {
+    "name": "Small Battery Pack",
+    "alt": "小电池包",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/small-battery-pack/",
+    "asset": "/assets/talent/632001/talent-632001-thumbnail.webp",
+    "search": "小电池包 Small Battery Pack 获得5能量。 "
+  },
+  {
+    "name": "Copy Machine",
+    "alt": "复印机",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/copy-machine/",
+    "asset": "/assets/talent/623002/talent-623002-thumbnail.webp",
+    "search": "复印机 Copy Machine 获得2张天赋牌复印机：指定1名1-3阶英雄，获得该英雄牌。 "
+  },
+  {
+    "name": "One Snap",
+    "alt": "一个响指",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/one-snap/",
+    "asset": "/assets/talent/671017/talent-671017-thumbnail.webp",
+    "search": "一个响指 One Snap 获得1张天赋牌听天由命：消除等级最低的4个英雄，每名英雄会提供一定资源。 把低价值库存转换成一次资源重组，收益取决于被消除对象和当前缺口。"
+  },
+  {
+    "name": "Xiao Xiao Zhu Li",
+    "alt": "小小的助力",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/xiao-xiao-zhu-li/",
+    "asset": "/assets/talent/671006/talent-671006-thumbnail.webp",
+    "search": "小小的助力 Xiao Xiao Zhu Li 战斗开始时，你场上有不少于4名1-3阶英雄，则4-5阶英雄获得30%伤害加成和60%攻速。 "
+  },
+  {
+    "name": "Zhong Ji Fu Yin Ji",
+    "alt": "终极复印机",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zhong-ji-fu-yin-ji/",
+    "asset": "/assets/talent/623008/talent-623008-thumbnail.webp",
+    "search": "终极复印机 Zhong Ji Fu Yin Ji 获得2张天赋牌终极复印机：指定1名英雄，获得该英雄牌。 "
+  },
+  {
+    "name": "Kuo Bian Ming E",
+    "alt": "扩编名额",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/kuo-bian-ming-e/",
+    "asset": "/assets/talent/681010/talent-681010-thumbnail.webp",
+    "search": "扩编名额 Kuo Bian Ming E 获得1个可购买天赋：花费8能量，可上阵人数+1。可购买2次。 "
+  },
+  {
+    "name": "Bu Ji Xian ： Kai Tuan",
+    "alt": "补给线：开团",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/bu-ji-xian-kai-tuan/",
+    "asset": "/assets/talent/681014/talent-681014-thumbnail.webp",
+    "search": "补给线：开团 Bu Ji Xian ： Kai Tuan 获得3张开团效果英雄牌。 "
+  },
+  {
+    "name": "Chang Sheng Jiang Jun",
+    "alt": "常胜将军",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/chang-sheng-jiang-jun/",
+    "asset": "/assets/talent/622009/talent-622009-thumbnail.webp",
+    "search": "常胜将军 Chang Sheng Jiang Jun 若你至少2连胜，战斗胜利时获得2能量和4棋手生命值。 "
+  },
+  {
+    "name": "Zhong Jian Li Liang",
+    "alt": "中坚力量",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zhong-jian-li-liang/",
+    "asset": "/assets/talent/622006/talent-622006-thumbnail.webp",
+    "search": "中坚力量 Zhong Jian Li Liang 打出3阶英雄牌，额外+4级。 "
+  },
+  {
+    "name": "Ru Fa Pao Zhi",
+    "alt": "如法炮制",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ru-fa-pao-zhi/",
+    "asset": "/assets/talent/632009/talent-632009-thumbnail.webp",
+    "search": "如法炮制 Ru Fa Pao Zhi 每回合首次打出英雄牌时，获得1张同阶的英雄牌（不可超过棋手等级）。 "
+  },
+  {
+    "name": "Xiao Fei Fan Li",
+    "alt": "消费返利",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/xiao-fei-fan-li/",
+    "asset": "/assets/talent/632010/talent-632010-thumbnail.webp",
+    "search": "消费返利 Xiao Fei Fan Li 每消耗15能量，获得1张加速成长：指定1名英雄等级+5。 "
+  },
+  {
+    "name": "Kai Xuan Zheng Zhao",
+    "alt": "凯旋征召",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/kai-xuan-zheng-zhao/",
+    "asset": "/assets/talent/622005/talent-622005-thumbnail.webp",
+    "search": "凯旋征召 Kai Xuan Zheng Zhao 战斗胜利时，获得1张你等级最高的英雄牌。 "
+  },
+  {
+    "name": "Jin Suan Pan",
+    "alt": "金算盘",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/jin-suan-pan/",
+    "asset": "/assets/talent/632013/talent-632013-thumbnail.webp",
+    "search": "金算盘 Jin Suan Pan 出售场上英雄时，随机1名英雄等级+3。 "
+  },
+  {
+    "name": "Chao Zhuan Zhu She Ji",
+    "alt": "超专注射击",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/chao-zhuan-zhu-she-ji/",
+    "asset": "/assets/talent/632014/talent-632014-thumbnail.webp",
+    "search": "超专注射击 Chao Zhuan Zhu She Ji 战斗开始时，你后两排英雄每次普攻获得5%攻速和5点物理攻击力，上限10层。 "
+  },
+  {
+    "name": "Dian Chi Bao",
+    "alt": "电池包",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/dian-chi-bao/",
+    "asset": "/assets/talent/633001/talent-633001-thumbnail.webp",
+    "search": "电池包 Dian Chi Bao 获得8能量。 "
+  },
+  {
+    "name": "Jie Ban",
+    "alt": "结伴",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/jie-ban/",
+    "asset": "/assets/talent/633002/talent-633002-thumbnail.webp",
+    "search": "结伴 Jie Ban 获得2能量以及2张3阶英雄兑换券。 "
+  },
+  {
+    "name": "Ren Cai Shi Chang",
+    "alt": "人才市场",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ren-cai-shi-chang/",
+    "asset": "/assets/talent/622002/talent-622002-thumbnail.webp",
+    "search": "人才市场 Ren Cai Shi Chang 获得3张天赋牌人才搜寻。 "
+  },
+  {
+    "name": "Tong Lu Ren",
+    "alt": "同路人",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/tong-lu-ren/",
+    "asset": "/assets/talent/633013/talent-633013-thumbnail.webp",
+    "search": "同路人 Tong Lu Ren 同一回合内，每打出4张同阵营英雄牌，随机获得1张该阵营英雄牌。 "
+  },
+  {
+    "name": "Zhan Qian Jiao Zhen",
+    "alt": "战前叫阵",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zhan-qian-jiao-zhen/",
+    "asset": "/assets/talent/681008/talent-681008-thumbnail.webp",
+    "search": "战前叫阵 Zhan Qian Jiao Zhen 战斗开始时，敌我双方等级最高英雄比拼等级：我方胜利，其英雄获得1次完美复生；我方失败，其变为猪猪3秒，获得30%最大生命值护盾。 "
+  },
+  {
+    "name": "Zhong Zhuang Shang Zhen",
+    "alt": "重装上阵",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zhong-zhuang-shang-zhen/",
+    "asset": "/assets/talent/633017/talent-633017-thumbnail.webp",
+    "search": "重装上阵 Zhong Zhuang Shang Zhen 战斗开始时，你至少穿戴2件装备的英雄获得15%伤害加成和15%伤害减免。 "
+  },
+  {
+    "name": "Cheng Nian Li",
+    "alt": "成年礼",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/cheng-nian-li/",
+    "asset": "/assets/talent/633018/talent-633018-thumbnail.webp",
+    "search": "成年礼 Cheng Nian Li 己方英雄30级时，随机获得2张其阵营的英雄牌（已达30级的英雄，再升级1次可获得）。 "
+  },
+  {
+    "name": "Qian Xian Bao Lei",
+    "alt": "前线堡垒",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/qian-xian-bao-lei/",
+    "asset": "/assets/talent/681006/talent-681006-thumbnail.webp",
+    "search": "前线堡垒 Qian Xian Bao Lei 战斗开始时，你第一排的英雄获得20点物理及法术防御。 "
+  },
+  {
+    "name": "Da Dian Chi Bao",
+    "alt": "大电池包",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/da-dian-chi-bao/",
+    "asset": "/assets/talent/634001/talent-634001-thumbnail.webp",
+    "search": "大电池包 Da Dian Chi Bao 获得10能量。 "
+  },
+  {
+    "name": "Xian Zhi Xing Jin Hua",
+    "alt": "限制性进化",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/xian-zhi-xing-jin-hua/",
+    "asset": "/assets/talent/634012/talent-634012-thumbnail.webp",
+    "search": "限制性进化 Xian Zhi Xing Jin Hua 获得3张天赋牌限制性进化：指定移除1名1~2阶英雄，获得高2阶的随机英雄牌，且上阵时为原等级+10。 "
+  },
+  {
+    "name": "Yuan Jun",
+    "alt": "援军",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/yuan-jun/",
+    "asset": "/assets/talent/634013/talent-634013-thumbnail.webp",
+    "search": "援军 Yuan Jun 获得1张援军：指定1名英雄，随机获得4张同阵营的英雄牌。 "
+  },
+  {
+    "name": "Qun Ying Hui Cui",
+    "alt": "群英荟萃",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/qun-ying-hui-cui/",
+    "asset": "/assets/talent/681004/talent-681004-thumbnail.webp",
+    "search": "群英荟萃 Qun Ying Hui Cui 回合中每打出3张不同品阶的英雄牌，全体英雄等级+3。 "
+  },
+  {
+    "name": "Zi Shi Ying Wu Zhuang",
+    "alt": "自适应武装",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zi-shi-ying-wu-zhuang/",
+    "asset": "/assets/talent/634015/talent-634015-thumbnail.webp",
+    "search": "自适应武装 Zi Shi Ying Wu Zhuang 获得1张天赋牌自适应武装：指定1名英雄，随机获得2张与其适配的普通装备牌。 "
+  },
+  {
+    "name": "Xu Gou Equipment",
+    "alt": "虚构装备",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/xu-gou-equipment/",
+    "asset": "/assets/talent/634018/talent-634018-thumbnail.webp",
+    "search": "虚构装备 Xu Gou Equipment 战斗开始时，随机3名己方英雄临时获得1件普通装备及100点生命上限。 "
+  },
+  {
+    "name": "Tactics Mo Zu",
+    "alt": "战术模组",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/tactics-mo-zu/",
+    "asset": "/assets/talent/634019/talent-634019-thumbnail.webp",
+    "search": "战术模组 Tactics Mo Zu 可上阵人数+1。 "
+  },
+  {
+    "name": "Ji Xian Cao Zuo",
+    "alt": "极限操作",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ji-xian-cao-zuo/",
+    "asset": "/assets/talent/615005/talent-615005-thumbnail.webp",
+    "search": "极限操作 Ji Xian Cao Zuo 棋手生命值-15，获得15能量。 "
+  },
+  {
+    "name": "Kong Neng Da Ren",
+    "alt": "控能达人",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/kong-neng-da-ren/",
+    "asset": "/assets/talent/634021/talent-634021-thumbnail.webp",
+    "search": "控能达人 Kong Neng Da Ren 战斗开始时，若当前能量≤3，随机获得1张3-4阶英雄牌。 "
+  },
+  {
+    "name": "Qiang Zhe Zi Qiang",
+    "alt": "强者自强",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/qiang-zhe-zi-qiang/",
+    "asset": "/assets/talent/634025/talent-634025-thumbnail.webp",
+    "search": "强者自强 Qiang Zhe Zi Qiang 战斗开始时，已觉醒英雄获得40点物理攻击力和40点法术攻击力。 "
+  },
+  {
+    "name": "Po Bai Of Li",
+    "alt": "破败之力",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/po-bai-of-li/",
+    "asset": "/assets/talent/634026/talent-634026-thumbnail.webp",
+    "search": "破败之力 Po Bai Of Li 战斗开始时，你的英雄普攻附带敌人最大生命值2%的法术伤害。 "
+  },
+  {
+    "name": "Qiang Gong",
+    "alt": "抢攻",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/qiang-gong/",
+    "asset": "/assets/talent/681003/talent-681003-thumbnail.webp",
+    "search": "抢攻 Qiang Gong 获得1张普通装备牌。之后5回合内，若对其他棋手累计造成20点伤害，获得10能量。 "
+  },
+  {
+    "name": "Shen Mi Hero",
+    "alt": "神秘英雄",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/shen-mi-hero/",
+    "asset": "/assets/talent/681002/talent-681002-thumbnail.webp",
+    "search": "神秘英雄 Shen Mi Hero 获得2张神秘英雄牌。手动刷新时，随机变为不低于当前棋手对应品阶的英雄牌。每回合有15%概率自动销毁并获得3能量。 "
+  },
+  {
+    "name": "Random Jin Hua",
+    "alt": "随机进化",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/random-jin-hua/",
+    "asset": "/assets/talent/634031/talent-634031-thumbnail.webp",
+    "search": "随机进化 Random Jin Hua 战斗开始时，你品阶最高的1名英雄等级永久+6。 "
+  },
+  {
+    "name": "Li Bing Mo Ma",
+    "alt": "厉兵秣马",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/li-bing-mo-ma/",
+    "asset": "/assets/talent/671020/talent-671020-thumbnail.webp",
+    "search": "厉兵秣马 Li Bing Mo Ma 随机获得1张普通装备牌。接下来5个回合若你的棋手等级没有变化，再获得2张。 "
+  },
+  {
+    "name": "Lei Tai Meng Hu",
+    "alt": "擂台猛虎",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/lei-tai-meng-hu/",
+    "asset": "/assets/talent/636312/talent-636312-thumbnail.webp",
+    "search": "擂台猛虎 Lei Tai Meng Hu 获得1个猛虎擂台，擂台中的【三分】英雄获得30点物攻和法攻。每当敌人于擂台范围内被击败时，擂台吸收其灵魂，永久额外提供10点物攻和法攻。每吸收5次，擂台范围永久扩大1格，最多扩大3次。 "
+  },
+  {
+    "name": "Pai Mai Zhuan Jia",
+    "alt": "拍卖专家",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/pai-mai-zhuan-jia/",
+    "asset": "/assets/talent/671016/talent-671016-thumbnail.webp",
+    "search": "拍卖专家 Pai Mai Zhuan Jia 每次拍卖后，获得1张天赋牌拍卖重现：选择获得1张拍卖中你未获得的卡牌。 "
+  },
+  {
+    "name": "San Shi Er Da",
+    "alt": "三十而达",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/san-shi-er-da/",
+    "asset": "/assets/talent/614008/talent-614008-thumbnail.webp",
+    "search": "三十而达 San Shi Er Da 备战阶段中，英雄总等级到达30级时，获得9棋手经验。 "
+  },
+  {
+    "name": "Tou Zhi",
+    "alt": "透支",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/tou-zhi/",
+    "asset": "/assets/talent/671015/talent-671015-thumbnail.webp",
+    "search": "透支 Tou Zhi 能量可用至-15。回合开始时，如果能量为负，本回合无法打出英雄牌。 "
+  },
+  {
+    "name": "Chao Su Growth",
+    "alt": "超速成长",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/chao-su-growth/",
+    "asset": "/assets/talent/635002/talent-635002-thumbnail.webp",
+    "search": "超速成长 Chao Su Growth 获得1张天赋牌超速成长：指定1名英雄等级+15。 "
+  },
+  {
+    "name": "Wang Pai Ren Zheng",
+    "alt": "王牌认证",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/wang-pai-ren-zheng/",
+    "asset": "/assets/talent/614004/talent-614004-thumbnail.webp",
+    "search": "王牌认证 Wang Pai Ren Zheng 战斗开始时，若你至少有3名4-5阶英雄，获得1张2-3阶效果锦囊。 "
+  },
+  {
+    "name": "Zhu Ni Hao Yun",
+    "alt": "祝你好运",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zhu-ni-hao-yun/",
+    "asset": "/assets/talent/671011/talent-671011-thumbnail.webp",
+    "search": "祝你好运 Zhu Ni Hao Yun 棋手升级时，获得1张天赋牌碰碰运气：指定1名英雄提升5-20等级，随机消耗1-5能量。 "
+  },
+  {
+    "name": "Temporary Zeng Fu",
+    "alt": "临时增幅",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/temporary-zeng-fu/",
+    "asset": "/assets/talent/614003/talent-614003-thumbnail.webp",
+    "search": "临时增幅 Temporary Zeng Fu 战斗开始时，将20临时等级随机分配给己方英雄。每回合增加5临时等级。 "
+  },
+  {
+    "name": "He Luo Lai Ke",
+    "alt": "河洛来客",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/he-luo-lai-ke/",
+    "asset": "/assets/talent/635015/talent-635015-thumbnail.webp",
+    "search": "河洛来客 He Luo Lai Ke 获得3能量以及1张李信。 "
+  },
+  {
+    "name": "Jin Ji Xing Dong",
+    "alt": "紧急行动",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/jin-ji-xing-dong/",
+    "asset": "/assets/talent/614002/talent-614002-thumbnail.webp",
+    "search": "紧急行动 Jin Ji Xing Dong 获得10点棋手生命值、1张装备箱。 "
+  },
+  {
+    "name": "He Luo Jing Bing",
+    "alt": "河洛精兵",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/he-luo-jing-bing/",
+    "asset": "/assets/talent/635017/talent-635017-thumbnail.webp",
+    "search": "河洛精兵 He Luo Jing Bing 卡牌3选1（4阶或5阶的【河洛】英雄）。 "
+  },
+  {
+    "name": "Fu Gui Xian Zhong Qiu",
+    "alt": "富贵险中求",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/fu-gui-xian-zhong-qiu/",
+    "asset": "/assets/talent/671009/talent-671009-thumbnail.webp",
+    "search": "富贵险中求 Fu Gui Xian Zhong Qiu 获得1张天赋牌一刀穷一刀富：打出后，获得1张基础装备牌及1张险中求富（持有时获胜累积奖励，失败则消失）。 "
+  },
+  {
+    "name": "Qian Lang Rong Guang",
+    "alt": "前浪的荣光",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/qian-lang-rong-guang/",
+    "asset": "/assets/talent/635021/talent-635021-thumbnail.webp",
+    "search": "前浪的荣光 Qian Lang Rong Guang 获得2张天赋牌前浪的荣光：指定1名英雄，获得1张高1-2阶的同阵营英雄牌。 "
+  },
+  {
+    "name": "Quan Jun Lie Zhen",
+    "alt": "全军列阵",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/quan-jun-lie-zhen/",
+    "asset": "/assets/talent/635024/talent-635024-thumbnail.webp",
+    "search": "全军列阵 Quan Jun Lie Zhen 获得1张天赋牌全军列阵：指定1名英雄，召唤其同阵营英雄上场直到阵容人数上限（不超过商店可购品阶）。 "
+  },
+  {
+    "name": "Da Mai Mai",
+    "alt": "大买卖",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/da-mai-mai/",
+    "asset": "/assets/talent/681027/talent-681027-thumbnail.webp",
+    "search": "大买卖 Da Mai Mai 商店购买额外花费1能量，出售英雄牌额外获得1能量。 "
+  },
+  {
+    "name": "Zhu Lu Lai Ke",
+    "alt": "逐鹿来客",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zhu-lu-lai-ke/",
+    "asset": "/assets/talent/635027/talent-635027-thumbnail.webp",
+    "search": "逐鹿来客 Zhu Lu Lai Ke 获得3能量以及1张蒙犽。 "
+  },
+  {
+    "name": "Ni Xi Of Lu",
+    "alt": "逆袭之路",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ni-xi-of-lu/",
+    "asset": "/assets/talent/671007/talent-671007-thumbnail.webp",
+    "search": "逆袭之路 Ni Xi Of Lu 当你排名不是第1或第2名时，你的所有单位伤害+10%，最大生命值+20%。 "
+  },
+  {
+    "name": "Zhu Lu Jing Bing",
+    "alt": "逐鹿精兵",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zhu-lu-jing-bing/",
+    "asset": "/assets/talent/635029/talent-635029-thumbnail.webp",
+    "search": "逐鹿精兵 Zhu Lu Jing Bing 卡牌3选1（4阶或5阶的【逐鹿】英雄）。 "
+  },
+  {
+    "name": "Shang Hai Zhuan Hua Qi",
+    "alt": "伤害转化器",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/shang-hai-zhuan-hua-qi/",
+    "asset": "/assets/talent/623007/talent-623007-thumbnail.webp",
+    "search": "伤害转化器 Shang Hai Zhuan Hua Qi 获得2能量。战斗胜利时，再获得2能量。 "
+  },
+  {
+    "name": "Jue Dui Ling Yu",
+    "alt": "绝对领域",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/jue-dui-ling-yu/",
+    "asset": "/assets/talent/613010/talent-613010-thumbnail.webp",
+    "search": "绝对领域 Jue Dui Ling Yu 棋手每次受到的伤害减少3点。 "
+  },
+  {
+    "name": "Da He Lai Ke",
+    "alt": "大河来客",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/da-he-lai-ke/",
+    "asset": "/assets/talent/635032/talent-635032-thumbnail.webp",
+    "search": "大河来客 Da He Lai Ke 获得3能量以及1张刘邦。 "
+  },
+  {
+    "name": "Wo Xin Chang Dan",
+    "alt": "卧薪尝胆",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/wo-xin-chang-dan/",
+    "asset": "/assets/talent/613009/talent-613009-thumbnail.webp",
+    "search": "卧薪尝胆 Wo Xin Chang Dan 选取天赋后，当你输掉2场战斗时，获得9棋手经验。 "
+  },
+  {
+    "name": "Da He Jing Bing",
+    "alt": "大河精兵",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/da-he-jing-bing/",
+    "asset": "/assets/talent/635034/talent-635034-thumbnail.webp",
+    "search": "大河精兵 Da He Jing Bing 卡牌3选1（4阶或5阶的【大河流域】英雄）。 "
+  },
+  {
+    "name": "Xiao Shen Ti Da Neng Liang",
+    "alt": "小身体大能量",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/xiao-shen-ti-da-neng-liang/",
+    "asset": "/assets/talent/671002/talent-671002-thumbnail.webp",
+    "search": "小身体大能量 Xiao Shen Ti Da Neng Liang 战斗开始时，英雄模型缩小，攻速+60%，暴击率+40%，生命值上限-20%。 "
+  },
+  {
+    "name": "Zhong Da Li Cheng Bei",
+    "alt": "重大里程碑",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zhong-da-li-cheng-bei/",
+    "asset": "/assets/talent/613008/talent-613008-thumbnail.webp",
+    "search": "重大里程碑 Zhong Da Li Cheng Bei 棋手到达5级时，获得8能量、1张装备箱和1张高阶效果牌。 "
+  },
+  {
+    "name": "Ri Luo Hai Lai Ke",
+    "alt": "日落海来客",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ri-luo-hai-lai-ke/",
+    "asset": "/assets/talent/635037/talent-635037-thumbnail.webp",
+    "search": "日落海来客 Ri Luo Hai Lai Ke 获得3能量以及1张雅典娜。 "
+  },
+  {
+    "name": "Yi Fen Qian Yi Fen Huo",
+    "alt": "一分钱一分货",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/yi-fen-qian-yi-fen-huo/",
+    "asset": "/assets/talent/671001/talent-671001-thumbnail.webp",
+    "search": "一分钱一分货 Yi Fen Qian Yi Fen Huo 获得1张天赋牌等价交换：扣除当前所有能量。根据扣除数量获得不同资源奖励。 把当前能量库存转换成分档奖励，是明确的预算闸门。"
+  },
+  {
+    "name": "Ri Luo Hai Jing Bing",
+    "alt": "日落海精兵",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ri-luo-hai-jing-bing/",
+    "asset": "/assets/talent/635039/talent-635039-thumbnail.webp",
+    "search": "日落海精兵 Ri Luo Hai Jing Bing 卡牌3选1（4阶或5阶的【日落海】英雄）。 "
+  },
+  {
+    "name": "Nu Shen Xiang Lian",
+    "alt": "怒神项链",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/nu-shen-xiang-lian/",
+    "asset": "/assets/talent/646011/talent-646011-thumbnail.webp",
+    "search": "怒神项链 Nu Shen Xiang Lian 获得怒神项链：增加暴击率以及法术伤害可以暴击。 "
+  },
+  {
+    "name": "Ren Cai Ji Ji",
+    "alt": "人才济济",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ren-cai-ji-ji/",
+    "asset": "/assets/talent/613004/talent-613004-thumbnail.webp",
+    "search": "人才济济 Ren Cai Ji Ji 升级所需棋手经验-2，每次升级时获得1张天赋牌人才搜寻。 "
+  },
+  {
+    "name": "San Fen Lai Ke",
+    "alt": "三分来客",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/san-fen-lai-ke/",
+    "asset": "/assets/talent/635042/talent-635042-thumbnail.webp",
+    "search": "三分来客 San Fen Lai Ke 获得3能量以及1张小乔。 "
+  },
+  {
+    "name": "Fa Chao Ling Zhang",
+    "alt": "法潮灵杖",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/fa-chao-ling-zhang/",
+    "asset": "/assets/talent/646004/talent-646004-thumbnail.webp",
+    "search": "法潮灵杖 Fa Chao Ling Zhang 获得法潮灵杖：获取左右1格英雄法术攻击力。 "
+  },
+  {
+    "name": "San Fen Jing Bing",
+    "alt": "三分精兵",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/san-fen-jing-bing/",
+    "asset": "/assets/talent/635044/talent-635044-thumbnail.webp",
+    "search": "三分精兵 San Fen Jing Bing 卡牌3选1（4阶或5阶的【三分】英雄）。 "
+  },
+  {
+    "name": "Duan Nian",
+    "alt": "断念",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/duan-nian/",
+    "asset": "/assets/talent/646003/talent-646003-thumbnail.webp",
+    "search": "断念 Duan Nian 获得断念：造成伤害时降低敌方最大生命值。 "
+  },
+  {
+    "name": "Po Zhen Zhan Mang",
+    "alt": "破阵战芒",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/po-zhen-zhan-mang/",
+    "asset": "/assets/talent/646002/talent-646002-thumbnail.webp",
+    "search": "破阵战芒 Po Zhen Zhan Mang 获得破阵战芒：增加攻速及伤害提升（1-3阶英雄限定）。 "
+  },
+  {
+    "name": "Neng Liang Gai Zao",
+    "alt": "能量改造",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/neng-liang-gai-zao/",
+    "asset": "/assets/talent/636101/talent-636101-thumbnail.webp",
+    "search": "能量改造 Neng Liang Gai Zao 阿科米亚核心不再分配等级。回合开始时，核心每拥有30级，将随机触发场上1名英雄的1次整备或登场效果（单回合最多触发100次）。 "
+  },
+  {
+    "name": "Po Wang Of Ren",
+    "alt": "破妄之刃",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/po-wang-of-ren/",
+    "asset": "/assets/talent/646001/talent-646001-thumbnail.webp",
+    "search": "破妄之刃 Po Wang Of Ren 获得破妄之刃：获得真实伤害能力并提升移速且免疫减速效果。 "
+  },
+  {
+    "name": "Guang Leng Ta",
+    "alt": "光棱塔",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/guang-leng-ta/",
+    "asset": "/assets/talent/636103/talent-636103-thumbnail.webp",
+    "search": "光棱塔 Guang Leng Ta 阿科米亚核心不再分配等级。每秒对1个随机敌方单位造成6次核心等级×1的法术伤害。每击败1名敌方英雄，阿科米亚核心获得自身1%的等级成长。每击败1名敌方英雄，光棱塔获得自身1%的等级成长。 "
+  },
+  {
+    "name": "Shun Ying Lian Zhan",
+    "alt": "瞬影连斩",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/shun-ying-lian-zhan/",
+    "asset": "/assets/talent/638008/talent-638008-thumbnail.webp",
+    "search": "瞬影连斩 Shun Ying Lian Zhan 闪现英雄击败敌方单位时，会立刻闪现至最近的敌人处，并无敌0.5秒。 "
+  },
+  {
+    "name": "Chang Wai Gong Neng",
+    "alt": "场外供能",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/chang-wai-gong-neng/",
+    "asset": "/assets/talent/636105/talent-636105-thumbnail.webp",
+    "search": "场外供能 Chang Wai Gong Neng 回合开始时，阿科米亚核心获得棋手等级×3的等级。 "
+  },
+  {
+    "name": "Ji Ji Zheng Bei",
+    "alt": "积极整备",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ji-ji-zheng-bei/",
+    "asset": "/assets/talent/636106/talent-636106-thumbnail.webp",
+    "search": "积极整备 Ji Ji Zheng Bei 你的英雄每触发5次整备效果，随机获得1件日落海专属装备，上限3件。 "
+  },
+  {
+    "name": "Sheng Of Bu Wu",
+    "alt": "胜之不武",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/sheng-of-bu-wu/",
+    "asset": "/assets/talent/638003/talent-638003-thumbnail.webp",
+    "search": "胜之不武 Sheng Of Bu Wu 获得3张天赋牌胜之不武：下场战斗你的英雄+20临时等级，但对敌方棋手造成的伤害-10。 "
+  },
+  {
+    "name": "Jue Qi",
+    "alt": "崛起",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/jue-qi/",
+    "asset": "/assets/talent/63700801/talent-63700801-thumbnail.webp",
+    "search": "崛起 Jue Qi 获得1张马可波罗和1张百里守约。共战时，获得3临时等级。若战斗胜利，至多保留他们获得的20临时等级。 "
+  },
+  {
+    "name": "Xie Tong Yi Zhi",
+    "alt": "协同一致",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/xie-tong-yi-zhi/",
+    "asset": "/assets/talent/636601/talent-636601-thumbnail.webp",
+    "search": "协同一致 Xie Tong Yi Zhi 回合开始时，无阵营英雄获得等于当前棋手等级的等级。 "
+  },
+  {
+    "name": "Jing Ji Lao Long",
+    "alt": "荆棘牢笼",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/jing-ji-lao-long/",
+    "asset": "/assets/talent/636516/talent-636516-thumbnail.webp",
+    "search": "荆棘牢笼 Jing Ji Lao Long 先知图腾获得额外效果：每5秒眩晕最远的1个敌人，持续2秒。如果敌人在眩晕期间阵亡，召唤1只与其等级相同的熊灵。 "
+  },
+  {
+    "name": "Yin Yuan Ji Hui",
+    "alt": "因缘际会",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/yin-yuan-ji-hui/",
+    "asset": "/assets/talent/636514/talent-636514-thumbnail.webp",
+    "search": "因缘际会 Yin Yuan Ji Hui 召唤1个1级的因缘图腾。 "
+  },
+  {
+    "name": "Dong Neng Guan Zhu",
+    "alt": "动能灌注",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/dong-neng-guan-zhu/",
+    "asset": "/assets/talent/636115/talent-636115-thumbnail.webp",
+    "search": "动能灌注 Dong Neng Guan Zhu 阿科米亚核心等级+10。你的英雄每合计攻击10次，核心等级+1。 "
+  },
+  {
+    "name": "Zhi Neng Zhuang Jia",
+    "alt": "智能装甲",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zhi-neng-zhuang-jia/",
+    "asset": "/assets/talent/636117/talent-636117-thumbnail.webp",
+    "search": "智能装甲 Zhi Neng Zhuang Jia 随机获得1件【日落海专属装备】。我方英雄每穿戴1件【日落海专属装备】，其整备效果会额外触发1次。 "
+  },
+  {
+    "name": "Duo Cai Ancient Coin",
+    "alt": "多彩古币",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/duo-cai-ancient-coin/",
+    "asset": "/assets/talent/636201/talent-636201-thumbnail.webp",
+    "search": "多彩古币 Duo Cai Ancient Coin 获得1张古币。古币只能对非【河洛】英雄主动使用：随机变成其他同阶非【河洛】英雄，等级额外+7。 "
+  },
+  {
+    "name": "Jian Bu Ke Cui",
+    "alt": "坚不可摧",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/jian-bu-ke-cui/",
+    "asset": "/assets/talent/636512/talent-636512-thumbnail.webp",
+    "search": "坚不可摧 Jian Bu Ke Cui 战斗开始时，我方先知图腾、因缘图腾和往生图腾获得回合数x100的护盾。 "
+  },
+  {
+    "name": "Tu Teng Qi Ling",
+    "alt": "图腾启灵",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/tu-teng-qi-ling/",
+    "asset": "/assets/talent/636510/talent-636510-thumbnail.webp",
+    "search": "图腾启灵 Tu Teng Qi Ling 每回合随机召唤1个图腾，直到回合结束。 "
+  },
+  {
+    "name": "Hua Wei Xiong Ling",
+    "alt": "化为熊灵",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/hua-wei-xiong-ling/",
+    "asset": "/assets/talent/636509/talent-636509-thumbnail.webp",
+    "search": "化为熊灵 Hua Wei Xiong Ling 战斗中首名【大河】英雄阵亡时，召唤1只场上大河英雄等级之和的熊灵（不计算临时等级），并嘲讽周围2格敌人，持续4秒。 "
+  },
+  {
+    "name": "Chuan Jia Bao",
+    "alt": "传家宝",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/chuan-jia-bao/",
+    "asset": "/assets/talent/636206/talent-636206-thumbnail.webp",
+    "search": "传家宝 Chuan Jia Bao 古币不再附带转瞬。每回合开始时，手牌中古币等级+1，若数量≥8张，则+2级。 "
+  },
+  {
+    "name": "Ancient Coin Fan Xin",
+    "alt": "古币翻新",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ancient-coin-fan-xin/",
+    "asset": "/assets/talent/636209/talent-636209-thumbnail.webp",
+    "search": "古币翻新 Ancient Coin Fan Xin 获得1张古币。古币牌会额外提供2级。 "
+  },
+  {
+    "name": "Life Zhan Fang",
+    "alt": "生命绽放",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/life-zhan-fang/",
+    "asset": "/assets/talent/636506/talent-636506-thumbnail.webp",
+    "search": "生命绽放 Life Zhan Fang 获得1张鬼谷子，玄微之种获得额外效果：每秒回复穿戴者3%生命值。 "
+  },
+  {
+    "name": "Xian Ji Of Ci",
+    "alt": "献祭之赐",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/xian-ji-of-ci/",
+    "asset": "/assets/talent/636213/talent-636213-thumbnail.webp",
+    "search": "献祭之赐 Xian Ji Of Ci 获得1张李信，李信卡牌效果提供的临时等级额外+3。若李信觉醒，敌方英雄触发牺牲时，也会触发己方李信的卡牌效果。 "
+  },
+  {
+    "name": "Xian Shi Deng Men",
+    "alt": "贤士登门",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/xian-shi-deng-men/",
+    "asset": "/assets/talent/636415/talent-636415-thumbnail.webp",
+    "search": "贤士登门 Xian Shi Deng Men 随机获得1张【逐鹿】英雄牌。回合开始时，再获得1张。 "
+  },
+  {
+    "name": "Ling Qian Dui Huan",
+    "alt": "零钱兑换",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ling-qian-dui-huan/",
+    "asset": "/assets/talent/636215/talent-636215-thumbnail.webp",
+    "search": "零钱兑换 Ling Qian Dui Huan 你获得的古币会自动兑换为2张无法提供等级的破损古币，精致古币则兑换为4张。 "
+  },
+  {
+    "name": "Cheng Sheng Zhui Ji",
+    "alt": "乘胜追击",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/cheng-sheng-zhui-ji/",
+    "asset": "/assets/talent/636413/talent-636413-thumbnail.webp",
+    "search": "乘胜追击 Cheng Sheng Zhui Ji 战斗胜利时，获得1张高阶推演战术。 "
+  },
+  {
+    "name": "Zui Zhong Shou Wei",
+    "alt": "最终守卫",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zui-zhong-shou-wei/",
+    "asset": "/assets/talent/636217/talent-636217-thumbnail.webp",
+    "search": "最终守卫 Zui Zhong Shou Wei 你最后1名【河洛】英雄受到致命伤害时进入无敌状态，并提升50%攻击速度，持续1秒。战斗中你的英雄每触发过1次牺牲效果，无敌时间增加0.25秒。 "
+  },
+  {
+    "name": "Ancient Coin Qi Yue",
+    "alt": "古币契约",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ancient-coin-qi-yue/",
+    "asset": "/assets/talent/636218/talent-636218-thumbnail.webp",
+    "search": "古币契约 Ancient Coin Qi Yue 你的英雄每触发3次牺牲效果，获得1张古币。 "
+  },
+  {
+    "name": "Bao Chi Jin Bu",
+    "alt": "保持进步",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/bao-chi-jin-bu/",
+    "asset": "/assets/talent/613002/talent-613002-thumbnail.webp",
+    "search": "保持进步 Bao Chi Jin Bu 获得1张3阶兑换券。回合开始时，获得1棋手经验。满级后，改为获得1能量。 "
+  },
+  {
+    "name": "Jing Tun",
+    "alt": "鲸吞",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/jing-tun/",
+    "asset": "/assets/talent/636412/talent-636412-thumbnail.webp",
+    "search": "鲸吞 Jing Tun 获得1张庄周，【逐鹿】英雄每释放6次技能，庄周会吞噬敌方等级最低的1名英雄，永久获得其30%的生命值上限（每场战斗最多吞噬1次）。若庄周觉醒，吞噬上限变为3次。 "
+  },
+  {
+    "name": "Xing Yun Ying Bi",
+    "alt": "幸运硬币",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/xing-yun-ying-bi/",
+    "asset": "/assets/talent/636221/talent-636221-thumbnail.webp",
+    "search": "幸运硬币 Xing Yun Ying Bi 打出古币时有概率额外触发1-3次。 "
+  },
+  {
+    "name": "Hong Dou Of Tuo",
+    "alt": "红豆之托",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/hong-dou-of-tuo/",
+    "asset": "/assets/talent/636224/talent-636224-thumbnail.webp",
+    "search": "红豆之托 Hong Dou Of Tuo 获得1张【河洛】英雄王维。备战阶段，场上英雄总等级分别达到100/200/400级时，再获得1张王维。 "
+  },
+  {
+    "name": "Qiang Li Xiao Di",
+    "alt": "强力小弟",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/qiang-li-xiao-di/",
+    "asset": "/assets/talent/636409/talent-636409-thumbnail.webp",
+    "search": "强力小弟 Qiang Li Xiao Di 你的召唤单位等级+6。每回合开始时，再+6。 "
+  },
+  {
+    "name": "Ji Gao Yi Chou",
+    "alt": "技高一筹",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ji-gao-yi-chou/",
+    "asset": "/assets/talent/636401/talent-636401-thumbnail.webp",
+    "search": "技高一筹 Ji Gao Yi Chou 【逐鹿】英雄每释放6次技能，获得1能量，上限5能量。 "
+  },
+  {
+    "name": "Le Shan Hao Shi",
+    "alt": "乐善好施",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/le-shan-hao-shi/",
+    "asset": "/assets/talent/636304/talent-636304-thumbnail.webp",
+    "search": "乐善好施 Le Shan Hao Shi 你的英雄触发登场效果时，随机2名【三分】英雄等级+2。 "
+  },
+  {
+    "name": "Peng Hua Life",
+    "alt": "膨化生命",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/peng-hua-life/",
+    "asset": "/assets/talent/636317/talent-636317-thumbnail.webp",
+    "search": "膨化生命 Peng Hua Life 战斗开始时，你的【三分】英雄额外获得100%生命值上限（仅提升上限），且生命恢复和护盾效果提升20%。 "
+  },
+  {
+    "name": "Yi Shen Shi Dan",
+    "alt": "一身是胆",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/yi-shen-shi-dan/",
+    "asset": "/assets/talent/636306/talent-636306-thumbnail.webp",
+    "search": "一身是胆 Yi Shen Shi Dan 获得1张赵云，赵云在释放技能前，会额外释放1个技能惊雷之龙，且赵云生命值每次经过70%/30%档位时，会恢复全部法力值。 改写赵云施法拓扑和回蓝窗口，不能当作泛用伤害天赋。"
+  },
+  {
+    "name": "Wo Long Wei Shi",
+    "alt": "卧龙威势",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/wo-long-wei-shi/",
+    "asset": "/assets/talent/636307/talent-636307-thumbnail.webp",
+    "search": "卧龙威势 Wo Long Wei Shi 获得1张诸葛亮，你的英雄释放技能时，诸葛亮周围1格的其他【三分】英雄获得10点法力值。 "
+  },
+  {
+    "name": "Jin Nang Miao Ji",
+    "alt": "锦囊妙计",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/jin-nang-miao-ji/",
+    "asset": "/assets/talent/636314/talent-636314-thumbnail.webp",
+    "search": "锦囊妙计 Jin Nang Miao Ji 获得1张锦囊：使用后，本回合打出的登场英雄牌，会额外触发1次登场效果。 "
+  },
+  {
+    "name": "Qian Sheng Zhan Li",
+    "alt": "钱生战力",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/qian-sheng-zhan-li/",
+    "asset": "/assets/talent/636219/talent-636219-thumbnail.webp",
+    "search": "钱生战力 Qian Sheng Zhan Li 战斗开始时，随机4名【河洛】英雄获得累计使用古币数（选择此天赋后）的临时等级。 "
+  },
+  {
+    "name": "Kong Zhi Gan Ying",
+    "alt": "控制感应",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/kong-zhi-gan-ying/",
+    "asset": "/assets/talent/636313/talent-636313-thumbnail.webp",
+    "search": "控制感应 Kong Zhi Gan Ying 你的英雄施加控制效果时，你的【三分】英雄获得20点法术攻击力。 "
+  },
+  {
+    "name": "Nu Tao",
+    "alt": "怒涛",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/nu-tao/",
+    "asset": "/assets/talent/636309/talent-636309-thumbnail.webp",
+    "search": "怒涛 Nu Tao 【三分】英雄获得牺牲：大乔灵体现身，对敌人施加1次巨型海浪打击。 "
+  },
+  {
+    "name": "San San De San",
+    "alt": "三三得三",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/san-san-de-san/",
+    "asset": "/assets/talent/636315/talent-636315-thumbnail.webp",
+    "search": "三三得三 San San De San 战斗开始时，若你场上【三分】英雄人数刚好是3的倍数，他们分别获得33临时等级。 用严格人数闸门换取三分英雄的战斗内临时等级。"
+  },
+  {
+    "name": "Gua Shuai Shang Zhen",
+    "alt": "挂帅上阵",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/gua-shuai-shang-zhen/",
+    "asset": "/assets/talent/636316/talent-636316-thumbnail.webp",
+    "search": "挂帅上阵 Gua Shuai Shang Zhen 获得1张挂帅：指定1名【三分】英雄，使其等级等同于1名最近的【三分】英雄。 "
+  },
+  {
+    "name": "Bo Zhan",
+    "alt": "搏战",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/bo-zhan/",
+    "asset": "/assets/talent/636305/talent-636305-thumbnail.webp",
+    "search": "搏战 Bo Zhan 你前两排的【三分】英雄生命值50%以下时，每秒恢复5%生命值，并提升50%攻速。 "
+  },
+  {
+    "name": "San Fen Ling Xiu",
+    "alt": "三分领袖",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/san-fen-ling-xiu/",
+    "asset": "/assets/talent/636318/talent-636318-thumbnail.webp",
+    "search": "三分领袖 San Fen Ling Xiu 获得1张装备牌三分旗帜：造成伤害的40%平摊治疗所有【三分】英雄（仅【三分】英雄可穿戴）。\n治疗分摊时会排除满血的【三分】英雄。 "
+  },
+  {
+    "name": "Si Chong Zou",
+    "alt": "四重奏",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/si-chong-zou/",
+    "asset": "/assets/talent/636303/talent-636303-thumbnail.webp",
+    "search": "四重奏 Si Chong Zou 战斗开始时，若你场上有至少3个阵营，全体英雄获得5×棋手等级的临时等级。 "
+  },
+  {
+    "name": "Yi Wai Of Cai",
+    "alt": "意外之财",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/yi-wai-of-cai/",
+    "asset": "/assets/talent/636402/talent-636402-thumbnail.webp",
+    "search": "意外之财 Yi Wai Of Cai 每合成4次【逐鹿】英雄，获得1张随机1-5阶效果锦囊牌。 "
+  },
+  {
+    "name": "Ling Xing Ru Liu",
+    "alt": "令行如流",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ling-xing-ru-liu/",
+    "asset": "/assets/talent/636403/talent-636403-thumbnail.webp",
+    "search": "令行如流 Ling Xing Ru Liu 获得1张战术牌。回合开始时，再获得1张（棋手等级达到5级后，必定是高阶战术）。 "
+  },
+  {
+    "name": "Qiong Bing Du Wu",
+    "alt": "穷兵黩武",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/qiong-bing-du-wu/",
+    "asset": "/assets/talent/636404/talent-636404-thumbnail.webp",
+    "search": "穷兵黩武 Qiong Bing Du Wu 【逐鹿】英雄释放技能时，召唤1个玄雍士兵，其等级与召唤英雄相同，最多同时存在3个。 "
+  },
+  {
+    "name": "Fu Xian",
+    "alt": "复现",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/fu-xian/",
+    "asset": "/assets/talent/636406/talent-636406-thumbnail.webp",
+    "search": "复现 Fu Xian 每回合首次对【逐鹿】英雄使用的效果牌会返回手牌并附加转瞬。 "
+  },
+  {
+    "name": "Gui Shen Jiang Lin",
+    "alt": "鬼神降临",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/gui-shen-jiang-lin/",
+    "asset": "/assets/talent/636301/talent-636301-thumbnail.webp",
+    "search": "鬼神降临 Gui Shen Jiang Lin 你阵亡4名【三分】英雄后，召唤吕布，其等级为已阵亡【三分】英雄等级之和的一半。 "
+  },
+  {
+    "name": "Yan Wu",
+    "alt": "演武",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/yan-wu/",
+    "asset": "/assets/talent/636410/talent-636410-thumbnail.webp",
+    "search": "演武 Yan Wu 棋手升到5级后，你获得的战术牌都会变为高阶战术。 "
+  },
+  {
+    "name": "Gang Qi Hu Ti",
+    "alt": "罡气护体",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/gang-qi-hu-ti/",
+    "asset": "/assets/talent/636411/talent-636411-thumbnail.webp",
+    "search": "罡气护体 Gang Qi Hu Ti 【逐鹿】英雄在技能释放期间，每1秒获得自身最大生命值5%的护盾，护盾持续3秒。 "
+  },
+  {
+    "name": "Bao Jun Gui Lai",
+    "alt": "暴君归来",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/bao-jun-gui-lai/",
+    "asset": "/assets/talent/636220/talent-636220-thumbnail.webp",
+    "search": "暴君归来 Bao Jun Gui Lai 你在战斗过程中复生的英雄，获得200%攻速、100%暴击率和70%伤害减免，持续1.5秒。 "
+  },
+  {
+    "name": "Qian Jin Huan Jiu",
+    "alt": "千金换酒",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/qian-jin-huan-jiu/",
+    "asset": "/assets/talent/636216/talent-636216-thumbnail.webp",
+    "search": "千金换酒 Qian Jin Huan Jiu 获得1张李白，李白每获得12次古币，释放技能时会永久额外释放1次。 "
+  },
+  {
+    "name": "Si Chou Of Lu",
+    "alt": "丝绸之路",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/si-chou-of-lu/",
+    "asset": "/assets/talent/636214/talent-636214-thumbnail.webp",
+    "search": "丝绸之路 Si Chou Of Lu 每出售4名场上英雄获得1张古币，每出售1张古币获得1张【河洛】英雄牌。 "
+  },
+  {
+    "name": "Chun Feng Hua Yu",
+    "alt": "春风化雨",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/chun-feng-hua-yu/",
+    "asset": "/assets/talent/636417/talent-636417-thumbnail.webp",
+    "search": "春风化雨 Chun Feng Hua Yu 回合开始时，获得1张【逐鹿】英雄牌；若上场战斗胜利，再获得1张场上【逐鹿】英雄的同名牌。 "
+  },
+  {
+    "name": "Shui Jing Qiong Ding",
+    "alt": "水晶穹顶",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/shui-jing-qiong-ding/",
+    "asset": "/assets/talent/636418/talent-636418-thumbnail.webp",
+    "search": "水晶穹顶 Shui Jing Qiong Ding 战斗开始时，穹顶会将区域内英雄的护盾吸收变为自身的护盾，保护区域内的友军不受伤害。 "
+  },
+  {
+    "name": "Wang Mei Zhi Ke",
+    "alt": "望梅止渴",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/wang-mei-zhi-ke/",
+    "asset": "/assets/talent/636501/talent-636501-thumbnail.webp",
+    "search": "望梅止渴 Wang Mei Zhi Ke 获得1张望梅止渴。回合开始时，场上每有2名【大河】英雄，再获得1张。 "
+  },
+  {
+    "name": "Si Hai Lai Yuan",
+    "alt": "四海来援",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/si-hai-lai-yuan/",
+    "asset": "/assets/talent/636503/talent-636503-thumbnail.webp",
+    "search": "四海来援 Si Hai Lai Yuan 无阵营英雄获得牺牲：召唤1名与自身品阶和等级相同的英雄（无卡牌效果）参战。 "
+  },
+  {
+    "name": "Ming Yun Tu Teng",
+    "alt": "命运图腾",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ming-yun-tu-teng/",
+    "asset": "/assets/talent/636504/talent-636504-thumbnail.webp",
+    "search": "命运图腾 Ming Yun Tu Teng 战斗开始时，若你至少有2名【大河】英雄，随机在其周围1格召唤命运图腾：消灭击败该图腾的敌人。 "
+  },
+  {
+    "name": "Shen Ming Bi You",
+    "alt": "神明庇佑",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/shen-ming-bi-you/",
+    "asset": "/assets/talent/636505/talent-636505-thumbnail.webp",
+    "search": "神明庇佑 Shen Ming Bi You 战斗开始时，图腾周围1格的己方单位提高10%生命值上限和20%攻速，可叠加。 "
+  },
+  {
+    "name": "Zi Wo Feng Xian",
+    "alt": "自我奉献",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zi-wo-feng-xian/",
+    "asset": "/assets/talent/636211/talent-636211-thumbnail.webp",
+    "search": "自我奉献 Zi Wo Feng Xian 【河洛】英雄获得牺牲：所有友方单位+1临时等级，每次触发此牺牲效果时，临时等级额外+1。 "
+  },
+  {
+    "name": "Shi Zu Xiong Ling",
+    "alt": "始祖熊灵",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/shi-zu-xiong-ling/",
+    "asset": "/assets/talent/636507/talent-636507-thumbnail.webp",
+    "search": "始祖熊灵 Shi Zu Xiong Ling 获得1张始祖熊灵，其被视为【大河】英雄且不占人口。战斗开始时，我方每比敌方多1个单位，始祖熊灵永久增加2级。 "
+  },
+  {
+    "name": "Xiong Hun Fu Jia",
+    "alt": "熊魂附甲",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/xiong-hun-fu-jia/",
+    "asset": "/assets/talent/636508/talent-636508-thumbnail.webp",
+    "search": "熊魂附甲 Xiong Hun Fu Jia 你至少穿戴2件装备的【大河】英雄阵亡获得牺牲：召唤1只与该英雄等级相同的熊灵。 "
+  },
+  {
+    "name": "Yi Qi Fa Cai",
+    "alt": "一起发财",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/yi-qi-fa-cai/",
+    "asset": "/assets/talent/636205/talent-636205-thumbnail.webp",
+    "search": "一起发财 Yi Qi Fa Cai 使用古币时，其他每个阵营中各1名随机英雄等级+3。 "
+  },
+  {
+    "name": "Ancient Coin Ji",
+    "alt": "古币机",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ancient-coin-ji/",
+    "asset": "/assets/talent/636204/talent-636204-thumbnail.webp",
+    "search": "古币机 Ancient Coin Ji 召唤古币机，每对其使用4张古币牌（精致古币视为2次），依次获得：随机5张河洛英雄牌；1件贤者的庇护。之后随机获得：1张超速成长、1张普通装备牌或8能量。 "
+  },
+  {
+    "name": "Xu Wang Zhuan Sheng",
+    "alt": "虚妄转生",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/xu-wang-zhuan-sheng/",
+    "asset": "/assets/talent/636511/talent-636511-thumbnail.webp",
+    "search": "虚妄转生 Xu Wang Zhuan Sheng 召唤1个虚妄图腾：被摧毁时，变为场上存活的等级最高或品阶最高的【大河】英雄（无卡牌效果）。 "
+  },
+  {
+    "name": "Sheng Zhi",
+    "alt": "升值",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/sheng-zhi/",
+    "asset": "/assets/talent/636203/talent-636203-thumbnail.webp",
+    "search": "升值 Sheng Zhi 获得2张古币。战斗胜利时，古币牌提供的等级永久+1。 "
+  },
+  {
+    "name": "Ling Ji Sheng Hua",
+    "alt": "灵祭升华",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ling-ji-sheng-hua/",
+    "asset": "/assets/talent/636513/talent-636513-thumbnail.webp",
+    "search": "灵祭升华 Ling Ji Sheng Hua 场上的图腾被摧毁时，等级最高的【大河】英雄获得图腾一半等级的临时等级。 "
+  },
+  {
+    "name": "He Xin Lie Hen",
+    "alt": "核心裂痕",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/he-xin-lie-hen/",
+    "asset": "/assets/talent/636114/talent-636114-thumbnail.webp",
+    "search": "核心裂痕 He Xin Lie Hen 获得1张盗火。回合开始时，再获得1张（转瞬。指定1名英雄，至多偷取阿科米亚核心20级）。 "
+  },
+  {
+    "name": "Neng Yuan Zhi Huan",
+    "alt": "能源置换",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/neng-yuan-zhi-huan/",
+    "asset": "/assets/talent/636113/talent-636113-thumbnail.webp",
+    "search": "能源置换 Neng Yuan Zhi Huan 回合开始时，阿科米亚核心失去20级，获得10能量。每回合最多触发1次。 "
+  },
+  {
+    "name": "Shen Ying Duan Jiang",
+    "alt": "神鹰锻匠",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/shen-ying-duan-jiang/",
+    "asset": "/assets/talent/636517/talent-636517-thumbnail.webp",
+    "search": "神鹰锻匠 Shen Ying Duan Jiang 获得1张云中君，战斗开始时，云中君会为距离最近的1个【大河】英雄添加1件神兵装备。若云中君觉醒，神兵至多添加3件。 "
+  },
+  {
+    "name": "Quan Yu Gong Ming",
+    "alt": "全域共鸣",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/quan-yu-gong-ming/",
+    "asset": "/assets/talent/636112/talent-636112-thumbnail.webp",
+    "search": "全域共鸣 Quan Yu Gong Ming 随机获得1件星源装备，且星源装备的【日落海】专属效果对穿戴它的任意英雄生效。 "
+  },
+  {
+    "name": "Sheng Ge",
+    "alt": "升格",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/sheng-ge/",
+    "asset": "/assets/talent/636602/talent-636602-thumbnail.webp",
+    "search": "升格 Sheng Ge 战斗中入场的召唤物存活8秒后，变为其召唤者（无卡牌效果）并保留等级，每场战斗最多5次。 "
+  },
+  {
+    "name": "Qian Li Xiang Ju",
+    "alt": "千里相聚",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/qian-li-xiang-ju/",
+    "asset": "/assets/talent/636603/talent-636603-thumbnail.webp",
+    "search": "千里相聚 Qian Li Xiang Ju 每打出3张无阵营英雄牌时，全体英雄等级+4。 "
+  },
+  {
+    "name": "Shen Wai Shen",
+    "alt": "身外身",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/shen-wai-shen/",
+    "asset": "/assets/talent/636604/talent-636604-thumbnail.webp",
+    "search": "身外身 Shen Wai Shen 获得1张孙悟空，孙悟空释放技能时，呼出2个猴毛化身进行1次攻击。战斗胜利时，化身永久+1。 "
+  },
+  {
+    "name": "Xiong Mei",
+    "alt": "兄妹",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/xiong-mei/",
+    "asset": "/assets/talent/637001/talent-637001-thumbnail.webp",
+    "search": "兄妹 Xiong Mei 获得1张铠和1张露娜。共战时，铠首次释放技能，露娜可以无限释放技能，持续7秒。露娜每次释放技能，铠提升40%攻速。 "
+  },
+  {
+    "name": "Shou Jue",
+    "alt": "兽觉",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/shou-jue/",
+    "asset": "/assets/talent/637003/talent-637003-thumbnail.webp",
+    "search": "兽觉 Shou Jue 获得1张裴擒虎和1张云中君。共战时，每当敌人被击败，二人获得兽觉，普攻额外造成100%物理伤害，持续5秒。 "
+  },
+  {
+    "name": "Ju Xiang",
+    "alt": "巨像",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ju-xiang/",
+    "asset": "/assets/talent/637004/talent-637004-thumbnail.webp",
+    "search": "巨像 Ju Xiang 获得1张米莱狄和1张蒙恬。二人在场时，召唤与米莱狄等级相同的蔚蓝神兽。二人等级之和达到100时，召唤与蒙恬等级相同的猩红神兽。 "
+  },
+  {
+    "name": "Wu Li Quan Kai",
+    "alt": "舞力全开",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/wu-li-quan-kai/",
+    "asset": "/assets/talent/637006/talent-637006-thumbnail.webp",
+    "search": "舞力全开 Wu Li Quan Kai 貂蝉、婉儿共战时二人共享法力值（不会变更），技能变为融合技，可对目标造成伤害及负面效果。 "
+  },
+  {
+    "name": "Qi Wu",
+    "alt": "起舞",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/qi-wu/",
+    "asset": "/assets/talent/63700601/talent-63700601-thumbnail.webp",
+    "search": "起舞 Qi Wu 获得1张貂蝉和1张上官婉儿。共战时，参与击败敌方英雄后，二人均+10点法术攻击力并+1级。 "
+  },
+  {
+    "name": "Jian Yu",
+    "alt": "箭雨",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/jian-yu/",
+    "asset": "/assets/talent/637007/talent-637007-thumbnail.webp",
+    "search": "箭雨 Jian Yu 获得1张虞姬和1张公孙离。共战时，每合计攻击10次，将往敌方人群最密集处释放箭雨，各造成3次自身等级x2的法术伤害。 "
+  },
+  {
+    "name": "Shuang Sheng Tu Xi",
+    "alt": "双生突袭",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/shuang-sheng-tu-xi/",
+    "asset": "/assets/talent/637008/talent-637008-thumbnail.webp",
+    "search": "双生突袭 Shuang Sheng Tu Xi 马可波罗、百里守约共战，释放技能时创造分身朝敌人释放技能。 "
+  },
+  {
+    "name": "Shuang Chong Fen Pei",
+    "alt": "双重分配",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/shuang-chong-fen-pei/",
+    "asset": "/assets/talent/636108/talent-636108-thumbnail.webp",
+    "search": "双重分配 Shuang Chong Fen Pei 阿科米亚核心每分配1等级，还将随机分配1点属性：双攻/攻速/初始法力值中的随机1个（每场战斗随机）。 "
+  },
+  {
+    "name": "Du Nai",
+    "alt": "毒奶",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/du-nai/",
+    "asset": "/assets/talent/637010/talent-637010-thumbnail.webp",
+    "search": "毒奶 Du Nai 获得1张蔡文姬和1张扁鹊。共战时，扁鹊固定对蔡文姬释放技能，蔡文姬获得50%移速，持续在敌方附近游走并造成伤害（详见技能面板）。\n毒奶·长歌行：基础技能为10+30%法术攻击力的生命值恢复和法术伤害；10级技能为10+45%法术攻击力的生命值恢复和法术伤害。 "
+  },
+  {
+    "name": "Zhu Xing",
+    "alt": "逐星",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zhu-xing/",
+    "asset": "/assets/talent/637011/talent-637011-thumbnail.webp",
+    "search": "逐星 Zhu Xing 获得1张李白和1张曜。共战时，李白释放技能后，曜同步模仿李白，3次后曜将二人的技能融会贯通，领悟更强大的招式（详见技能面板）。 "
+  },
+  {
+    "name": "Bao He",
+    "alt": "宝盒",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/bao-he/",
+    "asset": "/assets/talent/637012/talent-637012-thumbnail.webp",
+    "search": "宝盒 Bao He 获得1张露娜和1张孙悟空。共战时二者任意一方受到致死伤害时会暂时离场，持续6秒。在此期间另一方如未阵亡，则返回战场并恢复全部生命值及法力值。 "
+  },
+  {
+    "name": "Xuan Ren",
+    "alt": "旋刃",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/xuan-ren/",
+    "asset": "/assets/talent/637016/talent-637016-thumbnail.webp",
+    "search": "旋刃 Xuan Ren 获得1张李元芳和1张公孙离。共战时二人共享法力值（不会变更），技能变为融合技：旋刃（详见技能面板）。旋刃每造成2次伤害，李元芳等级永久+1。 "
+  },
+  {
+    "name": "Mu Ming Er Lai",
+    "alt": "慕名而来",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/mu-ming-er-lai/",
+    "asset": "/assets/talent/638001/talent-638001-thumbnail.webp",
+    "search": "慕名而来 Mu Ming Er Lai 你的英雄每触发4次登场效果，随机获得1张英雄牌。 "
+  },
+  {
+    "name": "Kuang Ye Wei Mu",
+    "alt": "狂野帷幕",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/kuang-ye-wei-mu/",
+    "asset": "/assets/talent/638002/talent-638002-thumbnail.webp",
+    "search": "狂野帷幕 Kuang Ye Wei Mu 战斗开始时，所有非牺牲单位进入隐形状态，持续10秒。 "
+  },
+  {
+    "name": "Ji Shao Cheng Duo",
+    "alt": "积少成多",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ji-shao-cheng-duo/",
+    "asset": "/assets/talent/636107/talent-636107-thumbnail.webp",
+    "search": "积少成多 Ji Shao Cheng Duo 【日落海】英雄每提升10级，阿科米亚核心获得4等级。 "
+  },
+  {
+    "name": "Chao Ji Xu Neng",
+    "alt": "超级蓄能",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/chao-ji-xu-neng/",
+    "asset": "/assets/talent/638004/talent-638004-thumbnail.webp",
+    "search": "超级蓄能 Chao Ji Xu Neng 回合开始时，你的整备效果英雄会提升场上整备效果英雄数x2的等级。 "
+  },
+  {
+    "name": "Jing Xiang Mi Li",
+    "alt": "镜像迷离",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/jing-xiang-mi-li/",
+    "asset": "/assets/talent/638005/talent-638005-thumbnail.webp",
+    "search": "镜像迷离 Jing Xiang Mi Li 战斗开始时，你的英雄偷取敌方同名英雄33%的等级，每名英雄只会因此效果改变一次等级。若对手也拥有此天赋，则无法生效。 "
+  },
+  {
+    "name": "She Ren Xin Po",
+    "alt": "摄人心魄",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/she-ren-xin-po/",
+    "asset": "/assets/talent/638006/talent-638006-thumbnail.webp",
+    "search": "摄人心魄 She Ren Xin Po 你的夺取效果英雄击败敌方英雄时，将永久夺取对方3级。 "
+  },
+  {
+    "name": "Kong Hun",
+    "alt": "控魂",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/kong-hun/",
+    "asset": "/assets/talent/638007/talent-638007-thumbnail.webp",
+    "search": "控魂 Kong Hun 夺取效果英雄击败敌方英雄时，将其灵魂复活（无卡牌效果），满法力值作战，持续5秒。 "
+  },
+  {
+    "name": "Neng Liang Ji Qu",
+    "alt": "能量汲取",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/neng-liang-ji-qu/",
+    "asset": "/assets/talent/636104/talent-636104-thumbnail.webp",
+    "search": "能量汲取 Neng Liang Ji Qu 出售场上英雄时，阿科米亚核心会获得其等级。 "
+  },
+  {
+    "name": "Shuang Sheng Xiang",
+    "alt": "双生相",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/shuang-sheng-xiang/",
+    "asset": "/assets/talent/638009/talent-638009-thumbnail.webp",
+    "search": "双生相 Shuang Sheng Xiang 战斗开始时，第一排闪现英雄不再闪现，获得30%最大生命值上限以及10点双抗；后三排闪现英雄额外获得20%暴击率和40%暴击效果。 "
+  },
+  {
+    "name": "Sheng Sheng Bu Xi",
+    "alt": "生生不息",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/sheng-sheng-bu-xi/",
+    "asset": "/assets/talent/638010/talent-638010-thumbnail.webp",
+    "search": "生生不息 Sheng Sheng Bu Xi 4/5阶的召唤单位获得完美复生。 "
+  },
+  {
+    "name": "Ding Xiang Chuan Shu",
+    "alt": "定向传输",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ding-xiang-chuan-shu/",
+    "asset": "/assets/talent/636102/talent-636102-thumbnail.webp",
+    "search": "定向传输 Ding Xiang Chuan Shu 阿科米亚核心的等级会优先分配给穿戴装备最多的【日落海】英雄，最多分配200级。 "
+  },
+  {
+    "name": "Dian Bing Dian Jiang",
+    "alt": "点兵点将",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/dian-bing-dian-jiang/",
+    "asset": "/assets/talent/635046/talent-635046-thumbnail.webp",
+    "search": "点兵点将 Dian Bing Dian Jiang 获得1张天赋牌点兵点将：获得场上英雄牌各1张。 "
+  },
+  {
+    "name": "San Fen Qiang Yuan",
+    "alt": "三分强援",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/san-fen-qiang-yuan/",
+    "asset": "/assets/talent/635045/talent-635045-thumbnail.webp",
+    "search": "三分强援 San Fen Qiang Yuan 获得5能量和随机3张4-5阶【三分】英雄牌。 "
+  },
+  {
+    "name": "San Fen Zeng Yuan",
+    "alt": "三分增援",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/san-fen-zeng-yuan/",
+    "asset": "/assets/talent/635043/talent-635043-thumbnail.webp",
+    "search": "三分增援 San Fen Zeng Yuan 随机获得3张3-4阶【三分】英雄牌。 把天赋选择转换成三分中高费补件包。"
+  },
+  {
+    "name": "Hu Ming Ling Zhu",
+    "alt": "护命灵珠",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/hu-ming-ling-zhu/",
+    "asset": "/assets/talent/646005/talent-646005-thumbnail.webp",
+    "search": "护命灵珠 Hu Ming Ling Zhu 获得护命灵珠：增加护盾，护盾存在期间造成伤害提升。 "
+  },
+  {
+    "name": "Guang Hui Sheng Kai",
+    "alt": "光辉圣铠",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/guang-hui-sheng-kai/",
+    "asset": "/assets/talent/646006/talent-646006-thumbnail.webp",
+    "search": "光辉圣铠 Guang Hui Sheng Kai 获得光辉圣铠：每秒获得生命恢复。 "
+  },
+  {
+    "name": "Hun Ji Jue Ren",
+    "alt": "魂祭绝刃",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/hun-ji-jue-ren/",
+    "asset": "/assets/talent/646007/talent-646007-thumbnail.webp",
+    "search": "魂祭绝刃 Hun Ji Jue Ren 获得魂祭绝刃：增加攻速与吸血，但每次战斗以50%生命值开始。 "
+  },
+  {
+    "name": "Gen Yuan Of Li",
+    "alt": "根源之力",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/gen-yuan-of-li/",
+    "asset": "/assets/talent/646008/talent-646008-thumbnail.webp",
+    "search": "根源之力 Gen Yuan Of Li 获得根源之力：对敌方血量最少的单位造成法术伤害。 "
+  },
+  {
+    "name": "Ling Quan Xiang Lian",
+    "alt": "灵泉项链",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ling-quan-xiang-lian/",
+    "asset": "/assets/talent/646009/talent-646009-thumbnail.webp",
+    "search": "灵泉项链 Ling Quan Xiang Lian 获得灵泉项链：法力值上限-10，自身及周围1格友军每秒获得法力值。 "
+  },
+  {
+    "name": "Hun Mie Ling Guan",
+    "alt": "魂灭灵冠",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/hun-mie-ling-guan/",
+    "asset": "/assets/talent/646010/talent-646010-thumbnail.webp",
+    "search": "魂灭灵冠 Hun Mie Ling Guan 获得魂灭灵冠：穿戴者阵亡时基于敌人最大生命值造成真实伤害。 "
+  },
+  {
+    "name": "Ri Luo Hai Qiang Yuan",
+    "alt": "日落海强援",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ri-luo-hai-qiang-yuan/",
+    "asset": "/assets/talent/635040/talent-635040-thumbnail.webp",
+    "search": "日落海强援 Ri Luo Hai Qiang Yuan 获得5能量和随机3张4-5阶【日落海】英雄牌。 "
+  },
+  {
+    "name": "Qiang Di Ke Xing",
+    "alt": "强敌克星",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/qiang-di-ke-xing/",
+    "asset": "/assets/talent/646012/talent-646012-thumbnail.webp",
+    "search": "强敌克星 Qiang Di Ke Xing 获得强敌克星：造成真实伤害，每普攻4次眩晕敌人。 "
+  },
+  {
+    "name": "Ling Quan Fa Zhang",
+    "alt": "灵泉法杖",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ling-quan-fa-zhang/",
+    "asset": "/assets/talent/646013/talent-646013-thumbnail.webp",
+    "search": "灵泉法杖 Ling Quan Fa Zhang 获得灵泉法杖：获得闪现，闪现后重击敌人。 "
+  },
+  {
+    "name": "Gu Wu Of Jie",
+    "alt": "鼓舞之戒",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/gu-wu-of-jie/",
+    "asset": "/assets/talent/646015/talent-646015-thumbnail.webp",
+    "search": "鼓舞之戒 Gu Wu Of Jie 获得鼓舞之戒：与穿戴者同阵营的英雄提升最大生命值。 "
+  },
+  {
+    "name": "Meng Yan Of Ya",
+    "alt": "梦魇之牙",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/meng-yan-of-ya/",
+    "asset": "/assets/talent/646016/talent-646016-thumbnail.webp",
+    "search": "梦魇之牙 Meng Yan Of Ya 获得梦魇之牙：魔法伤害击败敌方造成范围伤害。 "
+  },
+  {
+    "name": "Mo Shi",
+    "alt": "末世",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/mo-shi/",
+    "asset": "/assets/talent/646017/talent-646017-thumbnail.webp",
+    "search": "末世 Mo Shi 获得末世：普通攻击偷取敌方生命值。 "
+  },
+  {
+    "name": "Ri Luo Hai Zeng Yuan",
+    "alt": "日落海增援",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ri-luo-hai-zeng-yuan/",
+    "asset": "/assets/talent/635038/talent-635038-thumbnail.webp",
+    "search": "日落海增援 Ri Luo Hai Zeng Yuan 随机获得3张3-4阶【日落海】英雄牌。 "
+  },
+  {
+    "name": "Da He Qiang Yuan",
+    "alt": "大河强援",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/da-he-qiang-yuan/",
+    "asset": "/assets/talent/635035/talent-635035-thumbnail.webp",
+    "search": "大河强援 Da He Qiang Yuan 获得5能量和随机3张4-5阶【大河流域】英雄牌。 "
+  },
+  {
+    "name": "Da He Zeng Yuan",
+    "alt": "大河增援",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/da-he-zeng-yuan/",
+    "asset": "/assets/talent/635033/talent-635033-thumbnail.webp",
+    "search": "大河增援 Da He Zeng Yuan 随机获得3张3-4阶【大河流域】英雄牌。 "
+  },
+  {
+    "name": "Zhu Lu Qiang Yuan",
+    "alt": "逐鹿强援",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zhu-lu-qiang-yuan/",
+    "asset": "/assets/talent/635030/talent-635030-thumbnail.webp",
+    "search": "逐鹿强援 Zhu Lu Qiang Yuan 获得5能量和随机3张4-5阶【逐鹿】英雄牌。 "
+  },
+  {
+    "name": "Zhu Lu Zeng Yuan",
+    "alt": "逐鹿增援",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zhu-lu-zeng-yuan/",
+    "asset": "/assets/talent/635028/talent-635028-thumbnail.webp",
+    "search": "逐鹿增援 Zhu Lu Zeng Yuan 随机获得3张3-4阶【逐鹿】英雄牌。 "
+  },
+  {
+    "name": "Shi Huang Zhe",
+    "alt": "拾荒者",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/shi-huang-zhe/",
+    "asset": "/assets/talent/671008/talent-671008-thumbnail.webp",
+    "search": "拾荒者 Shi Huang Zhe 恢复10棋手生命值。之后每有1位棋手被淘汰，获得2张5阶英雄兑换券。 "
+  },
+  {
+    "name": "He Luo Qiang Yuan",
+    "alt": "河洛强援",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/he-luo-qiang-yuan/",
+    "asset": "/assets/talent/635018/talent-635018-thumbnail.webp",
+    "search": "河洛强援 He Luo Qiang Yuan 获得5能量和3张随机4-5阶【河洛】英雄牌。 "
+  },
+  {
+    "name": "He Luo Zeng Yuan",
+    "alt": "河洛增援",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/he-luo-zeng-yuan/",
+    "asset": "/assets/talent/635016/talent-635016-thumbnail.webp",
+    "search": "河洛增援 He Luo Zeng Yuan 随机获得3张3-4阶【河洛】英雄牌。 "
+  },
+  {
+    "name": "Tian Bing",
+    "alt": "天兵",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/tian-bing/",
+    "asset": "/assets/talent/635013/talent-635013-thumbnail.webp",
+    "search": "天兵 Tian Bing 获得1张5阶英雄牌。回合开始时，再获得1张。 "
+  },
+  {
+    "name": "Shou Hu Ling",
+    "alt": "守护灵",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/shou-hu-ling/",
+    "asset": "/assets/talent/635012/talent-635012-thumbnail.webp",
+    "search": "守护灵 Shou Hu Ling 当你在战斗中仅剩1名英雄时，随机召唤1名满装备的5阶英雄（无卡牌效果）出战，并使之获得回合数x10的等级（至少为80级）。 "
+  },
+  {
+    "name": "Qun Xing Cui Can",
+    "alt": "群星璀璨",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/qun-xing-cui-can/",
+    "asset": "/assets/talent/671013/talent-671013-thumbnail.webp",
+    "search": "群星璀璨 Qun Xing Cui Can 获得2张4-5阶英雄兑换券。当你场上至少有5名4-5阶英雄时，所有4-5阶英雄获得20临时等级。 "
+  },
+  {
+    "name": "Te Da Dian Chi Bao",
+    "alt": "特大电池包",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/te-da-dian-chi-bao/",
+    "asset": "/assets/talent/635001/talent-635001-thumbnail.webp",
+    "search": "特大电池包 Te Da Dian Chi Bao 获得12能量。 "
+  },
+  {
+    "name": "Qiang Zhe Heng Qiang",
+    "alt": "强者恒强",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/qiang-zhe-heng-qiang/",
+    "asset": "/assets/talent/634037/talent-634037-thumbnail.webp",
+    "search": "强者恒强 Qiang Zhe Heng Qiang 战斗开始时，你的已觉醒英雄获得50点物理攻击力和50点法术攻击力。若所有己方英雄已觉醒，则再获得20%物理及法术吸血。 "
+  },
+  {
+    "name": "Randomenhance",
+    "alt": "随机强化",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/randomenhance/",
+    "asset": "/assets/talent/634035/talent-634035-thumbnail.webp",
+    "search": "随机强化 Randomenhance 战斗开始时，你品阶最高的1名英雄等级永久+9。 "
+  },
+  {
+    "name": "Wu Ying Shou",
+    "alt": "无影手",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/wu-ying-shou/",
+    "asset": "/assets/talent/671018/talent-671018-thumbnail.webp",
+    "search": "无影手 Wu Ying Shou 回合开始时，获得3次仅本回合可用的免费商店刷新。 "
+  },
+  {
+    "name": "Xue Ba",
+    "alt": "学霸",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/xue-ba/",
+    "asset": "/assets/talent/671019/talent-671019-thumbnail.webp",
+    "search": "学霸 Xue Ba 获得5能量。若你是第1个到达5/6级的棋手，则5级获得2张5阶英雄兑换券，6级获得1件天赋装备。失败则获得留级证明。 "
+  },
+  {
+    "name": "Po Bai Shen Wei",
+    "alt": "破败神威",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/po-bai-shen-wei/",
+    "asset": "/assets/talent/634032/talent-634032-thumbnail.webp",
+    "search": "破败神威 Po Bai Shen Wei 战斗开始时，你的英雄普攻附带敌人最大生命值3%的法术伤害。 "
+  },
+  {
+    "name": "Jue Jing Ni Xi",
+    "alt": "绝境逆袭",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/jue-jing-ni-xi/",
+    "asset": "/assets/talent/671021/talent-671021-thumbnail.webp",
+    "search": "绝境逆袭 Jue Jing Ni Xi 当你排名不是第1或第2名时，你的所有单位伤害+20%，最大生命值+25%。 "
+  },
+  {
+    "name": "Mai Ju Zi Qu",
+    "alt": "买橘子去",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/mai-ju-zi-qu/",
+    "asset": "/assets/talent/681001/talent-681001-thumbnail.webp",
+    "search": "买橘子去 Mai Ju Zi Qu 获得1张天赋牌站这别动：指定1个阵位，每过2回合，获得1张此格上的英雄牌。 "
+  },
+  {
+    "name": "Zhan Lve Zhong Shu",
+    "alt": "战略中枢",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zhan-lve-zhong-shu/",
+    "asset": "/assets/talent/634030/talent-634030-thumbnail.webp",
+    "search": "战略中枢 Zhan Lve Zhong Shu 可上阵人数+1，同时获得2张有福同享。 "
+  },
+  {
+    "name": "Xu Gou Wu Zhuang",
+    "alt": "虚构武装",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/xu-gou-wu-zhuang/",
+    "asset": "/assets/talent/634028/talent-634028-thumbnail.webp",
+    "search": "虚构武装 Xu Gou Wu Zhuang 战斗开始时，随机3名己方英雄临时获得2件普通装备及300点生命上限。 "
+  },
+  {
+    "name": "Yan Chi Man Zu",
+    "alt": "延迟满足",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/yan-chi-man-zu/",
+    "asset": "/assets/talent/634014/talent-634014-thumbnail.webp",
+    "search": "延迟满足 Yan Chi Man Zu 获得1张天赋牌延迟满足：指定1名英雄等级+10。3回合后，再+25。 "
+  },
+  {
+    "name": "Quan Fu Wu Zhuang",
+    "alt": "全副武装",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/quan-fu-wu-zhuang/",
+    "asset": "/assets/talent/633020/talent-633020-thumbnail.webp",
+    "search": "全副武装 Quan Fu Wu Zhuang 获得1张基础装备牌。战斗开始时，你至少穿戴2件装备的英雄获得15%伤害加成和减免。 "
+  },
+  {
+    "name": "Tong Xin Xie Li",
+    "alt": "同心协力",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/tong-xin-xie-li/",
+    "asset": "/assets/talent/633014/talent-633014-thumbnail.webp",
+    "search": "同心协力 Tong Xin Xie Li 战斗开始时，若你至少有6名同阵营英雄，其获得50点物攻和法攻以及50%攻速。 "
+  },
+  {
+    "name": "Quan Shui",
+    "alt": "泉水",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/quan-shui/",
+    "asset": "/assets/talent/632012/talent-632012-thumbnail.webp",
+    "search": "泉水 Quan Shui 回合开始时，恢复3棋手生命值；若棋手生命值已满，改为获得4棋手经验。 "
+  },
+  {
+    "name": "San Ren You",
+    "alt": "三人游",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/san-ren-you/",
+    "asset": "/assets/talent/623001/talent-623001-thumbnail.webp",
+    "search": "三人游 San Ren You 随机获得3张4-5阶英雄牌。 用高阶随机供给扩大后期候选，但不保证命中当前路线。"
+  },
+  {
+    "name": "Kuo Bian Gao Feng",
+    "alt": "扩编高峰",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/kuo-bian-gao-feng/",
+    "asset": "/assets/talent/681011/talent-681011-thumbnail.webp",
+    "search": "扩编高峰 Kuo Bian Gao Feng 获得1个可购买天赋：花费8能量，可上阵人数+1。可购买3次。 "
+  },
+  {
+    "name": "Bu Ji Xian ： Zheng Bei",
+    "alt": "补给线：整备",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/bu-ji-xian-zheng-bei/",
+    "asset": "/assets/talent/681012/talent-681012-thumbnail.webp",
+    "search": "补给线：整备 Bu Ji Xian ： Zheng Bei 获得1张整备效果英雄牌。回合开始时，再获得1张。 "
+  },
+  {
+    "name": "Bu Ji Xian ： Xi Sheng",
+    "alt": "补给线：牺牲",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/bu-ji-xian-xi-sheng/",
+    "asset": "/assets/talent/681013/talent-681013-thumbnail.webp",
+    "search": "补给线：牺牲 Bu Ji Xian ： Xi Sheng 获得1张牺牲效果英雄牌。回合开始时，再获得1张。 "
+  },
+  {
+    "name": "Zhong Liu Di Zhu",
+    "alt": "中流砥柱",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zhong-liu-di-zhu/",
+    "asset": "/assets/talent/622010/talent-622010-thumbnail.webp",
+    "search": "中流砥柱 Zhong Liu Di Zhu 打出3阶英雄牌，额外+6级。 "
+  },
+  {
+    "name": "Bu Ji Xian ： Deng Chang",
+    "alt": "补给线：登场",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/bu-ji-xian-deng-chang/",
+    "asset": "/assets/talent/681015/talent-681015-thumbnail.webp",
+    "search": "补给线：登场 Bu Ji Xian ： Deng Chang 获得1张登场效果英雄牌。回合开始时，再获得1张。 "
+  },
+  {
+    "name": "Hun Dun Ci Yuan",
+    "alt": "混沌次元",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/hun-dun-ci-yuan/",
+    "asset": "/assets/talent/681016/talent-681016-thumbnail.webp",
+    "search": "混沌次元 Hun Dun Ci Yuan 获得混沌裂隙：指定阵位召唤裂隙，开战前吞噬英雄，永久获得其双倍等级。开战时，召唤1名品阶≥商店等级的满装备英雄。 "
+  },
+  {
+    "name": "Xiao Ka Xiu",
+    "alt": "小咖秀",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/xiao-ka-xiu/",
+    "asset": "/assets/talent/622008/talent-622008-thumbnail.webp",
+    "search": "小咖秀 Xiao Ka Xiu 战斗开始时，若你只有1-3阶英雄，随机获得1张场上的英雄牌。 "
+  },
+  {
+    "name": "Yong Bu Du Xing",
+    "alt": "永不独行",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/yong-bu-du-xing/",
+    "asset": "/assets/talent/622003/talent-622003-thumbnail.webp",
+    "search": "永不独行 Yong Bu Du Xing 获得1张双人同行。回合开始时，若棋手不超过3级，再获得1张。 "
+  },
+  {
+    "name": "Bo Ming",
+    "alt": "搏命",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/bo-ming/",
+    "asset": "/assets/talent/615006/talent-615006-thumbnail.webp",
+    "search": "搏命 Bo Ming 棋手生命值-20，获得25能量。 "
+  },
+  {
+    "name": "Jin Ji Jiu Yuan",
+    "alt": "紧急救援",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/jin-ji-jiu-yuan/",
+    "asset": "/assets/talent/615002/talent-615002-thumbnail.webp",
+    "search": "紧急救援 Jin Ji Jiu Yuan 获得15棋手生命值、1张装备箱、1张5阶兑换券。 "
+  },
+  {
+    "name": "Wei Xian Shu Zi",
+    "alt": "危险数字",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/wei-xian-shu-zi/",
+    "asset": "/assets/talent/681023/talent-681023-thumbnail.webp",
+    "search": "危险数字 Wei Xian Shu Zi 在商店每买3张牌，获得1能量；若其品阶相加等于10，随机再获得其中1张。 "
+  },
+  {
+    "name": "Da Ming Xing",
+    "alt": "大明星",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/da-ming-xing/",
+    "asset": "/assets/talent/615001/talent-615001-thumbnail.webp",
+    "search": "大明星 Da Ming Xing 获得1张大明星：随机上阵1名不在场的等级为棋手等级x7的5阶英雄，其觉醒进度为1，此后每经过2回合则额外+1。 "
+  },
+  {
+    "name": "Wang Pai Bu Dui",
+    "alt": "王牌部队",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/wang-pai-bu-dui/",
+    "asset": "/assets/talent/614007/talent-614007-thumbnail.webp",
+    "search": "王牌部队 Wang Pai Bu Dui 战斗开始时，若你至少有3名4-5阶英雄，获得1张4-5阶效果锦囊。 "
+  },
+  {
+    "name": "You She You De",
+    "alt": "有舍有得",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/you-she-you-de/",
+    "asset": "/assets/talent/614006/talent-614006-thumbnail.webp",
+    "search": "有舍有得 You She You De 回合开始时，随机1名英雄觉醒进度+1，但英雄合成提升的等级-1。 "
+  },
+  {
+    "name": "Zi Shen Lie Tou",
+    "alt": "资深猎头",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/zi-shen-lie-tou/",
+    "asset": "/assets/talent/614001/talent-614001-thumbnail.webp",
+    "search": "资深猎头 Zi Shen Lie Tou 棋手4级时，获得1张天赋牌资深猎头：4阶卡牌2选1，并将选中的卡牌一分为四。 "
+  },
+  {
+    "name": "Wu Xian Jin Bu",
+    "alt": "无限进步",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/wu-xian-jin-bu/",
+    "asset": "/assets/talent/613011/talent-613011-thumbnail.webp",
+    "search": "无限进步 Wu Xian Jin Bu 获得1张3阶兑换券。回合开始时，获得2棋手经验。满级后，改为获得2能量。 "
+  },
+  {
+    "name": "Tu Po ： Ya Se",
+    "alt": "突破：亚瑟",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/tu-po-ya-se/",
+    "asset": "/assets/talent/63611802/talent-63611802-thumbnail.webp",
+    "search": "突破：亚瑟 Tu Po ： Ya Se 获得一张亚瑟，为亚瑟在卡牌突破和技能突破中二选一。 "
+  },
+  {
+    "name": "Diu Kui Qi Jia",
+    "alt": "丢盔弃甲",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/diu-kui-qi-jia/",
+    "asset": "/assets/talent/681030/talent-681030-thumbnail.webp",
+    "search": "丢盔弃甲 Diu Kui Qi Jia 获得1张天赋牌空手道：指定一名英雄，取消装备槽位。战斗开始时，该英雄获得等同于其真实等级的临时等级。 "
+  },
+  {
+    "name": "Liu Dong Zi Chan",
+    "alt": "流动资产",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/liu-dong-zi-chan/",
+    "asset": "/assets/talent/681029/talent-681029-thumbnail.webp",
+    "search": "流动资产 Liu Dong Zi Chan 装备卡可以售卖3能量，效果卡可以售卖1能量。 "
+  },
+  {
+    "name": "Yi Wu Yi Wu",
+    "alt": "以物易物",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/yi-wu-yi-wu/",
+    "asset": "/assets/talent/636202/talent-636202-thumbnail.webp",
+    "search": "以物易物 Yi Wu Yi Wu 每出售3张古币牌，获得1张不屈意志。 "
+  },
+  {
+    "name": "Yong Guan San Jun",
+    "alt": "勇冠三军",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/yong-guan-san-jun/",
+    "asset": "/assets/talent/636310/talent-636310-thumbnail.webp",
+    "search": "勇冠三军 Yong Guan San Jun 获得1张马超，战斗中，马超的暴击率始终会分享给友军。马超暴击率达到100%时，所有友军的法术伤害可以暴击。 "
+  },
+  {
+    "name": "Wo Men Ji Ge Zhen Qiang",
+    "alt": "我们几个真强",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/wo-men-ji-ge-zhen-qiang/",
+    "asset": "/assets/talent/636419/talent-636419-thumbnail.webp",
+    "search": "我们几个真强 Wo Men Ji Ge Zhen Qiang 孙膑、墨子、扁鹊、鲁班七号释放技能时，出现一个替身同步释放技能。 "
+  },
+  {
+    "name": "Pao Huo",
+    "alt": "炮火",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/pao-huo/",
+    "asset": "/assets/talent/637013/talent-637013-thumbnail.webp",
+    "search": "炮火 Pao Huo 获得1张莱西奥和1张蒙犽。共战时二人共享法力值（不会变更），技能变为融合技（详见技能面板）。每次击败敌方英雄二人等级均+1。 "
+  },
+  {
+    "name": "Ba Wang",
+    "alt": "霸王",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ba-wang/",
+    "asset": "/assets/talent/637015/talent-637015-thumbnail.webp",
+    "search": "霸王 Ba Wang 获得1张吕布和1张项羽。共战时，二人共享生命值（二者生命值之和），并分别为自身装备【方天画戟】和【霸王戟】（详见天赋栏）。 "
+  },
+  {
+    "name": "Di Lin",
+    "alt": "帝临",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/di-lin/",
+    "asset": "/assets/talent/637018/talent-637018-thumbnail.webp",
+    "search": "帝临 Di Lin 获得1张嬴政和1张武则天。备战开始时，若嬴政和武则天同时在场，二选一种统治方案，每种方案选择后会得到强化。 "
+  },
+  {
+    "name": "Shu Tu",
+    "alt": "殊途",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/shu-tu/",
+    "asset": "/assets/talent/637019/talent-637019-thumbnail.webp",
+    "search": "殊途 Shu Tu 获得1张姜子牙和1张老夫子。同时在场时，每2次英雄合成获得1张【神谕】。每使用3张效果牌获得1张【诫律】。 "
+  },
+  {
+    "name": "Hero Zai Lin",
+    "alt": "英雄再临",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/hero-zai-lin/",
+    "asset": "/assets/talent/636210/talent-636210-thumbnail.webp",
+    "search": "英雄再临 Hero Zai Lin 战斗中，你第4次触发英雄的牺牲效果时，所有已阵亡的牺牲英雄将会完美复生。 "
+  },
+  {
+    "name": "Peng Peng",
+    "alt": "砰砰",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/peng-peng/",
+    "asset": "/assets/talent/derived-pengpeng/talent-derived-pengpeng-thumbnail.webp",
+    "search": "砰砰 Peng Peng 获得1张沈梦溪和1张孙膑。共战时，二人法力值上限保持一致（取较低值），每次释放技能额外+1级。 "
+  },
+  {
+    "name": "Lady Sun: Empowered",
+    "alt": "孙尚香·强化",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/lady-sun-empowered/",
+    "asset": "/assets/talent/635605/talent-635605-thumbnail.webp",
+    "search": "孙尚香·强化 Lady Sun: Empowered 每回合开始时，触发1次孙尚香卡牌效果。 "
+  },
+  {
+    "name": "Ganjiang: Empowered",
+    "alt": "干将·强化",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/ganjiang-empowered/",
+    "asset": "/assets/talent/635604/talent-635604-thumbnail.webp",
+    "search": "干将·强化 Ganjiang: Empowered 战斗开始时，干将莫邪获得1件【法源之杯】。 "
+  },
+  {
+    "name": "Skill Breakthrough: Arthur",
+    "alt": "技能突破：亚瑟",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/skill-breakthrough-arthur/",
+    "asset": "/assets/talent/636118/talent-636118-thumbnail.webp",
+    "search": "技能突破：亚瑟 Skill Breakthrough: Arthur 获得1张亚瑟，战斗开始时，亚瑟周围一格的友方英雄变身为圣殿骑士。亚瑟的普攻变为为血量最低的圣殿骑士回复生命值；技能改为指挥全体圣殿骑士朝敌人冲锋。\n骑士冲锋：冲锋时长1.2秒；冲锋时，对路径敌人造成50+5%最大生命值的物理伤害。 "
+  },
+  {
+    "name": "Mirror Blossom",
+    "alt": "镜花影",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/mirror-blossom/",
+    "asset": "/assets/talent/662107/talent-662107-thumbnail.webp",
+    "search": "镜花影 Mirror Blossom 商店里的英雄牌在购买后会留下1个镜像复制（不计入秘技任务）。 "
+  },
+  {
+    "name": "Full Firepower",
+    "alt": "火力全开",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/full-firepower/",
+    "asset": "/assets/talent/665005/talent-665005-thumbnail.webp",
+    "search": "火力全开 Full Firepower 香香获得（己方英雄等级的总和×0.5）%的攻击力提升。 "
+  },
+  {
+    "name": "Celebration Time",
+    "alt": "狂欢时刻",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/celebration-time/",
+    "asset": "/assets/talent/664005/talent-664005-thumbnail.webp",
+    "search": "狂欢时刻 Celebration Time 获得1张打成一片。 "
+  },
+  {
+    "name": "Dragon in Flight",
+    "alt": "飞龙在天",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/dragon-in-flight/",
+    "asset": "/assets/talent/663905/talent-663905-thumbnail.webp",
+    "search": "飞龙在天 Dragon in Flight 强化明先生的卦象。 卦象·节：每回合额外获得4能量。 卦象·丰：每回合获得8次临时刷新。 "
+  },
+  {
+    "name": "Time Treasure",
+    "alt": "时光宝藏",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/time-treasure/",
+    "asset": "/assets/talent/663805/talent-663805-thumbnail.webp",
+    "search": "时光宝藏 Time Treasure 获得1张更强力的永恒时之回环，可以记录12张英雄牌或效果牌。 "
+  },
+  {
+    "name": "The Divine Move",
+    "alt": "神之一手",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/the-divine-move/",
+    "asset": "/assets/talent/663607/talent-663607-thumbnail.webp",
+    "search": "神之一手 The Divine Move 战斗开始时，将敌方等级最高的英雄复制，临时加入我方战场。 "
+  },
+  {
+    "name": "Frozen Treasure",
+    "alt": "冰雪秘藏",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/frozen-treasure/",
+    "asset": "/assets/talent/663405/talent-663405-thumbnail.webp",
+    "search": "冰雪秘藏 Frozen Treasure 从3个增益效果中选择1个。 "
+  },
+  {
+    "name": "Blizzard Moment",
+    "alt": "雪暴时刻",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/blizzard-moment/",
+    "asset": "/assets/talent/663404/talent-663404-thumbnail.webp",
+    "search": "雪暴时刻 Blizzard Moment 冻结的英雄，解冻后等级永久+20。 "
+  },
+  {
+    "name": "Immortal Ice",
+    "alt": "不朽坚冰",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/immortal-ice/",
+    "asset": "/assets/talent/663403/talent-663403-thumbnail.webp",
+    "search": "不朽坚冰 Immortal Ice 战斗开始时，你的全体英雄获得500点最大生命值、60点物理和法术攻击力。 "
+  },
+  {
+    "name": "Moment of Insight",
+    "alt": "顿悟时刻",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/moment-of-insight/",
+    "asset": "/assets/talent/665104/talent-665104-thumbnail.webp",
+    "search": "顿悟时刻 Moment of Insight 选择1个获取神秘力量的天赋。 "
+  },
+  {
+    "name": "Privileged Decisions",
+    "alt": "特权决策",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/privileged-decisions/",
+    "asset": "/assets/talent/610006/talent-610006-thumbnail.webp",
+    "search": "特权决策 Privileged Decisions 选择1个特权决策颁布，对所有玩家生效，并且自己额外享受特权效果。 "
+  },
+  {
+    "name": "Perfect Performance",
+    "alt": "完美演出",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/perfect-performance/",
+    "asset": "/assets/talent/664108/talent-664108-thumbnail.webp",
+    "search": "完美演出 Perfect Performance 封神一瞬指定的英雄在战斗开始时获得30%物理和法术吸血，并在15秒内免疫控制效果（压制除外）。 "
+  },
+  {
+    "name": "United as One",
+    "alt": "打成一片",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/united-as-one/",
+    "asset": "/assets/talent/664009/talent-664009-thumbnail.webp",
+    "search": "打成一片 United as One 天赋3选1（技能选择阵营相关的天赋）。 "
+  },
+  {
+    "name": "Super Connection",
+    "alt": "超级连接",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/super-connection/",
+    "asset": "/assets/talent/665105/talent-665105-thumbnail.webp",
+    "search": "超级连接 Super Connection 获得一张灵异探测大改装。战斗开始时，飞行器连接的英雄会随机获得自身10%-30%等级数的临时等级。 "
+  },
+  {
+    "name": "Instant Dance",
+    "alt": "即刻起舞",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/instant-dance/",
+    "asset": "/assets/talent/610010/talent-610010-thumbnail.webp",
+    "search": "即刻起舞 Instant Dance 从3个枫叶舞强化中选择1项。 "
+  },
+  {
+    "name": "Exceptional Talent",
+    "alt": "惊才绝艳",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/exceptional-talent/",
+    "asset": "/assets/talent/663307/talent-663307-thumbnail.webp",
+    "search": "惊才绝艳 Exceptional Talent 获得1张奇才：指定1名英雄，获得4张该英雄牌。 "
+  },
+  {
+    "name": "Special Care",
+    "alt": "重点照顾",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/special-care/",
+    "asset": "/assets/talent/663208/talent-663208-thumbnail.webp",
+    "search": "重点照顾 Special Care 战斗开始时，你的人数最多的同品阶英雄获得1%×已打出宝藏牌数量的伤害提升。 "
+  },
+  {
+    "name": "Sunshine for All",
+    "alt": "阳光普照",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/sunshine-for-all/",
+    "asset": "/assets/talent/663207/talent-663207-thumbnail.webp",
+    "search": "阳光普照 Sunshine for All 战斗开始时，你的全体英雄获得0.7%×已打出宝藏牌数量的伤害提升。 "
+  },
+  {
+    "name": "Engine Upgrade",
+    "alt": "引擎升级",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/engine-upgrade/",
+    "asset": "/assets/talent/663108/talent-663108-thumbnail.webp",
+    "search": "引擎升级 Engine Upgrade 获得1张梦幻引擎：将商店替换为梦幻商店。若在棋手生命值≤30时战斗失败，则重复获得。 "
+  },
+  {
+    "name": "Divide the Treasure",
+    "alt": "瓜分宝藏",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/divide-the-treasure/",
+    "asset": "/assets/talent/610013/talent-610013-thumbnail.webp",
+    "search": "瓜分宝藏 Divide the Treasure 从2种英雄强化效果中选择1个。 "
+  },
+  {
+    "name": "Lingering Melody",
+    "alt": "余音绕梁",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/lingering-melody/",
+    "asset": "/assets/talent/662502/talent-662502-thumbnail.webp",
+    "search": "余音绕梁 Lingering Melody 获得3次惊鸿调演奏次数。 "
+  },
+  {
+    "name": "Moon Special",
+    "alt": "月之特调",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/moon-special/",
+    "asset": "/assets/talent/662407/talent-662407-thumbnail.webp",
+    "search": "月之特调 Moon Special 小菟提供等级时，每5级使其额外获得1项随机属性：15%攻速/2%物理和法术吸血/2点物理和法术防御力。且每通过小菟助力提供65级时，获得1张小菟送福。 "
+  },
+  {
+    "name": "Rise and Fall",
+    "alt": "潮起潮落",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/rise-and-fall/",
+    "asset": "/assets/talent/662206/talent-662206-thumbnail.webp",
+    "search": "潮起潮落 Rise and Fall 战斗开始时，随机传送1个4-5阶临时等级为回合数×12的英雄进入战场（不含卡牌效果），并携带3件适配装备。 "
+  },
+  {
+    "name": "Frost Tide",
+    "alt": "寒潮之势",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/frost-tide/",
+    "asset": "/assets/talent/663402/talent-663402-thumbnail.webp",
+    "search": "寒潮之势 Frost Tide 战斗开始时，你等级最高的英雄获得1200点生命值、120点物理和法术攻击力。 "
+  },
+  {
+    "name": "Giant Plush",
+    "alt": "巨型玩偶",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/giant-plush/",
+    "asset": "/assets/talent/661106/talent-661106-thumbnail.webp",
+    "search": "巨型玩偶 Giant Plush 小鹿等级+30，并获得1件小鹿的庇护。 "
+  },
+  {
+    "name": "Infinite Charm",
+    "alt": "魅力无限",
+    "type": "Talent",
+    "group": "Talents",
+    "url": "/talents/infinite-charm/",
+    "asset": "/assets/talent/661009/talent-661009-thumbnail.webp",
+    "search": "魅力无限 Infinite Charm 每回合打出的第1张效果牌会触发2次。 "
+  },
+  {
+    "name": "Qiao Xi",
+    "alt": "乔汐",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/qiao-xi/",
+    "asset": "/icon.png",
+    "search": "乔汐 Qiao Xi Gentle Call Embrace of the Sea"
+  },
+  {
+    "name": "Ying Lü",
+    "alt": "嬴律",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/ying-lu/",
+    "asset": "/icon.png",
+    "search": "嬴律 Ying Lü Supreme Decision Maker Lord Supreme"
+  },
+  {
+    "name": "Sun Xiaobin",
+    "alt": "孙小宾",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/sun-xiaobin/",
+    "asset": "/icon.png",
+    "search": "孙小宾 Sun Xiaobin Time Rewind Time Magic"
+  },
+  {
+    "name": "Little Daji",
+    "alt": "小妲己",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/little-daji/",
+    "asset": "/icon.png",
+    "search": "小妲己 Little Daji Heart Flutter Heartbeat"
+  },
+  {
+    "name": "Zhuang Xiaoyu",
+    "alt": "庄小鱼",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/zhuang-xiaoyu/",
+    "asset": "/icon.png",
+    "search": "庄小鱼 Zhuang Xiaoyu Dream Game Dreams Come True"
+  },
+  {
+    "name": "Yi Xing",
+    "alt": "弈星",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/yi-xing/",
+    "asset": "/icon.png",
+    "search": "弈星 Yi Xing All-Seeing Board Plan Ahead"
+  },
+  {
+    "name": "Master Ming",
+    "alt": "明先生",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/master-ming/",
+    "asset": "/icon.png",
+    "search": "明先生 Master Ming Oracle Signs Fortune from Heaven"
+  },
+  {
+    "name": "Yu Huan",
+    "alt": "玉环",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/yu-huan/",
+    "asset": "/icon.png",
+    "search": "玉环 Yu Huan Jade Melody Find Your Tune"
+  },
+  {
+    "name": "Uncle Ban",
+    "alt": "班叔",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/uncle-ban/",
+    "asset": "/icon.png",
+    "search": "班叔 Uncle Ban Master Craftsman Build Upgrade"
+  },
+  {
+    "name": "Yao",
+    "alt": "瑶妹",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/yao/",
+    "asset": "/icon.png",
+    "search": "瑶妹 Yao Lovely Fawn Super Cute Fawn"
+  },
+  {
+    "name": "Jing",
+    "alt": "镜",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/jing/",
+    "asset": "/icon.png",
+    "search": "镜 Jing Infinite Mirror Mirror Force"
+  },
+  {
+    "name": "Nao Nao",
+    "alt": "闹闹",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/nao-nao/",
+    "asset": "/icon.png",
+    "search": "闹闹 Nao Nao Party Bubble Happy Gathering"
+  },
+  {
+    "name": "Xiang Xiang",
+    "alt": "香香",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/xiang-xiang/",
+    "asset": "/icon.png",
+    "search": "香香 Xiang Xiang Ultimate Crossbow Artillery"
+  },
+  {
+    "name": "A Li",
+    "alt": "阿离",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/a-li/",
+    "asset": "/icon.png",
+    "search": "阿离 A Li Maple Dance Dragon in Flight"
+  },
+  {
+    "name": "Angela",
+    "alt": "安琪拉",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/angela/",
+    "asset": "/icon.png",
+    "search": "安琪拉 Angela Special Paranormal Tracker Exorcise! Harder!"
+  },
+  {
+    "name": "Wu Feng",
+    "alt": "武凤",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/wu-feng/",
+    "asset": "/icon.png",
+    "search": "武凤 Wu Feng Grand Household All for One"
+  },
+  {
+    "name": "Jiang Dao",
+    "alt": "姜导",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/jiang-dao/",
+    "asset": "/icon.png",
+    "search": "姜导 Jiang Dao Chosen Protagonist Apotheosis Moment"
+  },
+  {
+    "name": "Chang Xiao’e",
+    "alt": "常小娥",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/chang-xiao-e/",
+    "asset": "/icon.png",
+    "search": "常小娥 Chang Xiao’e Xiaotu’s Aid Rapid Rabbit Rise"
+  },
+  {
+    "name": "Zhaojun",
+    "alt": "昭君",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/zhaojun/",
+    "asset": "/icon.png",
+    "search": "昭君 Zhaojun Heart of Ice Extreme Freeze"
+  },
+  {
+    "name": "Bai Ge",
+    "alt": "白歌",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/bai-ge/",
+    "asset": "/icon.png",
+    "search": "白歌 Bai Ge Inspired Stroke Born a Genius"
+  },
+  {
+    "name": "Marco Polo",
+    "alt": "马可",
+    "type": "Chess player",
+    "group": "Chess players",
+    "url": "/players/marco-polo/",
+    "asset": "/icon.png",
+    "search": "马可 Marco Polo Treasure Hunt Ultimate Treasure"
+  },
+  {
+    "name": "Preparation",
+    "alt": "整备",
+    "type": "Mechanic",
+    "group": "Mechanics",
+    "url": "/mechanics/preparation/",
+    "asset": "/icon.png",
+    "search": "整备 Preparation 准备阶段执行由卡面标注的效果，结算顺序以卡面原文和实测为准。 Preparation effects resolve during the preparation phase; order follows the card text and recorded tests."
+  },
+  {
+    "name": "Combat start",
+    "alt": "开团",
+    "type": "Mechanic",
+    "group": "Mechanics",
+    "url": "/mechanics/combat-start/",
+    "asset": "/icon.png",
+    "search": "开团 Combat start 战斗开始时触发的效果，通常先于普通攻击和持续效果。 Effects marked for combat start resolve before normal attacks and ongoing effects."
+  },
+  {
+    "name": "On entry",
+    "alt": "登场",
+    "type": "Mechanic",
+    "group": "Mechanics",
+    "url": "/mechanics/on-entry/",
+    "asset": "/icon.png",
+    "search": "登场 On entry 英雄牌或召唤物进入战场时触发。 Triggers when a hero card or summoned unit enters the board."
+  },
+  {
+    "name": "Victory",
+    "alt": "凯旋",
+    "type": "Mechanic",
+    "group": "Mechanics",
+    "url": "/mechanics/victory/",
+    "asset": "/icon.png",
+    "search": "凯旋 Victory 战斗胜利后的结算时点，可影响奖励和等级。 The post-combat victory timing used by rewards and level effects."
+  },
+  {
+    "name": "Leave board",
+    "alt": "退场",
+    "type": "Mechanic",
+    "group": "Mechanics",
+    "url": "/mechanics/leave-board/",
+    "asset": "/icon.png",
+    "search": "退场 Leave board 单位离开战场、被击败或被移除时触发。 Triggers when a unit leaves the board, is defeated or removed."
+  },
+  {
+    "name": "Level growth",
+    "alt": "等级成长",
+    "type": "Mechanic",
+    "group": "Mechanics",
+    "url": "/mechanics/level-growth/",
+    "asset": "/icon.png",
+    "search": "等级成长 Level growth 等级会改变生命、攻击和技能中的动态数值。 Level changes health, attack and dynamic skill values."
+  },
+  {
+    "name": "Temporary level",
+    "alt": "临时等级",
+    "type": "Mechanic",
+    "group": "Mechanics",
+    "url": "/mechanics/temporary-level/",
+    "asset": "/icon.png",
+    "search": "临时等级 Temporary level 只在当前战斗或指定回合有效的等级提升。 A level increase that lasts for the current combat or stated rounds."
+  },
+  {
+    "name": "Permanent level",
+    "alt": "永久等级",
+    "type": "Mechanic",
+    "group": "Mechanics",
+    "url": "/mechanics/permanent-level/",
+    "asset": "/icon.png",
+    "search": "永久等级 Permanent level 写入单位成长记录并持续到本局结束。 A level increase written to the unit record for the rest of the match."
+  },
+  {
+    "name": "Energy and mana",
+    "alt": "能量与法力",
+    "type": "Mechanic",
+    "group": "Mechanics",
+    "url": "/mechanics/energy-and-mana/",
+    "asset": "/icon.png",
+    "search": "能量与法力 Energy and mana 技能、秘技和部分召唤物使用的资源及上限。 The resource and cap used by skills, Secrets and some summons."
+  },
+  {
+    "name": "Summoning",
+    "alt": "召唤",
+    "type": "Mechanic",
+    "group": "Mechanics",
+    "url": "/mechanics/summoning/",
+    "asset": "/icon.png",
+    "search": "召唤 Summoning 把独立召唤物加入战场，并按召唤物自己的属性计算。 Adds an independent summon to the board; its own stats are used."
+  },
+  {
+    "name": "Awakening",
+    "alt": "觉醒",
+    "type": "Mechanic",
+    "group": "Mechanics",
+    "url": "/mechanics/awakening/",
+    "asset": "/icon.png",
+    "search": "觉醒 Awakening 觉醒卡面会替换技能文本和部分属性，不能与普通形态混算。 Awakened card faces replace skill text and some stats; do not mix forms."
+  },
+  {
+    "name": "Card choice",
+    "alt": "效果牌选择",
+    "type": "Mechanic",
+    "group": "Mechanics",
+    "url": "/mechanics/card-choice/",
+    "asset": "/icon.png",
+    "search": "效果牌选择 Card choice 从候选卡牌中选择并结算资源、英雄或强化效果。 Choose from candidate cards and resolve resource, hero or upgrade effects."
+  }
+]
