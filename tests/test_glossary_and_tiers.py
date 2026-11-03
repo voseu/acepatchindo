@@ -554,6 +554,49 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
         assert "pedang" in bg_val, f"Expected 'pedang' in Bai Ge Burst of Inspiration: {bg_val!r}"
         assert "menyalin 1 Hero" not in bg_val, f"Found incorrect Improvised Creation in Bai Ge Burst of Inspiration: {bg_val!r}"
 
+    # Phase 6 Round 5 Remediation Verifications (Task 42):
+    # 7. Zero unexpanded sentinel/slot tokens across entire catalog
+    for sec in ("unique", "english_updates"):
+        items = cat[sec].items() if isinstance(cat[sec], dict) else enumerate(cat[sec])
+        for k, v in items:
+            if isinstance(v, list):
+                for row in v:
+                    assert "__EXPR" not in str(row) and "__WXQ" not in str(row) and "__SLOT" not in str(row), f"Unexpanded sentinel in {sec}: {row}"
+            else:
+                assert "__EXPR" not in str(v) and "__WXQ" not in str(v) and "__SLOT" not in str(v), f"Unexpanded sentinel in {sec}: {k} -> {v}"
+
+    # 8. Zero <color=#ffffffbf> header bleed into body words
+    header_bleed = [
+        (k, v) for k, v in diff_u.items()
+        if re.search(r"<color=#ffffffbf>\s*(?:Pasif|Aktif)\s*:\s+\S+", v)
+    ]
+    assert len(header_bleed) == 0, f"Header bleed into body words ({len(header_bleed)}): {header_bleed[:5]}"
+
+    # 9. Zero overwritten duration/distance numbers
+    assert not any("selama [6] detik" in v or "selama [159004p2q2] detik" in v or "dalam [2] tile" in v for v in diff_u.values()), "Found overwritten duration/distance numbers in diff_u"
+
+    # 10. Parenthetical 2-tag Hero skills preserve exact tags (Lu Bu)
+    lubu_target_keys = [
+        k for k in cat["unique"]
+        if "吕布" in k and "[0]点物理伤害" in k and ("（[1]+[2]%物理攻击力）" in k or "([1]+[2]%物理攻击力)" in k)
+    ]
+    assert len(lubu_target_keys) > 0, "Missing Lu Bu parenthetical skill string in cat['unique']"
+    for lk in lubu_target_keys:
+        lubu_val = cat["unique"][lk]
+        assert "<color=#ffffffbf>Aktif:</color>" in lubu_val, f"Missing clean '<color=#ffffffbf>Aktif:</color>' in: {lubu_val!r}"
+        assert "<color=#dfa15e>[0] Physical Damage</color><color=#dfa15e> ([1]+[2]% Physical Attack)</color>" in lubu_val, f"Missing parenthetical formula tags in: {lubu_val!r}"
+
+    exemplar_lubu = (
+        "<color=#ffffffbf>被动：</color>吕布会根据敌人位置使用不同招式，普攻能对身前2格内敌人造成伤害。\n"
+        "<color=#ffffffbf>主动：</color>吕布跳向指定位置，落地后挥斩，对大范围的敌人造成<color=#dfa15e>[0]点物理伤害</color><color=#dfa15e>（[1]+[2]%物理攻击力）</color>并击飞[3]秒。\n"
+        "<color=#86888A>点击技能描述面板，查看<b>击飞</b>详细解释</color>"
+    )
+    if exemplar_lubu in cat["unique"]:
+        ex_val = cat["unique"][exemplar_lubu]
+        assert "<color=#ffffffbf>Aktif:</color>" in ex_val
+        assert "<color=#dfa15e>[0] Physical Damage</color><color=#dfa15e> ([1]+[2]% Physical Attack)</color>" in ex_val
+
+
 
 
 

@@ -43,8 +43,8 @@ Rilis pemasang *patch* Bahasa Indonesia **Hybrid Gameplay Edition** untuk **Hono
 
 ### Verifikasi SHA-256
 ```text
-1d31762743e3a82a6e990beb794ef3063781ffe2f4707e7c12b82c886402f083  Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe
-328fa90caa826855a8b4530e788a0955a6aedec17ccffb99cd41db8388c49f68  ace-worker.exe (embedded @ 0x4CAC4A..0x3838C00)
+dc8a8028d1aeda785967155f5c48a50bf10936079179c2f92e97aa9d7063428a  Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe
+9350853f218131709a6c65f7b8df2408c62d494c7819e19458c237ddcd939b94  ace-worker.exe (embedded @ 0x4CAC4A..0x3838C00)
 ```
 """
 

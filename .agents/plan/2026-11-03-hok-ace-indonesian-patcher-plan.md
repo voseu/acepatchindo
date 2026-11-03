@@ -2782,7 +2782,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
 
 ### Task 37: Fix `reinject_formula_and_skeleton`, `reinject_skeleton_from_source`, Control-Glyph Placement, & `normalize_formula_skeleton_zh` in `src/acepatchindo/tag_aligner.py`
 
-- [x] **Step 37.1: Fix `reinject_formula_and_skeleton` (`tag_aligner.py:256-470`) — Eliminate Pre-Step-3 `sentinels_icon`, Preserve Trailing `点击技能描述面板` Nested `<b>...</b>` Tags, and Never Strip Valid Formula Tags**
+- [x] **Step 37.1: Fix `reinject_formula_and_skeleton` (`tag_aligner.py:256-470`) — Eliminate Pre-Step-3 `sentinels_icon`, Preserve Trailing `点击技能描述面板` Nested `<b>...</b>` Tags, and Never Strip Valid Formula Tags** *(REOPENED BY MANAGER AUDIT ROUND 5 — `tag_aligner.py:406` used `__EXPR_SLOT_{i}__` with digits inside `_1_` and lookbehind `(?<![\d\[{|A-Za-z])` without `_`, leaking literal `__EXPR_SLOT_1__` and `__EXPR_SLOT_{0|2}__` into `4` strings in `catalog.json.gz`; `zh_num_counter_re.sub("1", ...)` replaced `三次`/`两次` both with `"1"`; and `id_dmg_spans` at `line 338` required `\s+sebesar\s+` before Step 2 ran, missing `110` parenthetical `[0]点...（[1]+[2]%...）` skills and causing `needed_numeric_phs` to overwrite `10 detik -> selama [6] detik` in Dolia and `1 tile -> [2] tile` in Bai Qi -> Remediated in Task 41)*
   1. **Handle Trailing UI Hint `<color=...>点击技能描述面板，查看<b>...</b>详细解释</color>` Cleanly Before Body Alignment:**
      - If `source_zh` matches `r"(\n*)((?:<color=[^>]+>)*点击技能描述面板[，,]查看(?:<b>)?([^<]+?)(?:</b>)?详细解释(?:</color>)*)\s*$"` (with or without `<b>`):
        - Strip that trailing match from `source_zh` into `body_source_zh` and construct `footer_id` with the **EXACT SAME TAG SEQUENCE** as the matched footer in `source_zh` (e.g., if `source_zh` has `<color=#86888A>点击技能描述面板，查看<b>击飞</b>详细解释</color>`, then `footer_id` MUST be `f"{leading_nl}<color=#86888A>Ketuk panel deskripsi Skill untuk melihat penjelasan detail <b>{term_id}</b></color>"` so `TAG_RE.findall(footer_id) == TAG_RE.findall(footer_zh)`!).
@@ -2803,7 +2803,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
        - For remaining `<color=c_val>zh_content</color>` spans: match headers (`Pasif:` / `Aktif:` / `Qingping:` / `Changhen:` / `Bentuk Manusia:` / `Bentuk Putri Duyung:` / `2 Stack:` / `3 Stack:` / `Saat bola kembali:`), bracketed factions (`[Central Plain]`, `[Zhulu]`, `[Three Kingdoms]`, `[Sunset]`, `[Jixia]`, `[Great Wall]`, `[Xuanyong]`, `[Yaotian]`, `[Cloudream]`, `[Riverlands]`), entity names (`BADGE_ALIAS_MAP`), and damage/shield/stat formulas!
        - **NEVER** run `out = TAG_RE.sub("", out)` when `out` already contains valid grafted tags! Instead, pass `out` to `reinject_skeleton_from_source(body_source_zh, out, ...)` and let `reinject_skeleton_from_source` insert only the **missing** tags in their proper clauses/lines!
 
-- [x] **Step 37.2: Fix Control-Glyph Placement (`╧`, `╥`, `╉`, `╬`, `═`, `╆`, `╋`, `╪`, `╫`) & Preserve `\n` Newlines and Existing Tags in `reinject_skeleton_from_source` (`tag_aligner.py:485-880`)**
+- [x] **Step 37.2: Fix Control-Glyph Placement (`╧`, `╥`, `╉`, `╬`, `═`, `╆`, `╋`, `╪`, `╫`) & Preserve `\n` Newlines and Existing Tags in `reinject_skeleton_from_source` (`tag_aligner.py:485-880`)** *(REOPENED BY MANAGER AUDIT ROUND 5 — `reinject_skeleton_from_source` at `line 892` still ran `stripped_id = TAG_RE.sub("", result)`, stripping already-matched `<color=#ffffffbf>Pasif:</color>` / `<color=#ffffffbf>Aktif:</color>` tags and calling `_wrap_exact_tag_sequence` on `153` target `unique` strings, producing `<color=#ffffffbf> Aktif: Lu Bu melompat ke</color>`, `<color=#ffffffbf> Aktif: Liyuan</color> Fang melempar <color=#dfa15e> dart yang</color>` -> Remediated in Task 41)*
   1. **Complete `GLYPH_KEYWORD_MAP` in `reinject_skeleton_from_source` (`lines 720–748`) so `0` Glyphs Are Ever Prepend-Dumped at Index 0:**
      - Define:
        ```python
@@ -2842,7 +2842,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
        - For each description `d`, also split `d` on `\n` (`for line in d.splitlines():`):
          - Strip leading `╆?转瞬[。.]?` from `line`.
          - If `line` matches `^([^：:]{2,15})[：:](.+)$`, add both `line` and the RHS clause `m.group(2).strip()` (when `len(normalize_plain_zh(rhs)) >= 6`) to `ref_target_zh`!
-       - This cleanly puts split Contestant Secret Art / ability card descriptions (like Wu Zetian's `平定天下一统四海...`, `女帝登基威加海内...`, `科举取士唯才是举...`, `감业寺苦修...`, Ying Zheng's `长生不老药...`, etc.) into `ref_target_zh`, `ref_target_plain`, and `ref_target_skel` **without** needing any wildcard on `CARD_PREFIXES`!
+       - This cleanly puts split Contestant Secret Art / ability card descriptions (like Wu Zetian's `平定天下一统四海...`, `女帝登基威加海内...`, `科举取士唯才是举...`, `感业寺苦修...`, Ying Zheng's `长生不老药...`, etc.) into `ref_target_zh`, `ref_target_plain`, and `ref_target_skel` **without** needing any wildcard on `CARD_PREFIXES`!
   2. **Remove the 3 Unauthorized `elif len >= 8` Wildcards (`lines 404, 462, 569`):**
      - **Line `404` (`tag == "60D2"`):** Remove `elif len(plain_zh) >= 8 and any(...): is_target = True`. On `tag == "60D2"`, `is_target = True` **ONLY** when `is_ref` is `True`!
      - **Line `462` (`tag in CARD_PREFIXES`):** Remove `elif tag != "60D2" and len(plain_zh) >= 8 and any(...): is_target = True`! On `tag in CARD_PREFIXES - {"60D2"}`, a non-`is_ref` record is `is_target = True` **ONLY** when:
@@ -2880,7 +2880,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
 
 ### Task 40: Add Strict Anti-Corruption Assertions to `tests/test_glossary_and_tiers.py`, Rebuild Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Verify `14 passed`, & Re-Publish `v1.4.12-id.2` (`06`)
 
-- [x] **Step 40.1: Add 6 Iron-Clad Structural & Content Assertions to `tests/test_glossary_and_tiers.py`**
+- [x] **Step 40.1: Add 6 Iron-Clad Structural & Content Assertions to `tests/test_glossary_and_tiers.py`** *(REOPENED — needs assertions for `0` `__EXPR` tokens, `0` `<color=#ffffffbf> Aktif: <word>` header merges, and `0` `selama [` overwritten durations -> Remediated in Task 42)*
   1. **Zero Lost `\n` Newlines:**
      `assert sum(1 for k, v in diff_u.items() if "\n" in k and "\n" not in v) == 0`
   2. **Zero Misplaced Control Glyphs at Index 0:**
@@ -2894,7 +2894,255 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
   6. **Bai Ge's `Burst of Inspiration` (`释放3道剑气...`) Accuracy:**
      Assert `"pedang"` in `cat["unique"]["释放3道剑气，斩击手牌中随机3张非觉醒英雄牌，将每张牌斩为2张╆转瞬版复制。"]` and `"menyalin 1 Hero"` is **NOT** in it!
 
-- [x] **Step 40.2: Re-Run Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Run `pytest -v`, Commit, Force-Tag `v1.4.12-id.2`, & Re-Upload Release Assets (`06`)**
+- [x] **Step 40.2: Re-Run Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Run `pytest -v`, Commit, Force-Tag `v1.4.12-id.2`, & Re-Upload Release Assets (`06`)** *(REOPENED)*
+
+---
+
+## Phase 6 Remediation Round 5: Eliminating `__EXPR_SLOT_` Leakage & Remaining `153` `_wrap_exact_tag_sequence` Parenthetical-Formula Fallbacks in `src/acepatchindo/tag_aligner.py` (Tasks 41–42)
+
+> [!CAUTION]
+> **Manager Forensic Audit of `commit d874791` — REJECTED Due to 2 Remaining Bugs in `src/acepatchindo/tag_aligner.py`:**
+>
+> 1. **BUG 1: Literal `__EXPR_SLOT_1__` and `__EXPR_SLOT_{0|2}__` Tokens Leaked Into `4` Catalog Strings (`tag_aligner.py:372-418`):**
+>    - **Root Cause A (`slot_tok = f"__EXPR_SLOT_{i}__"` + Missing `_` in Negative Lookbehind/Lookahead at `lines 406–417`):**
+>      - Because `slot_tok` contained a digit `{i}` surrounded by underscores (`_1_`), and `re.subn` at line `408` used `rf"(?<![\d\[{{|A-Za-z]){re.escape(c_ex)}(?![\d%\]}}|A-Za-z])"` (**without `_`** in the character class!), whenever a later iteration in `zip(cn_exprs, src_exprs)` had `c_ex == "1"` or `c_ex == "2"`, `re.subn` matched the digit `1` **inside `__EXPR_SLOT_1__`** and replaced it with `__EXPR_SLOT_3__`! Then the expansion loop at line `417` looked for `__EXPR_SLOT_1__` first (not found!) and later expanded `__EXPR_SLOT_3__` back into `1` or `{0|2}`, leaving literal **`__EXPR_SLOT_1__`** and **`__EXPR_SLOT_{0|2}__`** in 4 strings in `catalog.json.gz`:
+>        1. `亚连向身前目标发动三次疾速劈砍...` (2 variants) -> `...melancarkan __EXPR_SLOT_1__ tebasan cepat ke target di depannya...`
+>        2. `获得1张3阶兑换券。回合开始时，获得<color=#FFE897>{3|2}{LordExp}</color>。满级后，改为获得{0|2}{Energy}。` -> `Memperoleh {3|2} Voucher Tier 3. Saat Round dimulai,<color=#FFE897>memperoleh __EXPR_SLOT_{0|2}__ {LordExp}</color>, setelah Level maksimum, diganti menjadi 2 {Energy}.`
+>        3. `获得{0|3}{Energy}。回合结束时，你每有<color=#FFE897>{0|7}{Energy}，额外获得{0|1}{Energy}</color>。` -> `Memperoleh {0|3}{Energy}. Saat Round <color=#FFE897> berakhir, tiap __EXPR_SLOT_{0|1}__ {Energy}</color> yang kamu miliki, dapat {0|7}{Energy} tambahan.`
+>    - **Root Cause B (`zh_num_counter_re.sub("1", ...)` at `lines 372–377`):**
+>      - `zh_num_counter_re` replaced ALL Chinese numerals (`三次`, `两次`) with `"1"`, turning Allain's `三次...两次` in `src_clean` into `1...1` while `desc_cn` had `3...2`!
+>    - **Root Cause C (`{3|2}{LordExp}` vs `{LordExp}` Expression Count Shift in `获得1张3阶兑换券...`):**
+>      - In `获得1张3阶兑换券...`, `source_zh` has `{3|2}{LordExp}` (`4` numeric expressions: `1`, `3`, `{3|2}`, `{0|2}`), whereas Tier 1 `desc_cn` has `获得{LordExp}` without a number (`3` numeric expressions: `1`, `3`, `2`), so `zip(cn_exprs, src_exprs)` paired `cn_exprs[0]="1"` with `src_exprs[1]="{3|2}"` and `cn_exprs[2]="2"` with `src_exprs[3]="{0|2}"`!
+>
+> 2. **BUG 2: `153` Target `unique` Strings Still Fall Through to `_wrap_exact_tag_sequence` Mid-Clause Chunk Slicing (`tag_aligner.py:331-367, 420-437, 892`):**
+>    - **Root Cause A (`id_dmg_spans` at `line 338` Required `\s+sebesar\s+` and Ran BEFORE Step 2 `COMPOUND_EXPR_RE`):**
+>      - In `tier1_wiki_id.json`, 90% of Hero skill descriptions do **NOT** use the word `"sebesar"` — they write `memberikan 180% Physical Attack sebagai Physical Damage`, `dengan 80+80% Physical Attack sebagai Physical Damage`, `memulihkan 8% Max HP`, `memulihkan 100+50% Magic Attack sebagai HP`!
+>      - Because `line 338` required `\s+sebesar\s+`, `id_dmg_spans` matched `0` spans on `~110` parenthetical `<color=C1>[0]点物理伤害</color><color=C2>（[1]+[2]%物理攻击力）</color>` skills (`Lu Bu`, `Allain`, `Fang`, `Donghuang`, `Dolia`, `Augran`, `Ming Shiyin`, `Erin`, `Hua Mulan`, `Alessio`, `Consort Yu`, `Xiang Yu`, `Ma Chao`, `Shangguan Wan'er`, `Cirrus`, `Arthur`, `Arli`, `Mayene`, `Liu Shan`, `Liu Bang`, `Jiang Ziya`, `Lady Sun`, `Sun Wukong`, `Sun Bin`, `Angela`, `Xiao Qiao`, `Dyadia`, `Gan & Mo`, `Lian Po`, `Yi Xing`, `Dr. Bian`, `Biron`, `Ao Yin`, `Yao`, `Cao Cao`, `Yang Yuhuan`, `Menki`, `Wu Zetian`, `Heino`, `Niu Mo`, `Baili Xuance`, `Zhenji`, `Bai Qi`, `Baili Shouyue`, `Cheng Yaojin`, `Milady`, `Su Lie`, `Meng Ya`, `Pei Qin Hu`, `Xishi`, `Zhuge Liang`, `Diao Chan`, `Zhao Yun`, `Kui`, `Jing`, `Arke`, `Athena`, `Marco Polo`, `Luban No.7`, `Master Luban`).
+>      - Then Step 2 (`lines 389–390`) collapsed `[0]点物理伤害([1]+[2]%物理攻击力)` to `[1]+[2]%物理攻击力的物理伤害` in `src_clean`, substituting only `[1]+[2]%` into `out` and dropping `[0]`!
+>      - Then `needed_numeric_phs` (`lines 420–437`) saw `[0]` (or `[6]` in Dolia, `[2]` in Bai Qi) was missing from `out` and overwrote unrelated duration/distance numbers in `out` (`10 detik` -> `selama [6] detik` in Dolia, `1 tile` -> `dalam [2] tile` in Bai Qi)!
+>      - Finally, `reinject_skeleton_from_source` (`line 892`) saw `TAG_RE.findall(curr) != tags_in_src`, stripped the already-matched `<color=#ffffffbf>Pasif:</color>` / `<color=#ffffffbf>Aktif:</color>` tags (`stripped_id = TAG_RE.sub("", result)`), and called `_wrap_exact_tag_sequence`, producing `<color=#ffffffbf> Aktif: Lu Bu melompat ke</color>`, `<color=#ffffffbf> Aktif: Liyuan</color> Fang melempar <color=#dfa15e> dart yang</color>`!
+
+### Task 41: Fix `reinject_formula_and_skeleton` & `reinject_skeleton_from_source` in `src/acepatchindo/tag_aligner.py`
+
+- [x] **Step 41.1: Fix Chinese Numeral Conversion, Letter-Only Slot Tokens, `{num_ph}{Icon}` Alignment, and Post-Step-2 Parenthetical/Split Formula Grafting in `reinject_formula_and_skeleton` (`tag_aligner.py:328-525`)**
+  1. **Replace Chinese Numerals With Their True Digits (`1..10`) Instead of `"1"` (`lines 372–377`):**
+     ```python
+     ZH_DIGIT_MAP = {
+         "一": "1", "二": "2", "两": "2", "三": "3", "四": "4",
+         "五": "5", "六": "6", "七": "7", "八": "8", "九": "9", "十": "10",
+     }
+     zh_num_counter_re = re.compile(r"([一二两三四五六七八九十])(次|秒|格|名|个|道|枚|把|层|回合|阶|张)")
+     src_clean = zh_num_counter_re.sub(lambda m: f"{ZH_DIGIT_MAP[m.group(1)]}{m.group(2)}", src_clean)
+     cn_clean = zh_num_counter_re.sub(lambda m: f"{ZH_DIGIT_MAP[m.group(1)]}{m.group(2)}", cn_clean)
+     ```
+  2. **Pre-Bind `{num_ph}{Energy|LordExp|LordHp}` Using Letter-Only Sentinels (`__WXQICONA__`, `__WXQICONB__`, ...) BEFORE `COMPOUND_EXPR_RE`:**
+     - Before running `COMPOUND_EXPR_RE`, scan `body_source_zh` for `r"(\{[0-9A-Za-z_:+|.%/~ -]+\})\s*(\{(?:Energy|LordExp|LordHp)\})"` (`m.group(1) = num_ph`, `m.group(2) = icon_ph`):
+       - Allocate a **100% letter-only sentinel** `sent = f"__WXQICON{chr(65 + idx)}__"` (contains **ZERO digits** so `COMPOUND_EXPR_RE` and `\d+` will NEVER touch it!).
+       - In `src_clean`, replace `f"{num_ph}{icon_ph}"` (count=1) with `sent`.
+       - In `cn_clean`, replace the corresponding `r"(?:\d+(?:\.\d+)?|\{[^{}]+\})?\s*(?:点?\s*(?:能量|棋手经验|棋手生命值|玩家生命值)|\{(?:Energy|LordExp|LordHp)\})"` (matching the same icon type, count=1) with `sent`.
+       - In `out`, replace the corresponding Indonesian span (matching the same icon type: `r"(?:\d+(?:\.\d+)?\s*)?(?:Energy|Energi|\{Energy\})"` for `{Energy}`, `r"(?:memperoleh\s+)?(?:\d+(?:\.\d+)?\s*)?(?:Player EXP|EXP Chess Player|EXP Kontestan|\{LordExp\})"` for `{LordExp}`, `r"(?:\d+(?:\.\d+)?\s*)?(?:Player HP|HP Chess Player|HP Kontestan|\{LordHp\})"` for `{LordHp}`, count=1) with `sent` (preserving `"memperoleh "` if matched!).
+       - Store `icon_sentinels.append((sent, f"{num_ph}{icon_ph}"))` and restore `for sent, val in icon_sentinels: out = out.replace(sent, val)` right after `COMPOUND_EXPR_RE`!
+     - Because `sent` (`__WXQICONA__`) has no digits, `COMPOUND_EXPR_RE` completely ignores it in `src_clean`, `cn_clean`, and `out` — so `{3|2}{LordExp}` and `{0|7}{Energy}` NEVER shift `cn_exprs` vs `src_exprs` and NEVER get overwritten!
+  3. **Use Letter-Only `__EXPRSLOTAA__` Tokens & Include `_` in Lookbehind/Lookahead (`lines 405–418`):**
+     - In `reinject_formula_and_skeleton`, change `slot_tok = f"__EXPR_SLOT_{i}__"` to:
+       ```python
+       slot_tok = f"__EXPRSLOT{chr(65 + (i // 26))}{chr(65 + (i % 26))}__"
+       ```
+       (pure letters, **NO digits** inside `slot_tok`!) and include `_` in the negative lookbehind/lookahead:
+       ```python
+       pat = rf"(?<![\d\[{{|A-Za-z_]){re.escape(c_ex)}(?![\d%\]}}|A-Za-z_])"
+       ```
+       This makes it mathematically impossible for a later `c_ex` replacement to ever match inside an earlier `slot_tok`!
+  4. **Run Parenthetical 2-Tag & Split 2/3-Tag Formula Grafting AFTER Step 2 (`COMPOUND_EXPR_RE`) and BEFORE `needed_numeric_phs`!**
+     - Delete the pre-Step-2 `zh_split_formulas` block (`lines 331–351`, which ran before placeholders were injected and required `\s+sebesar\s+`).
+     - Instead, **immediately AFTER Step 2 (`COMPOUND_EXPR_RE` substitution) and BEFORE `needed_numeric_phs`**:
+       - `out` NOW contains the exact inner placeholders (`[1]+[2]%`, `[1]%`, `[3]%`, `[4]+[5]%`, `[159004p1q1]+[159004p1q3/100]%`) in the Indonesian sentence!
+       - **Case 1 (2-Tag Parenthetical `<color=C1>(?:恢复)?[a]点?...</color><color=C2>（[b]...）</color>`):**
+         ```python
+         paren_2tag_re = re.compile(
+             r"(<color=[^>]+>)([^<\[\d]*?)(\[\d+\])点?(物理伤害|法术伤害|真实伤害|护盾|生命值?)(</color>)\s*(<color=[^>]+>)[（(]([^）)]+)[）)](</color>)"
+         )
+         for m_p in paren_2tag_re.finditer(body_source_zh):
+             open1, pre_zh, idx_a, kind_zh, close1, open2, inner_zh, close2 = m_p.groups()
+             if f"{open1}{idx_a}" in out:
+                 continue
+             inner_phs = re.findall(r"\[[A-Za-z0-9_+/.*%-]+\]", inner_zh)
+             if not inner_phs:
+                 continue
+             kind_id = {
+                 "物理伤害": "Physical Damage",
+                 "法术伤害": "Magic Damage",
+                 "真实伤害": "True Damage",
+                 "护盾": "Shield",
+                 "生命": "HP",
+                 "生命值": "HP",
+             }.get(kind_zh, "Damage")
+             first_ph = inner_phs[0]
+             last_ph = inner_phs[-1]
+             # Match the Indonesian formula span containing first_ph .. last_ph and its stat/damage label
+             span_re = re.compile(
+                 rf"(?:(?:Physical|Magic|True)\s+Damage\s+(?:sebesar\s+)?|Damage\s+(?:sebesar\s+)?|Shield\s+(?:sebesar\s+)?|HP\s+(?:sebesar\s+)?)?"
+                 rf"(?:\d+(?:\.\d+)?%?\s*\+\s*)?{re.escape(first_ph)}"
+                 rf"(?:[^.,;\n)]*?{re.escape(last_ph)})?"
+                 rf"[^.,;\n)]*?(?:sebagai\s+(?:Physical|Magic|True)\s+Damage|sebagai\s+HP|(?:Physical|Magic|True)\s+Damage|Physical Attack|Magic Attack|Max HP(?:\s+miliknya|\s+-nya|-nya|\s+[A-Za-z']+)?|HP\s+Maks(?:\s+miliknya)?|Attack(?:\s+dasarnya)?|HP(?:\s+miliknya)?)",
+                 flags=re.I,
+             )
+             m_sp = span_re.search(out)
+             if m_sp:
+                 matched_formula = m_sp.group(0).strip()
+                 # Strip trailing "sebagai Physical/Magic/True Damage" or leading "Damage sebesar" inside parentheses so it reads cleanly: [0] Physical Damage ([1]+[2]% Physical Attack)
+                 inner_clean = re.sub(
+                     r"^(?:(?:Physical|Magic|True)\s+Damage|Damage|Shield|HP)\s+(?:sebesar\s+)?",
+                     "",
+                     matched_formula,
+                     flags=re.I,
+                 )
+                 inner_clean = re.sub(
+                     r"\s+sebagai\s+(?:(?:Physical|Magic|True)\s+Damage|HP)$",
+                     "",
+                     inner_clean,
+                     flags=re.I,
+                 )
+                 prefix_id = "memulihkan " if "恢复" in pre_zh and not re.search(r"memulihkan\s+$", out[:m_sp.start()], flags=re.I) else ""
+                 rep = f"{open1}{prefix_id}{idx_a} {kind_id}{close1}{open2} ({inner_clean}){close2}"
+                 out = out[:m_sp.start()] + rep + out[m_sp.end():]
+         ```
+       - **Case 2 (3-Tag Split Recovery `<color=C1>(?:恢复)?[a_or_num]\+</color><color=C2>[b]%...</color><color=C3>的生命值</color>` like `Yang Yuhuan` & `Ming Shiyin`):**
+         ```python
+         split_3tag_re = re.compile(
+             r"(<color=[^>]+>)(?:恢复)?(\[\d+\]|\d+)\+(</color>)(<color=[^>]+>)(\[[^\]]+\]|\d+)%([^<]+)(</color>)(<color=[^>]+>)的生命值?(</color>)"
+         )
+         for m_3 in split_3tag_re.finditer(body_source_zh):
+             c1_o, p1, c1_c, c2_o, p2, stat_zh, c2_c, c3_o, c3_c = m_3.groups()
+             # Match "memulihkan <p1>+<p2>% <Stat> (sebagai )?HP" or "<p1>+<p2>% <Stat> (sebagai )?HP"
+             sp3_re = re.compile(
+                 rf"(memulihkan\s+)?({re.escape(p1)}\s*\+\s*)({re.escape(p2)}%\s*(?:Magic Attack|Physical Attack|Max HP|HP Maks)(?:\s+miliknya)?)(?:\s+sebagai)?\s+(HP\b)",
+                 flags=re.I,
+             )
+             m_s3 = sp3_re.search(out)
+             if m_s3:
+                 mem_p = m_s3.group(1) or ""
+                 part1 = f"{mem_p}{m_s3.group(2)}" if "恢复" in m_3.group(0) else m_s3.group(2)
+                 prefix_outside = "" if "恢复" in m_3.group(0) else mem_p
+                 rep3 = f"{prefix_outside}{c1_o}{part1.strip()}{c1_c}{c2_o}{m_s3.group(3).strip()}{c2_c} {c3_o}{m_s3.group(4)}{c3_c}"
+                 out = out[:m_s3.start()] + rep3 + out[m_s3.end():]
+         ```
+       - **Case 3 (2-Tag Split Recovery/Shield `<color=C1>(?:恢复)?...%</color><color=C2>的(?:生命值?|护盾)</color>` like `Dolia`, `Dr. Bian`, `Mi Yue`, `Yaria`, `Kui`, `Bai Qi`, `Master Luban`, `Augran`, `Milady`):**
+         ```python
+         split_2tag_re = re.compile(
+             r"(<color=[^>]+>)((?:恢复)?[^<]*?\[[^\]]+\][^<]*?)(</color>)(<color=[^>]+>)的(生命值?|护盾)(</color>)"
+         )
+         for m_2 in split_2tag_re.finditer(body_source_zh):
+             c1_o, expr_zh, c1_c, c2_o, kind_zh, c2_c = m_2.groups()
+             phs = re.findall(r"\[[A-Za-z0-9_+/.*%-]+\]", expr_zh)
+             if not phs:
+                 continue
+             first_ph, last_ph = phs[0], phs[-1]
+             if kind_zh.startswith("生命"):
+                 # Match either "memulihkan <Formula> (sebagai )?HP" OR "memulihkan HP (miliknya )?sebesar <Formula>"
+                 sp2a = re.compile(
+                     rf"(memulihkan\s+)((?:[^.,;\n<]*?{re.escape(first_ph)}[^.,;\n<]*?{re.escape(last_ph)}%\s*(?:Magic Attack|Physical Attack|Max HP|HP Maks)(?:\s+miliknya)?))(?:\s+sebagai)?\s+(HP\b)",
+                     flags=re.I,
+                 )
+                 sp2b = re.compile(
+                     rf"(memulihkan\s+)(HP(?:\s+miliknya)?)\s+sebesar\s+([^.,;\n<]*?{re.escape(first_ph)}[^.,;\n<]*?{re.escape(last_ph)}%\s*(?:Magic Attack|Physical Attack|Max HP|HP Maks)(?:\s+miliknya)?)",
+                     flags=re.I,
+                 )
+                 if m_a := sp2a.search(out):
+                     mem_w, form_w, hp_w = m_a.groups()
+                     rep2 = (f"{c1_o}{mem_w}{form_w}{c1_c} {c2_o}{hp_w}{c2_c}") if "恢复" in expr_zh else (f"{mem_w}{c1_o}{form_w}{c1_c} {c2_o}{hp_w}{c2_c}")
+                     out = out[:m_a.start()] + rep2 + out[m_a.end():]
+                 elif m_b := sp2b.search(out):
+                     mem_w, hp_w, form_w = m_b.groups()
+                     rep2 = (f"{c1_o}{mem_w}{form_w}{c1_c} {c2_o}{hp_w}{c2_c}") if "恢复" in expr_zh else (f"{mem_w}{c1_o}{form_w}{c1_c} {c2_o}{hp_w}{c2_c}")
+                     out = out[:m_b.start()] + rep2 + out[m_b.end():]
+             elif kind_zh == "护盾":
+                 sp2s = re.compile(
+                     rf"(Shield)\s+(?:sebesar\s+)?([^.,;\n<]*?{re.escape(first_ph)}[^.,;\n<]*?{re.escape(last_ph)}%\s*(?:Max HP|Magic Attack|Physical Attack)(?:\s+[A-Za-z']+)?)",
+                     flags=re.I,
+                 )
+                 if m_s := sp2s.search(out):
+                     sh_w, form_w = m_s.groups()
+                     rep2 = f"{c1_o}{form_w}{c1_c} {c2_o}{sh_w}{c2_c}"
+                     out = out[:m_s.start()] + rep2 + out[m_s.end():]
+         ```
+     - Because Cases 1, 2, and 3 run **before** `needed_numeric_phs` (`lines 420–437`), `[0]` (and `[6]` in Dolia, `[2]` in Bai Qi) are already injected in their exact parenthetical formula slots, so `needed_numeric_phs` is `0` and **NEVER** overwrites `10 detik` (`selama [6] detik`) or `1 tile` (`dalam [2] tile`)!
+
+- [x] **Step 41.2: Expand Single-Span `<color=...>` Patterns & Never Strip Already-Matched Tags in `reinject_skeleton_from_source` (`tag_aligner.py:450-920`)**
+  1. **Expand Semantic Span Patterns in `reinject_formula_and_skeleton` (`lines 470–515`) and `reinject_skeleton_from_source` (`lines 680–720`):**
+     - In `reinject_formula_and_skeleton` Step 5 (`color_spans`) and `reinject_skeleton_from_source` Step 2 (`spans`):
+       - **Headers (`^[A-Za-z\u4e00-\u9fff0-9/]+[:：]$`):** Also map:
+         - `"普通攻击："` -> `("Basic Attack:",)`
+         - `"强化普攻："` -> `("Enhanced Basic Attack:", "Basic Attack Diperkuat:")`
+         - `"1技能："` -> `("Skill 1:",)`
+         - `"2技能："` -> `("Skill 2:",)`
+         - `"3技能："` -> `("Skill 3:",)`
+         - `"连招："` -> `("Combo:", "Kombo:")`
+         - `"小提示："` -> `("Tips:", "Tip:")`
+         - `"人形态："` -> `("Bentuk Manusia:", "Human Form:")`
+         - `"人鱼形态："` -> `("Bentuk Putri Duyung:", "Mermaid Form:")`
+         - `"清平："` -> `("Qingping:",)`
+         - `"长恨："` -> `("Changhen:",)`
+         - `"2层："` -> `("2 Stack:",)`
+         - `"3层："` -> `("3 Stack:",)`
+         - `"法球返回时："` -> `("Saat bola kembali:",)`
+         - `"短剑会留存在原地："` -> `("Belati tetap berada di tempat:",)`
+       - **Shield spans (`护盾` in `zh_c`):** Match BOTH `Shield <N>` and `<N> Shield` (`r"(?:Shield\s+(?:sebesar\s+)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?(?:\s*\+\s*(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?\s*(?:Physical Attack|Magic Attack|Max HP)(?:\s+miliknya)?)?|(?:(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?\s+Shield))"`).
+       - **Mana spans (`法力值` / `法力` in `zh_c`):** Match `r"(?:memulihkan\s+(?:tambahan\s+)?)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*Mana\b"`.
+       - **Stat & Status spans:**
+         - `"伤害减免"` in `zh_c`: `r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?\s*Damage Reduction\b"`
+         - `"移动速度"` or `"移速"` in `zh_c`: `r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?\s*Movement Speed\b"`
+         - `"攻击速度"` or `"攻速"` in `zh_c`: `r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?\s*Attack Speed\b"`
+         - `"物理攻击"` in `zh_c` (when not `"物理伤害"`): `r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?\s*(?:Physical Attack|Attack(?:\s+dasarnya)?)\b"`
+         - `"物理防御"` in `zh_c`: `r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?\s*Physical Defense\b"`
+         - `"法术防御"` in `zh_c`: `r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?\s*Magic Defense\b"`
+         - `"生命值"` or `"生命"` in `zh_c` (when not multi-tag): `r"(?:memulihkan\s+)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?(?:\s*\+\s*(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?\s*(?:Physical Attack|Magic Attack|Max HP))?(?:\s+sebagai)?\s*(?:Max HP|HP(?:\s+miliknya)?)\b"`
+         - `"浮空"` in `zh_c`: `r"\b(?:melayang|Levitate|Airborne)\b"`
+         - `"嘲讽"` in `zh_c`: `r"\b(?:memberi\s+taunt|taunt|Taunt)\b"`
+         - `"眩晕"` in `zh_c`: `r"\b(?:stun(?:\s+selama)?(?:\s+(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*detik)?)\b"`
+         - `"击飞"` in `zh_c`: `r"\b(?:Knockback|knockback|menghempaskan(?:\s+musuh)?(?:\s+ke\s+udara)?|terhempas(?:\s+ke\s+udara)?)\b"`
+         - `"冰冻"` in `zh_c`: `r"\b(?:Freeze|freeze|membekukan|beku)\b"`
+         - `"减速"` in `zh_c`: `r"\b(?:Slow|slow|memperlambat)\b"`
+         - `"沉默"` in `zh_c`: `r"\b(?:Silence|silence|membungkam)\b"`
+         - `"退场"` in `zh_c`: `r"\b(?:Retreat|Exit|mundur)\b"`
+         - `"镜像"` in `zh_c`: `r"\b(?:Mirror|cermin|bayangan)\b"`
+         - `"万镜"` in `zh_c`: `r"\bMyriad Mirrors\b"`
+         - `"人才搜寻"` in `zh_c`: `r"\bTalent Search\b"`
+         - `"碰碰运气"` in `zh_c`: `r"\bTry Your Luck\b"`
+         - `"英雄兑换券"` in `zh_c`: `r"\bHero Voucher(?:\s+Tier\s+\d+)?\b"`
+         - `"兑换券"` in `zh_c`: `r"\b(?:Hero\s+)?Voucher(?:\s+Tier\s+\d+)?\b"`
+         - `"普通装备牌"` in `zh_c`: `r"\b(?:[Kk]artu\s+Normal\s+Equipment|[Kk]artu\s+Equipment\s+Biasa)\b"`
+  2. **Preserve Already-Matched Tags When Partial Tags Remain (`reinject_skeleton_from_source` lines 655–900):**
+     - In `reinject_skeleton_from_source`, if `result` enters with partial tags from `reinject_formula_and_skeleton` (or after Step 2 `spans` matches a subset of `spans`), do **NOT** discard `curr` and do **NOT** run `stripped_id = TAG_RE.sub("", result)` at line `892`!
+     - Instead, when `0 < len(TAG_RE.findall(curr)) < len(tags_in_src)`:
+       - Identify which `(open_tag, close_tag)` pairs from `source_zh` are still missing in `curr`, and insert ONLY those missing tag pairs around the remaining untagged clauses/numbers in `curr` in their exact sequence order so `TAG_RE.findall(curr) == tags_in_src` **without** disturbing the already-matched `<color=#ffffffbf>Pasif:</color>`, `<color=#ffffffbf>Aktif:</color>`, or `<color=#dfa15e>[0] Physical Damage</color><color=#dfa15e> ([1]+[2]% Physical Attack)</color>` tags!
+
+### Task 42: Add Anti-Regression Assertions to `tests/test_glossary_and_tiers.py`, Re-Run Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Verify `14 passed`, & Re-Publish `v1.4.12-id.2` (`06`)
+
+- [x] **Step 42.1: Add 4 Additional Strict Assertions to `tests/test_glossary_and_tiers.py`**
+  1. **Zero Unexpanded Sentinel / Slot Tokens Across Entire Catalog:**
+     ```python
+     for section in ("unique", "english_updates"):
+         for k, v in cat[section].items():
+             assert "__EXPR" not in v and "__WXQ" not in v and "__SLOT" not in v, f"Unexpanded sentinel in {section}: {k} -> {v}"
+     ```
+  2. **Zero `<color=#ffffffbf>` Header Bleed Into Body Words (`Pasif:` / `Aktif:` Must Never Swallow Body Words):**
+     ```python
+     header_bleed = [
+         (k, v) for k, v in diff_u.items()
+         if re.search(r"<color=#ffffffbf>\s*(?:Pasif|Aktif)\s*:\s+\S+", v)
+     ]
+     assert len(header_bleed) == 0, f"Header bleed into body words ({len(header_bleed)}): {header_bleed[:5]}"
+     ```
+  3. **Zero Overwritten Duration/Distance Numbers (`selama [6] detik`, `dalam [2] tile`):**
+     ```python
+     assert not any("selama [6] detik" in v or "selama [159004p2q2] detik" in v or "dalam [2] tile" in v for v in diff_u.values())
+     ```
+  4. **Parenthetical 2-Tag Hero Skills Preserve Exact Tags (`Lu Bu`, `Allain`, `Fang`, `Dolia`, `Bai Qi`):**
+     - Assert `"<color=#ffffffbf>Aktif:</color>"` in `cat["unique"]["<color=#ffffffbf>被动：</color>吕布会根据敌人位置使用不同招式，普攻能对身前2格内敌人造成伤害。\n<color=#ffffffbf>主动：</color>吕布跳向指定位置，落地后挥斩，对大范围的敌人造成<color=#dfa15e>[0]点物理伤害</color><color=#dfa15e>（[1]+[2]%物理攻击力）</color>并击飞[3]秒。\n<color=#86888A>点击技能描述面板，查看<b>击飞</b>详细解释</color>"]`
+     - Assert `"<color=#dfa15e>[0] Physical Damage</color><color=#dfa15e> ([1]+[2]% Physical Attack)</color>"` in that same Lu Bu string!
+
+- [x] **Step 42.2: Re-Run Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Run `pytest -v`, Commit, Force-Tag `v1.4.12-id.2`, & Re-Upload Release Assets (`06`)**
   1. `/home/whise/.local/bin/uv run --python 3.12 python scripts/01b_build_hybrid_vfs_index.py`
   2. `/home/whise/.local/bin/uv run --python 3.12 python scripts/02_build_indonesian_catalog.py`
   3. `/home/whise/.local/bin/uv run --python 3.12 python scripts/03_patch_worker_modules.py`
@@ -2902,6 +3150,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
   5. `/home/whise/.local/bin/uv run --python 3.12 python scripts/05_repack_windows_exe.py`
   6. `/home/whise/.local/bin/uv run --python 3.12 pytest -v` (`14 passed, 0 failed, 0 skipped`)
   7. Update SHA-256 hashes in `README.md` & `scripts/06_publish_github_release.py`, check `[x]` on all completed tasks in `.agents/plan/2026-11-03-hok-ace-indonesian-patcher-plan.md`, commit, `git push origin main`, `git tag -f v1.4.12-id.2 HEAD && git push -f origin v1.4.12-id.2`, and run `scripts/06_publish_github_release.py`.
+
 
 
 
