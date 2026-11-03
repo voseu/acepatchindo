@@ -101,6 +101,6 @@ uv run --python 3.12 pytest -v
 
 | Berkas / Komponen | Ukuran (Byte) | SHA-256 |
 | :--- | ---: | :--- |
-| `Celeslib-HoK-Ace-Patcher-v1.0.0.exe` | `55.087.136` | `8ded6277457c64705bc35da35be784b4f1f50b9f470319908b9730ecfcf877d9` |
-| `Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe` | `55.087.136` | `8ded6277457c64705bc35da35be784b4f1f50b9f470319908b9730ecfcf877d9` |
+| `Celeslib-HoK-Ace-Patcher-v1.0.0.exe` | `55.088.672` | `2f0a4bb02f9ccdd91feb95ad8eb04296c62877386b0f3dd61b84da525acff1fa` |
+| `Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe` | `55.088.672` | `2f0a4bb02f9ccdd91feb95ad8eb04296c62877386b0f3dd61b84da525acff1fa` |
 | `ace-worker.exe` (*embedded payload*) | `53.927.862` | `abbfffec6bab992b31c25e32dc8a33571fd5f279033185f84361af87632253f2` |

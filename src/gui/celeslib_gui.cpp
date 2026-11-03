@@ -790,6 +790,7 @@ void RenderCeleslibFrame(Gdiplus::Graphics& g, int width, int height, const AppS
     SolidBrush whiteBrush(Theme::PrimaryWhite);
     SolidBrush blackBrush(Theme::PrimaryBlack);
     SolidBrush textWhiteBrush(Theme::TextWhite);
+    SolidBrush textRedBrush(Theme::AccentRed);
     SolidBrush textLightBrush(Theme::TextLight);
     SolidBrush textSilverBrush(Theme::TextSilver);
     SolidBrush textMutedBrush(Theme::TextMuted);
@@ -975,7 +976,7 @@ void RenderCeleslibFrame(Gdiplus::Graphics& g, int width, int height, const AppS
     DrawRoundRect(g, restore_hover ? borderRedPen : borderDarkPen, 194.0f, 166.0f, 132.0f, 34.0f, 6.0f);
     Pen restPen(restore_hover ? Theme::AccentRed : Theme::TextWhite, 1.4f);
     DrawVectorRotateCCW(g, 208.0f, 177.0f, restPen);
-    g.DrawString(s.btn_restore, -1, &fontHeader, PointF(228.0f, 175.0f), restore_hover ? (SolidBrush*)&borderRedPen : &textWhiteBrush);
+    g.DrawString(s.btn_restore, -1, &fontHeader, PointF(228.0f, 175.0f), restore_hover ? &textRedBrush : &textWhiteBrush);
 
     // 3. [✓ Periksa] (ID: 303, X: 334..462, Y: 166..200)
     bool verify_hover = (state.hovered_btn == 303);
@@ -1012,7 +1013,7 @@ void RenderCeleslibFrame(Gdiplus::Graphics& g, int width, int height, const AppS
     DrawRoundRect(g, rec_hover ? borderRedPen : borderDarkPen, 748.0f, 166.0f, 120.0f, 34.0f, 6.0f);
     Pen recPen(rec_hover ? Theme::AccentRed : Theme::TextWhite, 1.4f);
     DrawVectorRotateCCW(g, 758.0f, 177.0f, recPen);
-    g.DrawString(s.btn_android_recover, -1, &fontHeader, PointF(776.0f, 175.0f), rec_hover ? (SolidBrush*)&borderRedPen : &textWhiteBrush);
+    g.DrawString(s.btn_android_recover, -1, &fontHeader, PointF(776.0f, 175.0f), rec_hover ? &textRedBrush : &textWhiteBrush);
 
     // 5. Console [🗑 Clear] (ID: 307, X: 878..950, Y: 166..200)
     bool clear_hover = (state.hovered_btn == 307);
@@ -1055,6 +1056,9 @@ void RenderCeleslibFrame(Gdiplus::Graphics& g, int width, int height, const AppS
     // Minimap Rail (X: 908..959, Y: 253..575)
     g.FillRectangle(&gutterBg, 908, 253, 51, 322);
     g.DrawLine(&borderFaintPen, 908, 253, 908, 575);
+    SolidBrush minimapSliderBg(Color(0xFF, 0x1A, 0x1A, 0x1A));
+    FillRoundRect(g, minimapSliderBg, 912.0f, 260.0f, 43.0f, 80.0f, 4.0f);
+    DrawRoundRect(g, borderDarkPen, 912.0f, 260.0f, 43.0f, 80.0f, 4.0f);
 
     // Render Log Lines in Viewport
     if (state.log_lines.empty()) {
@@ -1245,6 +1249,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 // UI Language: Indonesia (ID: 205)
                 if (y >= 89 && y <= 117 && x >= 727 && x <= 834) {
                     g_state.ui_lang = UiLang::ID;
+                    if (!g_state.is_busy) {
+                        if (g_state.status_text == STRINGS_EN.status_ready) g_state.status_text = STRINGS_ID.status_ready;
+                        else if (g_state.status_text == STRINGS_EN.status_installed) g_state.status_text = STRINGS_ID.status_installed;
+                        else if (g_state.status_text == STRINGS_EN.status_originals) g_state.status_text = STRINGS_ID.status_originals;
+                        else if (g_state.status_text == STRINGS_EN.status_error) g_state.status_text = STRINGS_ID.status_error;
+                    }
                     SaveConfig();
                     InvalidateRect(hwnd, NULL, FALSE);
                     return 0;
@@ -1252,6 +1262,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 // UI Language: English (ID: 206)
                 if (y >= 89 && y <= 117 && x >= 836 && x <= 943) {
                     g_state.ui_lang = UiLang::EN;
+                    if (!g_state.is_busy) {
+                        if (g_state.status_text == STRINGS_ID.status_ready) g_state.status_text = STRINGS_EN.status_ready;
+                        else if (g_state.status_text == STRINGS_ID.status_installed) g_state.status_text = STRINGS_EN.status_installed;
+                        else if (g_state.status_text == STRINGS_ID.status_originals) g_state.status_text = STRINGS_EN.status_originals;
+                        else if (g_state.status_text == STRINGS_ID.status_error) g_state.status_text = STRINGS_EN.status_error;
+                    }
                     SaveConfig();
                     InvalidateRect(hwnd, NULL, FALSE);
                     return 0;
@@ -1451,6 +1467,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
     }
 
     LoadConfig();
+    g_state.status_text = GetStrings(g_state.ui_lang).status_ready;
 
     WNDCLASSEXW wc = { sizeof(wc) };
     wc.lpfnWndProc = WndProc;
@@ -1474,8 +1491,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
     UpdateWindow(hwnd);
 
     // Initial check for installation
-    AppendLog(L"[INFO] Celeslib Honor of Kings: Ace Patcher v1.0.0 siap.");
-    AppendLog(L"[INFO] Mode Patch Aktif: " + std::wstring(g_state.patch_mode == PatchMode::EN_FULL ? L"Full English (EN)" : L"Indonesian Hybrid (ID)"));
+    if (g_state.ui_lang == UiLang::EN) {
+        AppendLog(L"[INFO] Celeslib Honor of Kings: Ace Patcher v1.0.0 ready.");
+        AppendLog(L"[INFO] Active Patch Mode: " + std::wstring(g_state.patch_mode == PatchMode::EN_FULL ? L"Full English (EN)." : L"Indonesian Hybrid (ID)."));
+    } else {
+        AppendLog(L"[INFO] Celeslib Honor of Kings: Ace Patcher v1.0.0 siap.");
+        AppendLog(L"[INFO] Mode Patch Aktif: " + std::wstring(g_state.patch_mode == PatchMode::EN_FULL ? L"Full English (EN)." : L"Indonesian Hybrid (ID)."));
+    }
 
     MSG msg;
     while (GetMessageW(&msg, NULL, 0, 0)) {
