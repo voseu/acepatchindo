@@ -597,6 +597,48 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
         assert "<color=#dfa15e>[0] Physical Damage</color><color=#dfa15e> ([1]+[2]% Physical Attack)</color>" in ex_val
 
 
+def test_round6_footer_terms_and_zero_fallback_wraps() -> None:
+    catalog_path = ROOT / "data" / "catalog_checkpoints" / "catalog.json.gz"
+    with gzip.open(catalog_path, "rt", encoding="utf-8") as f:
+        cat = json.load(f)
+
+    # 1. Zero Misplaced {1|1} on {LordHp}-10 / {LordHp}-15 & Exact -15 Preservation
+    s_hp10 = "<color=#FFE897>{LordHp}</color>-10，战斗开始时，<color=#FFE897>己方每名英雄</color>+2═临时等级。战斗胜利时，获得{1|1}{LordHp}，═临时等级额外+1。"
+    s_hp15 = "<color=#FFE897>{LordHp}</color>-15，战斗开始时，<color=#FFE897>己方每名英雄</color>+2═临时等级。战斗胜利时，获得{1|1}{LordHp}，═临时等级额外+1。"
+    if s_hp10 in cat["unique"]:
+        assert not cat["unique"][s_hp10].startswith("{1|1}") and "{1|1}{LordHp}" in cat["unique"][s_hp10]
+    if s_hp15 in cat["unique"]:
+        assert not cat["unique"][s_hp15].startswith("{1|1}") and "-15" in cat["unique"][s_hp15] and "{1|1}{LordHp}" in cat["unique"][s_hp15]
+
+    # 2. Try Your Luck (碰碰运气) Range Placeholder Precision
+    s_tyl = "<color=#FFE897>棋手升级时</color>，获得1张天赋牌<color=#FFE897>碰碰运气</color>：指定1名英雄提升5-20等级，随机消耗{0|1}-{0|5}{Energy}。"
+    if s_tyl in cat["unique"]:
+        assert "memperoleh 1 Kartu Talent" in cat["unique"][s_tyl] and "{0|1}-{0|5}{Energy}" in cat["unique"][s_tyl]
+
+    # 3. Zero Tier 3 Fallback on Footer-Tagged Tier 1 Hero Skills (Donghuang, Lu Bu Variant 1, Bai Qi, Xiao Qiao)
+    s_dh = "<color=#ffffffbf>被动：</color>东皇太一创造3颗能量球绕自身转动。能量球触碰到敌人时会造成其<color=#d487e4>[0]%最大生命值的法术伤害</color>并恢复东皇<color=#9ff5d0>[1]%的最大生命值</color>。\n\n<color=#ffffffbf>主动：</color>东皇太一施展堕神契约<color=#ffffffbf>压制</color>目标敌人5秒，期间双方承受等量伤害。若期间与目标距离过远，则效果提前中断。\n\n\n<color=#86888A>点击技能描述面板，查看<b>压制</b>详细解释</color>"
+    if s_dh in cat["unique"]:
+        assert "<b>Suppress</b>" in cat["unique"][s_dh] and "Energi bola" not in cat["unique"][s_dh]
+
+    # 4. Zero Chunk-Sliced Tags on Dolia, Ming Shiyin, Dr. Bian, Yao, Shi, Fleeting, and Totem
+    dolia_k = "<color=#ffffffbf>被动：</color>朵莉亚在自身创建的水域内会化身人鱼形态。普通攻击会额外恢复5点法力值，对目标附带<color=#d487e4>50%法术攻击力的法术伤害</color>，在水域内再次施放技能，原水域消失形成新水域。\n<color=#ffffffbf>主动：</color>跃向3格内友军密集处创造一片水域，水域持续10秒，朵莉亚在水域中化身人鱼形态，落地立即恢复范围内友军<color=#d487e4>75+100%法术攻击力</color><color=#9ff5d0>的生命值</color>，10点法力值（法力值恢复不对朵莉亚生效），水域每秒恢复范围内友军<color=#d487e4>50%法术攻击力</color><color=#9ff5d0>的生命值</color>，朵莉亚离开水域时水域消失并且恢复人形态。"
+    if dolia_k in cat["unique"]:
+        assert "<color=#d487e4> tile dan" not in cat["unique"][dolia_k]
+
+    fleet_k = "使用技能，随机获得1张2-5阶的<a href=3130012><color=#ffffff>╆<b>转瞬</b></color></a>英雄牌。"
+    if fleet_k in cat["unique"]:
+        assert "<b> secara acak 1</b>" not in cat["unique"][fleet_k]
+
+    totem_k = "<a href=321><color=#ffffff>╉<b>图腾</b></color></a>不会被优先攻击。\n<a href=3><color=#ffffff>╪<b>开团</b></color></a>：获得每个<a href=321><color=#ffffff>╉<b>图腾</b></color></a>等级数15%的<a href=3130011><color=#ffffff>═<b>临时等级</b></color></a>。"
+    if totem_k in cat["unique"]:
+        assert "<b> sebesar</b>" not in cat["unique"][totem_k]
+
+    voucher_k = "获得<color=#FFE897>{0|2}{Energy}</color>以及2张<color=#FFE897>3阶英雄兑换券</color>。"
+    if voucher_k in cat["unique"]:
+        assert not cat["unique"][voucher_k].startswith("<color=#FFE897>Memperoleh</color>")
+
+
+
 
 
 

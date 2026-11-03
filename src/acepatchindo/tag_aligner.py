@@ -130,7 +130,7 @@ BADGE_ALIAS_MAP: dict[str, list[str]] = {
     "刷新": ["Refresh"],
     "退场": ["Exit:", "Exit"],
     "合成": ["Synthesis", "Merge"],
-    "转瞬": ["Fleet", "Instant"],
+    "转瞬": ["Fleeting", "Fleet", "Instant", "Sekilas"],
     "图腾系列": ["Totem Series", "Seri Totem"],
     "图腾": ["Totem"],
     "因缘图腾": ["Bond Totem", "Destiny Totem", "Totem Ikatan"],
@@ -284,6 +284,12 @@ def normalize_formula_skeleton_zh(text: str) -> str:
     while "#N#+#N#" in skel or "#N##N#" in skel:
         skel = skel.replace("#N#+#N#", "#N#").replace("#N##N#", "#N#")
     skel = re.sub(r"最大生命值?的?生命值?", "最大生命值", skel)
+    skel = re.sub(r"[，。：:；;、“”\"!\?！？]", "", skel)
+    skel = re.sub(
+        r"^吕布会根据敌人位置使用不同招式(?:普攻|普通攻击)能对身前#N#格内敌人造成伤害",
+        "吕布的普攻能造成范围伤害",
+        skel,
+    )
     skel = (
         skel.replace("释放", "施放")
         .replace("基础物理攻击", "物理攻击")
@@ -301,16 +307,22 @@ def normalize_formula_skeleton_zh(text: str) -> str:
         .replace("普通攻击能对身前敌人造成范围伤害", "普攻能造成范围伤害")
         .replace("普通攻击能造成范围伤害", "普攻能造成范围伤害")
         .replace("普攻能对身前敌人造成范围伤害", "普攻能造成范围伤害")
+        .replace("甄姬引导水流", "甄姬施放水流")
+        .replace("解除左右两边#N#格内友军和自身所受的控制效果", "驱散自身和左右两边#N#格内友军")
+        .replace("伤害由范围内的敌人平均分摊", "")
+        .replace("赵云刺出龙枪短时间内打击敌人#N#次", "赵云快速刺出#N#次龙枪打击目标")
+        .replace(
+            "鲁班七号召唤河豚飞艇穿越整个战场对下方区域随机投掷河豚炸弹共#N#个炸弹命中敌人后",
+            "鲁班七号呼唤河豚飞艇朝战场投掷#N#枚炸弹炸弹对命中敌人",
+        )
+        .replace("陷入弹坑中的敌人会被灼烧每秒受到", "并留下弹坑弹坑中的敌人每秒受到")
+        .replace("杨玉环弹奏琵琶循环激活以下乐曲效果之一", "杨玉环弹奏琵琶")
+        .replace("破阵杨玉环弹奏琵琶对", "破阵对")
     )
     skel = re.sub(r"恢复东皇(?:#N#%|#N#)+的最大生命值", "恢复东皇#N#%最大生命值", skel)
     skel = re.sub(r"恢复东皇(?:#N#%|#N#)+生命值", "恢复东皇#N#%最大生命值", skel)
     skel = re.sub(r"(?<!李元芳)丢出飞镖", "李元芳丢出飞镖", skel)
-    skel = re.sub(
-        r"^吕布会根据敌人位置使用不同招式(?:普攻|普通攻击)能对身前#N#格内敌人造成伤害",
-        "吕布的普通攻击能对身前敌人造成范围伤害",
-        skel,
-    )
-    skel = re.sub(r"[，。：:；;、“”\"!\?！？]", "", skel)
+    skel = re.sub(r"化身剑气(?:施展#N#次斩击|斩击范围内敌人#N#次)", "化身剑气斩击#N#次", skel)
     return skel
 
 
@@ -346,6 +358,14 @@ def reinject_formula_and_skeleton(
             "霸体": "Control Immunity",
             "禁锢": "Immobilize",
             "定身": "Root",
+            "压制": "Suppress",
+            "不可选中": "Untargetable",
+            "击退": "Knockback",
+            "浮空": "Airborne",
+            "降低生命恢复": "HP Regen Reduction",
+            "嘲讽": "Taunt",
+            "驱散": "Dispel",
+            "冻结": "Freeze",
         }
         term_id = term_zh
         for zh_t, id_t in TERM_MAP.items():
@@ -384,7 +404,7 @@ def reinject_formula_and_skeleton(
     # Pre-bind {num_ph}{Energy|LordExp|LordHp} using letter-only sentinels BEFORE COMPOUND_EXPR_RE
     icon_sentinels: list[tuple[str, str]] = []
     icon_pair_matches = list(re.finditer(
-        r"(\{[0-9A-Za-z_:+|.%/~ -]+\})\s*(\{(?:Energy|LordExp|LordHp)\})",
+        r"((?:\{[0-9A-Za-z_:+|.%/~ -]+\}(?:\s*[~-]\s*)?)+)\s*(\{(?:Energy|LordExp|LordHp)\})",
         body_source_zh,
     ))
     for idx, m_pair in enumerate(icon_pair_matches):
@@ -396,49 +416,32 @@ def reinject_formula_and_skeleton(
         clean_num_ph = normalize_plain_zh(num_ph)
         src_clean = src_clean.replace(f"{clean_num_ph}{icon_ph}", sent, 1)
 
-        if icon_ph == "{Energy}":
-            cn_clean = re.sub(
-                r"(?:\d+(?:\.\d+)?|\{[^{}]+\})?\s*(?:点?\s*能量|\{Energy\})",
-                sent,
-                cn_clean,
-                count=1,
-            )
-        elif icon_ph == "{LordExp}":
-            cn_clean = re.sub(
-                r"(?:\d+(?:\.\d+)?|\{[^{}]+\})?\s*(?:点?\s*(?:棋手经验|经验)|\{LordExp\})",
-                sent,
-                cn_clean,
-                count=1,
-            )
-        elif icon_ph == "{LordHp}":
-            cn_clean = re.sub(
-                r"(?:\d+(?:\.\d+)?|\{[^{}]+\})?\s*(?:点?\s*(?:棋手生命值|玩家生命值|生命值)|\{LordHp\})",
-                sent,
-                cn_clean,
-                count=1,
-            )
+        zh_icon_pat = (
+            r"(?:点?\s*能量|\{Energy\})" if icon_ph == "{Energy}"
+            else r"(?:点?\s*(?:棋手经验|经验)|\{LordExp\})" if icon_ph == "{LordExp}"
+            else r"(?:点?\s*(?:棋手生命值|玩家生命值|生命值)|\{LordHp\})"
+        )
+        # Try WITH required leading number/range first!
+        cn_clean, cnt_cn = re.subn(
+            rf"(?:\d+(?:\.\d+)?(?:\s*[~-]\s*\d+(?:\.\d+)?)?|\{{[^{{}}]+\}}(?:\s*[~-]\s*\{{[^{{}}]+\}})?)\s*{zh_icon_pat}",
+            sent,
+            cn_clean,
+            count=1,
+        )
+        if not cnt_cn:
+            cn_clean = re.sub(zh_icon_pat, sent, cn_clean, count=1)
 
-        if icon_ph == "{Energy}":
-            m_out = re.search(r"(?:\d+(?:\.\d+)?\s*)?(?:Energy|Energi|\{Energy\})\b", out, flags=re.I)
-            if m_out:
-                out = out[:m_out.start()] + sent + out[m_out.end():]
-        elif icon_ph == "{LordExp}":
-            m_out = re.search(
-                r"(memperoleh\s+)?(?:\d+(?:\.\d+)?\s*)?(?:Player EXP|EXP Chess Player|EXP Kontestan|EXP Pemain|EXP|\{LordExp\})\b",
-                out,
-                flags=re.I,
-            )
-            if m_out:
-                prefix = m_out.group(1) or ""
-                out = out[:m_out.start()] + prefix + sent + out[m_out.end():]
-        elif icon_ph == "{LordHp}":
-            m_out = re.search(
-                r"(?:\d+(?:\.\d+)?\s*)?(?:Player HP|HP Chess Player|HP Kontestan|HP Pemain|Health|\{LordHp\})\b",
-                out,
-                flags=re.I,
-            )
-            if m_out:
-                out = out[:m_out.start()] + sent + out[m_out.end():]
+        id_icon_pat = (
+            r"(?:Energy|Energi|\{Energy\})\b" if icon_ph == "{Energy}"
+            else r"(?:Player EXP|EXP Chess Player|EXP Kontestan|EXP Pemain|EXP|\{LordExp\})\b" if icon_ph == "{LordExp}"
+            else r"(?:Player HP|HP Chess Player|HP Kontestan|HP Pemain|Health|\{LordHp\})\b"
+        )
+        # Try WITH required leading number/range in `out` first!
+        m_out = re.search(rf"\d+(?:\.\d+)?(?:\s*[~-]\s*\d+(?:\.\d+)?)?\s*{id_icon_pat}", out, flags=re.I)
+        if not m_out:
+            m_out = re.search(id_icon_pat, out, flags=re.I)
+        if m_out:
+            out = out[:m_out.start()] + sent + out[m_out.end():]
 
     # Strip remaining standalone icon placeholders from src_clean/cn_clean
     src_clean = (
@@ -478,9 +481,13 @@ def reinject_formula_and_skeleton(
         slots: list[tuple[str, str]] = []
         cursor = 0
         for i, ((c_ex, c_u), (s_ex, s_u)) in enumerate(zip(cn_matches, src_matches)):
-            if c_ex == s_ex:
-                continue
             unit_pat = UNIT_MAP.get(s_u or c_u, "")
+            if c_ex == s_ex:
+                pat_same = re.compile(rf"(?<![\d\[{{|A-Za-z_]){re.escape(c_ex)}(?![\d%\]}}|A-Za-z_])")
+                m_same = pat_same.search(out, cursor)
+                if m_same:
+                    cursor = m_same.end()
+                continue
             pat = None
             if unit_pat:
                 pat = re.compile(rf"(?<![\d\[{{|A-Za-z_]){re.escape(c_ex)}(?![\d%\]}}|A-Za-z_])(?={unit_pat})", flags=re.I)
@@ -494,6 +501,10 @@ def reinject_formula_and_skeleton(
                 m = pat.search(out, cursor)
                 if not m:
                     m = pat.search(out, 0)
+            if not m and re.match(r"^\d+(?:\.\d+)?\+\d+(?:\.\d+)?%$", c_ex):
+                m = re.compile(r"\d+(?:\.\d+)?\s*\+\s*\d+(?:\.\d+)?%").search(out, cursor)
+                if not m:
+                    m = re.compile(r"\d+(?:\.\d+)?\s*\+\s*\d+(?:\.\d+)?%").search(out, 0)
             if not m:
                 continue
             clean_s = re.sub(r"\s+", "", s_ex)
@@ -566,7 +577,7 @@ def reinject_formula_and_skeleton(
 
     # Case 2: 3-Tag Split Recovery (<color=C1>...+</color><color=C2>...%</color><color=C3>的生命值</color>)
     split_3tag_re = re.compile(
-        r"(<color=[^>]+>)(?:恢复)?(\[\d+\]|\d+)\+(</color>)(<color=[^>]+>)(\[[^\]]+\]|\d+)%([^<]+)(</color>)(<color=[^>]+>)的生命值?(</color>)"
+        r"(<color=[^>]+>)(?:恢复)?(\[[^\]]+\]|\d+)\+(</color>)(<color=[^>]+>)(\[[^\]]+\]|\d+)%([^<]+)(</color>)(<color=[^>]+>)的生命值?(</color>)"
     )
     for m_3 in split_3tag_re.finditer(body_source_zh):
         c1_o, p1, c1_c, c2_o, p2, stat_zh, c2_c, c3_o, c3_c = m_3.groups()
@@ -584,25 +595,29 @@ def reinject_formula_and_skeleton(
 
     # Case 3: 2-Tag Split Recovery/Shield (<color=C1>...%</color><color=C2>的(生命值|护盾)</color>)
     split_2tag_re = re.compile(
-        r"(<color=[^>]+>)((?:恢复)?[^<]*?\[[^\]]+\][^<]*?)(</color>)(<color=[^>]+>)的(生命值?|护盾)(</color>)"
+        r"(<color=[^>]+>)((?:恢复)?[^<]*?(?:\[[^\]]+\]|\d+)%[^<]*?)(</color>)(<color=[^>]+>)的(生命值?|护盾)(</color>)"
     )
     for m_2 in split_2tag_re.finditer(body_source_zh):
         c1_o, expr_zh, c1_c, c2_o, kind_zh, c2_c = m_2.groups()
-        phs = re.findall(r"\[[A-Za-z0-9_+/.*%-]+\]", expr_zh)
-        if not phs:
+        toks = re.findall(r"\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?", expr_zh)
+        if not toks:
             continue
-        first_ph, last_ph = phs[0], phs[-1]
+        if len(toks) >= 2:
+            num_pat = rf"{re.escape(toks[0])}\s*\+\s*{re.escape(toks[-1])}%"
+        else:
+            num_pat = rf"{re.escape(toks[0])}%"
         if kind_zh.startswith("生命"):
             sp2a = re.compile(
-                rf"(memulihkan\s+)((?:[^.,;\n<]*?{re.escape(first_ph)}[^.,;\n<]*?{re.escape(last_ph)}%\s*(?:Magic Attack|Physical Attack|Max HP|HP Maks)(?:\s+miliknya)?))(?:\s+sebagai)?\s+(HP\b)",
+                rf"(memulihkan\s+)?({num_pat}\s*(?:Magic Attack|Physical Attack|Max HP|HP Maks)(?:\s+miliknya)?)\s*((?:sebagai\s+)?HP\b)",
                 flags=re.I,
             )
             sp2b = re.compile(
-                rf"(memulihkan\s+)(HP(?:\s+miliknya)?)\s+sebesar\s+([^.,;\n<]*?{re.escape(first_ph)}[^.,;\n<]*?{re.escape(last_ph)}%\s*(?:Magic Attack|Physical Attack|Max HP|HP Maks)(?:\s+miliknya)?)",
+                rf"(memulihkan\s+)(HP(?:\s+miliknya)?)\s+sebesar\s+({num_pat}\s*(?:Magic Attack|Physical Attack|Max HP|HP Maks)(?:\s+miliknya)?)",
                 flags=re.I,
             )
             if m_a := sp2a.search(out):
                 mem_w, form_w, hp_w = m_a.groups()
+                mem_w = mem_w or ""
                 rep2 = (f"{c1_o}{mem_w}{form_w}{c1_c} {c2_o}{hp_w}{c2_c}") if "恢复" in expr_zh else (f"{mem_w}{c1_o}{form_w}{c1_c} {c2_o}{hp_w}{c2_c}")
                 out = out[:m_a.start()] + rep2 + out[m_a.end():]
             elif m_b := sp2b.search(out):
@@ -611,13 +626,18 @@ def reinject_formula_and_skeleton(
                 out = out[:m_b.start()] + rep2 + out[m_b.end():]
         elif kind_zh == "护盾":
             sp2s = re.compile(
-                rf"(Shield)\s+(?:sebesar\s+)?([^.,;\n<]*?{re.escape(first_ph)}[^.,;\n<]*?{re.escape(last_ph)}%\s*(?:Max HP|Magic Attack|Physical Attack)(?:\s+[A-Za-z']+)?)",
+                rf"(?:(Shield|perisai)\s+(?:sebesar\s+)?({num_pat}\s*(?:Max HP|Magic Attack|Physical Attack|HP Maks)(?:\s+[A-Za-z']+)?)|({num_pat}\s*(?:Max HP|Magic Attack|Physical Attack|HP Maks)(?:\s+[A-Za-z']+)?)\s*(Shield|perisai))",
                 flags=re.I,
             )
             if m_s := sp2s.search(out):
-                sh_w, form_w = m_s.groups()
-                rep2 = f"{c1_o}{form_w}{c1_c} {c2_o}{sh_w}{c2_c}"
-                out = out[:m_s.start()] + rep2 + out[m_s.end():]
+                if m_s.group(1):
+                    sh_w, form_w = m_s.group(1), m_s.group(2)
+                    rep2 = f"{c1_o}{form_w}{c1_c} {c2_o}{sh_w}{c2_c}"
+                    out = out[:m_s.start()] + rep2 + out[m_s.end():]
+                else:
+                    form_w, sh_w = m_s.group(3), m_s.group(4)
+                    rep2 = f"{c1_o}{form_w}{c1_c} {c2_o}{sh_w}{c2_c}"
+                    out = out[:m_s.start()] + rep2 + out[m_s.end():]
 
     # Step 2c: Any remaining unmatched numeric/formula placeholders from body_source_zh
     needed_numeric_phs = Counter(
@@ -740,6 +760,16 @@ def reinject_skeleton_from_source(
     result = plain_id
 
     # 0. Multiline line-by-line alignment if both have newlines
+    if "\n" in source_zh and "\n" in result and source_zh.count("\n") != result.count("\n"):
+        src_paras = [p for p in re.split(r"\n+", source_zh.strip()) if p.strip()]
+        res_paras = [p for p in re.split(r"\n+", result.strip()) if p.strip()]
+        src_seps = re.findall(r"\n+", source_zh.strip())
+        if len(src_paras) == len(res_paras) and len(src_seps) == len(src_paras) - 1:
+            rebuilt_nl = [res_paras[0]]
+            for sep, rp in zip(src_seps, res_paras[1:]):
+                rebuilt_nl.append(sep + rp)
+            result = "".join(rebuilt_nl)
+
     if "\n" in source_zh and "\n" in result and source_zh.count("\n") == result.count("\n"):
         src_lines = source_zh.split("\n")
         res_lines = result.split("\n")
@@ -766,6 +796,14 @@ def reinject_skeleton_from_source(
             ok, _ = validate_translation(source_zh, cand_multiline)
             if ok:
                 return normalize_tag_boundary_spacing(source_zh, cand_multiline)
+
+    if "<a href=321>" in source_zh and "<a href=3130011>" in source_zh and source_zh.find("<a href=321>") < source_zh.find("<a href=3130011>"):
+        result = re.sub(
+            r"memperoleh\s+(═?Temporary Level)\s+sebesar\s+(\d+%)\s+dari\s+jumlah\s+Level\s+setiap\s+(╉?Totem)",
+            r"dari setiap \3, memperoleh \2 \1 berdasarkan jumlah Level-nya",
+            result,
+            flags=re.I,
+        )
 
     # 1. If baseline_en has valid matching tags & a short leading tagged keyword prefix
     if baseline_en and TAG_RE.findall(baseline_en) == tags_in_src and tags_in_src:
@@ -799,13 +837,20 @@ def reinject_skeleton_from_source(
             close_part = m_span.group(3)
 
             # Check if this exact span is ALREADY wrapped in curr at or after cursor
+            phs_in_inner = re.findall(r"\[[A-Za-z0-9_+/.*%-]+\]", zh_inner)
             if open_part in curr and close_part in curr:
                 m_existing = re.compile(rf"{re.escape(open_part)}([^<]+){re.escape(close_part)}").search(curr, cursor)
                 if m_existing:
-                    cursor = m_existing.end()
-                    matched_this = True
-                    matched_indices.add(idx)
-                    continue
+                    inner_cand = m_existing.group(1)
+                    if (phs_in_inner and all(ph in inner_cand for ph in phs_in_inner)) or (
+                        not phs_in_inner
+                        and not re.search(r"\[[A-Za-z0-9_+/.*%-]+\]", inner_cand)
+                        and curr.find("<", cursor) == m_existing.start()
+                    ):
+                        cursor = m_existing.end()
+                        matched_this = True
+                        matched_indices.add(idx)
+                        continue
 
             aliases: list[str] = []
             has_brackets = (zh_inner.startswith("[") and zh_inner.endswith("]")) or (
@@ -890,9 +935,16 @@ def reinject_skeleton_from_source(
                 # Check formula / stat pattern for color spans
                 pattern = None
                 phs_in_inner = re.findall(r"\[[A-Za-z0-9_+/.*%-]+\]", zh_inner)
-                if phs_in_inner:
-                    ph_anchor = re.escape(phs_in_inner[-1])
-                    pattern = rf"(?:(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*\+\s*)?{ph_anchor}(?:%|\s*persen)?\s*(?:Physical Attack|Magic Attack|Max HP|HP|Physical Defense|Magic Defense|Physical Lifesteal|Magic Lifesteal|Attack Speed|Movement Speed)?(?:\s+sebagai\s+(?:Physical|Magic|True)\s+Damage)?"
+                if zh_inner.startswith(("（", "(")) and zh_inner.endswith(("）", ")")):
+                    pattern = r"\([^\)]*?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)[^\)]*?\)"
+                elif "护盾" in zh_inner:
+                    pattern = r"(?:(?:Shield|perisai)\s+(?:sebesar\s+)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)(?:\s*[xX]\s*(?:jumlah\s+Round|Round))?%?(?:\s*\+\s*(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?\s*(?:Physical Attack|Magic Attack|Max HP)(?:\s+miliknya)?)?|(?:(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?\s+(?:Shield|perisai)))"
+                elif "法力" in zh_inner:
+                    pattern = r"(?:(?:memulihkan\s+(?:tambahan\s+)?)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*Mana\b|(?:Mana\s+(?:sebesar\s+)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)))"
+                elif "兑换券" in zh_inner:
+                    pattern = r"\b(?:Hero\s+)?Voucher(?:\s+Tier\s+\d+(?:-\d+)?)?\b"
+                elif "普通装备牌" in zh_inner:
+                    pattern = r"\b(?:[Kk]artu\s+Normal\s+Equipment|[Kk]artu\s+Equipment\s+Biasa|Normal\s+Equipment)\b"
                 elif zh_inner.endswith(("：", ":")) or any(k in zh_inner for k in ("被动", "主动", "清平", "长恨", "Pasif", "Aktif")):
                     label_zh = zh_inner.rstrip("：: ")
                     label_trans = (
@@ -901,24 +953,23 @@ def reinject_skeleton_from_source(
                         else (inner_translator(label_zh) if inner_translator else label_zh)
                     )
                     pattern = rf"\b(?:Pasif|Aktif|{re.escape(label_trans)})\s*[:：]"
+                elif phs_in_inner:
+                    ph_anchor = re.escape(phs_in_inner[-1])
+                    pattern = rf"(?:(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*\+\s*)?{ph_anchor}(?:%|\s*persen)?\s*(?:Physical Attack|Magic Attack|Max HP|HP|Physical Defense|Magic Defense|Physical Lifesteal|Magic Lifesteal|Attack Speed|Movement Speed)?(?:\s+sebagai\s+(?:Physical|Magic|True)\s+Damage)?"
                 elif "自身" in zh_inner or ("生命" in zh_inner and ("法术伤害" in zh_inner or "物理伤害" in zh_inner)):
                     pattern = r"(?:Magic Damage|Physical Damage|Shield|perisai)?\s*(?:sebesar\s*)?(?:\[[A-Za-z0-9_+/.*%-]+\]\s*\+\s*)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?\s*(?:base\s+|dasar\s+)?(?:Physical Attack|Magic Attack|Max HP)(?:\s+[A-Za-z]+)?(?:\s+sebagai\s+(?:Magic Damage|Physical Damage|True Damage))?"
-                elif "物理伤害" in zh_inner or "物理攻击力" in zh_inner:
-                    pattern = r"(?:(?:(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*\+\s*)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)(?:%|\s*persen)?\s*(?:Physical Attack|Magic Attack)?\s*(?:sebagai\s+)?(?:Physical Damage|Damage))"
+                elif "物理伤害" in zh_inner or "物理攻击" in zh_inner:
+                    pattern = r"(?:(?:(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*\+\s*)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)(?:%|\s*persen)?\s*(?:Physical Attack)(?:\s*(?:sebagai\s+)?(?:Physical Damage|Damage))?|(?:(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*\+\s*)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)(?:%|\s*persen)?\s*(?:sebagai\s+)?(?:Physical Damage|Damage))"
                 elif "物理防御" in zh_inner:
                     pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*Physical Defense"
-                elif "法术伤害" in zh_inner or "法术攻击力" in zh_inner:
-                    pattern = r"(?:(?:(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*\+\s*)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)(?:%|\s*persen)?\s*(?:Magic Attack)?\s*(?:sebagai\s+)?(?:Magic Damage|Damage))"
+                elif "法术伤害" in zh_inner or "法术攻击" in zh_inner:
+                    pattern = r"(?:(?:(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*\+\s*)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)(?:%|\s*persen)?\s*(?:Magic Attack)(?:\s*(?:sebagai\s+)?(?:Magic Damage|Damage))?|(?:(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*\+\s*)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)(?:%|\s*persen)?\s*(?:sebagai\s+)?(?:Magic Damage|Damage))"
                 elif "法术防御" in zh_inner:
                     pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*Magic Defense"
                 elif "吸血" in zh_inner or "Lifesteal" in zh_inner:
                     pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?%?)\s*(?:Physical Lifesteal|Magic Lifesteal|Lifesteal)"
-                elif "护盾" in zh_inner:
-                    pattern = r"(?:(?:Shield|perisai)\s+(?:sebesar\s+)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)(?:\s*[xX]\s*(?:jumlah\s+Round|Round))?%?(?:\s*\+\s*(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?\s*(?:Physical Attack|Magic Attack|Max HP)(?:\s+miliknya)?)?|(?:(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?\s+(?:Shield|perisai)))"
-                elif "法力" in zh_inner:
-                    pattern = r"(?:memulihkan\s+(?:tambahan\s+)?)?(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)\s*Mana\b"
                 elif "生命" in zh_inner or "HP" in zh_inner:
-                    pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?%?)\s*(?:Max HP|HP|Health)(?:\s*(?:diri|sekutu|miliknya))?(?:\s*sebagai\s*(?:Magic Damage|Physical Damage|True Damage))?"
+                    pattern = r"(?:(?:sebagai\s+)?(?:Max HP|HP|Health)(?:\s*(?:diri|sekutu|miliknya))?|(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?%?)\s*(?:Max HP|HP|Health)(?:\s*(?:diri|sekutu|miliknya))?(?:\s*sebagai\s*(?:Magic Damage|Physical Damage|True Damage))?)"
                 elif "伤害减免" in zh_inner:
                     pattern = r"(?:\[[A-Za-z0-9_+/.*%-]+\]|\d+(?:\.\d+)?)%?\s*Damage Reduction"
                 elif "移动速度" in zh_inner or "移速" in zh_inner:
@@ -955,33 +1006,70 @@ def reinject_skeleton_from_source(
                 all_matched = False
 
         if not all_matched and len(spans) == 1 and "<" not in curr and curr.strip():
-            span_zh = spans[0].group(2)
-            if len(normalize_plain_zh(span_zh)) >= 0.75 * len(normalize_plain_zh(source_zh)):
+            m_nest = re.search(
+                r"<color=([^>]+)>([^<]*)<color=([^>]+)>([^<]+)</color>([^<]*)</color>",
+                source_zh,
+            )
+            if m_nest:
+                c1_col, p1, c2_col, inner_val, p2 = m_nest.groups()
+                inner_trans = inner_translator(inner_val) if inner_translator else inner_val
+                m_inner = re.search(rf"\b{re.escape(inner_trans)}\b", curr, flags=re.I) or re.search(
+                    rf"\b{re.escape(inner_val)}\b", curr, flags=re.I
+                )
+                if m_inner:
+                    tagged_inner = f"<color={c2_col}>{m_inner.group(0)}</color>"
+                    curr = curr[: m_inner.start()] + tagged_inner + curr[m_inner.end() :]
+                    curr = f"<color={c1_col}>{curr}</color>"
+                    all_matched = True
+            elif len(normalize_plain_zh(spans[0].group(2))) >= 0.75 * len(normalize_plain_zh(source_zh)):
                 curr = f"{spans[0].group(1)}{curr}{spans[0].group(3)}"
                 all_matched = True
             else:
-                zh_clauses = [c for c in re.split(r"[，。！？；\n]+", source_zh) if c.strip()]
-                target_idx = next((i for i, c in enumerate(zh_clauses) if span_zh in c), -1)
-                id_clauses = re.split(r"([,.;!?\n]+)", curr)
+                span_zh = spans[0].group(2)
+                span_subs = [s for s in re.split(r"[，。！？；：:\n]+", span_zh) if s.strip()]
+                zh_clauses = [c for c in re.split(r"[，。！？；：:\n]+", source_zh) if c.strip()]
+                id_clauses = re.split(r"([,.;!?\n:]+)", curr)
                 content_clause_indices = [
                     i for i in range(0, len(id_clauses), 2) if id_clauses[i].strip()
                 ]
-                if target_idx != -1 and content_clause_indices:
-                    mapped_idx = int(
-                        round(
-                            target_idx
-                            / max(1, len(zh_clauses) - 1)
-                            * (len(content_clause_indices) - 1)
+                if span_subs and zh_clauses and content_clause_indices:
+                    start_idx = next(
+                        (i for i, c in enumerate(zh_clauses) if span_subs[0] in c), -1
+                    )
+                    end_idx = next(
+                        (i for i, c in enumerate(zh_clauses) if span_subs[-1] in c), start_idx
+                    )
+                    if start_idx != -1:
+                        if end_idx == -1 or end_idx < start_idx:
+                            end_idx = start_idx
+                        mapped_start = int(
+                            round(
+                                start_idx
+                                / max(1, len(zh_clauses) - 1)
+                                * (len(content_clause_indices) - 1)
+                            )
                         )
-                    )
-                    actual_idx = content_clause_indices[
-                        min(mapped_idx, len(content_clause_indices) - 1)
-                    ]
-                    id_clauses[actual_idx] = (
-                        f"{spans[0].group(1)}{id_clauses[actual_idx].strip()}{spans[0].group(3)}"
-                    )
-                    curr = "".join(id_clauses)
-                    all_matched = True
+                        mapped_end = int(
+                            round(
+                                end_idx
+                                / max(1, len(zh_clauses) - 1)
+                                * (len(content_clause_indices) - 1)
+                            )
+                        )
+                        actual_start = content_clause_indices[
+                            min(mapped_start, len(content_clause_indices) - 1)
+                        ]
+                        actual_end = content_clause_indices[
+                            min(mapped_end, len(content_clause_indices) - 1)
+                        ]
+                        id_clauses[actual_start] = (
+                            f"{spans[0].group(1)}{id_clauses[actual_start].lstrip()}"
+                        )
+                        id_clauses[actual_end] = (
+                            f"{id_clauses[actual_end].rstrip()}{spans[0].group(3)}"
+                        )
+                        curr = "".join(id_clauses)
+                        all_matched = True
         elif not all_matched:
             unmatched_indices = [i for i in range(len(spans)) if i not in matched_indices]
             for u_idx in unmatched_indices:
@@ -1089,7 +1177,11 @@ def reinject_skeleton_from_source(
                             needed -= 1
                 if needed > 0:
                     clean_src = TAG_RE.sub("", source_zh).strip()
-                    if clean_src.startswith(ch):
+                    if f"{ch}<b>" in source_zh and f"{ch}<b>" not in result:
+                        if "<b>" in result:
+                            result = result.replace("<b>", f"{ch}<b>", needed)
+                            needed -= min(needed, result.count(f"{ch}<b>"))
+                    if needed > 0 and clean_src.startswith(ch):
                         result = (ch * needed) + result
 
     # 4. Check if candidate already passes all rules
@@ -1163,6 +1255,11 @@ def reinject_skeleton_from_source(
             else:
                 missing_pairs.append(sp)
 
+        STOPWORDS = {
+            "memperoleh", "mendapatkan", "dan", "serta", "atau", "saat", "ketika",
+            "jika", "pada", "untuk", "dengan", "dari", "ke", "di", "ini", "itu",
+            "akan", "dapat", "bisa", "selama", "setiap", "adalah", "sebagai"
+        }
         patched_res = result
         for m_open, m_close in missing_pairs:
             m_words = list(re.finditer(r"\b([A-Za-z0-9+%-]+)\b", patched_res))
@@ -1170,6 +1267,8 @@ def reinject_skeleton_from_source(
                 before = patched_res[: mw.start()]
                 if before.rfind("<") <= before.rfind(">"):
                     w = mw.group(1)
+                    if w.lower() in STOPWORDS:
+                        continue
                     patched_res = (
                         patched_res[: mw.start()]
                         + f"{m_open}{w}{m_close}"
