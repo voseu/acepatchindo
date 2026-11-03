@@ -10,7 +10,7 @@ from pathlib import Path
 from wxq_patch import translation_rules as runtime_rules
 
 from acepatchindo.glossary import WINDOWS_108_ZH_TO_ID, ThreeTierGlossary
-from acepatchindo.hybrid_classifier import HybridClassifier
+from acepatchindo.hybrid_classifier import ALLOWED_TARGET_PREFIXES, HybridClassifier
 from acepatchindo.validator import PLACEHOLDER_RE, TAG_RE, validate_translation
 from acepatchindo.windows_108_split import WINDOWS_108_TARGET_DESC_ID
 
@@ -144,8 +144,8 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
             if PROSE_CALQUE_RE.search(stripped):
                 target_stopword_hits += 1
 
-    assert 3200 <= target_count <= 3600, (
-        f"Expected between 3,200 and 3,600 target gameplay descriptions in unique, got {target_count}"
+    assert 4000 <= target_count <= 5200, (
+        f"Expected between 4,000 and 5,200 target gameplay descriptions in unique, got {target_count}"
     )
     assert target_stopword_hits < 50, (
         f"Expected < 50 prose calque hits in target descriptions, got {target_stopword_hits}"
@@ -389,6 +389,18 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
         "orbit di sekitarnya",
         "dasar Lu Bu serangan",
         "dasar Augran serangan",
+        "melompat menjadi padat",
+        "sebuah padat",
+        "itu orbit",
+        "itu mengelilinginya",
+        "Merah tua Bayangan",
+        "Hati Menjaga",
+        "putri duyung wujud dalam air",
+        "Basic Attack Basic Attack",
+        "ke Menyerang",
+        "ke Memberikan",
+        "ke Memulihkan",
+        "ke Memicu",
     ]
     for flt in forbidden_leak_terms:
         flt_low = flt.lower()
@@ -415,7 +427,7 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
         vfs_data = json.loads(vfs_index_path.read_text(encoding="utf-8"))
         assert len(vfs_data.get("vfs_target_keys", [])) >= 24000
         # 0 conflicting sfx between target and veto
-        tgt_sfx = {k.split("#")[-1] for k in vfs_data.get("vfs_target_keys", [])}
+        tgt_sfx = {k[5:17] for k in vfs_data.get("vfs_target_keys", [])}
         veto_sfx = set(vfs_data.get("vfs_veto_sfx", []))
         conflicts = tgt_sfx & veto_sfx
         assert len(conflicts) == 0, f"Found conflicting sfx in VFS index: {conflicts}"
@@ -426,6 +438,50 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
         # 0 #60D2 tag leaks (e.g. '三分之地   战士')
         assert all("三分之地   战士" not in z for z in vfs_data.get("vfs_target_zh", []))
         assert all("三分之地\t" not in z for z in vfs_data.get("vfs_target_zh", []))
+
+    # Phase 6 Round 3 Remediation Verifications:
+    # 1. Assert specific unique strings translated to Indonesian
+    round3_target_uniques = [
+        "<color=#FFE897>4/5阶的召唤单位</color>获得╧完美复生。",
+        "光辉伤害提升至[0]%法术攻击力",
+        "子弹伤害提升至40+25%物理攻击力",
+        "导弹伤害提升至30+80%物理攻击力",
+    ]
+    for tu in round3_target_uniques:
+        if tu in cat["unique"] and tu in orig_cat["unique"]:
+            assert cat["unique"][tu] != orig_cat["unique"][tu], f"Target unique not translated to ID: {tu!r}"
+    cirrus_found = False
+    for k, v in cat["unique"].items():
+        if "云中君展翅舞蹈向周围1格射出羽箭" in k:
+            cirrus_found = True
+            assert v != orig_cat["unique"].get(k), f"Cirrus skill not translated to ID: {k!r}"
+    assert cirrus_found, "Cirrus skill string not found in unique catalog!"
+
+    # 2. Assert specific english_updates translated to Indonesian
+    round3_upd_keys = {
+        "#BCDEF24440F2D6B7#",
+        "#BCDEEB1EA4FBE926#",
+        "#BCDE84EBBBE3F468#",
+        "#23F7F8529D5D33D5#",
+    }
+    orig_upd_map = {r[1]: r for r in orig_cat.get("english_updates", [])}
+    for r in cat.get("english_updates", []):
+        if r[1] in round3_upd_keys:
+            orig_r = orig_upd_map.get(r[1])
+            assert orig_r is not None, f"Key {r[1]} not found in original catalog english_updates"
+            assert r[3] != orig_r[3], f"Row {r[1]} in english_updates was not translated to ID!"
+
+    # 3. Assert 0 mismatches between cat["unique"] and cat["english_updates"]
+    for r in cat.get("english_updates", []):
+        k = r[1]
+        opt_zh = r[4] if len(r) > 4 else ""
+        tag = k[1:5] if k.startswith("#") and len(k) >= 5 else ""
+        if opt_zh and opt_zh in cat["unique"] and tag in ALLOWED_TARGET_PREFIXES - {"60D2"}:
+            if cat["unique"][opt_zh] != orig_cat["unique"].get(opt_zh):
+                orig_r = orig_upd_map.get(k)
+                if orig_r:
+                    assert r[3] != orig_r[3], f"Row {k} in english_updates not translated even though unique was: {opt_zh!r}"
+
 
 
 

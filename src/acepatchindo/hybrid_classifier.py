@@ -21,7 +21,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from acepatchindo.tag_aligner import normalize_plain_zh
+from acepatchindo.tag_aligner import (
+    normalize_formula_skeleton_zh,
+    normalize_plain_zh,
+)
 from acepatchindo.windows_108_split import (
     WINDOWS_108_NONTARGET_EN,
     WINDOWS_108_TARGET_DESC_ID,
@@ -74,6 +77,7 @@ class HybridClassifier:
         self.vfs_veto_sfx: frozenset[str] = frozenset(data.get("vfs_veto_sfx", []))
         self.ref_target_zh: frozenset[str] = frozenset(data.get("ref_target_zh", []))
         self.ref_target_plain: frozenset[str] = frozenset(data.get("ref_target_plain", []))
+        self.ref_target_skel: frozenset[str] = frozenset(data.get("ref_target_skel", []))
         self.nontarget_table_zh: frozenset[str] = frozenset(data.get("nontarget_table_zh", []))
         self.veto_names_zh: frozenset[str] = frozenset(data.get("veto_names_zh", []))
         self.veto_equip_zh: frozenset[str] = frozenset(data.get("veto_equip_zh", []))
@@ -98,7 +102,19 @@ class HybridClassifier:
             return False
 
         # 2. Authoritative positive references (checked BEFORE veto_names_zh & nontarget_table_zh!)
-        if zh_clean in WINDOWS_108_TARGET_DESC_ID or zh_clean in self.ref_target_zh:
+        if (
+            zh_clean in WINDOWS_108_TARGET_DESC_ID
+            or zh_clean in self.ref_target_zh
+            or p_zh in self.ref_target_plain
+        ):
+            return True
+
+        skel_zh = normalize_formula_skeleton_zh(zh_clean)
+        if (
+            len(p_zh) >= 6
+            and skel_zh in self.ref_target_skel
+            and zh_clean not in self.nontarget_table_zh
+        ):
             return True
 
         # 3. Known entity/hero/talent names veto
@@ -109,8 +125,8 @@ class HybridClassifier:
         if zh_clean in self.nontarget_table_zh:
             return False
 
-        # 5. Target VFS strings or normalized reference match
-        if zh_clean in self.vfs_target_zh or p_zh in self.ref_target_plain:
+        # 5. Target VFS strings
+        if zh_clean in self.vfs_target_zh:
             return True
 
         return False
@@ -131,15 +147,15 @@ class HybridClassifier:
         if tag not in ALLOWED_TARGET_PREFIXES or tag == "60D2":
             return False
 
-        # 2. Veto check (key or suffix)
-        if key in self.vfs_veto_keys or suffix in self.vfs_veto_sfx:
-            return False
-
-        # 3. If Chinese source string is provided, use is_target_unique directly
+        # 2. If Chinese source string is provided, use is_target_unique
         if opt_zh:
             return self.is_target_unique(opt_zh, target_en)
 
-        # 4. If no Chinese source string, fall back to key and structural heuristics
+        # 3. Veto check (key or suffix)
+        if key in self.vfs_veto_keys or suffix in self.vfs_veto_sfx:
+            return False
+
+        # 4. Direct match in target keys from VFS index
         if key in self.vfs_target_keys:
             return True
         if tag in CARD_TAGS - {"60D2"} and suffix in self.hero_suffixes and suffix not in self.vfs_veto_sfx:

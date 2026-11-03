@@ -7,6 +7,7 @@ Hero Cards, Skills, Talents, and Contestants.
 
 from __future__ import annotations
 
+import gzip
 import json
 import re
 import struct
@@ -17,7 +18,11 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "extracted_source"))
 
-from acepatchindo.tag_aligner import TAG_RE, normalize_plain_zh
+from acepatchindo.tag_aligner import (
+    TAG_RE,
+    normalize_formula_skeleton_zh,
+    normalize_plain_zh,
+)
 from acepatchindo.windows_108_split import (
     WINDOWS_108_NONTARGET_EN,
     WINDOWS_108_TARGET_DESC_ID,
@@ -59,9 +64,9 @@ EQUIPMENT_TABLE_PREFIXES: frozenset[str] = frozenset(
 )
 
 P_EQUIP_PATTERN = re.compile(
-    r"(?:<b>唯一</b>|唯一[：:]|唯一被动|穿戴给英雄|穿戴者|穿着这件装备|仅.{1,6}英雄穿戴|普通装备│"
-    r"|件装备|装备箱|特殊装备|高级装备|穿戴|佩戴"
-    r"|^(?:<color=[^>]+>)*(?:物理吸血|法术吸血|物理防御力?|法术防御力?|攻击速度|暴击率|冷却缩减)\+\d+)"
+    r"(?:<b>唯一</b>|唯一[：:]|唯一被动|仅.{1,6}英雄穿戴|普通装备│|"
+    r"^(?:<color=[^>]+>)*(?:物理吸血|法术吸血|物理防御力?|法术防御力?|攻击速度|暴击率|冷却缩减)\+\d+|"
+    r"^(?:卡牌\d+选\d+|\d+选\d+)?(?:特殊装备|高级装备|装备箱))"
 )
 
 P_EFFECT_CARD_PATTERN = re.compile(
@@ -158,6 +163,11 @@ def build_index() -> dict:
 
     ref_target_plain: set[str] = {
         normalize_plain_zh(s) for s in ref_target_zh if normalize_plain_zh(s)
+    }
+    ref_target_skel: set[str] = {
+        normalize_formula_skeleton_zh(s)
+        for s in ref_target_zh
+        if len(normalize_plain_zh(s)) >= 6
     }
 
     # 2. Build Veto Sets
@@ -313,8 +323,14 @@ def build_index() -> dict:
                             m60_lookup[sfx] = s
                             if HERO_FACTION_CLASS_RE.search(s):
                                 m60_hero_suffixes.add(sfx)
-                            if s.strip() not in ref_target_zh:
-                                veto_names_zh.add(s.strip())
+                            s_str = s.strip()
+                            p_str = normalize_plain_zh(s_str)
+                            if HERO_FACTION_CLASS_RE.search(s_str) or (
+                                len(p_str) < 8
+                                and not any(p in s_str for p in ("，", "。", "：", ":", "\n"))
+                            ):
+                                if s_str not in ref_target_zh:
+                                    veto_names_zh.add(s_str)
                     continue
 
                 if prefix in EQUIPMENT_TABLE_PREFIXES:
@@ -326,7 +342,7 @@ def build_index() -> dict:
                             if p_s:
                                 veto_equip_plain.add(p_s)
 
-                if prefix not in ALLOWED_TARGET_PREFIXES or prefix == "60D2":
+                if prefix not in ALLOWED_TARGET_PREFIXES:
                     for _, s in records:
                         if _CJK_RE.search(s):
                             s_str = s.strip()
@@ -354,6 +370,14 @@ def build_index() -> dict:
 
     target_sfx: set[str] = set()
     veto_sfx: set[str] = set()
+    hard_veto_sfx: set[str] = set()
+
+    def is_ref_target(zh_s: str, pl_s: str, sk_s: str) -> bool:
+        return (
+            zh_s in ref_target_zh
+            or pl_s in ref_target_plain
+            or (len(pl_s) >= 6 and sk_s in ref_target_skel)
+        )
 
     # Pass A: Evaluate strictly on Chinese records
     for k, zh in chinese_records:
@@ -364,25 +388,47 @@ def build_index() -> dict:
         tag = k[1:5] if k.startswith("#") and len(k) >= 5 else ""
         sfx = k[5:17] if len(k) >= 17 else ""
         plain_zh = normalize_plain_zh(zh_str)
+        skel_zh = normalize_formula_skeleton_zh(zh_str)
+        is_ref = is_ref_target(zh_str, plain_zh, skel_zh)
 
         # Basic veto conditions
         is_vetoed = False
         if tag == "60D2":
-            # All #60D2 records are category/faction badges and must stay English
+            # All #60D2 records themselves stay English
+            vfs_veto_keys.add(k)
+            vfs_veto_zh.add(zh_str)
+            # If this #60D2 record is a gameplay description, mark suffix as target
+            # so the paired card tables (#FCC7, #23F7, etc.) become targets!
+            if (
+                len(plain_zh) >= 8
+                and any(p in zh_str for p in ("，", "。", "：", ":", "\n"))
+                and not P_EFFECT_CARD_PATTERN.match(plain_zh)
+                and not P_EQUIP_PATTERN.search(zh_str)
+                and zh_str not in veto_equip_zh
+                and zh_str not in veto_effect_zh
+                and zh_str not in WINDOWS_108_NONTARGET_EN
+            ):
+                target_sfx.add(sfx)
+            continue
+        elif zh_str in WINDOWS_108_NONTARGET_EN:
             is_vetoed = True
-        elif zh_str in WINDOWS_108_NONTARGET_EN or zh_str in veto_names_zh:
-            is_vetoed = True
+            hard_veto_sfx.add(sfx)
         elif zh_str in veto_equip_zh or plain_zh in veto_equip_plain:
             is_vetoed = True
+            hard_veto_sfx.add(sfx)
         elif zh_str in veto_effect_zh or plain_zh in veto_effect_plain:
             is_vetoed = True
-        elif P_EQUIP_PATTERN.search(zh_str) and zh_str not in ref_target_zh:
+            hard_veto_sfx.add(sfx)
+        elif P_EQUIP_PATTERN.search(zh_str) and not is_ref and sfx not in m60_hero_suffixes:
+            is_vetoed = True
+            hard_veto_sfx.add(sfx)
+        elif zh_str in veto_names_zh and not is_ref:
             is_vetoed = True
         elif zh_str.startswith("棋手") and "技能-" in zh_str:
             is_vetoed = True
         elif zh_str in ("瑶妹描述", "小妲己描述"):
             is_vetoed = True
-        elif (zh_str in nontarget_table_zh) and (zh_str not in ref_target_zh):
+        elif (zh_str in nontarget_table_zh) and not is_ref:
             is_vetoed = True
 
         if is_vetoed:
@@ -394,19 +440,26 @@ def build_index() -> dict:
         # Check by family
         is_target = False
 
-        if tag in CARD_PREFIXES:
+        if is_ref and tag != "60D2":
+            is_target = True
+
+        elif tag in CARD_PREFIXES:
             m60_val = m60_lookup.get(sfx, "")
             if m60_val == "效果" or P_EFFECT_CARD_PATTERN.match(plain_zh):
                 is_vetoed = True
-            elif P_EQUIP_PATTERN.search(zh_str) and zh_str not in ref_target_zh:
+                hard_veto_sfx.add(sfx)
+            elif P_EQUIP_PATTERN.search(zh_str) and not is_ref and sfx not in m60_hero_suffixes:
                 is_vetoed = True
+                hard_veto_sfx.add(sfx)
             elif sfx in m60_hero_suffixes:
                 if zh_str != m60_val and len(plain_zh) >= 4:
                     is_target = True
             elif m60_val in ("秘技", "技能", "专属"):
                 if len(plain_zh) >= 8 and any(p in zh_str for p in ("，", "。", "：", ":", "\n")):
                     is_target = True
-            elif zh_str in ref_target_zh or plain_zh in ref_target_plain:
+            elif is_ref:
+                is_target = True
+            elif tag != "60D2" and len(plain_zh) >= 8 and any(p in zh_str for p in ("，", "。", "：", ":", "\n")):
                 is_target = True
             else:
                 is_vetoed = True
@@ -416,7 +469,7 @@ def build_index() -> dict:
                 is_vetoed = True
             elif re.match(r"^(?:可爱的小鹿|它最大的职责就是挨打|机器仆从)", plain_zh):
                 is_vetoed = True
-            elif zh_str in ref_target_zh or plain_zh in ref_target_plain:
+            elif is_ref:
                 is_target = True
             elif len(plain_zh) >= 6 and re.search(
                 r"(\d+|%|\[\d+\]|\+|伤害|恢复|生命|护盾|法力|物理|法术|攻击|防御|速度|冷却|眩晕|击飞|减速|沉默|免疫|召唤|被动|主动|入场|登场|牺牲|觉醒|提升|降低|增加|减少|造成|获得|持续|范围|目标|友军|敌方|敌人|回合|技能|普攻|暴击|分身|层数|上限)",
@@ -432,11 +485,13 @@ def build_index() -> dict:
                 is_vetoed = True
             elif P_EFFECT_CARD_PATTERN.match(plain_zh):
                 is_vetoed = True
-            elif P_EQUIP_PATTERN.search(zh_str) and zh_str not in ref_target_zh:
+                hard_veto_sfx.add(sfx)
+            elif P_EQUIP_PATTERN.search(zh_str) and not is_ref:
                 is_vetoed = True
+                hard_veto_sfx.add(sfx)
             elif zh_str.startswith("当前祝福：") or "炸弹牌加入了对局" in zh_str:
                 is_vetoed = True
-            elif zh_str in ref_target_zh or plain_zh in ref_target_plain:
+            elif is_ref:
                 is_target = True
             elif len(plain_zh) >= 9 and any(p in zh_str for p in ("，", "。", "：", ":", "\n")):
                 is_target = True
@@ -450,7 +505,7 @@ def build_index() -> dict:
                 is_vetoed = True
 
         elif tag == "2394":
-            if (zh_str in ref_target_zh or plain_zh in ref_target_plain) or (
+            if is_ref or (
                 len(plain_zh) >= 8 and any(p in zh_str for p in ("，", "。", "：", ":", "\n"))
             ):
                 is_target = True
@@ -473,9 +528,10 @@ def build_index() -> dict:
             vfs_veto_zh.add(zh_str)
             veto_sfx.add(sfx)
 
-    # Reconcile sfx conflicts: any suffix in veto_sfx CANNOT be in target_sfx
-    conflicted_sfx = target_sfx & veto_sfx
-    target_sfx -= veto_sfx
+    # Reconcile sfx conflicts: any suffix in hard_veto_sfx cannot be in target_sfx,
+    # but valid target_sfx will not be vetoed by soft vetoes
+    target_sfx -= hard_veto_sfx
+    veto_sfx -= target_sfx
     vfs_target_keys = {k for k in vfs_target_keys if k[5:17] in target_sfx}
     vfs_veto_keys = {k for k in vfs_veto_keys if k[5:17] not in target_sfx}
 
@@ -488,8 +544,47 @@ def build_index() -> dict:
             vfs_target_keys.add(k)
         else:
             vfs_veto_keys.add(k)
-            veto_sfx.add(sfx)
+            if sfx not in target_sfx:
+                veto_sfx.add(sfx)
 
+    vfs_target_keys = {k for k in vfs_target_keys if k[5:17] in target_sfx}
+    vfs_veto_keys = {k for k in vfs_veto_keys if k[5:17] not in target_sfx}
+
+    # Also add Chinese strings from baseline catalog's target updates
+    with gzip.open(
+        ROOT / "Honor of Kings Ace English Patcher 1.4.12.exe_extracted" / "catalog" / "catalog.json.gz",
+        "rt",
+        encoding="utf-8",
+    ) as f:
+        orig_cat_data = json.load(f)
+    for r in orig_cat_data.get("english_updates", []):
+        k = r[1]
+        sfx = k[5:17] if len(k) >= 17 else ""
+        tag = k[1:5] if k.startswith("#") and len(k) >= 5 else ""
+        if tag in ALLOWED_TARGET_PREFIXES - {"60D2"} and sfx not in hard_veto_sfx:
+            if len(r) > 4 and _CJK_RE.search(r[4]):
+                zh_u = r[4].strip()
+                p_u = normalize_plain_zh(zh_u)
+                sk_u = normalize_formula_skeleton_zh(zh_u)
+                if is_ref_target(zh_u, p_u, sk_u) or (
+                    len(p_u) >= 8
+                    and any(p in zh_u for p in ("，", "。", "：", ":", "\n"))
+                    and not P_EFFECT_CARD_PATTERN.match(p_u)
+                    and not P_EQUIP_PATTERN.search(zh_u)
+                    and zh_u not in veto_equip_zh
+                    and zh_u not in veto_effect_zh
+                    and zh_u not in WINDOWS_108_NONTARGET_EN
+                    and zh_u not in veto_names_zh
+                    and not zh_u.startswith("棋手")
+                ):
+                    target_sfx.add(sfx)
+                    vfs_target_keys.add(k)
+                    vfs_target_zh.add(zh_u)
+            elif sfx in target_sfx:
+                vfs_target_keys.add(k)
+
+    target_sfx -= hard_veto_sfx
+    veto_sfx -= target_sfx
     vfs_target_keys = {k for k in vfs_target_keys if k[5:17] in target_sfx}
     vfs_veto_keys = {k for k in vfs_veto_keys if k[5:17] not in target_sfx}
 
@@ -524,6 +619,7 @@ def build_index() -> dict:
         "vfs_veto_sfx": sorted(veto_sfx),
         "ref_target_zh": sorted(ref_target_zh),
         "ref_target_plain": sorted(ref_target_plain),
+        "ref_target_skel": sorted(ref_target_skel),
         "nontarget_table_zh": sorted(nontarget_table_zh),
         "veto_names_zh": sorted(veto_names_zh),
         "veto_equip_zh": sorted(veto_equip_zh),

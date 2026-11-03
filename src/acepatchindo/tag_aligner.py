@@ -216,8 +216,8 @@ def normalize_plain_zh(text: str) -> str:
 def normalize_formula_skeleton_zh(text: str) -> str:
     """Normalize Chinese text by replacing dynamic formula tokens, icon placeholders, and numbers with #N#."""
     p = normalize_plain_zh(text)
-    p = re.sub(r"^(?:主动|被动|觉醒|天赋|效果|秘技)[：:]", "", p)
-    p = re.sub(r"\n*(?:<color=[^>]+>)*点击技能描述面板[，,].*$", "", p)
+    p = re.sub(r"点击技能描述面板.*$", "", p)
+    p = re.sub(r"(?:主动|被动|觉醒|天赋|效果|秘技|清平|长恨)[：:]", "", p)
     p = p.replace("（", "(").replace("）", ")").replace("【", "[").replace("】", "]")
     p = (
         p.replace("{Energy}", "能量")
@@ -226,7 +226,6 @@ def normalize_formula_skeleton_zh(text: str) -> str:
     )
     p = re.sub(r"\[\d+\]点?(物理|法术|真实)伤害\(([^)]+)\)", r"\2的\1伤害", p)
     p = re.sub(r"\[\d+\]点?(护盾|生命值?)\(([^)]+)\)", r"\2的\1", p)
-    p = re.sub(r"\[\d+\](%|秒|米|层|次|个|点|张|只|名|格|回合)", r"#\1", p)
     p = re.sub(
         r"[一二两三四五六七八九十]+(?=周|次|秒|格|层|名|个|张|点|回合|件|把|枚|颗|只|条|道)",
         "#N#",
@@ -234,6 +233,23 @@ def normalize_formula_skeleton_zh(text: str) -> str:
     )
     skel = FORMULA_TOKEN_RE.sub("#N#", p)
     skel = skel.replace("#N#-#N#", "#N#").replace("#N#点", "#N#")
+    while "#N#+#N#" in skel or "#N##N#" in skel:
+        skel = skel.replace("#N#+#N#", "#N#").replace("#N##N#", "#N#")
+    skel = re.sub(r"最大生命值的?生命值?", "最大生命值", skel)
+    skel = (
+        skel.replace("释放", "施放")
+        .replace("基础物理攻击", "物理攻击")
+        .replace("基础法术攻击", "法术攻击")
+        .replace("目标敌人", "目标")
+        .replace("若期间与目标距离过远", "若期间目标距离过远")
+        .replace("普通攻击能对身前敌人造成范围伤害", "普攻能造成范围伤害")
+        .replace("普通攻击能造成范围伤害", "普攻能造成范围伤害")
+        .replace("普攻能对身前敌人造成范围伤害", "普攻能造成范围伤害")
+    )
+    skel = re.sub(r"恢复东皇(?:#N#%|#N#)+的最大生命值", "恢复东皇#N#%最大生命值", skel)
+    skel = re.sub(r"恢复东皇(?:#N#%|#N#)+生命值", "恢复东皇#N#%最大生命值", skel)
+    skel = re.sub(r"^吕布会根据敌人位置使用不同招式普攻能对身前#N#格内敌人造成伤害", "吕布的普攻能造成范围伤害", skel)
+    skel = re.sub(r"[，。：:；;、“”\"!\?！？]", "", skel)
     return skel
 
 
@@ -351,7 +367,6 @@ def reinject_formula_and_skeleton(
     )
     src_clean = re.sub(r"\[\d+\]点?(物理|法术|真实)伤害\(([^)]+)\)", r"\2的\1伤害", src_clean)
     src_clean = re.sub(r"\[\d+\]点?(护盾|生命值?)\(([^)]+)\)", r"\2的\1", src_clean)
-    src_clean = re.sub(r"\[\d+\](%|秒|米|层|次|个|点|张|只|名|格|回合)", r"#\1", src_clean)
 
     ph_map = {re.sub(r"\s+", "", ph): ph for ph in PLACEHOLDER_RE.findall(source_zh)}
     cn_exprs = COMPOUND_EXPR_RE.findall(cn_clean)
@@ -368,6 +383,19 @@ def reinject_formula_and_skeleton(
                     out,
                     count=1,
                 )
+
+    needed_phs = Counter(PLACEHOLDER_RE.findall(source_zh))
+    curr_phs = Counter(PLACEHOLDER_RE.findall(out))
+    if curr_phs != needed_phs:
+        missing_phs: list[str] = []
+        for ph, count in needed_phs.items():
+            diff = count - curr_phs.get(ph, 0)
+            if diff > 0:
+                missing_phs.extend([ph] * diff)
+        for ph in missing_phs:
+            m_num = re.search(r"(?<![\d\[{|A-Za-z])\d+(?:\.\d+)?%?(?![\d\]}|A-Za-z])", out)
+            if m_num:
+                out = out[: m_num.start()] + ph + out[m_num.end() :]
 
     # 4. Handle trailing UI inspection hint if present in source_zh
     ui_hint_m = re.search(
@@ -427,6 +455,9 @@ def reinject_formula_and_skeleton(
                     out = out[:s_idx] + f"{open_tag}{span_text}{close_tag}" + out[e_idx:]
                     break
 
+    if TAG_RE.findall(out) != TAG_RE.findall(source_zh):
+        out = TAG_RE.sub("", out)
+
     # Restore sentinels
     for tok, full_ph in sentinels_icon:
         out = out.replace(tok, full_ph, 1)
@@ -437,6 +468,7 @@ def reinject_formula_and_skeleton(
         inner_translator=inner_translator,
         baseline_en=baseline_en,
         en_translator=en_translator,
+        allow_en_fallback=False,
     )
 
 
@@ -470,6 +502,7 @@ def reinject_skeleton_from_source(
     inner_translator: Callable[[str], str] | None = None,
     baseline_en: str | None = None,
     en_translator: Callable[[str], str] | None = None,
+    allow_en_fallback: bool = True,
 ) -> str:
     """Re-inject exact tags, placeholders, and control tokens from source_zh into plain_id."""
     tags_in_src = TAG_RE.findall(source_zh)
@@ -726,7 +759,7 @@ def reinject_skeleton_from_source(
             return normalize_tag_boundary_spacing(source_zh, cand)
 
     # 5. Deterministic fallback: NEVER emit empty tags
-    if baseline_en:
+    if baseline_en and allow_en_fallback:
         b_tags = TAG_RE.findall(baseline_en)
         if b_tags == tags_in_src or len(b_tags) == len(tags_in_src):
             repaired_en = baseline_en

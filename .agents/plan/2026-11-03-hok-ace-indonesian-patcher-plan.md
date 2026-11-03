@@ -2563,7 +2563,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
 
 ### Task 29: Fix Dual-Table Chinese/English Separation, Suffix-Level Veto Propagation, & Voice-Line Filtering in `scripts/01b_build_hybrid_vfs_index.py` & `src/acepatchindo/hybrid_classifier.py`
 
-- [x] **Step 29.1: Never Let English `.bytes` Tables Overwrite `m60_lookup` or Bypass Chinese Vetoes in `scripts/01b_build_hybrid_vfs_index.py`**
+- [ ] **Step 29.1: Never Let English `.bytes` Tables Overwrite `m60_lookup` or Bypass Chinese Vetoes in `scripts/01b_build_hybrid_vfs_index.py`** *(REOPENED BY MANAGER AUDIT ROUND 3 — lines 317 & 329 dumped `1,445` full Talent/Contestant descriptions from `#60D2` into `veto_names_zh` and `nontarget_table_zh`, poisoning `#CEDB` and causing `247` tagged Tier 1/2 descriptions in `unique` and `1,126` rows in `english_updates` to stay in English!)*
   1. **Require CJK Characters in Chinese Pass (`_has_cjk(s)`):**
      - Define `_CJK_RE = re.compile(r"[\u4e00-\u9fff]")`.
      - When populating `m60_lookup` (Pass 1), **ONLY** read records where `_CJK_RE.search(val)` is `True` (or explicitly only from the Chinese `#60D2` table `0x36B258373DA34185`) so English `#60D2` (`0xDD400CE5E3F32E17`) **NEVER** overwrites `m60_lookup[sfx]`!
@@ -2584,7 +2584,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
 
 ### Task 30: Fix Multi-Index Formula Skeleton Alignment (`\[\d+\]`) in `src/acepatchindo/tag_aligner.py` So All `Lu Bu`, `Augran`, `Allain`, `Donghuang`, `Yang Jian`, `Dolia`, `Yao`, `Li Bai`, `Fang`, & `Yuhuan` Skills Hit Tier 1
 
-- [x] **Step 30.1: Generalize `normalize_formula_skeleton_zh` and `reinject_formula_and_skeleton` in `src/acepatchindo/tag_aligner.py`**
+- [ ] **Step 30.1: Generalize `normalize_formula_skeleton_zh` and `reinject_formula_and_skeleton` in `src/acepatchindo/tag_aligner.py`** *(REOPENED BY MANAGER AUDIT ROUND 3 — line 229 used `r"#\1"` instead of `#N#`, breaking `[\d+]%` -> `#% != #N#%`, AND `reinject_formula_and_skeleton` lines 384–429 + 729 threw away Tier 1 `desc_id` and fell back to Tier 3 `baseline_en`!)*
   1. In `normalize_formula_skeleton_zh(zh_text: str) -> str` (`tag_aligner.py:217-230`):
      - Before stripping tags, strip any trailing UI inspection hint line:
        `p = re.sub(r"\n*(?:<color=[^>]+>)*点击技能描述面板[，,].*$", "", p)`
@@ -2592,7 +2592,6 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
        ```python
        p = re.sub(r"\[\d+\]点?(物理|法术|真实)伤害\(([^)]+)\)", r"\2的\1伤害", p)
        p = re.sub(r"\[\d+\]点?(护盾|生命值?)\(([^)]+)\)", r"\2的\1", p)
-       p = re.sub(r"\[\d+\](%|秒|米|层|次|个|点|张|只|名|格|回合)", r"#\1", p)
        ```
   2. In `reinject_formula_and_skeleton(zh_src, id_trans, baseline_en)` (`tag_aligner.py:302-360`):
      - When `zh_src` has trailing `点击技能描述面板，查看...详细解释`, translate/preserve that trailing note cleanly (or strip/re-append its Indonesian equivalent `\n<color=#7288a7>Klik panel deskripsi Skill untuk melihat penjelasan detail</color>`) instead of failing formula alignment!
@@ -2600,7 +2599,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
 
 ### Task 31: Fix All Remaining Tier 3 Indlish & Name Mangling Bugs in `src/acepatchindo/glossary.py` & `src/acepatchindo/lexicon_id.py`
 
-- [x] **Step 31.1: Protect `"No. X"`, Faction Names (`Great Wall`), & Alphanumeric Suffixes (`A1`) in `src/acepatchindo/glossary.py`**
+- [ ] **Step 31.1: Protect `"No. X"`, Faction Names (`Great Wall`), & Alphanumeric Suffixes (`A1`) in `src/acepatchindo/glossary.py`** *(REOPENED — capitalized `"ke Menyerang"`, `"ke Memberikan"`, `"ke Memulihkan"`, `"ke Memicu"`, `"Basic Attack Basic Attack"`, and `"meningkatkan/mengurangi ... oleh"` still present!)*
   1. **Protect `Luban No. 7` / `No. 7` / `No. 9` / `No. 4` Before Tokenization:**
      - Add `"Luban No. 7"`, `"Luban No.7"`, `"Luban No. 9"`, `"Luban No. 4"`, `"Mechanical Minion A1"` AND all Faction English names (`"Great Wall"`, `"Three Kingdoms"`, `"Sunset Sea"`, `"Central Plains"`, `"Central Plain"`, `"Riverlands"`, `"Zhulu Plateau"`, `"Zhulu"`, `"Cloudream"`, `"Chang'an"`, `"Yaotian"`, `"Jixia"`, `"Xuanyong"`, `"Chaos Rift"`) to `CANONICAL_PROTECTED_TERMS`!
      - Also add a pre-pattern in `glossary.py` before tokenization that protects `r"\bNo\.\s*\d+\b"` (so `"No. 7"` / `"No.7"` / `"No. 9"` is NEVER split into `"No"` -> `"Tidak"` + `". 7"`!).
@@ -2621,14 +2620,124 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
 
 ### Task 32: Add Regression Assertions to `tests/test_glossary_and_tiers.py`, Re-Run Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Verify `14 passed`, & Re-Publish `v1.4.12-id.2` (`06`)
 
-- [x] **Step 32.1: Add Regression Checks to `tests/test_glossary_and_tiers.py`**
-  - Assert in `tests/test_glossary_and_tiers.py`:
-    1. `0` conflicting `sfx` suffixes between `vfs_target_keys` and `vfs_veto_keys` in `data/references/hybrid_vfs_index.json`, and `0` non-CJK strings in `vfs_target_zh`.
-    2. `0` `#60D2` Faction+Class tags translated (`cat["unique"]["三分之地   战士"] == orig_cat["unique"]["三分之地   战士"]`, `cat["unique"]["日落海   战士"] == orig_cat["unique"]["日落海   战士"]`).
-    3. `0` Hero voice lines / quotes translated (`cat["unique"]["女人，是水做的。"] == orig_cat["unique"]["女人，是水做的。"]`, `cat["unique"]["你已经被盯上了。"] == orig_cat["unique"]["你已经被盯上了。"]`, `cat["unique"]["清理工作才刚刚开始。"] == orig_cat["unique"]["清理工作才刚刚开始。"]`).
-    4. Parenthetical multi-formula Hero skills (`Lu Bu`, `Augran`, `Allain`, `Donghuang`) use Tier 1 translations (`"dasar Lu Bu serangan"` not in `cat["unique"].values()`, `"dasar Augran serangan"` not in `cat["unique"].values()`, `"orbit di sekitarnya"` not in `cat["unique"].values()`).
-    5. `0` occurrences across `cat["unique"]` and `cat["english_updates"]` of: `"Luban Tidak"`, `"Tidak. 7"`, `"Mementalkan Atas"`, `"mementalkan atas"`, `"Hebat Dinding"`, `"Damage Atas"`, `"Decay Bawah"`, `"Batas Atas"`, `"Mechanical Minion sebuah1"`, `"pada Skill Menggunakan"`, `"Three Kingdoms Pejuang"`, `"Sunset Pejuang"`, `"Physical blood-sucking"`.
-- [x] **Step 32.2: Re-Run Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Run `pytest -v`, Commit, Force-Tag `v1.4.12-id.2`, & Re-Upload Release Assets (`06`)**
+- [ ] **Step 32.1: Add Regression Checks to `tests/test_glossary_and_tiers.py`** *(REOPENED — line 418 used `k.split("#")[-1]` which is always `""` instead of `k[5:17]`!)*
+- [ ] **Step 32.2: Re-Run Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Run `pytest -v`, Commit, Force-Tag `v1.4.12-id.2`, & Re-Upload Release Assets (`06`)** *(REOPENED)*
+
+---
+
+## Phase 6 Remediation Round 3: Final Precision Fixes (Tasks 33–36)
+
+> [!CAUTION]
+> **Manager Forensic Audit of `commit bbe751f` — REJECTED Due to 3 Surgical Regressions Uncovered in `01b_build_hybrid_vfs_index.py`, `tag_aligner.py`, and `glossary.py`:**
+> 1. **`#60D2` POISONING BUG IN `scripts/01b_build_hybrid_vfs_index.py:317,329` + `P_EQUIP_PATTERN` OVER-VETO (`247` Tagged Hero/Skill/Talent Variants in `unique` & `1,126` Rows in `english_updates` Falsely Left in English!):**
+>    - Table `#60D2` is NOT purely a short badge table: while `425` records are Hero Faction+Class tags (`'河洛   坦克'`) and `5,648` are short badges (`< 8` chars), **`1,457` records in `#60D2` are full Talent, Contestant Secret Art, and Skill descriptions** (`len(plain_zh) >= 8` with sentence punctuation)!
+>    - In `01b_build_hybrid_vfs_index.py` lines `316–317` (`if s.strip() not in ref_target_zh: veto_names_zh.add(s.strip())`) and line `329` (`if prefix not in ALLOWED_TARGET_PREFIXES or prefix == "60D2": nontarget_table_zh.add(s_str)`), the Executor dumped **all `1,445` full descriptions from `#60D2`** into `veto_names_zh` AND `nontarget_table_zh`!
+>    - **Consequence A (`153 + 94 = 247` Tagged Gameplay Descriptions in `unique` Left in English):** Because `HybridClassifier.is_target_unique` checked `zh_clean in self.veto_names_zh` (Step 3) and `zh_clean in self.nontarget_table_zh` (Step 4) **BEFORE** `p_zh in self.ref_target_plain` (Step 5) and lacked `skel_zh in self.ref_target_skel`, `247` tagged Hero Card, Skill, and Talent descriptions (such as `<color=#FFE897>4/5阶的召唤单位</color>获得╧完美复生。`, `<color=#FFE897>╉先知图腾获得额外效果</color>...`, `云中君展翅舞蹈向周围1格射出羽箭...`, `<a href=3><color=#ffffff>╪<b>开团</b></color></a>：距离最近的4名己方英雄获...`, `光辉伤害提升至[0]%法术攻击力`, `子弹伤害提升至40+25%物理攻击力`, `导弹伤害提升至30+80%物理攻击力`) returned `False` and stayed in English!
+>    - **Consequence B (`1,126` Legitimate Talent & Hero Card Rows in `english_updates` Left in English):** When `#CEDB` was scanned in Pass A (line 373 `elif zh_str in veto_names_zh:`), `#CEDB`'s Talent descriptions matched the poisoned `veto_names_zh`, adding their `sfx` to `veto_sfx`. Then line `478` (`target_sfx -= veto_sfx`) wiped out those `sfx` suffixes across all 12 Talent tables (`#BCDE..#CEDB`), leaving `1,126` rows in `english_updates` (`#BCDEF24440F2D6B7#`, `#BCDEEB1EA4FBE926#` Kaizer & Luna, `#BCDE84EBBBE3F468#` Alessio & Meng Ya, plus Luara & Marco Polo Hero Cards whose text contained `穿戴`/`件装备`) in English!
+> 2. **3 BUGS IN `src/acepatchindo/tag_aligner.py` (`lines 229, 384–429, 729`) THAT STILL CAUSED ALL 10 MULTI-FORMULA HERO SKILLS (`Lu Bu`, `Augran`, `Allain`, `Donghuang`, `Yang Jian`, `Dolia`, `Yao`, `Li Bai`, `Fang`, `Yuhuan`) TO FALL BACK TO TIER 3:**
+>    - **Bug 2A (`tag_aligner.py:229` & `354`):** `p = re.sub(r"\[\d+\](%|秒|...)", r"#\1", p)` used `r"#\1"` (single `#`) instead of `#N#`, turning `[0]%` into **`#%`** while `FORMULA_TOKEN_RE.sub("#N#", p)` at line 235 turned `10%` in `tier1_wiki_id.json` into **`#N#%`** (`"#%" != "#N#%"`)! That single typo broke `tier1_formula_zh_to_id` matching for every skill containing `[0]%` or `[0]点`!
+>    - **Bug 2B (`tag_aligner.py:219`):** `re.sub(r"^(?:主动|被动|...)[：:]", "", p)` had `^` at the start, so mid-string `主动：` labels in `source_zh` vs `descCn` or `释放` vs `施放` / `最大生命` vs `最大生命值` prevented skeleton equality!
+>    - **Bug 2C (`tag_aligner.py:384-429` & `729-761`):** In `reinject_formula_and_skeleton`, the partial `color_spans` loop (`lines 384–429`) wrapped only *some* `<color=...>` tags into `out` (setting `"<" in out` to `True`), which caused `reinject_skeleton_from_source` line 497 (`if spans and "<" not in result:`) to be **skipped**, and then line `729` (`if baseline_en:`) **threw away the Tier 1 Indonesian translation `desc_id` completely and replaced it with Tier 3 translation of `baseline_en`** (`Lu Bu melompat menjadi sebuah padat area dari musuh`, `Donghuang menciptakan 3 Energi bola itu orbit dia`, `Allain memberikan Magic Damage saat menyerang dengan "Merah tua Bayangan"`, `Dolia menerima putri duyung wujud dalam air dia menciptakan`)!
+> 3. **REMAINING TIER 3 CASE-SENSITIVE REGEX & PROSE DEFECTS + VACUOUS TEST BUG (`tests/test_glossary_and_tiers.py:418`):**
+>    - In `glossary.py`, the `"ke <verb>"` -> `"untuk <verb>"` regex was case-sensitive (`me[a-z]+`), leaving `30+` capitalized occurrences of **`"ke Menyerang"`**, **`"ke Memberikan"`**, **`"ke Memulihkan"`**, **`"ke Memicu"`**!
+>    - Duplicate **`"Basic Attack Basic Attack"`** (`24` hits), **`"meningkatkan/mengurangi <Stat> oleh <N>"`** (`325` hits instead of `"sebesar"`), and untranslated `"cyclically"`, `"slices"`, `"cuts"` remained in Tier 3.
+>    - In `tests/test_glossary_and_tiers.py:418`, `tgt_sfx = {k.split("#")[-1] for k in ...}` always evaluated to `{""}` because every key `k` ends with `#` (`#23F70B7AD27441BA#`)! It must use `k[5:17]`.
+
+### Task 33: Fix `#60D2` Poisoning, `P_EQUIP_PATTERN` Guard, & Formula Skeleton Reference Matching in `scripts/01b_build_hybrid_vfs_index.py` & `src/acepatchindo/hybrid_classifier.py`
+
+- [x] **Step 33.1: Stop `#60D2` From Poisoning `veto_names_zh` and `nontarget_table_zh` in `scripts/01b_build_hybrid_vfs_index.py`**
+  1. In `scripts/01b_build_hybrid_vfs_index.py` (`lines 309–335`):
+     - When scanning `prefix == "60D2"`:
+       - Populate `m60_lookup[sfx] = s` and `m60_hero_suffixes.add(sfx)` for Chinese records (`_CJK_RE.search(s)`).
+       - **ONLY** add `s_str = s.strip()` to `veto_names_zh` if `HERO_FACTION_CLASS_RE.search(s_str)` OR (`len(normalize_plain_zh(s_str)) < 8` and not any(p in s_str for p in ("，", "。", "：", ":", "\n")))! **NEVER** add long `#60D2` descriptions (`len(normalize_plain_zh(s_str)) >= 8` with sentence punctuation) to `veto_names_zh`!
+     - At line `329`, change `if prefix not in ALLOWED_TARGET_PREFIXES or prefix == "60D2":` back to `if prefix not in ALLOWED_TARGET_PREFIXES:` so `#60D2`'s 1,457 long Talent/Contestant descriptions are **NEVER** added to `nontarget_table_zh`!
+  2. **Build `ref_target_skel` in `01b_build_hybrid_vfs_index.py` and Guard `P_EQUIP_PATTERN`:**
+     - Import `normalize_formula_skeleton_zh` from `acepatchindo.tag_aligner`.
+     - Build `ref_target_skel: set[str] = {normalize_formula_skeleton_zh(s) for s in ref_target_zh if len(normalize_plain_zh(s)) >= 6}` and save `"ref_target_skel": sorted(ref_target_skel)` into `hybrid_vfs_index.json`.
+     - Define helper `is_ref_target(zh_str, plain_zh, skel_zh) -> bool`:
+       `zh_str in ref_target_zh or plain_zh in ref_target_plain or (len(plain_zh) >= 6 and skel_zh in ref_target_skel)`.
+     - In Pass A (`lines 368–475`):
+       - Check `is_ref = is_ref_target(zh_str, plain_zh, skel_zh)`.
+       - Do **NOT** veto by `P_EQUIP_PATTERN` when `is_ref` is `True` OR `sfx in m60_hero_suffixes` (protecting Luara & Marco Polo Hero Cards and Equipment-granting Talents!), AND tighten `P_EQUIP_PATTERN` so it does NOT match bare `穿戴` / `件装备` inside Hero/Talent sentences:
+         `P_EQUIP_PATTERN = re.compile(r"(?:<b>唯一</b>|唯一[：:]|唯一被动|穿戴给英雄|穿戴者|穿着这件装备|仅.{1,6}英雄穿戴|普通装备│|^(?:<color=[^>]+>)*(?:物理吸血|法术吸血|物理防御力?|法术防御力?|攻击速度|暴击率|冷却缩减)\+\d+|^(?:卡牌\d+选\d+|\d+选\d+)?(?:特殊装备|高级装备|装备箱))")`.
+       - If `is_ref` is `True` (and `tag != "60D2"` and `zh_str not in veto_equip_zh` and `zh_str not in veto_effect_zh`), mark `is_target = True` and `is_vetoed = False`!
+  3. **Reconcile `sfx` Without Letting `#CEDB` Veto Valid `#BCDE` Talents:**
+     - If any Chinese record for `sfx` across `#BCDE..#CEDB` or `#23F7..#6E60` is a valid target (`sfx in target_sfx`) and `sfx` was NOT vetoed by `veto_equip_zh` / `veto_effect_zh` / `m60_val == "效果"`, keep `sfx` in `target_sfx` (`veto_sfx -= target_sfx` for non-equip/non-effect rows, and `vfs_target_keys = {k for k in vfs_target_keys if k[5:17] in target_sfx}`, `vfs_veto_keys = {k for k in vfs_veto_keys if k[5:17] not in target_sfx}`)!
+
+- [x] **Step 33.2: Update `HybridClassifier.is_target_unique` in `src/acepatchindo/hybrid_classifier.py`**
+  - Load `self.ref_target_skel: frozenset[str] = frozenset(data.get("ref_target_skel", []))`.
+  - In `is_target_unique(self, zh_src: str, en_base: str = "") -> bool`:
+    1. Hard vetoes first: `WINDOWS_108_NONTARGET_EN`, `self.veto_equip_zh`, `self.veto_effect_zh`, `p_zh in self.veto_equip_plain`, `p_zh in self.veto_effect_plain`.
+    2. **Authoritative positive references BEFORE `veto_names_zh` and `nontarget_table_zh`:**
+       - If `zh_clean in WINDOWS_108_TARGET_DESC_ID or zh_clean in self.ref_target_zh or p_zh in self.ref_target_plain`: return **`True`**!
+       - Compute `skel_zh = normalize_formula_skeleton_zh(zh_clean)`. If `len(p_zh) >= 6 and skel_zh in self.ref_target_skel and zh_clean not in self.nontarget_table_zh`: return **`True`**!
+    3. Then check `if zh_clean in self.veto_names_zh: return False` and `if zh_clean in self.nontarget_table_zh: return False`.
+    4. Then check `if zh_clean in self.vfs_target_zh: return True`.
+    5. Return `False`.
+
+### Task 34: Fix the 3 Bugs in `src/acepatchindo/tag_aligner.py` So Tier 1 `desc_id` Is Never Thrown Away for Tier 3 `baseline_en`
+
+- [x] **Step 34.1: Fix `normalize_formula_skeleton_zh` in `src/acepatchindo/tag_aligner.py:216-237`**
+  - Replace `normalize_formula_skeleton_zh` with:
+    ```python
+    def normalize_formula_skeleton_zh(text: str) -> str:
+        """Normalize Chinese text by replacing dynamic formula tokens, icon placeholders, and numbers with #N#."""
+        p = normalize_plain_zh(text)
+        p = re.sub(r"点击技能描述面板.*$", "", p)
+        p = re.sub(r"(?:主动|被动|觉醒|天赋|效果|秘技|清平|长恨)[：:]", "", p)
+        p = p.replace("（", "(").replace("）", ")").replace("【", "[").replace("】", "]")
+        p = (
+            p.replace("{Energy}", "能量")
+            .replace("{LordExp}", "棋手经验")
+            .replace("{LordHp}", "棋手生命值")
+        )
+        p = re.sub(r"\[\d+\]点?(物理|法术|真实)伤害\(([^)]+)\)", r"\2的\1伤害", p)
+        p = re.sub(r"\[\d+\]点?(护盾|生命值?)\(([^)]+)\)", r"\2的\1", p)
+        p = re.sub(
+            r"[一二两三四五六七八九十]+(?=周|次|秒|格|层|名|个|张|点|回合|件|把|枚|颗|只|条|道)",
+            "#N#",
+            p,
+        )
+        skel = FORMULA_TOKEN_RE.sub("#N#", p)
+        skel = skel.replace("#N#-#N#", "#N#").replace("#N#点", "#N#")
+        while "#N#+#N#" in skel or "#N##N#" in skel:
+            skel = skel.replace("#N#+#N#", "#N#").replace("#N##N#", "#N#")
+        skel = re.sub(r"最大生命值的?生命值?", "最大生命值", skel)
+        skel = (
+            skel.replace("释放", "施放")
+            .replace("基础物理攻击", "物理攻击")
+            .replace("基础法术攻击", "法术攻击")
+            .replace("目标敌人", "目标")
+        )
+        skel = re.sub(r"[，。：:；;、“”\"!\?！？]", "", skel)
+        return skel
+    ```
+  - Also in `reinject_formula_and_skeleton` line `354`, **DELETE** `src_clean = re.sub(r"\[\d+\](%|秒|...)", r"#\1", src_clean)`!
+
+- [x] **Step 34.2: Fix `reinject_formula_and_skeleton` (`tag_aligner.py:318-440`) So It Preserves Tier 1 `desc_id` Prose 100%**
+  1. In `reinject_formula_and_skeleton`, when `cn_exprs` and `src_exprs` differ in length (or after step 3), also substitute any remaining unmatched `[...]` or `{...}` formula placeholders from `source_zh` / `baseline_en` into `out`'s numeric spans so `Counter(PLACEHOLDER_RE.findall(out)) == Counter(PLACEHOLDER_RE.findall(source_zh))`!
+  2. In `reinject_formula_and_skeleton`, if the `color_spans` loop (`lines 384–429`) does NOT wrap all `<color=...>` tags in `source_zh` (`TAG_RE.findall(out) != TAG_RE.findall(source_zh)`), **strip the partial `<color=...>` tags from `out` (`out = TAG_RE.sub("", out)`)** before calling `reinject_skeleton_from_source(source_zh, out, ...)` so `reinject_skeleton_from_source`'s Step 2 (`if spans and "<" not in result:`) and Step 6 (`_wrap_exact_tag_sequence`) run cleanly!
+  3. **CRITICAL:** Pass `allow_en_fallback=False` from `reinject_formula_and_skeleton` to `reinject_skeleton_from_source` (and gate `if baseline_en and allow_en_fallback:` at line `729`), so that when `reinject_formula_and_skeleton` is aligning a **Tier 1 human-curated Indonesian translation `desc_id`**, it **NEVER** throws away `desc_id` to translate `baseline_en` with Tier 3! Instead, if Step 2 doesn't match all tags, it falls through to `_wrap_exact_tag_sequence(source_zh, stripped_result, inner_translator)` which preserves 100% of the Tier 1 Indonesian prose (`desc_id`) while guaranteeing `TAG_RE`, `PLACEHOLDER_RE`, and `CONTROL_TOKEN_RE` pass `validate_translation`!
+
+### Task 35: Fix Remaining Tier 3 Prose Defects (`ke Menyerang`, `Basic Attack Basic Attack`, `meningkatkan ... oleh`) in `src/acepatchindo/glossary.py` & `src/acepatchindo/lexicon_id.py`
+
+- [x] **Step 35.1: Fix Case-Insensitive `"ke <verb>"`, Duplicate `"Basic Attack"`, and `"oleh"` -> `"sebesar"`**
+  1. In `src/acepatchindo/glossary.py` (`_post_cleanup_id`), add `flags=re.IGNORECASE` to the `\bke\s+(me[a-z]+|ber[a-z]+|...)` regex so capitalized `"ke Menyerang"`, `"ke Memberikan"`, `"ke Memulihkan"`, `"ke Memicu"`, `"ke Mendapatkan"`, `"ke Meningkatkan"` become **`"untuk menyerang"`**, **`"untuk memberikan"`**, **`"untuk memulihkan"`**, **`"untuk memicu"`**!
+  2. Deduplicate repeated `"Basic Attack Basic Attack"`:
+     `out = re.sub(r"\b(Basic Attack)(?:\s+\1)+\b", r"\1", out, flags=re.I)`
+  3. Replace `"meningkatkan/mengurangi <X> oleh <Y>"` with `"sebesar"`:
+     `out = re.sub(r"\b(meningkatkan|mengurangi|menambah|menurunkan)\s+([^.,;:\n]{1,40}?)\s+oleh\s+(?=(?:<[^>]+>\s*)*[\d\[{+-])", r"\1 \2 sebesar ", out, flags=re.I)`
+  4. In `src/acepatchindo/lexicon_id.py`, add `"cyclically": "secara bergantian"`, `"slices": "membelah"`, `"cuts": "membelah"`.
+
+### Task 36: Strengthen `tests/test_glossary_and_tiers.py`, Rebuild Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Verify `14 passed`, & Re-Publish `v1.4.12-id.2` (`06`)
+
+- [x] **Step 36.1: Fix `tests/test_glossary_and_tiers.py` & Add Strict Assertions for All 3 Round 3 Fixes**
+  1. Fix line `418` of `tests/test_glossary_and_tiers.py`: change `tgt_sfx = {k.split("#")[-1] for k in ...}` to `tgt_sfx = {k[5:17] for k in vfs_data.get("vfs_target_keys", [])}`!
+  2. Assert **0** missed strings in `cat["unique"]` whose `normalize_plain_zh(zh)` is in `vfs_data["ref_target_plain"]` (and `zh` not in `veto_equip_zh | veto_effect_zh | WINDOWS_108_NONTARGET_EN`): specifically assert `<color=#FFE897>4/5阶的召唤单位</color>获得╧完美复生。`, `光辉伤害提升至[0]%法术攻击力`, `子弹伤害提升至40+25%物理攻击力`, `导弹伤害提升至30+80%物理攻击力`, and `云中君展翅舞蹈向周围1格射出羽箭...` are ALL translated to Indonesian (`cat["unique"][zh] != orig_cat["unique"][zh]`)!
+  3. Assert **0** mismatches between `cat["unique"]` and `cat["english_updates"]` when `r[4]` (`opt_zh`) is present in `cat["unique"]` and `r[1][1:5] in ALLOWED_TARGET_PREFIXES - {"60D2"}`: if `cat["unique"][opt_zh] != orig_cat["unique"][opt_zh]`, then `r[3] != orig_row[3]`!
+  4. Assert the 10 multi-formula Hero skills (`Lu Bu`, `Augran`, `Allain`, `Donghuang`, `Yang Jian`, `Dolia`, `Yao`, `Li Bai`, `Fang`, `Yuhuan`) use their **Tier 1** translations and have **0** occurrences of Tier 3 fallback strings: `"melompat menjadi padat"`, `"sebuah padat"`, `"itu orbit"`, `"itu mengelilinginya"`, `"Merah tua Bayangan"`, `"Hati Menjaga"`, `"putri duyung wujud dalam air"`, `"Basic Attack Basic Attack"`, `"ke Menyerang"`, `"ke Memberikan"`, `"ke Memulihkan"`, `"ke Memicu"`.
+- [x] **Step 36.2: Re-Run Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Run `pytest -v`, Commit, Force-Tag `v1.4.12-id.2`, & Re-Upload Release Assets (`06`)**
+
 
 
 

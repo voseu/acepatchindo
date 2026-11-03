@@ -1037,8 +1037,16 @@ class ThreeTierGlossary:
 
             out = re.sub(
                 r"\bke\s+(me[a-z]+|ber[a-z]+|ter[a-z]+|di[a-z]+|memper[a-z]+|meng[a-z]+|meny[a-z]+|men[a-z]+|mem[a-z]+|mel[a-z]+|mer[a-z]+)\b",
-                r"untuk \1",
+                lambda m: f"untuk {m.group(1).lower()}",
                 out,
+                flags=re.I,
+            )
+            out = re.sub(r"\b(Basic Attack)(?:\s+\1)+\b", r"\1", out, flags=re.I)
+            out = re.sub(
+                r"\b(meningkatkan|mengurangi|menambah|menurunkan)\s+([^.,;:\n]{1,40}?)\s+oleh\s+(?=(?:<[^>]+>\s*)*[\d\[{+-])",
+                r"\1 \2 sebesar ",
+                out,
+                flags=re.I,
             )
             out = re.sub(r"\bLuban\s+Tidak(?:\.\s*|\s+)(\d+)\b", r"Luban No.\1", out)
             out = re.sub(r"\bTidak\.\s*(\d+)\b", r"No.\1", out)
@@ -1056,6 +1064,17 @@ class ThreeTierGlossary:
             out = re.sub(r"\bdasar\s+([A-Z][A-Za-z0-9'&.\- ]{1,25}?)\s+serangan\b", r"Basic Attack \1", out)
             out = re.sub(r"\bdasar\s+serangan\b", "Basic Attack", out)
             out = out.replace("orbit di sekitarnya", "mengelilinginya")
+            out = re.sub(r"(?i)\bmelompat\s+menjadi\s+(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)(?:\s+dari\s+musuh)?\b", "melompat ke area terpadat musuh", out)
+            out = re.sub(r"(?i)\bmelompat\s+menjadi\s+padat\s+musuh\s+formasi\b", "melompat ke formasi musuh yang padat", out)
+            out = re.sub(r"(?i)\bmelompat\s+(?:dengan\s+suci\s+pedang\s+)?menjadi\s+(?:sebuah\s+)?padat\s+(?:grup|area|formasi)(?:\s+dari\s+musuh)?\b", "melompat ke area terpadat musuh", out)
+            out = re.sub(r"(?i)\bmenerjang\s+menjadi\s+(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)\b", "menerjang ke area terpadat musuh", out)
+            out = re.sub(r"(?i)\bmelemparkan\s+sebuah\s+bom\s+pada\s+(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)\b", "melemparkan bom ke area terpadat musuh", out)
+            out = re.sub(r"(?i)\b(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)(?:\s+dari\s+musuh)?\b", "area terpadat musuh", out)
+            out = re.sub(r"(?i)\bEnergi\s+bola\s+itu\s+(?:orbit\s+dia|mengelilinginya)\b", "Bola Energi yang mengelilinginya", out)
+            out = re.sub(r"(?i)\bBola\s+energi\s+itu\s+(?:orbit\s+dia|mengelilinginya)\b", "Bola Energi yang mengelilinginya", out)
+            out = re.sub(r"(?i)\bitu\s+orbit\s+dia\b", "yang mengelilinginya", out)
+            out = re.sub(r"(?i)\bitu\s+mengelilinginya\b", "yang mengelilinginya", out)
+            out = re.sub(r"(?i)\bsebuah\s+padat\b", "area terpadat", out)
 
             for old_ft, new_ft in (
                 ("Kartu Effect", "Kartu Efek"),
@@ -1083,8 +1102,16 @@ class ThreeTierGlossary:
         """Guarantee candidate satisfies len(candidate) <= max(len(source_zh) * 8, 48) when len(source_zh) >= 4."""
         candidate = re.sub(
             r"\bke\s+(me[a-z]+|ber[a-z]+|ter[a-z]+|di[a-z]+|memper[a-z]+|meng[a-z]+|meny[a-z]+|men[a-z]+|mem[a-z]+|mel[a-z]+|mer[a-z]+)\b",
-            r"untuk \1",
+            lambda m: f"untuk {m.group(1).lower()}",
             candidate,
+            flags=re.I,
+        )
+        candidate = re.sub(r"\b(Basic Attack)(?:\s+\1)+\b", r"\1", candidate, flags=re.I)
+        candidate = re.sub(
+            r"\b(meningkatkan|mengurangi|menambah|menurunkan)\s+([^.,;:\n]{1,40}?)\s+oleh\s+(?=(?:<[^>]+>\s*)*[\d\[{+-])",
+            r"\1 \2 sebesar ",
+            candidate,
+            flags=re.I,
         )
         candidate = re.sub(r"\bLuban\s+Tidak(?:\.\s*|\s+)(\d+)\b", r"Luban No.\1", candidate)
         candidate = re.sub(r"\bTidak\.\s*(\d+)\b", r"No.\1", candidate)
@@ -1102,6 +1129,17 @@ class ThreeTierGlossary:
         candidate = re.sub(r"\bdasar\s+([A-Z][A-Za-z0-9'&.\- ]{1,25}?)\s+serangan\b", r"Basic Attack \1", candidate)
         candidate = re.sub(r"\bdasar\s+serangan\b", "Basic Attack", candidate)
         candidate = candidate.replace("orbit di sekitarnya", "mengelilinginya")
+        candidate = re.sub(r"(?i)\bmelompat\s+menjadi\s+(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)(?:\s+dari\s+musuh)?\b", "melompat ke area terpadat musuh", candidate)
+        candidate = re.sub(r"(?i)\bmelompat\s+menjadi\s+padat\s+musuh\s+formasi\b", "melompat ke formasi musuh yang padat", candidate)
+        candidate = re.sub(r"(?i)\bmelompat\s+(?:dengan\s+suci\s+pedang\s+)?menjadi\s+(?:sebuah\s+)?padat\s+(?:grup|area|formasi)(?:\s+dari\s+musuh)?\b", "melompat ke area terpadat musuh", candidate)
+        candidate = re.sub(r"(?i)\bmenerjang\s+menjadi\s+(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)\b", "menerjang ke area terpadat musuh", candidate)
+        candidate = re.sub(r"(?i)\bmelemparkan\s+sebuah\s+bom\s+pada\s+(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)\b", "melemparkan bom ke area terpadat musuh", candidate)
+        candidate = re.sub(r"(?i)\b(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)(?:\s+dari\s+musuh)?\b", "area terpadat musuh", candidate)
+        candidate = re.sub(r"(?i)\bEnergi\s+bola\s+itu\s+(?:orbit\s+dia|mengelilinginya)\b", "Bola Energi yang mengelilinginya", candidate)
+        candidate = re.sub(r"(?i)\bBola\s+energi\s+itu\s+(?:orbit\s+dia|mengelilinginya)\b", "Bola Energi yang mengelilinginya", candidate)
+        candidate = re.sub(r"(?i)\bitu\s+orbit\s+dia\b", "yang mengelilinginya", candidate)
+        candidate = re.sub(r"(?i)\bitu\s+mengelilinginya\b", "yang mengelilinginya", candidate)
+        candidate = re.sub(r"(?i)\bsebuah\s+padat\b", "area terpadat", candidate)
 
         for old_ft, new_ft in (
             ("Kartu Effect", "Kartu Efek"),

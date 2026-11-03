@@ -42,6 +42,21 @@ OUT_CATALOG_GZ = OUT_DIR / "catalog.json.gz"
 OUT_EN_TO_ID_JSON = OUT_DIR / "en_to_id_map.json"
 
 
+def _align_en_to_id(en_val: str, id_val: str) -> str | None:
+    ok, reason = runtime_rules.validate_translation(en_val, id_val)
+    if ok:
+        return id_val
+    if reason == "semicolons_changed" and ";" in en_val:
+        needed = en_val.count(";") - id_val.count(";")
+        repaired = id_val
+        while needed > 0 and ", " in repaired:
+            repaired = repaired.replace(", ", "; ", 1)
+            needed -= 1
+        if runtime_rules.validate_translation(en_val, repaired)[0]:
+            return repaired
+    return None
+
+
 def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     classifier = HybridClassifier()
@@ -72,7 +87,9 @@ def main() -> None:
             new_unique[zh_src] = id_val
             tier_counts[f"{tier}_target_id"] += 1
             if en_base and en_base.strip() and id_val != en_base:
-                en_to_id_map[en_base] = id_val
+                aligned = _align_en_to_id(en_base, id_val)
+                if aligned:
+                    en_to_id_map[en_base] = aligned
         else:
             # Standalone names, equipment, effect cards, UI, tips, achievements stay English
             new_unique[zh_src] = en_base
@@ -116,7 +133,9 @@ def main() -> None:
                     raise ValueError(f"Contextual validation failed ({reason}) for {zh_src!r}")
                 ctx_row[3] = id_val
                 if en_base and en_base.strip() and id_val != en_base:
-                    en_to_id_map[en_base] = id_val
+                    aligned = _align_en_to_id(en_base, id_val)
+                    if aligned:
+                        en_to_id_map[en_base] = aligned
 
     # 4. Process all 29,750 english_updates entries ([asset, key, prev_en, target_en, optional_zh])
     eu_target_count = 0
@@ -153,9 +172,9 @@ def main() -> None:
             row[3] = id_val
             eu_target_count += 1
             if en_target and en_target.strip() and id_val != en_target:
-                en_to_id_map[en_target] = id_val
-            if prev_en and prev_en.strip() and id_val != prev_en:
-                en_to_id_map.setdefault(prev_en, id_val)
+                ok_pair, _ = runtime_rules.validate_translation(en_target, id_val)
+                if ok_pair:
+                    en_to_id_map[en_target] = id_val
         else:
             # Non-target stays clean English
             row[3] = en_target
