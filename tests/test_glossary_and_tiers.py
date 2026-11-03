@@ -9,6 +9,7 @@ from pathlib import Path
 
 from wxq_patch import translation_rules as runtime_rules
 
+import acepatchindo.tag_aligner as tag_aligner_module
 from acepatchindo.glossary import WINDOWS_108_ZH_TO_ID, ThreeTierGlossary
 from acepatchindo.hybrid_classifier import ALLOWED_TARGET_PREFIXES, HybridClassifier
 from acepatchindo.validator import PLACEHOLDER_RE, TAG_RE, validate_translation
@@ -636,6 +637,113 @@ def test_round6_footer_terms_and_zero_fallback_wraps() -> None:
     voucher_k = "获得<color=#FFE897>{0|2}{Energy}</color>以及2张<color=#FFE897>3阶英雄兑换券</color>。"
     if voucher_k in cat["unique"]:
         assert not cat["unique"][voucher_k].startswith("<color=#FFE897>Memperoleh</color>")
+
+
+def test_round7_anti_regression_and_swapped_formula_elimination() -> None:
+    catalog_path = ROOT / "data" / "catalog_checkpoints" / "catalog.json.gz"
+    with gzip.open(catalog_path, "rt", encoding="utf-8") as f:
+        cat = json.load(f)
+
+    # 1. Zero calls to _wrap_exact_tag_sequence & 0 mismatched tag pairs across all target unique entries
+    classifier = HybridClassifier()
+    g = ThreeTierGlossary.from_reference_files(
+        ROOT / "data" / "references" / "tier1_wiki_id.json",
+        ROOT / "data" / "references" / "tier2_wiki_en.json",
+    )
+    with gzip.open(
+        ROOT / "Honor of Kings Ace English Patcher 1.4.12.exe_extracted" / "catalog" / "catalog.json.gz",
+        "rt",
+        encoding="utf-8",
+    ) as f_orig:
+        orig_cat = json.load(f_orig)
+
+    wrap_calls: list[str] = []
+    orig_wrap = tag_aligner_module._wrap_exact_tag_sequence
+
+    def _trap_wrap(*args, **kwargs):
+        wrap_calls.append(args[0])
+        return orig_wrap(*args, **kwargs)
+
+    tag_aligner_module._wrap_exact_tag_sequence = _trap_wrap
+    try:
+        for zh, en_base in orig_cat["unique"].items():
+            if classifier.is_target_unique(zh):
+                res, _ = g.translate_entry(zh, baseline_en=en_base)
+                tags_src = TAG_RE.findall(zh)
+                tags_res = TAG_RE.findall(res)
+                assert tags_src == tags_res, f"Mismatched tags for {zh!r} -> {res!r}"
+    finally:
+        tag_aligner_module._wrap_exact_tag_sequence = orig_wrap
+
+    assert len(wrap_calls) == 0, f"Expected 0 _wrap_exact_tag_sequence calls, got {len(wrap_calls)}: {wrap_calls[:3]}"
+
+    # 2. Yang Yuhuan formulas are never swapped and never chunk sliced
+    zh1 = (
+        "杨玉环弹奏琵琶，循环激活以下乐曲效果之一：\n"
+        "<color=#ffffffbf>清平：</color>为3名血量最低的友军<color=#9ff5d0>恢复[0]点生命值</color><color=#9ff5d0>（[1]+[2]%法术攻击力）</color>。\n"
+        "<color=#ffffffbf>破阵：</color>对当前血量百分比最高的3名敌人造成<color=#d487e4>[3]点法术伤害</color><color=#d487e4>（[4]+[5]%法术攻击力）</color>。"
+    )
+    if zh1 in cat["unique"]:
+        v1 = cat["unique"][zh1]
+        v1_clean = TAG_RE.sub("", v1)
+        assert "[0] HP ([1]+[2]% Magic Attack)" in v1_clean
+        assert "[3] Magic Damage ([4]+[5]% Magic Attack)" in v1_clean
+        assert "memberikan memulihkan" not in v1
+        assert not v1.startswith("<color=#ffffffbf> Yang")
+
+    zh2 = (
+        "<color=#ffffffbf>清平：</color>杨玉环弹奏琵琶，为3名血量最低的友军<color=#9ff5d0>恢复100+</color><color=#9ff5d0>[0]%法术攻击力</color><color=#9ff5d0>的生命值</color>。\n"
+        "<color=#ffffffbf>破阵：</color>杨玉环弹奏琵琶，对当前血量百分比最高的3名敌人造成<color=#d487e4>[1]+80%法术攻击力的法术伤害</color>。"
+    )
+    if zh2 in cat["unique"]:
+        v2 = cat["unique"][zh2]
+        lines2 = v2.split("\n")
+        assert len(lines2) == 2, f"Expected exactly 2 lines for zh2, got {len(lines2)}"
+        assert "100+" in lines2[0] and "[0]%" in lines2[0]
+        assert "[1]" in lines2[1] and "80%" in lines2[1]
+
+    zh3 = (
+        "杨玉环弹奏琵琶，循环激活以下乐曲效果之一：\n"
+        "<color=#ffffffbf>清平：</color>为3名血量最低的友军<color=#9ff5d0>恢复100+</color><color=#9ff5d0>[176310p1q3/100]%法术攻击力</color><color=#9ff5d0>的生命值</color>。\n"
+        "<color=#ffffffbf>破阵：</color>对当前血量百分比最高的3名敌人造成<color=#d487e4>[176300p1q1]+80%法术攻击力的法术伤害</color>。"
+    )
+    if zh3 in cat["unique"]:
+        v3 = cat["unique"][zh3]
+        lines3 = v3.split("\n")
+        assert "176310" in lines3[1], f"176310 must be in Qingping line: {lines3[1]}"
+        assert "176300" in lines3[2], f"176300 must be in Pozhen line: {lines3[2]}"
+
+    # 3. Nested 2.5% wraps 2.5% correctly without chunk slicing
+    s_nest = "战斗开始时，你的英雄普攻附带<color=#FFE897>敌人最大生命值<color=#00FF00>2.5%</color></color>的法术伤害。"
+    if s_nest in cat["unique"]:
+        vn = cat["unique"][s_nest]
+        assert "<color=#00FF00>2.5%</color>" in vn
+        assert "<color=#00FF00> milikmu" not in vn and "<color=#FFE897> Basic Attack" not in vn
+
+    # 4. Nemesis does not start with "Gain", wraps proper term, and colon outside
+    s_nem = "获得<color=#FFE897>强敌克星</color>：造成真实伤害，每普攻4次眩晕敌人。"
+    if s_nem in cat["unique"]:
+        v_nem = cat["unique"][s_nem]
+        assert not v_nem.startswith("Gain")
+        assert (
+            "<color=#FFE897>Bane of the Mighty</color>:" in v_nem
+            or "<color=#FFE897>Nemesis</color>:" in v_nem
+        )
+
+    # 5. Mi Yue defense colors are not shifted
+    s_my = (
+        "芈月为等级最高的近战友军召唤1只暗影仆从协助战斗，持续10秒。仆从每次攻击造成"
+        "<color=#d487e4>[121210p1q3/100]%芈月法术攻击力的法术伤害</color>并为友军恢复"
+        "<color=#d487e4>[121220p1q3/100]%芈月法术攻击力</color><color=#9ff5d0>的生命值</color>，"
+        "同时窃取目标1点<color=#dfa15e>物理防御</color>和<color=#d487e4>法术防御</color>"
+        "转移给友军（最多30层，持续至回合结束）。"
+    )
+    if s_my in cat["unique"]:
+        v_my = cat["unique"][s_my]
+        assert "<color=#dfa15e>Physical Defense</color>" in v_my
+        assert "<color=#d487e4>Magic Defense</color>" in v_my
+        assert "<color=#d487e4>bertahan sampai Round berakhir)</color>" not in v_my
+
 
 
 

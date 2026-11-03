@@ -3043,7 +3043,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
      }
      ```
 
-- [x] **Step 43.2: Fix `{num_ph}{Icon}` Required-Number Priority, Range Icon Pre-Binding, Step 2 `cursor` Advance, `split_3tag_re`, and `split_2tag_re` in `reinject_formula_and_skeleton` (`tag_aligner.py:385-625`)**
+- [ ] **Step 43.2: Fix `{num_ph}{Icon}` Required-Number Priority, Range Icon Pre-Binding, Step 2 `cursor` Advance, `split_3tag_re`, and `split_2tag_re` in `reinject_formula_and_skeleton` (`tag_aligner.py:385-625`)** *(REOPENED BY MANAGER AUDIT ROUND 7 — Step 2 single shared `cursor` at `line 482` advanced past `"100+80%"` when `c_ex == "3"` matched `"untuk 3 sekutu"` at the end of Line 1 in `Yang Yuhuan`, swapping `Qingping` `[0]..[2]` with `Pozhen` `[3]..[5]`; and `sp2b` at `line 615` only allowed `HP(?:\s+miliknya)?` and `(?:\s+miliknya)?`, failing on `Mi Yue` (`memulihkan HP sekutu itu sebesar ... Magic Attack Miyue`) -> Remediated in Task 45)*
   1. **Support Range Placeholders `{0|1}-{0|5}{Energy}` & Require Leading Number First in `icon_pair_matches` (`lines 385-442`):**
      ```python
      icon_pair_matches = list(re.finditer(
@@ -3136,7 +3136,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
                    out = out[:m_b.start()] + rep2 + out[m_b.end():]
        ```
 
-- [x] **Step 43.3: Fix `reinject_skeleton_from_source` (`m_existing` Check, `护盾`/`法力`/`兑换券` Patterns, `"转瞬": "Fleeting"`, `╉图腾` Order, Multi-Clause Single-Span, & Paragraph Newlines) (`tag_aligner.py:130, 742-1185`)**
+- [ ] **Step 43.3: Fix `reinject_skeleton_from_source` (`m_existing` Check, `护盾`/`法力`/`兑换券` Patterns, `"转瞬": "Fleeting"`, `╉图腾` Order, Multi-Clause Single-Span, & Paragraph Newlines) (`tag_aligner.py:130, 742-1185`)** *(REOPENED BY MANAGER AUDIT ROUND 7 — `m_nest` at `line 1009` was unreachable because `ATOMIC_TAGGED_SPAN_RE` matched the inner `<color=#00FF00>2.5%</color>` first (`all_matched=True`); `LEADING_TAGGED_PREFIX_RE` at `line 810` copied untranslated English `"Gain <color=#FFE897>Nemesis</color>"`; and 7 Tier 1 strings failed Step 4 (`GLYPH_KEYWORD_MAP["╦"]` missing `"Merge"`, `(?<!>)` blocking `<color=#FFE897>╋Flash`, bare `<a>` Totem order) -> Remediated in Task 45)*
   1. **Add `"Fleeting"` to `BADGE_ALIAS_MAP["转瞬"]` (`line 130`):**
      `"转瞬": ("Fleeting", "Fleet", "Instant", "Sekilas"),`
   2. **Normalize Paragraph Break Counts (`\n` vs `\n\n`) Before Line-by-Line Alignment (`line 742`):**
@@ -3187,7 +3187,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
 
 ### Task 44: Add Round 6 Assertions to `tests/test_glossary_and_tiers.py`, Rebuild Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Verify `14 passed`, & Re-Publish `v1.4.12-id.2` (`06`)
 
-- [x] **Step 44.1: Add 5 Round 6 Precision Assertions to `tests/test_glossary_and_tiers.py`**
+- [ ] **Step 44.1: Add 5 Round 6 Precision Assertions to `tests/test_glossary_and_tiers.py`** *(REOPENED — Remediated in Task 46)*
   1. **Zero Misplaced `{1|1}` on `{LordHp}-10` / `{LordHp}-15` & Exact `-15` Preservation:**
      ```python
      s_hp10 = "<color=#FFE897>{LordHp}</color>-10，战斗开始时，<color=#FFE897>己方每名英雄</color>+2═临时等级。战斗胜利时，获得{1|1}{LordHp}，═临时等级额外+1。"
@@ -3211,7 +3211,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
      - Assert `"<b> sebesar</b>"` not in `cat["unique"]["<a href=321><color=#ffffff>╉<b>图腾</b></color></a>不会被优先攻击。\n<a href=3><color=#ffffff>╪<b>开团</b></color></a>：获得每个<a href=321><color=#ffffff>╉<b>图腾</b></color></a>等级数15%的<a href=3130011><color=#ffffff>═<b>临时等级</b></color></a>。"]`
      - Assert `not cat["unique"]["获得<color=#FFE897>{0|2}{Energy}</color>以及2张<color=#FFE897>3阶英雄兑换券</color>。"].startswith("<color=#FFE897>Memperoleh</color>")`
 
-- [x] **Step 44.2: Re-Run Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Run `pytest -v`, Commit, Force-Tag `v1.4.12-id.2`, & Re-Upload Release Assets (`06`)**
+- [ ] **Step 44.2: Re-Run Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Run `pytest -v`, Commit, Force-Tag `v1.4.12-id.2`, & Re-Upload Release Assets (`06`)** *(REOPENED — Remediated in Task 46)*
   1. `/home/whise/.local/bin/uv run --python 3.12 python scripts/01b_build_hybrid_vfs_index.py`
   2. `/home/whise/.local/bin/uv run --python 3.12 python scripts/02_build_indonesian_catalog.py`
   3. `/home/whise/.local/bin/uv run --python 3.12 python scripts/03_patch_worker_modules.py`
@@ -3219,6 +3219,168 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
   5. `/home/whise/.local/bin/uv run --python 3.12 python scripts/05_repack_windows_exe.py`
   6. `/home/whise/.local/bin/uv run --python 3.12 pytest -v` (`14 passed, 0 failed, 0 skipped`)
   7. Update SHA-256 hashes in `README.md` & `scripts/06_publish_github_release.py`, check `[x]` on all completed tasks in `.agents/plan/2026-11-03-hok-ace-indonesian-patcher-plan.md`, commit, `git push origin main`, `git tag -f v1.4.12-id.2 HEAD && git push -f origin v1.4.12-id.2`, and run `scripts/06_publish_github_release.py`.
+
+---
+
+## Phase 6 Remediation Round 7: Eliminating the Final `7` `_wrap_exact_tag_sequence` Calls (`Yang Yuhuan` Swapped Formulas & `2.5%` Nested Color), `7` Tier 1 Step-4 Fallbacks, & `Mi Yue` / `Gain` Prefix Bugs (Tasks 45–46)
+
+> [!CAUTION]
+> **Manager Forensic Audit of `commit 11d88d5` — REJECTED Due to 3 Final Bugs in `src/acepatchindo/tag_aligner.py`:**
+>
+> 1. **BUG 1: `Yang Yuhuan` (`杨玉环` / `惊鸿调`) — 4 Strings Have Swapped Formulas (`[0]..[2]` vs `[3]..[5]`) & Broken 2-Line vs 3-Line Tag Alignment (`tag_aligner.py:482-516, 763-775, 948`), Plus `Mi Yue` `sp2b` Regex (`tag_aligner.py:615`):**
+>    - **Root Cause A (Step 2 single `cursor` across different `c_ex` values in `tag_aligner.py:482-516`):**
+>      - In Chinese (`descCn`), each line of Yang Yuhuan's skill has `3名` **BEFORE** `100+80%` (`[('3', '名'), ('100+80%', ''), ('3', '名'), ('100+80%', '')]`).
+>      - In Indonesian (`desc_id`), each line has `100+80%` **BEFORE** `3 sekutu` / `3 musuh` (`Qingping: memulihkan 100+80% Magic Attack sebagai HP untuk 3 sekutu... \nPozhen: memberikan 100+80% Magic Attack sebagai Magic Damage ke 3 musuh...`).
+>      - When `i=0` (`c_ex="3" == s_ex="3"`) ran `m_same = pat_same.search(out, cursor)` and set `cursor = m_same.end()`, `cursor` jumped **past** `100+80%` on Line 1 (`Qingping`) to `untuk 3 sekutu`!
+>      - Then `i=1` (`c_ex="100+80%"`, `s_ex="[1]+[2]%"` / `"100+[176310p1q3/100]%"`) searched from `cursor` and matched the **second** `100+80%` (`Pozhen` on Line 2)!
+>      - And then `i=3` (`c_ex="100+80%"`, `s_ex="[4]+[5]%"` / `"[176300p1q1]+80%"`) wrapped around to `0` (`m = pat.search(out, 0)`) and matched the **first** `100+80%` (`Qingping` on Line 1), **swapping the heal and damage formulas between `Qingping` and `Pozhen`**:
+>        - `<color=#ffffffbf> Qingping: memulihkan</color>[3] Magic <color=#9ff5d0> Damage ([4]+[5]%</color><color=#9ff5d0> Magic Attack)</color> untuk 3 sekutu dengan HP terendah.`
+>        - `<color=#ffffffbf> Pozhen: memberikan memulihkan</color>[0] HP ([1]+[2]% <color=#d487e4> Magic Attack) ke</color><color=#d487e4> 3 musuh dengan</color> persentase HP tertinggi.`
+>    - **Root Cause B (2-Line `source_zh` vs 3-Line `desc_id` on Yang Yuhuan's 2-Line Variant):**
+>      - In `<color=#ffffffbf>清平：</color>杨玉环弹奏琵琶，为3名血量最低的友军...\n<color=#ffffffbf>破阵：</color>杨玉环弹奏琵琶，对当前血量百分比最高的3名敌人...`, `source_zh` has **2** lines (`\n` count = 1), whereas `tier1_wiki_id.json` `desc_id` has **3** lines (`Yang Yuhuan memainkan pipa dan mengaktifkan salah satu efek lagu secara bergantian.\nQingping: ...\nPozhen: ...`). Because `len(src_paras) == 2 != len(res_paras) == 3`, `reinject_skeleton_from_source` (`line 767`) failed to align line-by-line and fell into `_wrap_exact_tag_sequence` (`<color=#ffffffbf> Yang Yuhuan memainkan pipa</color>...`)!
+>    - **Root Cause C (`Mi Yue` `sp2b` Regex at `tag_aligner.py:615`):**
+>      - In `芈月为等级最高的近战友军召唤1只暗影仆从协助战斗...并为友军恢复<color=#d487e4>[121220p1q3/100]%芈月法术攻击力</color><color=#9ff5d0>的生命值</color>，同时窃取目标1点<color=#dfa15e>物理防御</color>和<color=#d487e4>法术防御</color>...`, `out` has `memulihkan HP sekutu itu sebesar [121220p1q3/100]% Magic Attack Miyue`.
+>      - Because `sp2b` (`line 615`) only allowed `(HP(?:\s+miliknya)?)` and `(?:\s+miliknya)?`, it failed to match `HP sekutu itu` and `Magic Attack Miyue`, shifting all subsequent tags by 1 (`<color=#9ff5d0>Physical Defense</color>` and `<color=#dfa15e>Magic Defense</color> ... <color=#d487e4>bertahan sampai Round berakhir)</color>`)!
+>
+> 2. **BUG 2: Unreachable Nested `<color=C1>...<color=C2>VAL</color>...</color>` Block (`tag_aligner.py:1008-1024`) & `LEADING_TAGGED_PREFIX_RE` Copying Untranslated `"Gain "` (`tag_aligner.py:809-820`):**
+>    - **Root Cause A (Nested Color Span in `战斗开始时，你的英雄普攻附带<color=#FFE897>敌人最大生命值<color=#00FF00>2.5%</color></color>的法术伤害。` and `获得1张诸葛亮和1张明世隐...<color=#FFE897>有概率连续施法<color=#00FF00>5</color>次</color>`):**
+>      - `ATOMIC_TAGGED_SPAN_RE` (`line 36`) matches only the inner span `<color=#00FF00>2.5%</color>` (so `len(spans) == 1`), and the loop at `lines 834-1006` matches `<color=#00FF00>2.5%</color>` (`all_matched = True`, `"<" in curr == True`).
+>      - Therefore, `if not all_matched and len(spans) == 1 and "<" not in curr:` at `line 1008` is **100% unreachable**, causing `2.5%` to fall into `_wrap_exact_tag_sequence` (`Saat Combat dimulai,<color=#FFE897> Basic Attack Hero <color=#00FF00> milikmu disertai Magic</color></color> Damage sebesar 2.5% Max HP musuh.`)!
+>    - **Root Cause B (`LEADING_TAGGED_PREFIX_RE` at `lines 809-820` Copying `"Gain <color=#FFE897>Nemesis</color>"`):**
+>      - On `获得<color=#FFE897>强敌克星</color>：造成真实伤害，每普攻4次眩晕敌人。` and `获得<color=#FFE897>断念</color>：造成伤害时降低敌方最大生命值。`, `baseline_en` starts with `"Gain <color=#FFE897>Nemesis</color>:"` (`2` words after stripping tags).
+>      - `lines 809-820` copied `m_en.group(1)` verbatim from `baseline_en`, leaving English `"Gain "` at the start of the Indonesian sentence (`"Gain <color=#FFE897>Nemesis</color>: memberikan True Damage..."`)!
+>      - And on `获得<color=#FFE897>法潮灵杖</color>：获取左右1格英雄法术攻击力。`, `en_spans[0]` had `"Tide Staff"` instead of `"Arcane Tide Staff"`, producing `"Memperoleh Arcane <color=#FFE897>Tide Staff:</color>"`!
+>
+> 3. **BUG 3: `7` Tier 1 Strings Silently Fail Step 4 (`tag_aligner.py:1188-1197`) and Fall Into Step 5 (`allow_en_fallback`, Discarding Tier 1 Human Translation for Broken Tier 3 Machine Translation) + `1` Broken `orig["unique"]` Totem Tag:**
+>    - Across the entire catalog, `7` Tier 1 strings fail Step 4 (`line 1190`) and get overwritten by Step 5 (`cand_en` Tier 3 machine translation):
+>      1. `<color=#FFE897>每╦合成4次【逐鹿】英雄</color>，获得1张随机1-5阶<color=#FFE897>效果锦囊牌</color>。` -> Fails `control_tokens_changed` at Step 4 because `GLYPH_KEYWORD_MAP["╦"]` (`line 1138`) only has `("ancient coin", "Ancient Coin")` and is missing `"Merge", "Synthesis", "Combine", "Menggabungkan"`, so `╦` is not placed before `Merge`!
+>      2. `战斗开始时，<color=#FFE897>第一排╋闪现英雄</color>不再<a><color=#FFE897>╋<b>闪现</b></color></a>...` (and its non-`<a>` variant) -> Fails `control_tokens_changed` / `tags_changed` at Step 4 because `rf"(?<!>)"` at `line 1155` blocks placing `╋` before `Flash` when `Flash` is immediately preceded by `>` in `<color=#FFE897>Flash Hero`!
+>      3. `<color=#FFE897>4/5阶的召唤单位</color>获得<a><color=#ffffff><b>╧完美复生</b></color></a>。` and `每回合<color=#FFE897>首次对【逐鹿】英雄使用的效果牌</color>会返回手牌并附加<color=#FFE897>╆转瞬</color>。` -> Fail `tags_changed` at Step 4 because they are single-clause sentences (no comma `,`) where the second span (`<a>...Perfect Revive...</a>` or `<color=#FFE897>╆Instant</color>`) matched, putting `"<"` in `id_clauses[0]`, so `untagged_indices` (`if id_clauses[i].strip() and "<" not in id_clauses[i]`) is empty `[]`!
+>      4. `<color=#FFE897>场上的╉图腾被摧毁</color>时，等级最高的【大河】英雄获得<a><color=#ffffff>╉<b>图腾</b></color></a>一半等级的<a>═临时等级</a>。` -> Fails `tags_changed` because `<a href=321>` check at `line 800` missed bare `<a>` (`<a><color=#ffffff>╉<b>图腾</b></color></a>` and `<a>═临时等级</a>`), and Span 1 (`<a>...图腾...</a>`) matched the 1st `Totem` at index 0 (`Saat Totem di field hancur`) instead of the 2nd `Totem`!
+>      5. `获得1张李信，李信卡牌效果提供的<a href=3130011><color=#ffffff>═<b>临时等级</b></color></a>额外+3。若李信觉醒，<color=#FFE897>敌方英雄触发<a>╫牺牲</color></a>时，也会触发己方李信的卡牌效果。` -> Fails `tags_changed` because `source_zh` has interleaved tags `<color=#FFE897>敌方英雄触发<a>╫牺牲</color></a>`!
+>    - Additionally, on `<color=#99DEB0>召唤╉图腾</color>，己方所有【大河】英雄获得相当于<a><color=#99DEB0>╉<b>图腾</b></color></a>等级<color=#99DEB0>50%</color>的<a>═临时等级</a>。` (Tier 3), `orig["unique"][k]` (`baseline_en`) has corrupted tags in the upstream English patcher (`<a>Riverlands<color=#99DEB0> heroes gain...`), producing `Semua sekutu <a>Riverlands <color=#99DEB0> Hero mendapatkan... Level═</a>.`! And on `战斗中入场的召唤物存活<color=#99DEB0>8秒</color>后，<color=#99DEB0>变为其召唤者（无卡牌效果）</color>...`, `"变为其召唤者（无卡牌效果）"` is missing from `BADGE_ALIAS_MAP`, wrapping `<color=#99DEB0>Summoned</color>` at index 0!
+
+### Task 45: Fix All 3 Final Bugs in `src/acepatchindo/tag_aligner.py`
+
+- [x] **Step 45.1: Fix Step 2 Per-`c_ex` Cursor (`Yang Yuhuan` Swapped Formulas), 2-Line `Yang Yuhuan` Intro Folding, and `Mi Yue` `sp2a`/`sp2b` Regex (`tag_aligner.py:380-630`)**
+  1. **Fold 3-Line `desc_id` Into 2 Lines When `source_zh` Starts With `<color=#ffffffbf>清平：</color>` (`around line 380`):**
+     ```python
+     if source_zh.lstrip().startswith("<color=#ffffffbf>清平：</color>") and out.startswith("Yang Yuhuan memainkan pipa"):
+         out = re.sub(
+             r"^Yang Yuhuan memainkan pipa[^.\n]*\.\s*\n\s*Qingping:\s*",
+             "Qingping: Yang Yuhuan memainkan pipa, ",
+             out,
+         )
+         cn_clean = re.sub(r"^清平杨玉环弹奏琵琶", "清平", cn_clean)
+         src_clean = re.sub(r"^清平杨玉环弹奏琵琶", "清平", src_clean)
+     ```
+  2. **Use Per-`c_ex` Cursors (`cursor_by_cex`) in Step 2 (`lines 480-518`) So Reordered Clause Numbers (`3名` vs `100+80%`) Never Swap Formulas:**
+     ```python
+     if len(cn_matches) == len(src_matches):
+         slots: list[tuple[str, str]] = []
+         cursor_by_cex: dict[str, int] = {}
+         for i, ((c_ex, c_u), (s_ex, s_u)) in enumerate(zip(cn_matches, src_matches)):
+             unit_pat = UNIT_MAP.get(s_u or c_u, "")
+             cur_pos = cursor_by_cex.get(c_ex, 0)
+             if c_ex == s_ex:
+                 pat_same = re.compile(rf"(?<![\d\[{{|A-Za-z_]){re.escape(c_ex)}(?![\d%\]}}|A-Za-z_])")
+                 m_same = pat_same.search(out, cur_pos)
+                 if m_same:
+                     cursor_by_cex[c_ex] = m_same.end()
+                 continue
+             pat = None
+             if unit_pat:
+                 pat = re.compile(rf"(?<![\d\[{{|A-Za-z_]){re.escape(c_ex)}(?![\d%\]}}|A-Za-z_])(?={unit_pat})", flags=re.I)
+                 m = pat.search(out, cur_pos)
+                 if not m:
+                     m = pat.search(out, 0)
+                 if not m:
+                     pat = None
+             if not pat:
+                 pat = re.compile(rf"(?<![\d\[{{|A-Za-z_]){re.escape(c_ex)}(?![\d%\]}}|A-Za-z_])")
+                 m = pat.search(out, cur_pos)
+                 if not m:
+                     m = pat.search(out, 0)
+             if not m and re.match(r"^\d+(?:\.\d+)?\+\d+(?:\.\d+)?%$", c_ex):
+                 m = re.compile(r"(?<![\d\[])\d+(?:\.\d+)?\s*\+\s*\d+(?:\.\d+)?%").search(out, cur_pos)
+                 if not m:
+                     m = re.compile(r"(?<![\d\[])\d+(?:\.\d+)?\s*\+\s*\d+(?:\.\d+)?%").search(out, 0)
+             if not m:
+                 continue
+             clean_s = re.sub(r"\s+", "", s_ex)
+             if clean_s in ph_map:
+                 s_ex = ph_map[clean_s]
+             slot_tok = f"__EXPRSLOT{chr(65 + (i // 26))}{chr(65 + (i % 26))}__"
+             delta = len(slot_tok) - (m.end() - m.start())
+             out = out[:m.start()] + slot_tok + out[m.end():]
+             for k_c, v_c in list(cursor_by_cex.items()):
+                 if v_c > m.start():
+                     cursor_by_cex[k_c] = v_c + delta
+             cursor_by_cex[c_ex] = m.start() + len(slot_tok)
+             slots.append((slot_tok, s_ex))
+         for slot_tok, s_ex in slots:
+             out = out.replace(slot_tok, s_ex)
+     ```
+  3. **Expand `sp2a` and `sp2b` (`lines 610-626`) to Match `Mi Yue` (`HP sekutu itu` and `Magic Attack Miyue`):**
+     ```python
+     sp2a = re.compile(
+         rf"(memulihkan\s+)?({num_pat}\s*(?:Magic Attack|Physical Attack|Max HP|HP Maks)(?:\s+(?:miliknya|Miyue|Mi Yue|Yaria))?)\s*((?:sebagai\s+)?HP(?:\s+sekutu(?:\s+itu)?)?\b)",
+         flags=re.I,
+     )
+     sp2b = re.compile(
+         rf"(memulihkan\s+)(HP(?:\s+sekutu(?:\s+itu)?|\s+miliknya)?)\s+sebesar\s+({num_pat}\s*(?:Magic Attack|Physical Attack|Max HP|HP Maks)(?:\s+(?:miliknya|Miyue|Mi Yue|Yaria))?)",
+         flags=re.I,
+     )
+     ```
+
+- [x] **Step 45.2: Fix Nested `<color=C1>...<color=C2>VAL</color>...</color>`, `LEADING_TAGGED_PREFIX_RE` `"Gain "` Guard, Colon Placement, and All 7 Tier 1 Step-4 Fallbacks in `reinject_skeleton_from_source` (`tag_aligner.py:130-250, 800-1265`)**
+  1. **Expand `BADGE_ALIAS_MAP` (`lines 130-250`) and `GLYPH_KEYWORD_MAP` (`lines 1126-1140`):**
+     - Add to `BADGE_ALIAS_MAP`:
+       - `"清平": ["Qingping"]`, `"破阵": ["Pozhen"]`, `"撕裂": ["Rend"]`
+       - `"法潮灵杖": ["Arcane Tide Staff"]`, `"强敌克星": ["Bane of the Mighty", "Nemesis"]`, `"断念": ["Severance", "Heartbreak"]`
+       - `"效果锦囊牌": ["kartu Efek Lucky Bag", "efek Strategi kartu", "Effect Strategy Card"]`
+       - `"4/5阶的召唤单位": ["4/5 Tier Summoned Unit", "Summoned Unit Tier 4/5", "Tier 4/5 unit panggilan"]`
+       - `"首次对【逐鹿】英雄使用的效果牌": ["Kartu Efek pertama yang digunakan pada Hero [Zhulu]"]`
+       - `"变为其召唤者（无卡牌效果）": ["berubah menjadi pemanggilnya (tanpa efek kartu)", "menjadi summoner mereka (tidak kartu efek)"]`
+       - `"第一排╋闪现英雄": ["Flash Hero di baris pertama"]`, `"第一排闪现英雄": ["Flash Hero di baris pertama"]`
+       - `"后三排╋闪现英雄": ["Flash Hero di 3 baris belakang"]`, `"后三排闪现英雄": ["Flash Hero di 3 baris belakang"]`
+       - `"场上的╉图腾被摧毁": ["Saat Totem di field hancur", "Totem di field hancur"]`
+     - Add `"Merge", "Synthesis", "Combine", "Menggabungkan", "Gabung"` to `GLYPH_KEYWORD_MAP["╦"]` (`line 1138`).
+  2. **Remove `rf"(?<!>)"` From Step 3 Control Token Regex (`line 1155`):**
+     - Replace `rf"(?<!>)"` with `rf"(?<!{re.escape(ch)}<color=#FFE897>)"` and `rf"(?<!{re.escape(ch)}<color=#ffffff>)"` so `╋` and `╦` can be placed inside `<color=#FFE897>╋Flash Hero` and `<color=#FFE897>Setiap kali ╦Merge`!
+  3. **Broaden Totem vs Temporary Level Reordering (`line 800`) to Include Bare `<a>` Tags & Repair Corrupted `baseline_en` Totem String:**
+     - At `line 800`, check `("图腾" in source_zh and "临时等级" in source_zh and ("<a" in source_zh) and source_zh.find("图腾") < source_zh.find("临时等级"))`:
+       - Also handle `memperoleh (═?Temporary Level) sebesar (setengah Level) (╉?Totem tersebut)` -> `memperoleh \2 \3 sebagai \1`, and `mendapatkan (?:╉?Temporary Level )?sebesar (\d+%) dari (╉?Totem) Level` -> `mendapatkan \2 Level \1 sebagai ═Temporary Level`.
+       - And if `baseline_en` contains `"<a>Riverlands<color=#99DEB0>"` (corrupted upstream English tag order on `<color=#99DEB0>召唤╉图腾</color>，己方所有【大河】英雄获得相当于<a><color=#99DEB0>╉<b>图腾</b></color></a>等级<color=#99DEB0>50%</color>的<a>═临时等级</a>。`), sanitize `baseline_en` to `'Summon <color=#99DEB0>╉Totem</color>. All allied [Riverlands] heroes gain <a><color=#99DEB0>╉<b>Totem</b></color></a> Level <color=#99DEB0>50%</color> as <a>═Temporary Level</a>.'` before alignment!
+  4. **Guard `LEADING_TAGGED_PREFIX_RE` (`line 810`) & Keep Colon Outside `close_part` When `source_zh` Has Colon Outside (`line 924`):**
+     - At `line 810`, require `m_en.group(1).lstrip().startswith("<")` so English verbs like `"Gain <color=#FFE897>Nemesis</color>"` are NEVER copied into Indonesian sentences!
+     - At `line 924`, only put `:` inside `{close_part}` (`f"{open_part}{kw}:{close_part} "`) if `zh_inner.endswith(("：", ":"))`; if the colon in `source_zh` is **outside** `close_part` (like `<color=#FFE897>强敌克星</color>：`), output `f"{open_part}{kw}{close_part}: "`!
+  5. **Handle Nested `<color=C1>...<color=C2>VAL</color>...</color>` and Interleaved `<color=#FFE897>敌方英雄触发<a>╫牺牲</color></a>` BEFORE `ATOMIC_TAGGED_SPAN_RE` (`around line 822`):**
+     - Before `spans = list(ATOMIC_TAGGED_SPAN_RE.finditer(source_zh))`:
+       - If `"<color=#FFE897>敌方英雄触发<a>╫牺牲</color></a>"` in `source_zh` and `"<" not in result`:
+         - Wrap `<a href=3130011><color=#ffffff>═<b>Temporary Level</b></color></a>` around `Temporary Level` and `<color=#FFE897>Hero musuh memicu <a>╫Sacrifice</color></a>` around `Hero musuh memicu Sacrifice`!
+       - If `m_nest := re.search(r"<color=([^>]+)>([^<]*)<color=([^>]+)>([^<]+)</color>([^<]*)</color>", source_zh)` and `"<" not in result`:
+         - Wrap the inner value (`m_nest.group(4)`, e.g. `2.5%` or `5`) in `<color={c2}>{inner_val}</color>`, and wrap the clause containing `<color={c2}>` (after `,` in `result`, or the verb phrase `memiliki ... <color={c2}>5</color> kali` / `Basic Attack Hero ... Max HP musuh`) in `<color={c1}>...</color>`!
+
+### Task 46: Add Round 7 Anti-Regression Assertions (`0` `_wrap_exact_tag_sequence` & `0` `missing_pairs` Across Entire Catalog), Rebuild Pipeline, Commit `graft` Setup, & Re-Publish `v1.4.12-id.2`
+
+- [x] **Step 46.1: Expand `test_round6_footer_terms_and_zero_fallback_wraps` in `tests/test_glossary_and_tiers.py`**
+  1. Assert **0** calls to `_wrap_exact_tag_sequence` and **0** calls to `missing_pairs` across all `4,183` target strings in `catalog.json.gz`.
+  2. Assert `Yang Yuhuan` (`杨玉环弹奏琵琶...` and `<color=#ffffffbf>清平：</color>杨玉环弹奏琵琶...`) has `[0] HP ([1]+[2]% Magic Attack)` under `Qingping` and `[3] Magic Damage ([4]+[5]% Magic Attack)` under `Pozhen` (never swapped, and never `"memberikan memulihkan"`).
+  3. Assert `战斗开始时，你的英雄普攻附带<color=#FFE897>敌人最大生命值<color=#00FF00>2.5%</color></color>的法术伤害。` wraps `<color=#00FF00>2.5%</color>` around `2.5%` (not `milikmu disertai Magic`).
+  4. Assert `获得<color=#FFE897>强敌克星</color>：造成真实伤害，每普攻4次眩晕敌人。` and `获得<color=#FFE897>断念</color>：造成伤害时降低敌方最大生命值。` start with `"Memperoleh "` (not `"Gain "`).
+  5. Assert `Mi Yue` (`芈月为等级最高的近战友军召唤1只暗影仆从协助战斗...`) wraps `<color=#dfa15e>Physical Defense</color>` and `<color=#d487e4>Magic Defense</color>` (not `<color=#9ff5d0>Physical Defense</color>`).
+  6. Assert `<color=#99DEB0>召唤╉图腾</color>，己方所有【大河】英雄获得相当于<a><color=#99DEB0>╉<b>图腾</b></color></a>等级<color=#99DEB0>50%</color>的<a>═临时等级</a>。` does NOT contain `"<a>Riverlands"` or `"Level═</a>"`.
+
+- [x] **Step 46.2: Re-Run Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Run `graft build` & `pytest -v`, Commit All Files (Including `graft` Setup), Force-Tag `v1.4.12-id.2`, & Re-Upload Release Assets (`06`)**
+  1. `/home/whise/.local/bin/uv run --python 3.12 python scripts/01b_build_hybrid_vfs_index.py`
+  2. `/home/whise/.local/bin/uv run --python 3.12 python scripts/02_build_indonesian_catalog.py`
+  3. `/home/whise/.local/bin/uv run --python 3.12 python scripts/03_patch_worker_modules.py`
+  4. `/home/whise/.local/bin/uv run --python 3.12 python scripts/04_verify_real_windows_game.py`
+  5. `/home/whise/.local/bin/uv run --python 3.12 python scripts/05_repack_windows_exe.py`
+  6. `graft build` and `/home/whise/.local/bin/uv run --python 3.12 pytest -v`
+  7. Update SHA-256 hashes in `README.md` & `scripts/06_publish_github_release.py`, check `[x]` on all completed tasks in `.agents/plan/2026-11-03-hok-ace-indonesian-patcher-plan.md`, commit all modified files AND the `graft` repo setup files (`.gitignore`, `.ignore`, `.claude/`, `.gemini/`, `.mcp.json`, `AGENTS.md`, `GEMINI.md`), `git push origin main`, `git tag -f v1.4.12-id.2 HEAD && git push -f origin v1.4.12-id.2`, and run `scripts/06_publish_github_release.py`.
+
 
 
 

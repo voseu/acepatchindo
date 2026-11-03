@@ -234,6 +234,66 @@ BADGE_ALIAS_MAP: dict[str, list[str]] = {
     "【玄雍】英雄牌": ["Kartu Hero [Xuanyong]", "[Xuanyong]"],
     "【尧天】英雄牌": ["Kartu Hero [Yaotian]", "[Yaotian]"],
     "【云梦泽】英雄牌": ["Kartu Hero [Cloudream]", "[Cloudream]"],
+    "清平": ["Qingping", "Serenity"],
+    "破阵": ["Pozhen", "Discord", "Conquest"],
+    "撕裂": ["Rend", "sobekan", "Sobekan"],
+    "法潮灵杖": ["Arcane Tide Staff", "Tide Staff", "Tongkat Pasang Surut"],
+    "强敌克星": ["Bane of the Mighty", "Nemesis", "Penakluk Musuh Kuat"],
+    "断念": ["Severance", "Heartbreak", "Pemutus Harapan"],
+    "效果锦囊牌": [
+        "kartu Efek Lucky Bag",
+        "efek Strategi kartu",
+        "Effect Strategy Card",
+        "Kartu Strategi Efek",
+        "kartu strategi efek",
+    ],
+    "4/5阶的召唤单位": [
+        "4/5 Tier Summoned Unit",
+        "Summoned Unit Tier 4/5",
+        "Tier 4/5 unit panggilan",
+        "Unit Panggilan Tier 4/5",
+        "unit summon Tier 4/5",
+    ],
+    "首次对【逐鹿】英雄使用的效果牌": [
+        "Kartu Efek pertama yang digunakan pada Hero [Zhulu]",
+        "pertama Kartu Efek digunakan pada sebuah [Zhulu Plateau] Hero",
+        "Kartu Efek pertama yang dipakai pada Hero [Zhulu]",
+    ],
+    "变为其召唤者（无卡牌效果）": [
+        "berubah menjadi pemanggilnya (tanpa efek kartu)",
+        "menjadi summoner mereka (tidak kartu efek)",
+        "berubah menjadi summoner mereka (tanpa efek kartu)",
+    ],
+    "第一排╋闪现英雄": [
+        "╋Flash Hero di baris pertama",
+        "Flash Hero di baris pertama",
+        "depan-baris╋ Flash Hero",
+        "Hero Flash di baris pertama",
+    ],
+    "第一排闪现英雄": [
+        "Flash Hero di baris pertama",
+        "depan-baris Flash Hero",
+        "Hero Flash di baris pertama",
+    ],
+    "后三排╋闪现英雄": [
+        "╋Flash Hero di 3 baris belakang",
+        "Flash Hero di 3 baris belakang",
+        "kembali 3 baris dari╋ Flash Hero",
+        "kembali 3-baris╋ Flash Hero",
+        "Hero Flash di 3 baris belakang",
+    ],
+    "后三排闪现英雄": [
+        "Flash Hero di 3 baris belakang",
+        "kembali 3 baris dari Flash Hero",
+        "Hero Flash di 3 baris belakang",
+    ],
+    "场上的╉图腾被摧毁": [
+        "Saat Totem di field hancur",
+        "Saat ╉Totem di field hancur",
+        "Totem di field hancur",
+        "╉Totem di papan dihancurkan",
+        "Totem di arena hancur",
+    ],
 }
 
 LEADING_TAGGED_PREFIX_RE = re.compile(
@@ -388,6 +448,18 @@ def reinject_formula_and_skeleton(
         else:
             footer_id = f"{leading_nl}<color={c_val}>Ketuk panel deskripsi Skill untuk melihat penjelasan detail <b>{term_id}</b></color>"
 
+    # Fold 3-line desc_id to 2 lines when source_zh is 2-line Yang Yuhuan variant
+    if (
+        source_zh.lstrip().startswith(("<color=#ffffffbf>清平：</color>", "清平："))
+        and out.strip().startswith("Yang Yuhuan memainkan pipa")
+    ):
+        out = re.sub(
+            r"^Yang Yuhuan memainkan pipa[^.\n]*\.\s*\n\s*Qingping:\s*",
+            "Qingping: Yang Yuhuan memainkan pipa, ",
+            out,
+        )
+        desc_cn = re.sub(r"^杨玉环弹奏琵琶[^，,\n]*[，,\n]\s*(?:循环激活以下乐曲效果之一[：:]\s*)?", "", desc_cn)
+
     # Step 1: Pre-bind Chinese numerals to digits (1..10)
     ZH_DIGIT_MAP = {
         "一": "1", "二": "2", "两": "2", "三": "3", "四": "4",
@@ -479,40 +551,45 @@ def reinject_formula_and_skeleton(
     src_matches = expr_with_unit_re.findall(src_clean)
     if len(cn_matches) == len(src_matches):
         slots: list[tuple[str, str]] = []
-        cursor = 0
+        cursor_by_cex: dict[str, int] = {}
         for i, ((c_ex, c_u), (s_ex, s_u)) in enumerate(zip(cn_matches, src_matches)):
             unit_pat = UNIT_MAP.get(s_u or c_u, "")
+            cur_pos = cursor_by_cex.get(c_ex, 0)
             if c_ex == s_ex:
                 pat_same = re.compile(rf"(?<![\d\[{{|A-Za-z_]){re.escape(c_ex)}(?![\d%\]}}|A-Za-z_])")
-                m_same = pat_same.search(out, cursor)
+                m_same = pat_same.search(out, cur_pos)
                 if m_same:
-                    cursor = m_same.end()
+                    cursor_by_cex[c_ex] = m_same.end()
                 continue
             pat = None
             if unit_pat:
                 pat = re.compile(rf"(?<![\d\[{{|A-Za-z_]){re.escape(c_ex)}(?![\d%\]}}|A-Za-z_])(?={unit_pat})", flags=re.I)
-                m = pat.search(out, cursor)
+                m = pat.search(out, cur_pos)
                 if not m:
                     m = pat.search(out, 0)
                 if not m:
                     pat = None
             if not pat:
                 pat = re.compile(rf"(?<![\d\[{{|A-Za-z_]){re.escape(c_ex)}(?![\d%\]}}|A-Za-z_])")
-                m = pat.search(out, cursor)
+                m = pat.search(out, cur_pos)
                 if not m:
                     m = pat.search(out, 0)
             if not m and re.match(r"^\d+(?:\.\d+)?\+\d+(?:\.\d+)?%$", c_ex):
-                m = re.compile(r"\d+(?:\.\d+)?\s*\+\s*\d+(?:\.\d+)?%").search(out, cursor)
+                m = re.compile(r"(?<![\d\[])\d+(?:\.\d+)?\s*\+\s*\d+(?:\.\d+)?%").search(out, cur_pos)
                 if not m:
-                    m = re.compile(r"\d+(?:\.\d+)?\s*\+\s*\d+(?:\.\d+)?%").search(out, 0)
+                    m = re.compile(r"(?<![\d\[])\d+(?:\.\d+)?\s*\+\s*\d+(?:\.\d+)?%").search(out, 0)
             if not m:
                 continue
             clean_s = re.sub(r"\s+", "", s_ex)
             if clean_s in ph_map:
                 s_ex = ph_map[clean_s]
             slot_tok = f"__EXPRSLOT{chr(65 + (i // 26))}{chr(65 + (i % 26))}__"
+            delta = len(slot_tok) - (m.end() - m.start())
             out = out[:m.start()] + slot_tok + out[m.end():]
-            cursor = m.start() + len(slot_tok)
+            for k_c, v_c in list(cursor_by_cex.items()):
+                if v_c > m.start():
+                    cursor_by_cex[k_c] = v_c + delta
+            cursor_by_cex[c_ex] = m.start() + len(slot_tok)
             slots.append((slot_tok, s_ex))
         for slot_tok, s_ex in slots:
             out = out.replace(slot_tok, s_ex)
@@ -557,20 +634,42 @@ def reinject_formula_and_skeleton(
         last_ph = inner_phs[-1]
         span_re = _get_formula_span_re(first_ph, last_ph)
         m_sp = span_re.search(out)
+        inner_clean = ""
+        if not m_sp and first_ph not in out:
+            alt_re = re.compile(
+                rf"(?:(?:Physical|Magic|True)\s+Damage\s+(?:sebesar\s+)?|Damage\s+(?:sebesar\s+)?|Shield\s+(?:sebesar\s+)?|HP\s+(?:sebesar\s+)?|memulihkan\s+(?:tambahan\s+)?)?"
+                rf"(?:\d+(?:\.\d+)?%?\s*\+\s*\d+(?:\.\d+)?%|\d+(?:\.\d+)?%?)"
+                rf"\s*{stat_label}(?:\s+(?:miliknya|dasarnya|dasar|tambahan))?"
+                rf"(?:\s+sebagai\s+{kind_id})?",
+                flags=re.I,
+            )
+            m_sp = alt_re.search(out)
+            if m_sp:
+                matched_inner = inner_zh
+                for zh_s, id_s in (
+                    ("法术攻击力", "Magic Attack"),
+                    ("物理攻击力", "Physical Attack"),
+                    ("最大生命值", "Max HP"),
+                    ("生命值", "HP"),
+                    ("生命", "HP"),
+                ):
+                    matched_inner = matched_inner.replace(zh_s, id_s)
+                inner_clean = matched_inner
         if m_sp:
             matched_formula = m_sp.group(0).strip()
-            inner_clean = re.sub(
-                r"^(?:(?:Physical|Magic|True)\s+Damage|Damage|Shield|HP)\s+(?:sebesar\s+)?",
-                "",
-                matched_formula,
-                flags=re.I,
-            )
-            inner_clean = re.sub(
-                r"\s+sebagai\s+(?:(?:Physical|Magic|True)\s+Damage|HP)$",
-                "",
-                inner_clean,
-                flags=re.I,
-            )
+            if not inner_clean:
+                inner_clean = re.sub(
+                    r"^(?:(?:Physical|Magic|True)\s+Damage|Damage|Shield|HP)\s+(?:sebesar\s+)?",
+                    "",
+                    matched_formula,
+                    flags=re.I,
+                )
+                inner_clean = re.sub(
+                    r"\s+sebagai\s+(?:(?:Physical|Magic|True)\s+Damage|HP)$",
+                    "",
+                    inner_clean,
+                    flags=re.I,
+                )
             prefix_id = "memulihkan " if "恢复" in pre_zh and not re.search(r"memulihkan\s+$", out[:m_sp.start()], flags=re.I) else ""
             rep = f"{open1}{prefix_id}{idx_a} {kind_id}{close1}{open2} ({inner_clean}){close2}"
             out = out[:m_sp.start()] + rep + out[m_sp.end():]
@@ -608,11 +707,11 @@ def reinject_formula_and_skeleton(
             num_pat = rf"{re.escape(toks[0])}%"
         if kind_zh.startswith("生命"):
             sp2a = re.compile(
-                rf"(memulihkan\s+)?({num_pat}\s*(?:Magic Attack|Physical Attack|Max HP|HP Maks)(?:\s+miliknya)?)\s*((?:sebagai\s+)?HP\b)",
+                rf"(memulihkan\s+)?({num_pat}\s*(?:Magic Attack|Physical Attack|Max HP|HP Maks)(?:\s+(?:miliknya|Miyue|Mi Yue|Yaria))?)\s*((?:sebagai\s+)?HP(?:\s+sekutu(?:\s+itu)?)?\b)",
                 flags=re.I,
             )
             sp2b = re.compile(
-                rf"(memulihkan\s+)(HP(?:\s+miliknya)?)\s+sebesar\s+({num_pat}\s*(?:Magic Attack|Physical Attack|Max HP|HP Maks)(?:\s+miliknya)?)",
+                rf"(memulihkan\s+)(HP(?:\s+sekutu(?:\s+itu)?|\s+miliknya)?)\s+sebesar\s+({num_pat}\s*(?:Magic Attack|Physical Attack|Max HP|HP Maks)(?:\s+(?:miliknya|Miyue|Mi Yue|Yaria))?)",
                 flags=re.I,
             )
             if m_a := sp2a.search(out):
@@ -759,6 +858,21 @@ def reinject_skeleton_from_source(
 
     result = plain_id
 
+    # Fold 3-line result to 2 lines when source_zh is 2-line Yang Yuhuan variant
+    if (
+        source_zh.lstrip().startswith(("<color=#ffffffbf>清平：</color>", "清平："))
+        and result.strip().startswith("Yang Yuhuan memainkan pipa")
+    ):
+        result = re.sub(
+            r"^Yang Yuhuan memainkan pipa[^.\n]*\.\s*\n\s*Qingping:\s*",
+            "Qingping: Yang Yuhuan memainkan pipa, ",
+            result,
+        )
+
+    # Sanitize corrupted upstream English patcher baseline_en
+    if baseline_en and "<a>Riverlands<color=#99DEB0>" in baseline_en:
+        baseline_en = "Summon <color=#99DEB0>╉Totem</color>. All allied [Riverlands] heroes gain <a><color=#99DEB0>╉<b>Totem</b></color></a> Level <color=#99DEB0>50%</color> as <a>═Temporary Level</a>."
+
     # 0. Multiline line-by-line alignment if both have newlines
     if "\n" in source_zh and "\n" in result and source_zh.count("\n") != result.count("\n"):
         src_paras = [p for p in re.split(r"\n+", source_zh.strip()) if p.strip()]
@@ -797,10 +911,22 @@ def reinject_skeleton_from_source(
             if ok:
                 return normalize_tag_boundary_spacing(source_zh, cand_multiline)
 
-    if "<a href=321>" in source_zh and "<a href=3130011>" in source_zh and source_zh.find("<a href=321>") < source_zh.find("<a href=3130011>"):
+    if "图腾" in source_zh and "临时等级" in source_zh and ("<a" in source_zh) and source_zh.find("图腾") < source_zh.find("临时等级"):
         result = re.sub(
             r"memperoleh\s+(═?Temporary Level)\s+sebesar\s+(\d+%)\s+dari\s+jumlah\s+Level\s+setiap\s+(╉?Totem)",
             r"dari setiap \3, memperoleh \2 \1 berdasarkan jumlah Level-nya",
+            result,
+            flags=re.I,
+        )
+        result = re.sub(
+            r"memperoleh\s+(═?Temporary Level)\s+sebesar\s+(setengah\s+Level)\s+(╉?Totem\s+tersebut)",
+            r"memperoleh \2 \3 sebagai \1",
+            result,
+            flags=re.I,
+        )
+        result = re.sub(
+            r"mendapatkan\s+(?:╉?Temporary\s+Level\s+)?sebesar\s+(\d+%)\s+dari\s+(╉?Totem)\s+Level",
+            r"mendapatkan \2 Level \1 sebagai ═Temporary Level",
             result,
             flags=re.I,
         )
@@ -812,12 +938,36 @@ def reinject_skeleton_from_source(
         if (
             m_en
             and m_id
+            and m_en.group(1).lstrip().startswith("<")
             and TAG_RE.findall(m_en.group(1)) == tags_in_src
             and len(TAG_RE.sub("", m_en.group(1)).strip().split()) <= 2
         ):
             cand = sanitize_target_text(source_zh, f"{m_en.group(1)}: {m_id.group(2)}")
             if validate_translation(source_zh, cand)[0]:
                 return cand
+
+    # Special: Handle interleaved <color=#FFE897>敌方英雄触发<a>╫牺牲</color></a>
+    if "<color=#FFE897>敌方英雄触发<a>╫牺牲</color></a>" in source_zh and "<" not in result:
+        cand_il = result
+        cand_il = re.sub(r"\b(═?Temporary Level)\b", r"<a href=3130011><color=#ffffff>═<b>\1</b></color></a>", cand_il)
+        cand_il = re.sub(r"(Hero musuh\s+(?:Memicu|memicu)\s+)(?:<a>)?(?:╫)?(?:Sacrifice|Pengorbanan)(?:</a>)?", r"<color=#FFE897>\1<a>╫Sacrifice</color></a>", cand_il, flags=re.I)
+        if validate_translation(source_zh, cand_il)[0]:
+            return cand_il
+
+    # Special: Handle nested <color=C1>...<color=C2>VAL</color>...</color>
+    m_nest = re.search(r"<color=([^>]+)>([^<]*)<color=([^>]+)>([^<]+)</color>([^<]*)</color>", source_zh)
+    if m_nest and "<" not in result:
+        c1 = m_nest.group(1)
+        c2 = m_nest.group(3)
+        inner_val = m_nest.group(4)
+        if inner_val in result:
+            cand_nest = result.replace(inner_val, f"<color={c2}>{inner_val}</color>", 1)
+            m_phrase = re.search(rf"(?:sebesar\s+)?<color={re.escape(c2)}>{re.escape(inner_val)}</color>(?:\s+Max HP\s+musuh|\s+kali)?", cand_nest, flags=re.I)
+            if m_phrase:
+                phrase_span = m_phrase.group(0)
+                cand_nest = cand_nest[:m_phrase.start()] + f"<color={c1}>{phrase_span}</color>" + cand_nest[m_phrase.end():]
+                if validate_translation(source_zh, cand_nest)[0]:
+                    return cand_nest
 
     # 2. Match all atomic tagged spans in source_zh and wrap corresponding terms in result
     spans = list(ATOMIC_TAGGED_SPAN_RE.finditer(source_zh))
@@ -920,8 +1070,10 @@ def reinject_skeleton_from_source(
                     if alias.endswith((".", ":", "\n")):
                         kw = alias[:-1]
                         punct = alias[-1]
-                        if punct in (":", "："):
+                        if punct in (":", "：") and zh_inner.endswith(("：", ":")):
                             tagged = f"{open_part}{kw}:{close_part} "
+                        elif punct in (":", "："):
+                            tagged = f"{open_part}{kw}{close_part}: "
                         else:
                             tagged = f"{open_part}{kw}{close_part}{punct}"
                     else:
@@ -1135,7 +1287,7 @@ def reinject_skeleton_from_source(
         "╫": ("On Play", "Deploy", "Saat Diterjunkan", "Sacrifice", "Pengorbanan"),
         "╨": ("Sacrifice", "Pengorbanan", "Deploy", "Saat Diterjunkan"),
         "╈": ("Awaken", "Bangkit"),
-        "╦": ("ancient coin", "Ancient Coin"),
+        "╦": ("ancient coin", "Ancient Coin", "Merge", "Synthesis", "Combine", "Menggabungkan", "Gabung"),
     }
 
     if ctrls_in_src and Counter(CONTROL_TOKEN_RE.findall(result)) != Counter(ctrls_in_src):
@@ -1152,7 +1304,8 @@ def reinject_skeleton_from_source(
                             rf"(?<!{re.escape(ch)} )"
                             rf"(?<!{re.escape(ch)}<b>)"
                             rf"(?<!{re.escape(ch)}<b> )"
-                            rf"(?<!>)"
+                            rf"(?<!{re.escape(ch)}<color=#FFE897>)"
+                            rf"(?<!{re.escape(ch)}<color=#ffffff>)"
                             rf"\b({re.escape(kw)})\b",
                             rf"{ch}\1",
                             result,
@@ -1280,6 +1433,10 @@ def reinject_skeleton_from_source(
             ok, _ = validate_translation(source_zh, cand)
             if ok:
                 return normalize_tag_boundary_spacing(source_zh, cand)
+
+    if not tags_in_src:
+        cand = sanitize_target_text(source_zh, TAG_RE.sub("", result))
+        return normalize_tag_boundary_spacing(source_zh, cand)
 
     stripped_result = CONTROL_TOKEN_RE.sub("", TAG_RE.sub("", result)).strip()
     wrapped = _wrap_exact_tag_sequence(source_zh, stripped_result, inner_translator)
