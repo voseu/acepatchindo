@@ -19,6 +19,7 @@ Strictly classifies catalog strings into:
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from acepatchindo.tag_aligner import (
@@ -59,6 +60,13 @@ TALENT_TAGS: frozenset[str] = frozenset(
     {"BCDE", "75CA", "9344", "31CF", "A40D", "BE08", "1632", "E222", "E378", "0977", "BF5A", "CEDB", "0955", "2394", "5CFD"}
 )
 
+P_CHOICE_CARD_RE = re.compile(
+    r"^(?:卡牌\d+选\d+|\d+阶卡牌\d+选\d+|(?:2选1|3选1|4选1|5选2)(?:一件|高级|普通|英雄|【)?|"
+    r"获得\d+张.+英雄牌。|\d+选1.+英雄，获得\d+张该英雄牌。|"
+    r"随机抽取\d+张.*英雄牌。|指定1名英雄等级\+\d+.*|\d+件装备选\d+件。|立即使所有手牌费用-\d+。)"
+)
+P_UNIT_FLAVOR_RE = re.compile(r"^(?:可爱的小鹿|它最大的职责就是挨打|机器仆从|训练用人偶|404\s*Error)")
+
 
 class HybridClassifier:
     """Deterministic classifier for Hybrid Gameplay strings."""
@@ -91,10 +99,12 @@ class HybridClassifier:
         if not zh_clean:
             return False
 
-        # 1. Hard vetoes: non-target 108, equipment, effect cards
+        # 1. Hard vetoes: non-target 108, equipment, effect cards, choice cards, training dummy
         if zh_clean in WINDOWS_108_NONTARGET_EN:
             return False
         if zh_clean in self.veto_equip_zh or zh_clean in self.veto_effect_zh:
+            return False
+        if P_CHOICE_CARD_RE.search(zh_clean) or P_UNIT_FLAVOR_RE.search(zh_clean):
             return False
 
         p_zh = normalize_plain_zh(zh_clean)
@@ -147,15 +157,26 @@ class HybridClassifier:
         if tag not in ALLOWED_TARGET_PREFIXES or tag == "60D2":
             return False
 
-        # 2. If Chinese source string is provided, use is_target_unique
         if opt_zh:
-            return self.is_target_unique(opt_zh, target_en)
+            if (
+                opt_zh in WINDOWS_108_NONTARGET_EN
+                or opt_zh in self.veto_names_zh
+                or opt_zh in self.veto_equip_zh
+                or opt_zh in self.veto_effect_zh
+                or opt_zh in self.nontarget_table_zh
+            ):
+                return False
+            p_zh = normalize_plain_zh(opt_zh)
+            if p_zh in self.veto_equip_plain or p_zh in self.veto_effect_plain:
+                return False
+            if self.is_target_unique(opt_zh, target_en):
+                return True
 
-        # 3. Veto check (key or suffix)
+        # 2. Veto check (key or suffix)
         if key in self.vfs_veto_keys or suffix in self.vfs_veto_sfx:
             return False
 
-        # 4. Direct match in target keys from VFS index
+        # 3. Direct match in target keys from VFS index
         if key in self.vfs_target_keys:
             return True
         if tag in CARD_TAGS - {"60D2"} and suffix in self.hero_suffixes and suffix not in self.vfs_veto_sfx:

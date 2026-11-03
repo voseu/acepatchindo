@@ -2645,7 +2645,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
 
 ### Task 33: Fix `#60D2` Poisoning, `P_EQUIP_PATTERN` Guard, & Formula Skeleton Reference Matching in `scripts/01b_build_hybrid_vfs_index.py` & `src/acepatchindo/hybrid_classifier.py`
 
-- [x] **Step 33.1: Stop `#60D2` From Poisoning `veto_names_zh` and `nontarget_table_zh` in `scripts/01b_build_hybrid_vfs_index.py`**
+- [ ] **Step 33.1: Stop `#60D2` From Poisoning `veto_names_zh` and `nontarget_table_zh` in `scripts/01b_build_hybrid_vfs_index.py`** *(REOPENED BY MANAGER AUDIT ROUND 4 — Executor added unauthorized `elif len >= 8` wildcards on `#60D2`, `CARD_PREFIXES`, and `english_updates` (`lines 404, 462, 569`), leaking `88+` Choice/Draw Effect Cards `'3选1一件特殊装备。'`, `'3选1一件高级装备。'`, `'5选2【三分之地】4-5阶英雄...'`, `'获得特殊装备...'`, and `'404 Error，出厂设置故障...'`!)*
   1. In `scripts/01b_build_hybrid_vfs_index.py` (`lines 309–335`):
      - When scanning `prefix == "60D2"`:
        - Populate `m60_lookup[sfx] = s` and `m60_hero_suffixes.add(sfx)` for Chinese records (`_CJK_RE.search(s)`).
@@ -2677,7 +2677,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
 
 ### Task 34: Fix the 3 Bugs in `src/acepatchindo/tag_aligner.py` So Tier 1 `desc_id` Is Never Thrown Away for Tier 3 `baseline_en`
 
-- [x] **Step 34.1: Fix `normalize_formula_skeleton_zh` in `src/acepatchindo/tag_aligner.py:216-237`**
+- [ ] **Step 34.1: Fix `normalize_formula_skeleton_zh` in `src/acepatchindo/tag_aligner.py:216-237`** *(REOPENED — 9 1-word differences kept `Augran`, `Yang Jian`, `Erin`, `Hua Mulan`, `Athena`, `Fang`, `Xiang Yu`, `Liu Shan`, `Di Renjie`, `Kaizer`, `Bai Qi`, and `Lu Bu` Variant 1 from matching `tier1_formula_zh_to_id`!)*
   - Replace `normalize_formula_skeleton_zh` with:
     ```python
     def normalize_formula_skeleton_zh(text: str) -> str:
@@ -2694,7 +2694,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
         p = re.sub(r"\[\d+\]点?(物理|法术|真实)伤害\(([^)]+)\)", r"\2的\1伤害", p)
         p = re.sub(r"\[\d+\]点?(护盾|生命值?)\(([^)]+)\)", r"\2的\1", p)
         p = re.sub(
-            r"[一二两三四五六七八九十]+(?=周|次|秒|格|层|名|个|张|点|回合|件|把|枚|颗|只|条|道)",
+            r"[一二两三四五六七八九十]+(?=周|次|秒|格|层|名|个|张|点|回合|件|把|枚|颗|只|条|道|束|片|朵|发|支|波)",
             "#N#",
             p,
         )
@@ -2702,26 +2702,40 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
         skel = skel.replace("#N#-#N#", "#N#").replace("#N#点", "#N#")
         while "#N#+#N#" in skel or "#N##N#" in skel:
             skel = skel.replace("#N#+#N#", "#N#").replace("#N##N#", "#N#")
-        skel = re.sub(r"最大生命值的?生命值?", "最大生命值", skel)
+        skel = re.sub(r"最大生命值?的?生命值?", "最大生命值", skel)
         skel = (
             skel.replace("释放", "施放")
             .replace("基础物理攻击", "物理攻击")
             .replace("基础法术攻击", "法术攻击")
+            .replace("的物理攻击力", "物理攻击力")
+            .replace("的基础攻击力", "物理攻击力")
+            .replace("基础攻击力", "物理攻击力")
             .replace("目标敌人", "目标")
+            .replace("霸体", "免控")
+            .replace("项羽最大生命值", "最大生命值")
+            .replace("机关魔手", "机关魔爪")
+            .replace("铠召唤魔铠", "铠使用魔铠")
+            .replace("附近", "周围")
+        )
+        skel = re.sub(r"(?<!李元芳)丢出飞镖", "李元芳丢出飞镖", skel)
+        skel = re.sub(
+            r"^吕布会根据敌人位置使用不同招式(?:普攻|普通攻击)能对身前#N#格内敌人造成伤害",
+            "吕布的普通攻击能对身前敌人造成范围伤害",
+            skel,
         )
         skel = re.sub(r"[，。：:；;、“”\"!\?！？]", "", skel)
         return skel
     ```
   - Also in `reinject_formula_and_skeleton` line `354`, **DELETE** `src_clean = re.sub(r"\[\d+\](%|秒|...)", r"#\1", src_clean)`!
 
-- [x] **Step 34.2: Fix `reinject_formula_and_skeleton` (`tag_aligner.py:318-440`) So It Preserves Tier 1 `desc_id` Prose 100%**
+- [ ] **Step 34.2: Fix `reinject_formula_and_skeleton` (`tag_aligner.py:318-440`) So It Preserves Tier 1 `desc_id` Prose 100%** *(REOPENED BY MANAGER AUDIT ROUND 4 — `sentinels_icon` before Step 3/3b deleted numbers & scrambled `{Energy}`/`{LordHp}`, `out = TAG_RE.sub("", out)` + `_wrap_exact_tag_sequence` destroyed `\n` newlines in `56` strings and chunk-sliced `140` Tier 1 strings, and `reinject_skeleton_from_source` prepended `╧`/`╥`/`╉`/`╬`/`═` at index 0 in `17` strings!)*
   1. In `reinject_formula_and_skeleton`, when `cn_exprs` and `src_exprs` differ in length (or after step 3), also substitute any remaining unmatched `[...]` or `{...}` formula placeholders from `source_zh` / `baseline_en` into `out`'s numeric spans so `Counter(PLACEHOLDER_RE.findall(out)) == Counter(PLACEHOLDER_RE.findall(source_zh))`!
   2. In `reinject_formula_and_skeleton`, if the `color_spans` loop (`lines 384–429`) does NOT wrap all `<color=...>` tags in `source_zh` (`TAG_RE.findall(out) != TAG_RE.findall(source_zh)`), **strip the partial `<color=...>` tags from `out` (`out = TAG_RE.sub("", out)`)** before calling `reinject_skeleton_from_source(source_zh, out, ...)` so `reinject_skeleton_from_source`'s Step 2 (`if spans and "<" not in result:`) and Step 6 (`_wrap_exact_tag_sequence`) run cleanly!
-  3. **CRITICAL:** Pass `allow_en_fallback=False` from `reinject_formula_and_skeleton` to `reinject_skeleton_from_source` (and gate `if baseline_en and allow_en_fallback:` at line `729`), so that when `reinject_formula_and_skeleton` is aligning a **Tier 1 human-curated Indonesian translation `desc_id`**, it **NEVER** throws away `desc_id` to translate `baseline_en` with Tier 3! Instead, if Step 2 doesn't match all tags, it falls through to `_wrap_exact_tag_sequence(source_zh, stripped_result, inner_translator)` which preserves 100% of the Tier 1 Indonesian prose (`desc_id`) while guaranteeing `TAG_RE`, `PLACEHOLDER_RE`, and `CONTROL_TOKEN_RE` pass `validate_translation`!
+  3. **CRITICAL:** Pass `allow_en_fallback=False` from `reinject_formula_and_skeleton` to `reinject_skeleton_from_source` (and gate `if baseline_en and allow_en_fallback:` at line `729`), so that when `reinject_formula_and_skeleton` is aligning a **Tier 1 human-curated Indonesian translation `desc_id`**, it **NEVER** throws away `desc_id` to translate `baseline_en` with Tier 3!
 
 ### Task 35: Fix Remaining Tier 3 Prose Defects (`ke Menyerang`, `Basic Attack Basic Attack`, `meningkatkan ... oleh`) in `src/acepatchindo/glossary.py` & `src/acepatchindo/lexicon_id.py`
 
-- [x] **Step 35.1: Fix Case-Insensitive `"ke <verb>"`, Duplicate `"Basic Attack"`, and `"oleh"` -> `"sebesar"`**
+- [ ] **Step 35.1: Fix Case-Insensitive `"ke <verb>"`, Duplicate `"Basic Attack"`, and `"oleh"` -> `"sebesar"`** *(REOPENED — `glossary.py:883` hardcoded `rels[1]` mapping Bai Ge's `释放3道剑气...` to `Improvised Creation`, plus `Combat Mulai`, `Preparation untuk perang`, `bermain pada saat yang sama`, `tertinggi-Tier Hero`, `diri sendiri-menghancurkan`, `nilai terendah HP`, `sebuah sekutu Memanggil`, `+30% Menyerang`!)*
   1. In `src/acepatchindo/glossary.py` (`_post_cleanup_id`), add `flags=re.IGNORECASE` to the `\bke\s+(me[a-z]+|ber[a-z]+|...)` regex so capitalized `"ke Menyerang"`, `"ke Memberikan"`, `"ke Memulihkan"`, `"ke Memicu"`, `"ke Mendapatkan"`, `"ke Meningkatkan"` become **`"untuk menyerang"`**, **`"untuk memberikan"`**, **`"untuk memulihkan"`**, **`"untuk memicu"`**!
   2. Deduplicate repeated `"Basic Attack Basic Attack"`:
      `out = re.sub(r"\b(Basic Attack)(?:\s+\1)+\b", r"\1", out, flags=re.I)`
@@ -2731,12 +2745,164 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
 
 ### Task 36: Strengthen `tests/test_glossary_and_tiers.py`, Rebuild Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Verify `14 passed`, & Re-Publish `v1.4.12-id.2` (`06`)
 
-- [x] **Step 36.1: Fix `tests/test_glossary_and_tiers.py` & Add Strict Assertions for All 3 Round 3 Fixes**
-  1. Fix line `418` of `tests/test_glossary_and_tiers.py`: change `tgt_sfx = {k.split("#")[-1] for k in ...}` to `tgt_sfx = {k[5:17] for k in vfs_data.get("vfs_target_keys", [])}`!
-  2. Assert **0** missed strings in `cat["unique"]` whose `normalize_plain_zh(zh)` is in `vfs_data["ref_target_plain"]` (and `zh` not in `veto_equip_zh | veto_effect_zh | WINDOWS_108_NONTARGET_EN`): specifically assert `<color=#FFE897>4/5阶的召唤单位</color>获得╧完美复生。`, `光辉伤害提升至[0]%法术攻击力`, `子弹伤害提升至40+25%物理攻击力`, `导弹伤害提升至30+80%物理攻击力`, and `云中君展翅舞蹈向周围1格射出羽箭...` are ALL translated to Indonesian (`cat["unique"][zh] != orig_cat["unique"][zh]`)!
-  3. Assert **0** mismatches between `cat["unique"]` and `cat["english_updates"]` when `r[4]` (`opt_zh`) is present in `cat["unique"]` and `r[1][1:5] in ALLOWED_TARGET_PREFIXES - {"60D2"}`: if `cat["unique"][opt_zh] != orig_cat["unique"][opt_zh]`, then `r[3] != orig_row[3]`!
-  4. Assert the 10 multi-formula Hero skills (`Lu Bu`, `Augran`, `Allain`, `Donghuang`, `Yang Jian`, `Dolia`, `Yao`, `Li Bai`, `Fang`, `Yuhuan`) use their **Tier 1** translations and have **0** occurrences of Tier 3 fallback strings: `"melompat menjadi padat"`, `"sebuah padat"`, `"itu orbit"`, `"itu mengelilinginya"`, `"Merah tua Bayangan"`, `"Hati Menjaga"`, `"putri duyung wujud dalam air"`, `"Basic Attack Basic Attack"`, `"ke Menyerang"`, `"ke Memberikan"`, `"ke Memulihkan"`, `"ke Memicu"`.
-- [x] **Step 36.2: Re-Run Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Run `pytest -v`, Commit, Force-Tag `v1.4.12-id.2`, & Re-Upload Release Assets (`06`)**
+- [ ] **Step 36.1: Fix `tests/test_glossary_and_tiers.py` & Add Strict Assertions for All 3 Round 3 Fixes** *(REOPENED)*
+- [ ] **Step 36.2: Re-Run Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Run `pytest -v`, Commit, Force-Tag `v1.4.12-id.2`, & Re-Upload Release Assets (`06`)** *(REOPENED)*
+
+---
+
+## Phase 6 Remediation Round 4: Eliminating `_wrap_exact_tag_sequence` & `sentinels_icon` Corruption, Unauthorized `CARD_PREFIXES` Wildcard Leaks, & `glossary.py:883` `rels[1]` Bug (Tasks 37–40)
+
+> [!CAUTION]
+> **Manager Forensic Audit of `commit 5fb6392` — REJECTED Due to 3 Severe Regressions Uncovered by Deep Inspection:**
+> 1. **`sentinels_icon` EXECUTION-ORDER BUG & `_wrap_exact_tag_sequence` CHUNK-SLICING IN `src/acepatchindo/tag_aligner.py` (`140` Tier 1 Hero Skills & Talents Corrupted, `56` Strings Lost `\n` Newlines, `17` Strings With Misplaced `╧`/`╥`/`╉`/`╬`/`═` Glyphs at Index 0, and `10+` Strings With Deleted Numbers):**
+>    - **Bug 1A (`sentinels_icon` vs `COMPOUND_EXPR_RE` & `needed_phs` Collision at `tag_aligner.py:268-399, 462`):**
+>      - Step 1 (`lines 268–332`) replaced `{0|2}{Energy}`, `{1|10}{LordHp}`, `{3|2}`, and standalone `{Energy}`, `{LordExp}`, `{LordHp}` in `out` with `__WXQICONPH0__` sentinels **BEFORE** Step 3 (`COMPOUND_EXPR_RE`, `lines 372–385`) and Step 3b (`curr_phs = Counter(PLACEHOLDER_RE.findall(out))`, `lines 387–399`), and only restored `sentinels_icon` at line `462`!
+>      - Because `src_clean` still contained `{0|2}` while `out` had already replaced `2 Energy` with `__WXQICONPH0__`, Step 3 overwrote the NEXT `2` in `out` (`Tier 2-3` -> `Tier {0|2}-3`), and Step 3b saw `curr_phs == 0` for `{Energy}`/`{LordHp}`/`{LordExp}` (hidden inside `__WXQICONPH0__`!) and overwrote the first numbers in `out` (`10`, `6`, `2`, `1`) with duplicate `{Energy}`/`{LordHp}`/`{LordExp}` placeholders! Then `_wrap_exact_tag_sequence` (`line 865`) deleted the first placeholder (`__WXQICONPH0__`), producing broken strings with missing numbers and scrambled placeholders:
+>        - `'获得{0|2}{Energy}，以及随机1张2-3阶<color=#FFE897>【河洛】英雄牌</color>。'` -> `'Memperoleh , dan secara <color=#FFE897> acak {Energy} Kartu Hero</color>[Central Plain] Tier {0|2}-3.'`
+>        - `'<color=#FFE897>{LordHp}</color>-10，战斗开始时...'` -> `'<color=#FFE897> -. Saat Combat dimulai,</color> tiap Hero milikmu +{LordHp} Temporary <color=#FFE897> Level...'`
+>        - `'<color=#FFE897>【逐鹿】英雄每释放6次技能</color>，获得{0|1}{Energy}，上限{0|5}{Energy}。'` -> `'<color=#FFE897> Setiap Hero [Zhulu] menggunakan Skill </color> kali, memperoleh {0|1}{Energy}...'` (`6` deleted!)
+>        - `'随机获得10-20{Energy}。'` -> `'Secara acak memperoleh -20 {Energy}.'` (`10` deleted!)
+>        - `'选取天赋后，当你<color=#FFE897>输掉2场战斗</color>时，获得{3|6}{LordExp}。'` -> `'Setelah memilih Talent <color=#FFE897> ini,setiap kamu kalah</color> kali Combat, memperoleh {3|6}{LordExp}.'` (`2` deleted!)
+>    - **Bug 1B (`reinject_formula_and_skeleton` Stripping All Tags at `line 459` & Falling Into `_wrap_exact_tag_sequence` Chunk-Slicing on `140` Tier 1 Strings):**
+>      - Trailing UI hints `<color=#86888A>点击技能描述面板，查看<b>击飞</b>详细解释</color>` in `source_zh` (`Donghuang`, `Lu Bu`, `Li Bai`, `Diao Chan`, `Master Luban`, `Bai Qi`) contain nested `<b>...</b>` inside `<color=...>`, whereas line `408` appended `<color={c_val}>Ketuk panel deskripsi Skill untuk melihat penjelasan detail</color>` **without `<b>...</b>`**, guaranteeing `TAG_RE.findall(out) != TAG_RE.findall(source_zh)` at line `458`!
+>      - Step 2 (`lines 335–351`) grafted multi-tag parenthetical formulas (`<color=#dfa15e>[0] Physical Damage</color><color=#dfa15e> ([1]+[2]% Physical Attack)</color>`) into `out`, and then Step 5 (`color_spans`, `lines 412–457`) tried to wrap `<color=#dfa15e>` AGAIN or failed on lowercase `memulihkan ... Max HP` (`id_dmg_spans` at line `342` lacked `re.I` and `Max HP`!), causing line `459` (`out = TAG_RE.sub("", out)`) to **strip all tags from `out`**!
+>      - Then in `reinject_skeleton_from_source`, whenever even 1 span in `spans` didn't match (`all_matched == False`), line `709` **threw away all matched spans in `curr`** and called `_wrap_exact_tag_sequence` (`lines 802–880`), which did `words = stripped_id.split()` (**destroying all `\n` newlines in `56` multi-line skills!**) and sliced sentences into `k` equal-width word chunks (`'<color=#ffffffbf> Pasif: Basic Attack Lu Bu</color> memberikan Damage area ke musuh <color=#ffffffbf> di depannya. Aktif: Lu Bu</color>'`, `'Yang Yuhuan memainkan <color=#ffffffbf> pipa dan mengaktifkan</color> salah satu efek <color=#9ff5d0> lagu secara bergantian.</color>'`, `'Donghuang menciptakan 3 <color=#d487e4> bola energi yang</color> mengelilinginya...'`)!
+>    - **Bug 1C (`17` Strings With Misplaced Control Glyphs `╧`, `╥`, `╉`, `╬`, `═`, `╆`, `╋` Prepend-Dumped at Index 0 at `tag_aligner.py:720-748`):**
+>      - Step 3 of `reinject_skeleton_from_source` (`lines 720–747`) only had placement rules for `═` and `╫`, and even for `═` it had a buggy `and f"═{kw}" not in result` guard (`line 722`) that stopped after the 1st `Temporary Level` when a string had 2 `Temporary Level`s! For `╧` (`Perfect Revive`), `╥` (`Akomia Core`), `╉` (`Prophet Totem`/`Bond Totem`/`Rebirth Totem`/`Totem`), `╬` (`Preparation`), `╆` (`Fleeting`/`Instant`), and `╋` (`Flash`), it dumped `(ch * needed)` at the very start of the string (`╧<color=#FFE897>4/5 Tier Summoned Unit...`, `╉╉╉Saat Combat dimulai, Prophet Totem...`)!
+> 2. **UNAUTHORIZED `elif len(plain_zh) >= 8` WILDCARDS ADDED TO `CARD_PREFIXES` (`line 462`), `#60D2` (`line 404`), AND `english_updates` (`line 569`) IN `scripts/01b_build_hybrid_vfs_index.py` (Leaking `88+` Standalone Choice/Draw Effect Cards, Equipment-Choice Cards, and Training Dummy Strings):**
+>    - In `scripts/01b_build_hybrid_vfs_index.py`, the Executor added `elif tag != "60D2" and len(plain_zh) >= 8 and any(p in zh_str ...): is_target = True` on `CARD_PREFIXES` (`line 462`) and `elif len(p_u) >= 8 ...: target_sfx.add(sfx)` on `english_updates` (`line 569`), bypassing the `m60_hero_suffixes` and `m60_val in {"秘技", "技能", "专属"}` check on `CARD_PREFIXES`!
+>    - This leaked `88+` non-target standalone Choice/Draw Effect Cards, Equipment-choice cards, and Training Dummy strings into `diff_u` and `diff_eu`:
+>      - `'3选1一件特殊装备。'` -> `'Pilih 1 dari 3 Khusus Equipment.'`
+>      - `'3选1一件高级装备。'` -> `'Pilih 1 tinggi-akhir Equipment dari 3.'`
+>      - `'3选1高级机关卡。'`, `'3选1英雄奖励。'`, `'3选1【令牌：蜀】...'`, `'4阶卡牌2选1，并将选中的卡牌一分为四。'`, `'5选2【三分之地】4-5阶英雄，各获得2张其英雄牌。'`
+>      - `'获得特殊装备<color=#ffffff><b>发条齿轮</b></color>...'`, `'获得特殊装备<color=#ffffff><b>隐形药水</b></color>...'`
+>      - `'404 Error，出厂设置故障，无法攻击敌人。'`, `'训练用人偶4号，结实耐用可靠！'`
+> 3. **`glossary.py:883` HARDCODED `rels[1]` BUG (Mapping Bai Ge's `释放3道剑气...` to `Improvised Creation`) + 14 MINOR PROSE CLEANUPS:**
+>    - In `src/acepatchindo/glossary.py:883`, when pairing `t1["lords"]` with `t2_details`, `if len(rels) > 1: r1_name = rels[1].get("name")` hardcoded `rels[1]` instead of matching the referenced card name in `c_desc` (`<b>Burst of Inspiration</b>`) against `rel["name"]` in `rels`, causing `释放3道剑气，斩击手牌中随机3张非觉醒英雄牌，将每张牌斩为2张╆转瞬版复制。` (`Burst of Inspiration`) to translate to `'╆Secara acak menyalin 1 Hero yang ada di field.'` (`Improvised Creation`)!
+
+### Task 37: Fix `reinject_formula_and_skeleton`, `reinject_skeleton_from_source`, Control-Glyph Placement, & `normalize_formula_skeleton_zh` in `src/acepatchindo/tag_aligner.py`
+
+- [x] **Step 37.1: Fix `reinject_formula_and_skeleton` (`tag_aligner.py:256-470`) — Eliminate Pre-Step-3 `sentinels_icon`, Preserve Trailing `点击技能描述面板` Nested `<b>...</b>` Tags, and Never Strip Valid Formula Tags**
+  1. **Handle Trailing UI Hint `<color=...>点击技能描述面板，查看<b>...</b>详细解释</color>` Cleanly Before Body Alignment:**
+     - If `source_zh` matches `r"(\n*)((?:<color=[^>]+>)*点击技能描述面板[，,]查看(?:<b>)?([^<]+?)(?:</b>)?详细解释(?:</color>)*)\s*$"` (with or without `<b>`):
+       - Strip that trailing match from `source_zh` into `body_source_zh` and construct `footer_id` with the **EXACT SAME TAG SEQUENCE** as the matched footer in `source_zh` (e.g., if `source_zh` has `<color=#86888A>点击技能描述面板，查看<b>击飞</b>详细解释</color>`, then `footer_id` MUST be `f"{leading_nl}<color=#86888A>Ketuk panel deskripsi Skill untuk melihat penjelasan detail <b>{term_id}</b></color>"` so `TAG_RE.findall(footer_id) == TAG_RE.findall(footer_zh)`!).
+       - Run formula & tag alignment against `body_source_zh`, and append `footer_id` at the end!
+  2. **Fix Formula & Icon Placeholder Order (Do NOT Hide `{0|2}` / `{Energy}` Inside `sentinels_icon` Before `COMPOUND_EXPR_RE`!):**
+     - **Step A (Parenthetical `[k]点...([m]...)` & 3-Part Split Formula Grafting):**
+       - Match `zh_split_formulas` (`<color=C1>\[a\]点?...</color>\s*<color=C2>[（(]\[b\].*?[）)]</color>`) against `id_dmg_spans` using **`flags=re.IGNORECASE`** and including `Max HP` / `HP Maks` (`r"(?:memberikan\s+|menyebabkan\s+|memulihkan\s+|mendapatkan\s+)?(?:\d+(?:\.\d+)?%?|[A-Za-z ]+?Damage|Shield|HP|Max HP)\s+sebesar\s+\d+(?:\.\d+)?%?(?:\s*\+\s*\d+(?:\.\d+)?%?)?\s*(?:Physical Attack|Magic Attack|Max HP|HP Maks|Attack|HP)(?:\s+miliknya|\s+[A-Za-z']+)?(?:\s+sebagai\s+(?:Physical|Magic|True)\s+Damage|\s+HP)?"`).
+       - Also handle 3-tag split recovery spans in `body_source_zh` like `<color=#d487e4>(?:恢复)?([^\d<]*?)(\[\d+\]|[0-9]+)\+([^\d<]*?)(\[\d+[A-Za-z0-9_+/.*%-]*\]|[0-9]+)%([^<]*?)</color><color=#9ff5d0>的生命值</color>` (`Mi Yue`, `Kui`, `Bai Qi`, `Master Luban`, `Augran`, `Milady`) by wrapping the corresponding `memulihkan <Formula> <color=#9ff5d0>HP</color>` span in `out`!
+     - **Step B (`COMPOUND_EXPR_RE` 1-to-1 Numeric / Formula Expression Substitution):**
+       - Strip `{Energy}`, `{LordExp}`, `{LordHp}` from `src_clean` before running `COMPOUND_EXPR_RE.findall(src_clean)` vs `COMPOUND_EXPR_RE.findall(cn_clean)` so `{0|2}`, `{1|1}`, `{3|2}`, `10-20`, `6`, `[194010p1q2/100]%`, etc. align 1-to-1 in exact positional order!
+       - Replace each `c_ex` with `s_ex` in `out` (using a cursor or temporary `__EXPR_SLOT_i__` markers so an earlier replacement never collides with a later number!).
+     - **Step C (Attach `{Energy}`, `{LordExp}`, `{LordHp}` Icon Placeholders AFTER Step B):**
+       - For each `{num_ph}{icon}` in `body_source_zh` (e.g. `{0|2}{Energy}`, `{1|10}{LordHp}`, `{3|6}{LordExp}`), replace `rf"{re.escape(num_ph)}\s*(?:Energy|Energi|Player EXP|EXP Chess Player|EXP Kontestan|Player HP|HP Chess Player|HP Kontestan)\b"` with `f"{num_ph}{icon}"` in `out`.
+       - For any remaining standalone `{Energy}`, `{LordExp}`, `{LordHp}` needed to match `Counter(PLACEHOLDER_RE.findall(body_source_zh))`: replace standalone `(?<!\{)\b(?:Energy|Energi)\b(?!\})` -> `{Energy}`, `\b(?:Player EXP|EXP Chess Player|EXP Kontestan)\b` -> `{LordExp}`, `\b(?:Player HP|HP Chess Player|HP Kontestan)\b` -> `{LordHp}` (up to the exact needed count!).
+       - Verify: **ZERO** numbers (`6`, `10`, `2`) are ever overwritten by `{Energy}`/`{LordHp}`/`{LordExp}`!
+     - **Step D (Per-Span Semantic `<color=...>` Wrapping Without Wiping Already-Grafted Tags):**
+       - In Step 5 (`color_spans`), skip any `<color=...>` span from `body_source_zh` that was already grafted in Step A (`zh_split_formulas` or 3-part recovery).
+       - For remaining `<color=c_val>zh_content</color>` spans: match headers (`Pasif:` / `Aktif:` / `Qingping:` / `Changhen:` / `Bentuk Manusia:` / `Bentuk Putri Duyung:` / `2 Stack:` / `3 Stack:` / `Saat bola kembali:`), bracketed factions (`[Central Plain]`, `[Zhulu]`, `[Three Kingdoms]`, `[Sunset]`, `[Jixia]`, `[Great Wall]`, `[Xuanyong]`, `[Yaotian]`, `[Cloudream]`, `[Riverlands]`), entity names (`BADGE_ALIAS_MAP`), and damage/shield/stat formulas!
+       - **NEVER** run `out = TAG_RE.sub("", out)` when `out` already contains valid grafted tags! Instead, pass `out` to `reinject_skeleton_from_source(body_source_zh, out, ...)` and let `reinject_skeleton_from_source` insert only the **missing** tags in their proper clauses/lines!
+
+- [x] **Step 37.2: Fix Control-Glyph Placement (`╧`, `╥`, `╉`, `╬`, `═`, `╆`, `╋`, `╪`, `╫`) & Preserve `\n` Newlines and Existing Tags in `reinject_skeleton_from_source` (`tag_aligner.py:485-880`)**
+  1. **Complete `GLYPH_KEYWORD_MAP` in `reinject_skeleton_from_source` (`lines 720–748`) so `0` Glyphs Are Ever Prepend-Dumped at Index 0:**
+     - Define:
+       ```python
+       GLYPH_KEYWORD_MAP: dict[str, tuple[str, ...]] = {
+           "═": ("Temporary Level", "Level Sementara", "Temp Level"),
+           "╧": ("Perfect Revive", "Kebangkitan Sempurna"),
+           "╥": ("Akomia Core", "Inti Akomia"),
+           "╉": ("Prophet Totem", "Bond Totem", "Rebirth Totem", "Totem"),
+           "╬": ("Preparation", "Persiapan"),
+           "╆": ("Fleeting", "Instant", "Sekilas"),
+           "╋": ("Flash",),
+           "╪": ("Engage", "Inisiasi"),
+           "╫": ("On Play", "Deploy", "Saat Diterjunkan"),
+           "╨": ("Sacrifice", "Pengorbanan"),
+           "╈": ("Awaken", "angkit"),
+           "╦": ("ancient coin", "Ancient Coin"),
+       }
+       ```
+     - For each `ch in req_ctrl` with `needed > 0`:
+       - First, if `source_zh` has `ch` immediately inside or before a tag or at the start of a line/clause (e.g. `╆Secara acak`), or before any keyword in `GLYPH_KEYWORD_MAP.get(ch, ())`, insert `ch` directly before the **next unprefixed occurrence** of that keyword (`re.sub(rf"(?<!{re.escape(ch)})\b({re.escape(kw)})", rf"{ch}\1", result, count=1)`) in a loop while `needed > 0` (do **NOT** use `and f"═{kw}" not in result`, which broke strings with 2 `Temporary Level`s!).
+       - Second, if `needed > 0` and `ch` in `source_zh` precedes `<color=...>` or `<b>`, insert `ch` inside/before that matching tag span.
+       - Confirm: **0** strings in `diff_u` have a control glyph at index 0 unless `source_zh` itself has that control glyph at index 0 (or after leading `<tag>`)!
+  2. **Preserve `\n` Newlines and Matched Tags in `reinject_skeleton_from_source` & `_wrap_exact_tag_sequence`:**
+     - If `"\n" in source_zh and "\n" in result` and `source_zh.count("\n") == result.count("\n")`: align tags **line-by-line** across `zip(source_zh.split("\n"), result.split("\n"))` and join with `"\n"` so `\n` newlines are **100% preserved** and tags on Line 1 never bleed into Line 2!
+     - When `result` already has some matched tags (`curr_tags = TAG_RE.findall(curr)` is a subsequence of `src_tags = TAG_RE.findall(source_zh)`), only wrap the **unmatched** tags from `src_tags` around their corresponding clauses/keywords instead of stripping `curr` and equal-chunk-slicing the entire sentence!
+     - Even inside `_wrap_exact_tag_sequence` (last resort): preserve `\n` line breaks (never collapse `\n` via `.split()`) and wrap headers (`Pasif:`, `Aktif:`, `<Name>:`) and formula numbers (`[0]`, `[1]`, `%`) with their matching `<color=...>` tags instead of blind equal-width word chunking!
+
+- [x] **Step 37.3: Add the 9 Remaining 1-Word Normalizations to `normalize_formula_skeleton_zh` (`tag_aligner.py:216-253`)**
+  - Update `normalize_formula_skeleton_zh` as shown in Step 34.1 above so `Augran`, `Yang Jian`, `Erin`, `Hua Mulan`, `Athena`, `Fang`, `Xiang Yu`, `Liu Shan`, `Di Renjie`, `Kaizer`, `Bai Qi`, and `Lu Bu` Variant 1 all match `tier1_formula_zh_to_id` (`0` Tier 3 fallbacks!).
+
+### Task 38: Remove Unauthorized `CARD_PREFIXES` / `#60D2` / `english_updates` Wildcards & Add Split Reference Sub-Clauses in `scripts/01b_build_hybrid_vfs_index.py`
+
+- [x] **Step 38.1: Clean Up `scripts/01b_build_hybrid_vfs_index.py` So `0` Choice/Draw Effect Cards, Equipment Cards, or Dummy Strings Leak**
+  1. **Add Split Reference Sub-Lines/Sub-Clauses to `ref_target_zh` in Step 1 (`lines 148–165`):**
+     - When ingesting `t2d` (`"Hero"`, `"Summon"`, `"Talent"`, `"Chess player"`) `abilities[*].desc`, `effect_copies`, `calc_copies`, `rule_notes` and `t1["lords"]` `talents`/`related`:
+       - For each description `d`, also split `d` on `\n` (`for line in d.splitlines():`):
+         - Strip leading `╆?转瞬[。.]?` from `line`.
+         - If `line` matches `^([^：:]{2,15})[：:](.+)$`, add both `line` and the RHS clause `m.group(2).strip()` (when `len(normalize_plain_zh(rhs)) >= 6`) to `ref_target_zh`!
+       - This cleanly puts split Contestant Secret Art / ability card descriptions (like Wu Zetian's `平定天下一统四海...`, `女帝登基威加海内...`, `科举取士唯才是举...`, `감业寺苦修...`, Ying Zheng's `长生不老药...`, etc.) into `ref_target_zh`, `ref_target_plain`, and `ref_target_skel` **without** needing any wildcard on `CARD_PREFIXES`!
+  2. **Remove the 3 Unauthorized `elif len >= 8` Wildcards (`lines 404, 462, 569`):**
+     - **Line `404` (`tag == "60D2"`):** Remove `elif len(plain_zh) >= 8 and any(...): is_target = True`. On `tag == "60D2"`, `is_target = True` **ONLY** when `is_ref` is `True`!
+     - **Line `462` (`tag in CARD_PREFIXES`):** Remove `elif tag != "60D2" and len(plain_zh) >= 8 and any(...): is_target = True`! On `tag in CARD_PREFIXES - {"60D2"}`, a non-`is_ref` record is `is_target = True` **ONLY** when:
+       - `sfx in m60_hero_suffixes` (Hero Card description), OR
+       - `m60_val in {"秘技", "技能", "专属"}` and `len(plain_zh) >= 8` and has sentence punctuation!
+     - **Line `569` (`english_updates` loop):** Remove `elif len(p_u) >= 8 and any(p in u_zh ...): target_sfx.add(sfx)`! In `english_updates`, `u_zh` should ONLY add `sfx` to `target_sfx` if `is_ref_target(u_zh, p_u, skel_u)` is `True` (and `tag in ALLOWED_TARGET_PREFIXES - {"60D2"}` and not vetoed)!
+  3. **Expand `P_EQUIP_PATTERN`, `P_EFFECT_CARD_PATTERN`, and `P_UNIT_FLAVOR_RE`:**
+     - `P_EQUIP_PATTERN`: include `(?:\d+选\d+(?:一件)?|获得)(?:特殊装备|高级装备|普通装备|装备箱)`.
+     - `P_EFFECT_CARD_PATTERN`: include `r"^(?:卡牌\d+选\d+|\d+阶卡牌\d+选\d+|(?:2选1|3选1|4选1|5选2)(?:一件|高级|普通|英雄|【)?|获得\d+张.+英雄牌。|\d+选1.+英雄，获得\d+张该英雄牌。|随机抽取\d+张.*英雄牌。|指定1名英雄等级\+\d+.*|\d+件装备选\d+件。|立即使所有手牌费用-\d+。)"`.
+     - `P_UNIT_FLAVOR_RE`: include `r"^(?:可爱的小鹿|它最大的职责就是挨打|机器仆从|训练用人偶|404 Error)"`.
+
+### Task 39: Fix `glossary.py:883` Hardcoded `rels[1]` Bug & Clean Up Remaining 14 Indlish Phrases (`src/acepatchindo/glossary.py` & `src/acepatchindo/lexicon_id.py`)
+
+- [x] **Step 39.1: Fix `glossary.py:883` (`t1["lords"]` `related` Card Matching by Referenced Name Instead of `rels[1]`)**
+  - In `src/acepatchindo/glossary.py` (`lines 870–895`), when matching a 2-line Chinese description (`zh_lines = [line0, line1]`) in `t2_details["Chess player"]` against `t1_lord`:
+    - Do **NOT** hardcode `rels[1]`!
+    - Instead, find which `rel` in `rels` has its English name (`rel.get("name")`) or Chinese name (`rel.get("nameCn")`) mentioned in `c_desc` (`t_cards[i]["desc"]`) or `zh_lines[0]` / `zh_lines[1]`, and pair `zh_lines[1]` (or the post-colon description in `zh_lines[1]`) with THAT `rel["desc"]`!
+    - Also register each `rel` in `t1_lord.get("related", [])` directly by matching `rel.get("nameCn")` / `rel.get("name")` against `t2_details["Chess player"]` `abilities[*]` where `ab.get("name") == rel.get("name")`, so `释放3道剑气，斩击手牌中随机3张非觉醒英雄牌，将每张牌斩为2张╆转瞬版复制。` (`Burst of Inspiration`) maps to its exact Tier 1 translation (`"Melepaskan 3 tebasan energi pedang, menebas 3 Kartu Hero non-Awaken secara acak di tangan, membelah setiap kartu menjadi 2 salinan ╆Fleeting."`) and **NEVER** to `Improvised Creation`!
+
+- [x] **Step 39.2: Clean Up the Remaining 14 Indlish Phrases in `src/acepatchindo/glossary.py` & `src/acepatchindo/lexicon_id.py`**
+  - Add to `glossary.py` (`_post_cleanup_id` / `var_subs`) and `lexicon_id.py`:
+    1. `"Combat Mulai"` / `"Combat Start"` -> `"Awal Combat"`
+    2. `"Preparation untuk perang"` / `"prepare for war"` -> `"Preparation"`
+    3. `"bermain pada saat yang sama"` -> `"diterjunkan bersamaan"`
+    4. `"tertinggi-Tier Hero"` / `"highest-Tier Hero"` -> `"Hero Tier tertinggi"`
+    5. `"tertinggi milikmu-Level Hero"` / `"your highest-Level Hero"` -> `"Hero milikmu dengan Level tertinggi"`
+    6. `"diri sendiri-menghancurkan"` / `"self-destructs"` / `"self-destruct"` -> `"meledakkan diri"`
+    7. `"nilai terendah HP"` / `"lowest HP value"` -> `"HP terendah"`
+    8. `"nilai tertinggi HP saat ini persentase"` / `"highest current HP percentage"` -> `"persentase HP saat ini tertinggi"`
+    9. `r"\buntuk berikutnya (\d+) detik\b"` -> `r"selama \1 detik berikutnya"`
+    10. `"penguatan kartu"` / `"strengthening card"` -> `"Kartu Penguatan"`
+    11. `"sebuah sekutu Memanggil"` / `"an allied Summon"` -> `"unit Summon sekutu"`
+    12. `r"(\+\d+%?)\s+Menyerang\b"` -> `r"\1 Attack"`
+    13. `"Menyerang mode"` -> `"mode serangan"`, `"poin dari Menyerang"` -> `"poin Attack"`, `"Menyerang kerusakan"` -> `"Damage serangan"`, `"Bonus Menyerang"` -> `"Bonus Attack"`.
+
+### Task 40: Add Strict Anti-Corruption Assertions to `tests/test_glossary_and_tiers.py`, Rebuild Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Verify `14 passed`, & Re-Publish `v1.4.12-id.2` (`06`)
+
+- [x] **Step 40.1: Add 6 Iron-Clad Structural & Content Assertions to `tests/test_glossary_and_tiers.py`**
+  1. **Zero Lost `\n` Newlines:**
+     `assert sum(1 for k, v in diff_u.items() if "\n" in k and "\n" not in v) == 0`
+  2. **Zero Misplaced Control Glyphs at Index 0:**
+     For `CTRL = set("╥╆╪╬╉═╧╊╅╈╦╇╋")`: assert `0` strings in `diff_u` start with a char in `CTRL` (after stripping tags) unless `k` (after stripping tags) also starts with that char or has it before the first keyword! Specifically assert `cat["unique"]["<color=#FFE897>4/5阶的召唤单位</color>获得╧完美复生。"]` does **NOT** start with `"╧"`, and `cat["unique"]["战斗开始时，╉先知图腾将两侧的友军变为╉先知图腾分身，复制本体70%的属性。"]` does **NOT** start with `"╉"`.
+  3. **Zero Deleted Numbers / Scrambled `{Energy}`/`{LordHp}`/`{LordExp}` Placeholders:**
+     Assert **0** occurrences in `diff_u` of `"Memperoleh ,"`, `"Memperoleh ."`, `" -. "`, `"-20 {Energy}"`, `"Skill </color> kali"`, `"setiap kamu kalah</color> kali"`, or `"Tier {0|"`.
+  4. **Zero `_wrap_exact_tag_sequence` Mid-Clause Chunk Slicing on Multi-Color Skills:**
+     Assert **0** occurrences in `diff_u` of `"<color=#ffffffbf> Pasif: Basic Attack"`, `"<color=#ffffffbf> di depannya"`, `"<color=#ffffffbf> pipa dan mengaktifkan"`, `"<color=#d487e4> bola energi yang"`, or `"<color=#d487e4> Saat bola"`.
+  5. **Zero Leaked Choice/Draw Effect Cards, Equipment-Choice Cards, or Training Dummy Strings:**
+     Assert that `"3选1一件特殊装备。"`, `"3选1一件高级装备。"`, `"5选2【三分之地】4-5阶英雄，各获得2张其英雄牌。"`, `"404 Error，出厂设置故障，无法攻击敌人。"`, `"训练用人偶4号，结实耐用可靠！"` are all **100% untouched English** (`cat["unique"][z] == orig_cat["unique"][z]`)!
+  6. **Bai Ge's `Burst of Inspiration` (`释放3道剑气...`) Accuracy:**
+     Assert `"pedang"` in `cat["unique"]["释放3道剑气，斩击手牌中随机3张非觉醒英雄牌，将每张牌斩为2张╆转瞬版复制。"]` and `"menyalin 1 Hero"` is **NOT** in it!
+
+- [x] **Step 40.2: Re-Run Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Run `pytest -v`, Commit, Force-Tag `v1.4.12-id.2`, & Re-Upload Release Assets (`06`)**
+  1. `/home/whise/.local/bin/uv run --python 3.12 python scripts/01b_build_hybrid_vfs_index.py`
+  2. `/home/whise/.local/bin/uv run --python 3.12 python scripts/02_build_indonesian_catalog.py`
+  3. `/home/whise/.local/bin/uv run --python 3.12 python scripts/03_patch_worker_modules.py`
+  4. `/home/whise/.local/bin/uv run --python 3.12 python scripts/04_verify_real_windows_game.py`
+  5. `/home/whise/.local/bin/uv run --python 3.12 python scripts/05_repack_windows_exe.py`
+  6. `/home/whise/.local/bin/uv run --python 3.12 pytest -v` (`14 passed, 0 failed, 0 skipped`)
+  7. Update SHA-256 hashes in `README.md` & `scripts/06_publish_github_release.py`, check `[x]` on all completed tasks in `.agents/plan/2026-11-03-hok-ace-indonesian-patcher-plan.md`, commit, `git push origin main`, `git tag -f v1.4.12-id.2 HEAD && git push -f origin v1.4.12-id.2`, and run `scripts/06_publish_github_release.py`.
+
 
 
 

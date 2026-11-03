@@ -27,6 +27,7 @@ from wxq_patch import translation_rules as runtime_rules  # noqa: E402
 
 from acepatchindo.glossary import ThreeTierGlossary  # noqa: E402
 from acepatchindo.hybrid_classifier import HybridClassifier  # noqa: E402
+from acepatchindo.tag_aligner import restore_newlines_from_source  # noqa: E402
 from acepatchindo.validator import CJK_RE, sanitize_target_text, validate_translation  # noqa: E402
 from acepatchindo.windows_108_split import (  # noqa: E402
     WINDOWS_108_HYBRID_MAP,
@@ -77,6 +78,8 @@ def main() -> None:
     for zh_src, en_base in data["unique"].items():
         if classifier.is_target_unique(zh_src, en_base):
             id_val, tier = glossary.translate_entry(zh_src, baseline_en=en_base)
+            if "\n" in zh_src and "\n" not in id_val:
+                id_val = restore_newlines_from_source(zh_src, id_val)
             ok_local, reason_local = validate_translation(zh_src, id_val)
             ok_runtime, reason_runtime = runtime_rules.validate_translation(zh_src, id_val)
             if not ok_local or not ok_runtime:
@@ -159,6 +162,9 @@ def main() -> None:
             else:
                 cand = sanitize_target_text(val_source, glossary.translate_en_to_id(en_target))
                 id_val = cand if runtime_rules.validate_translation(val_source, cand)[0] else en_target
+
+            if "\n" in val_source and "\n" not in id_val:
+                id_val = restore_newlines_from_source(val_source, id_val)
 
             ok_local, reason_local = validate_translation(val_source, id_val)
             ok_runtime, reason_runtime = runtime_rules.validate_translation(val_source, id_val)

@@ -880,22 +880,60 @@ class ThreeTierGlossary:
                         first_zh, sub_name_zh, sub_desc_zh = m_split.groups()
                         if c_desc and len(normalize_plain_zh(first_zh)) >= 8:
                             self._register_t1_pair(first_zh, c_desc)
-                        if len(rels) > 1:
-                            r1_name = (rels[1].get("name") or "").strip()
-                            r1_desc = (rels[1].get("desc") or "").strip()
-                            if r1_name and not STOPWORD_GUARD_RE.search(r1_name):
-                                self._register_t1_pair(sub_name_zh, r1_name)
-                            if r1_desc and len(normalize_plain_zh(sub_desc_zh)) >= 8:
-                                self._register_t1_pair(sub_desc_zh, r1_desc)
-                                if c_desc and r1_name and len(normalize_plain_zh(zh_ab.get("desc", ""))) >= 8:
+
+                        # Match related card by name reference in c_desc or zh_ab
+                        matched_rel = None
+                        for rel in rels:
+                            rel_name = (rel.get("name") or "").strip()
+                            rel_name_cn = (rel.get("nameCn") or "").strip()
+                            if rel_name and rel_name in c_desc:
+                                matched_rel = rel
+                                break
+                            if rel_name_cn and (rel_name_cn in sub_name_zh or rel_name_cn in first_zh):
+                                matched_rel = rel
+                                break
+                        if not matched_rel and len(rels) == 1:
+                            matched_rel = rels[0]
+
+                        if matched_rel:
+                            r_name = (matched_rel.get("name") or "").strip()
+                            r_desc = (matched_rel.get("desc") or "").strip()
+                            if r_name and not STOPWORD_GUARD_RE.search(r_name):
+                                self._register_t1_pair(sub_name_zh, r_name)
+                            if r_desc and len(normalize_plain_zh(sub_desc_zh)) >= 8:
+                                self._register_t1_pair(sub_desc_zh, r_desc)
+                                if c_desc and r_name and len(normalize_plain_zh(zh_ab.get("desc", ""))) >= 8:
                                     self._register_t1_pair(
                                         zh_ab.get("desc", ""),
-                                        f"{c_desc}\n{r1_name}: {r1_desc}",
+                                        f"{c_desc}\n{r_name}: {r_desc}",
                                     )
                 if idx < len(en_abs) and c_desc:
                     en_ab_desc = (en_abs[idx].get("desc") or "").strip()
                     if en_ab_desc and len(en_ab_desc) >= 20:
                         self.tier1_en_desc_to_id_desc[_normalize_en_key(en_ab_desc)] = c_desc
+
+            # Direct registration for all related cards
+            for rel in rels:
+                r_name = (rel.get("name") or "").strip()
+                r_name_cn = (rel.get("nameCn") or "").strip()
+                r_desc = (rel.get("desc") or "").strip()
+                if not r_desc:
+                    continue
+                for ab in zh_abs:
+                    ab_name = (ab.get("name") or "").strip()
+                    ab_desc = (ab.get("desc") or "").strip()
+                    if (r_name and ab_name == r_name) or (r_name_cn and ab_name == r_name_cn):
+                        self._register_t1_pair(ab_desc, r_desc)
+
+        # Explicit registration for Bai Ge's Burst of Inspiration card
+        self._register_t1_pair(
+            "释放3道剑气，斩击手牌中随机3张非觉醒英雄牌，将每张牌斩为2张╆转瞬版复制。",
+            "Melepaskan 3 tebasan energi pedang, menebas 3 Kartu Hero non-Awaken secara acak di tangan, membelah setiap kartu menjadi 2 salinan ╆Fleeting.",
+        )
+        self._register_t1_pair(
+            "释放3道剑气，斩击手牌中随机3张非觉醒英雄牌，将每张牌斩为2张转瞬版复制。",
+            "Melepaskan 3 tebasan energi pedang, menebas 3 Kartu Hero non-Awaken secara acak di tangan, membelah setiap kartu menjadi 2 salinan Fleeting.",
+        )
 
     def translate_en_to_id(self, en_text: str) -> str:
         """Convert English HoK Ace text into natural Indonesian while preserving tags, proper nouns, and tokens."""
@@ -1002,6 +1040,24 @@ class ThreeTierGlossary:
                 (r"\bon\s+skill\s+cast\b", "saat menggunakan Skill"),
                 (r"\bon\s+cast\b", "saat digunakan"),
                 (r"\bon\s+casting\b", "saat menggunakan"),
+                (r"\bCombat Start\b", "Awal Combat"),
+                (r"\bprepares?\s+for\s+war\b", "Preparation"),
+                (r"\bplayed\s+at\s+the\s+same\s+time\b", "diterjunkan bersamaan"),
+                (r"\bplay\s+at\s+the\s+same\s+time\b", "diterjunkan bersamaan"),
+                (r"\bhighest-Tier\s+Hero\b", "Hero Tier tertinggi"),
+                (r"\byour\s+highest-Level\s+Hero\b", "Hero milikmu dengan Level tertinggi"),
+                (r"\bhighest-Level\s+Hero\b", "Hero Level tertinggi"),
+                (r"\bself-destructs?\b", "meledakkan diri"),
+                (r"\blowest\s+HP\s+value\b", "HP terendah"),
+                (r"\bhighest\s+current\s+HP\s+percentage\b", "persentase HP saat ini tertinggi"),
+                (r"\bfor\s+the\s+next\s+(\d+)\s+seconds?\b", r"selama \1 detik berikutnya"),
+                (r"\bstrengthening\s+cards?\b", "Kartu Penguatan"),
+                (r"\ban\s+allied\s+Summon\b", "unit Summon sekutu"),
+                (r"\ballied\s+Summons?\b", "unit Summon sekutu"),
+                (r"\bAttack\s+mode\b", "mode serangan"),
+                (r"\bpoints?\s+of\s+Attack\b", "poin Attack"),
+                (r"\bAttack\s+damage\b", "Damage serangan"),
+                (r"\bAttack\s+Bonus\b", "Bonus Attack"),
             ]
             for pat, repl in var_subs:
                 out = re.sub(pat, repl, out, flags=re.IGNORECASE)
@@ -1092,6 +1148,23 @@ class ThreeTierGlossary:
             out = re.sub(r"\bsebuah\s+((?:<[^>]+>\s*)*\d+)", r"\1", out, flags=re.I)
             out = re.sub(r"\badalah\s+milikmu\b", "milikmu", out, flags=re.I)
 
+            out = re.sub(r"\bCombat\s+Mulai\b", "Awal Combat", out, flags=re.I)
+            out = re.sub(r"\bPreparation\s+untuk\s+perang\b", "Preparation", out, flags=re.I)
+            out = re.sub(r"\bbermain\s+pada\s+saat\s+yang\s+sama\b", "diterjunkan bersamaan", out, flags=re.I)
+            out = re.sub(r"\btertinggi-Tier\s+Hero\b", "Hero Tier tertinggi", out, flags=re.I)
+            out = re.sub(r"\btertinggi\s+milikmu-Level\s+Hero\b", "Hero milikmu dengan Level tertinggi", out, flags=re.I)
+            out = re.sub(r"\bdiri\s+sendiri-menghancurkan\b", "meledakkan diri", out, flags=re.I)
+            out = re.sub(r"\bnilai\s+terendah\s+HP\b", "HP terendah", out, flags=re.I)
+            out = re.sub(r"\bnilai\s+tertinggi\s+HP\s+saat\s+ini\s+persentase\b", "persentase HP saat ini tertinggi", out, flags=re.I)
+            out = re.sub(r"\buntuk\s+berikutnya\s+(\d+)\s+detik\b", r"selama \1 detik berikutnya", out, flags=re.I)
+            out = re.sub(r"\bpenguatan\s+kartu\b", "Kartu Penguatan", out, flags=re.I)
+            out = re.sub(r"\bsebuah\s+sekutu\s+Memanggil\b", "unit Summon sekutu", out, flags=re.I)
+            out = re.sub(r"(\+\d+%?)\s+Menyerang\b", r"\1 Attack", out)
+            out = re.sub(r"\bMenyerang\s+mode\b", "mode serangan", out, flags=re.I)
+            out = re.sub(r"\bpoin\s+dari\s+Menyerang\b", "poin Attack", out, flags=re.I)
+            out = re.sub(r"\bMenyerang\s+kerusakan\b", "Damage serangan", out, flags=re.I)
+            out = re.sub(r"\bBonus\s+Menyerang\b", "Bonus Attack", out, flags=re.I)
+
             return out
 
         res = translate_preserving_skeleton(en_text, _convert_segment)
@@ -1156,6 +1229,23 @@ class ThreeTierGlossary:
         candidate = re.sub(r"(?i)\bTemporary Level\s+atas\b", "Peningkatan Temporary Level", candidate)
         candidate = re.sub(r"\bsebuah\s+((?:<[^>]+>\s*)*\d+)", r"\1", candidate, flags=re.I)
         candidate = re.sub(r"\badalah\s+milikmu\b", "milikmu", candidate, flags=re.I)
+
+        candidate = re.sub(r"\bCombat\s+Mulai\b", "Awal Combat", candidate, flags=re.I)
+        candidate = re.sub(r"\bPreparation\s+untuk\s+perang\b", "Preparation", candidate, flags=re.I)
+        candidate = re.sub(r"\bbermain\s+pada\s+saat\s+yang\s+sama\b", "diterjunkan bersamaan", candidate, flags=re.I)
+        candidate = re.sub(r"\btertinggi-Tier\s+Hero\b", "Hero Tier tertinggi", candidate, flags=re.I)
+        candidate = re.sub(r"\btertinggi\s+milikmu-Level\s+Hero\b", "Hero milikmu dengan Level tertinggi", candidate, flags=re.I)
+        candidate = re.sub(r"\bdiri\s+sendiri-menghancurkan\b", "meledakkan diri", candidate, flags=re.I)
+        candidate = re.sub(r"\bnilai\s+terendah\s+HP\b", "HP terendah", candidate, flags=re.I)
+        candidate = re.sub(r"\bnilai\s+tertinggi\s+HP\s+saat\s+ini\s+persentase\b", "persentase HP saat ini tertinggi", candidate, flags=re.I)
+        candidate = re.sub(r"\buntuk\s+berikutnya\s+(\d+)\s+detik\b", r"selama \1 detik berikutnya", candidate, flags=re.I)
+        candidate = re.sub(r"\bpenguatan\s+kartu\b", "Kartu Penguatan", candidate, flags=re.I)
+        candidate = re.sub(r"\bsebuah\s+sekutu\s+Memanggil\b", "unit Summon sekutu", candidate, flags=re.I)
+        candidate = re.sub(r"(\+\d+%?)\s+Menyerang\b", r"\1 Attack", candidate)
+        candidate = re.sub(r"\bMenyerang\s+mode\b", "mode serangan", candidate, flags=re.I)
+        candidate = re.sub(r"\bpoin\s+dari\s+Menyerang\b", "poin Attack", candidate, flags=re.I)
+        candidate = re.sub(r"\bMenyerang\s+kerusakan\b", "Damage serangan", candidate, flags=re.I)
+        candidate = re.sub(r"\bBonus\s+Menyerang\b", "Bonus Attack", candidate, flags=re.I)
 
         if len(source_zh) < 4:
             return candidate
@@ -1233,7 +1323,17 @@ class ThreeTierGlossary:
                 ),
             )
             ok, _ = validate_translation(source_zh, cand)
-            if ok:
+            has_chunk_slice = any(
+                bc in cand
+                for bc in (
+                    "<color=#ffffffbf> Pasif: Basic Attack",
+                    "<color=#ffffffbf> di depannya",
+                    "<color=#ffffffbf> pipa dan mengaktifkan",
+                    "<color=#d487e4> bola energi yang",
+                    "<color=#d487e4> Saat bola",
+                )
+            )
+            if ok and not has_chunk_slice:
                 return (cand, "tier1")
 
         # 2. Tier 1 normalized (tag-stripped) match + skeleton re-injection
@@ -1250,7 +1350,17 @@ class ThreeTierGlossary:
                 ),
             )
             ok, _ = validate_translation(source_zh, cand)
-            if ok:
+            has_chunk_slice = any(
+                bc in cand
+                for bc in (
+                    "<color=#ffffffbf> Pasif: Basic Attack",
+                    "<color=#ffffffbf> di depannya",
+                    "<color=#ffffffbf> pipa dan mengaktifkan",
+                    "<color=#d487e4> bola energi yang",
+                    "<color=#d487e4> Saat bola",
+                )
+            )
+            if ok and not has_chunk_slice:
                 return (cand, "tier1")
 
         # 2b. Tier 1 formula-skeleton match (handles all 234 dynamic formula Hero skills/enhancements/awakenings)
@@ -1279,7 +1389,17 @@ class ThreeTierGlossary:
                 ),
             )
             ok, _ = validate_translation(source_zh, cand)
-            if ok:
+            has_chunk_slice = any(
+                bc in cand
+                for bc in (
+                    "<color=#ffffffbf> Pasif: Basic Attack",
+                    "<color=#ffffffbf> di depannya",
+                    "<color=#ffffffbf> pipa dan mengaktifkan",
+                    "<color=#d487e4> bola energi yang",
+                    "<color=#d487e4> Saat bola",
+                )
+            )
+            if ok and not has_chunk_slice:
                 return (cand, "tier1")
 
         # 2c. Tier 1 Lord card name / description match via baseline_en

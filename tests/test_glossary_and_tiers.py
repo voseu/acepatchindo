@@ -482,6 +482,78 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
                 if orig_r:
                     assert r[3] != orig_r[3], f"Row {k} in english_updates not translated even though unique was: {opt_zh!r}"
 
+    # Phase 6 Round 4 Remediation Verifications:
+    diff_u = {k: v for k, v in cat["unique"].items() if v != orig_cat["unique"].get(k)}
+
+    # 1. Zero lost \n newlines
+    lost_nl = [k for k, v in diff_u.items() if "\n" in k and "\n" not in v]
+    assert len(lost_nl) == 0, f"Found strings that lost \\n newlines ({len(lost_nl)}): {lost_nl[:3]}"
+
+    # 2. Zero misplaced control glyphs at index 0
+    CTRL = set("╥╆╪╬╉═╧╊╅╈╦╇╋")
+    misplaced_ctrl = []
+    for k, v in diff_u.items():
+        v_clean = TAG_RE.sub("", v).strip()
+        k_clean = TAG_RE.sub("", k).strip()
+        if v_clean and v_clean[0] in CTRL:
+            if not any(c in k_clean[:6] for c in CTRL):
+                misplaced_ctrl.append((k, v))
+    assert len(misplaced_ctrl) == 0, f"Found misplaced control glyphs at index 0 ({len(misplaced_ctrl)}): {misplaced_ctrl[:3]}"
+
+    if "<color=#FFE897>4/5阶的召唤单位</color>获得╧完美复生。" in cat["unique"]:
+        val_pr = cat["unique"]["<color=#FFE897>4/5阶的召唤单位</color>获得╧完美复生。"]
+        assert not val_pr.startswith("╧"), f"Perfect Revive glyph misplaced at start: {val_pr!r}"
+        assert "╧Perfect Revive" in val_pr, f"Missing ╧Perfect Revive in: {val_pr!r}"
+
+    if "战斗开始时，╉先知图腾将两侧的友军变为╉先知图腾分身，复制本体70%的属性。" in cat["unique"]:
+        val_pt = cat["unique"]["战斗开始时，╉先知图腾将两侧的友军变为╉先知图腾分身，复制本体70%的属性。"]
+        assert not val_pt.startswith("╉"), f"Prophet Totem glyph misplaced at start: {val_pt!r}"
+
+    # 3. Zero deleted numbers / scrambled placeholders
+    bad_ph_patterns = [
+        "Memperoleh ,",
+        "Memperoleh .",
+        " -. ",
+        "-20 {Energy}",
+        "Skill </color> kali",
+        "setiap kamu kalah</color> kali",
+        "Tier {0|",
+    ]
+    for bp in bad_ph_patterns:
+        hits = [v for v in diff_u.values() if bp in v]
+        assert len(hits) == 0, f"Found scrambled placeholder / deleted number pattern {bp!r} in {hits[:2]}"
+
+    # 4. Zero _wrap_exact_tag_sequence mid-clause chunk slicing on multi-color skills
+    bad_chunk_slices = [
+        "<color=#ffffffbf> Pasif: Basic Attack",
+        "<color=#ffffffbf> di depannya",
+        "<color=#ffffffbf> pipa dan mengaktifkan",
+        "<color=#d487e4> bola energi yang",
+        "<color=#d487e4> Saat bola",
+    ]
+    for bc in bad_chunk_slices:
+        hits = [v for v in diff_u.values() if bc in v]
+        assert len(hits) == 0, f"Found mid-clause chunk slice {bc!r} in {hits[:2]}"
+
+    # 5. Zero leaked choice/draw effect cards, equipment-choice cards, or training dummy strings
+    unauthorized_leaks = [
+        "3选1一件特殊装备。",
+        "3选1一件高级装备。",
+        "5选2【三分之地】4-5阶英雄，各获得2张其英雄牌。",
+        "404 Error，出厂设置故障，无法攻击敌人。",
+        "训练用人偶4号，结实耐用可靠！",
+    ]
+    for z in unauthorized_leaks:
+        if z in cat["unique"] and z in orig_cat["unique"]:
+            assert cat["unique"][z] == orig_cat["unique"][z], f"Unauthorized string leaked into ID: {z!r} -> {cat['unique'][z]!r}"
+
+    # 6. Bai Ge's Burst of Inspiration accuracy
+    bai_ge_src = "释放3道剑气，斩击手牌中随机3张非觉醒英雄牌，将每张牌斩为2张╆转瞬版复制。"
+    if bai_ge_src in cat["unique"]:
+        bg_val = cat["unique"][bai_ge_src]
+        assert "pedang" in bg_val, f"Expected 'pedang' in Bai Ge Burst of Inspiration: {bg_val!r}"
+        assert "menyalin 1 Hero" not in bg_val, f"Found incorrect Improvised Creation in Bai Ge Burst of Inspiration: {bg_val!r}"
+
 
 
 
