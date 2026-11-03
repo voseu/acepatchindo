@@ -76,7 +76,9 @@ def run_verification() -> tuple[dict, dict, list[dict]]:
             "Could not locate active originals directory under /run/media/whise/Windows/Users"
         )
 
-    with tempfile.TemporaryDirectory(prefix="wxq_id_verify_stage_") as stage_tmp_str:
+    stage_base = ROOT / ".stage_verify"
+    stage_base.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="wxq_id_verify_stage_", dir=str(stage_base)) as stage_tmp_str:
         stage_dir = Path(stage_tmp_str)
         assets_dir = prepare_staged_assets_dir(stage_dir)
 

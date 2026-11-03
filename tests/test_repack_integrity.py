@@ -1,4 +1,4 @@
-"""Binary integrity and PyInstaller CArchive extraction tests for the repacked Windows .exe."""
+"""Binary integrity and PyInstaller CArchive extraction tests for the Celeslib Xeno release .exe."""
 
 from __future__ import annotations
 
@@ -6,41 +6,75 @@ import gzip
 import hashlib
 import json
 import shutil
+import struct
 import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT_EXE = ROOT / "dist" / "Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe"
+DIST_DIR = ROOT / "dist"
+CELESLIB_EXE = DIST_DIR / "Celeslib-HoK-Ace-Patcher-v1.0.0.exe"
+COMPAT_EXE = DIST_DIR / "Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe"
+SHA256SUMS_PATH = DIST_DIR / "SHA256SUMS.txt"
 PYINSTXTRACTOR = ROOT / "tools" / "pyinstxtractor.py"
 if not PYINSTXTRACTOR.exists():
     PYINSTXTRACTOR = Path("/tmp/pyinstxtractor.py")
 
-SHA256_OFFSET = 0x4CABFA
-WORKER_START = 0x4CAC4A
-WORKER_END = 0x3838C00
-WORKER_SIZE = 53_927_862
-OUTER_SIZE = 59_877_888
+WORKER_EXACT_SIZE = 53_927_862
 
 
-def test_repacked_exe_sizes_sha256_guard_and_pyinstaller_unpack() -> None:
-    assert OUT_EXE.exists(), f"Missing repacked executable: {OUT_EXE}"
-    raw = OUT_EXE.read_bytes()
-    assert len(raw) == OUTER_SIZE
+def test_celeslib_repack_integrity_and_worker_unpack() -> None:
+    assert CELESLIB_EXE.exists(), f"Missing primary release executable: {CELESLIB_EXE}"
+    assert COMPAT_EXE.exists(), f"Missing compatibility release executable: {COMPAT_EXE}"
 
-    worker = raw[WORKER_START:WORKER_END]
-    assert len(worker) == WORKER_SIZE
+    raw = CELESLIB_EXE.read_bytes()
+    compat_raw = COMPAT_EXE.read_bytes()
+    assert raw == compat_raw, "Compatibility copy must match primary release executable bit-for-bit"
 
-    expected_digest = hashlib.sha256(worker).hexdigest().upper().encode("ascii") + b"\r\n"
-    actual_digest = raw[SHA256_OFFSET : SHA256_OFFSET + 66]
-    assert actual_digest == expected_digest
+    # 1. PE32+ GUI Header verification
+    assert raw[:2] == b"MZ"
+    pe_off = struct.unpack_from("<I", raw, 0x3C)[0]
+    assert raw[pe_off : pe_off + 4] == b"PE\x00\x00"
+    subsystem = struct.unpack_from("<H", raw, pe_off + 24 + 68)[0]
+    assert subsystem == 2, f"Expected IMAGE_SUBSYSTEM_WINDOWS_GUI (2), got {subsystem}"
 
-    # Verify localized outer Rust GUI strings are present
-    assert b"Honor of Kings: Ace Patch Indonesia" in raw[WORKER_END:]
-    assert b"Pasang Patch ID" in raw[WORKER_END:]
-    assert b"Pulihkan File" in raw[WORKER_END:]
+    # 2. Outer GUI Celeslib branding & Zero CPDD leakage
+    assert b"Celeslib" in raw
+    assert b"v1.0.0" in raw
+    assert b"1.4.12" in raw
+    assert b"Pasang Patch" in raw
+    assert b"Install Patch" in raw
+    assert b"CELESLIB_UI_LANG" in raw
+    assert b"CELESLIB_PATCH_LANG" in raw
+    assert b"CPDD" not in raw
+    assert b"cpdd-logo" not in raw
 
-    # Unpack embedded ace-worker.exe via pyinstxtractor under Python 3.12 and verify zero errors
-    unpack_root = Path("/tmp/verify_unpack_gate6")
+    # 3. Locate embedded worker using 8-byte footer pointer
+    sha_offset = struct.unpack_from("<Q", raw, len(raw) - 8)[0]
+    assert 0 < sha_offset < len(raw) - WORKER_EXACT_SIZE
+
+    expected_sha_hdr = raw[sha_offset : sha_offset + 80]
+    expected_digest = expected_sha_hdr[:64]
+    assert expected_sha_hdr[64:66] == b"\r\n"
+    assert expected_sha_hdr[66:80] == b"ace-worker.exe"
+
+    worker_start = sha_offset + 80
+    worker_end = len(raw) - 8
+    worker = raw[worker_start:worker_end]
+    assert len(worker) == WORKER_EXACT_SIZE
+
+    actual_digest = hashlib.sha256(worker).hexdigest().upper().encode("ascii")
+    assert actual_digest == expected_digest, f"Digest mismatch: {actual_digest} != {expected_digest}"
+
+    # 4. SHA256SUMS.txt verification
+    assert SHA256SUMS_PATH.exists()
+    sums_text = SHA256SUMS_PATH.read_text(encoding="utf-8")
+    exe_hash = hashlib.sha256(raw).hexdigest()
+    assert exe_hash in sums_text
+    assert CELESLIB_EXE.name in sums_text
+    assert COMPAT_EXE.name in sums_text
+
+    # 5. Unpack embedded ace-worker.exe via pyinstxtractor under Python 3.12
+    unpack_root = Path("/tmp/verify_celeslib_worker_unpack")
     if unpack_root.exists():
         shutil.rmtree(unpack_root)
     unpack_root.mkdir(parents=True, exist_ok=True)
@@ -72,8 +106,9 @@ def test_repacked_exe_sizes_sha256_guard_and_pyinstaller_unpack() -> None:
             cat = json.load(f)
         assert len(cat["unique"]) == 41_483
         assert len(cat["english_updates"]) == 29_750
-        # Phase 6 (Hybrid): en_to_id only maps target gameplay descriptions (approx 3,000 - 5,000)
         assert 3_000 <= len(cat["en_to_id"]) <= 6_000
+        assert 3_000 <= len(cat["id_to_en"]) <= 6_000
+        assert 3_000 <= len(cat["zh_to_en_gameplay"]) <= 6_000
 
         tc_pyc = ext_dir / "PYZ.pyz_extracted" / "wxq_patch" / "table_catalog.pyc"
         ad_pyc = ext_dir / "PYZ.pyz_extracted" / "wxq_patch" / "adaptive.pyc"
@@ -81,4 +116,3 @@ def test_repacked_exe_sizes_sha256_guard_and_pyinstaller_unpack() -> None:
         assert ad_pyc.exists() and ad_pyc.read_bytes()[:4] == b"\xcb\r\r\n"
     finally:
         shutil.rmtree(unpack_root, ignore_errors=True)
-

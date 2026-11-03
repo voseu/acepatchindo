@@ -8,6 +8,8 @@ import hashlib
 import json
 import marshal
 import struct
+import subprocess
+import sys
 import zlib
 from pathlib import Path
 
@@ -24,7 +26,10 @@ WXQ_DIR = ROOT / "extracted_source" / "wxq_patch"
 ID_CATALOG_GZ = ROOT / "data" / "catalog_checkpoints" / "catalog.json.gz"
 EN_TO_ID_JSON = ROOT / "data" / "catalog_checkpoints" / "en_to_id_map.json"
 DIST_DIR = ROOT / "dist"
-OUT_EXE = DIST_DIR / "Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe"
+CELESLIB_EXE = DIST_DIR / "Celeslib-HoK-Ace-Patcher-v1.0.0.exe"
+COMPAT_EXE = DIST_DIR / "Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe"
+OUT_EXE = CELESLIB_EXE
+STUB_EXE = ROOT / "build" / "celeslib_xeno_stub.exe"
 SHA256SUMS_PATH = DIST_DIR / "SHA256SUMS.txt"
 
 SHA256_OFFSET = 0x4CABFA
@@ -237,6 +242,12 @@ def apply_gui_patches(outer_tail: bytearray) -> int:
 
 def build_release_exe() -> dict[str, str | int]:
     DIST_DIR.mkdir(parents=True, exist_ok=True)
+    if not STUB_EXE.exists():
+        subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "08_compile_xeno_gui.py")],
+            check=True,
+        )
+
     outer_raw = bytearray(ORIG_EXE.read_bytes())
     assert len(outer_raw) == OUTER_SIZE
 
@@ -253,35 +264,45 @@ def build_release_exe() -> dict[str, str | int]:
         orig_worker, new_pyz, new_catalog_gz
     )
 
-    worker_sha256 = hashlib.sha256(repacked_worker).hexdigest().upper()
-    digest_slot = worker_sha256.encode("ascii") + b"\r\n"
-    assert len(digest_slot) == 66
+    worker_sha256 = hashlib.sha256(repacked_worker).hexdigest().upper().encode("ascii")
 
-    outer_raw[SHA256_OFFSET : SHA256_OFFSET + 66] = digest_slot
-    outer_raw[WORKER_START:WORKER_END] = repacked_worker
+    # Assemble Celeslib Xeno Release Executable
+    stub_raw = STUB_EXE.read_bytes()
+    pad_stub = (16 - (len(stub_raw) % 16)) % 16
+    stub_aligned = stub_raw + (b"\x00" * pad_stub)
+    marker = b"CELESLIB_WORKER_V1"
+    sha_offset = len(stub_aligned) + len(marker)
+    header = worker_sha256 + b"\r\n" + b"ace-worker.exe"
+    footer = struct.pack("<Q", sha_offset)
 
-    tail_buf = bytearray(outer_raw[WORKER_END:])
-    gui_patched = apply_gui_patches(tail_buf)
-    outer_raw[WORKER_END:] = tail_buf
+    celeslib_payload = (
+        stub_aligned
+        + marker
+        + header
+        + repacked_worker
+        + footer
+    )
 
-    assert len(outer_raw) == OUTER_SIZE
-    OUT_EXE.write_bytes(outer_raw)
+    CELESLIB_EXE.write_bytes(celeslib_payload)
+    COMPAT_EXE.write_bytes(celeslib_payload)
 
-    exe_sha256 = hashlib.sha256(outer_raw).hexdigest()
+    exe_sha256 = hashlib.sha256(celeslib_payload).hexdigest()
+    worker_sha_lower = worker_sha256.decode("ascii").lower()
     SHA256SUMS_PATH.write_text(
-        f"{exe_sha256}  {OUT_EXE.name}\n"
-        f"{worker_sha256.lower()}  ace-worker.exe (embedded @ 0x4CAC4A..0x3838C00)\n",
+        f"{exe_sha256}  {CELESLIB_EXE.name}\n"
+        f"{exe_sha256}  {COMPAT_EXE.name}\n"
+        f"{worker_sha_lower}  ace-worker.exe (embedded @ offset 0x{sha_offset + 80:X}..0x{len(celeslib_payload) - 8:X})\n",
         encoding="utf-8",
     )
 
     summary = {
-        "exe_path": str(OUT_EXE),
-        "exe_size": len(outer_raw),
+        "primary_exe_path": str(CELESLIB_EXE),
+        "compat_exe_path": str(COMPAT_EXE),
+        "exe_size": len(celeslib_payload),
         "exe_sha256": exe_sha256,
         "worker_size": len(repacked_worker),
-        "worker_sha256_upper": worker_sha256,
+        "worker_sha256_upper": worker_sha256.decode("ascii"),
         "carchive_zero_pad_bytes": pad_len,
-        "gui_strings_patched": gui_patched,
     }
     print(json.dumps(summary, indent=2))
     return summary
