@@ -217,14 +217,16 @@ def normalize_formula_skeleton_zh(text: str) -> str:
     """Normalize Chinese text by replacing dynamic formula tokens, icon placeholders, and numbers with #N#."""
     p = normalize_plain_zh(text)
     p = re.sub(r"^(?:主动|被动|觉醒|天赋|效果|秘技)[：:]", "", p)
+    p = re.sub(r"\n*(?:<color=[^>]+>)*点击技能描述面板[，,].*$", "", p)
     p = p.replace("（", "(").replace("）", ")").replace("【", "[").replace("】", "]")
     p = (
         p.replace("{Energy}", "能量")
         .replace("{LordExp}", "棋手经验")
         .replace("{LordHp}", "棋手生命值")
     )
-    p = re.sub(r"\[0\]点(物理|法术|真实)伤害\(([^)]+)\)", r"\2的\1伤害", p)
-    p = re.sub(r"\[0\]点(护盾|生命值)\(([^)]+)\)", r"\2的\1", p)
+    p = re.sub(r"\[\d+\]点?(物理|法术|真实)伤害\(([^)]+)\)", r"\2的\1伤害", p)
+    p = re.sub(r"\[\d+\]点?(护盾|生命值?)\(([^)]+)\)", r"\2的\1", p)
+    p = re.sub(r"\[\d+\](%|秒|米|层|次|个|点|张|只|名|格|回合)", r"#\1", p)
     p = re.sub(
         r"[一二两三四五六七八九十]+(?=周|次|秒|格|层|名|个|张|点|回合|件|把|枚|颗|只|条|道)",
         "#N#",
@@ -313,15 +315,15 @@ def reinject_formula_and_skeleton(
                 out = subbed
                 sentinels_icon.append((tok, full_ph))
 
-    # 2. If source_zh uses parenthetical [0]点...（[1]+[2]%...）, graft the exact formula span or align after normalization
-    if "[0]" in source_zh and baseline_en:
+    # 2. If source_zh uses parenthetical [\d+]点...（[\d+]+[\d+]%...）, graft the exact formula span or align after normalization
+    if re.search(r"\[\d+\]", source_zh) and baseline_en:
         en_tagged_dmg = re.findall(
             r"(?:<color=[^>]+>)?\[\d+\][^<]*(?:</color>)?\s*(?:<color=[^>]+>)?\s*\(\[\d+\][^)]*\)(?:</color>)?",
             baseline_en,
         )
         id_dmg_spans = list(
             re.finditer(
-                r"(?:\d+(?:\.\d+)?\+)?\d+(?:\.\d+)?%\s*(?:Physical Attack|Magic Attack|Max HP|HP Maksimum|[A-Za-z ]+?)\s+sebagai\s+(?:Physical Damage|Magic Damage|True Damage|Shield|HP)",
+                r"(?:(?:\d+(?:\.\d+)?\+)?\d+(?:\.\d+)?%\s*(?:Physical Attack|Magic Attack|Max HP|HP Maksimum|[A-Za-z ]+?)\s+sebagai\s+(?:Physical Damage|Magic Damage|True Damage|Shield|HP)|(?:Physical Damage|Magic Damage|True Damage|Shield|HP)\s+sebesar\s+(?:\d+(?:\.\d+)?\+)?\d+(?:\.\d+)?%\s*(?:Physical Attack|Magic Attack|Max HP|HP Maksimum|[A-Za-z ]+?)|mendapatkan Shield sebesar\s+[^.,\n]+|Memulihkan\s+[^.,\n]+\s+HP)",
                 out,
             )
         )
@@ -347,8 +349,9 @@ def reinject_formula_and_skeleton(
         .replace("{LordExp}", "棋手经验")
         .replace("{LordHp}", "棋手生命值")
     )
-    src_clean = re.sub(r"\[0\]点(物理|法术|真实)伤害\(([^)]+)\)", r"\2的\1伤害", src_clean)
-    src_clean = re.sub(r"\[0\]点(护盾|生命值)\(([^)]+)\)", r"\2的\1", src_clean)
+    src_clean = re.sub(r"\[\d+\]点?(物理|法术|真实)伤害\(([^)]+)\)", r"\2的\1伤害", src_clean)
+    src_clean = re.sub(r"\[\d+\]点?(护盾|生命值?)\(([^)]+)\)", r"\2的\1", src_clean)
+    src_clean = re.sub(r"\[\d+\](%|秒|米|层|次|个|点|张|只|名|格|回合)", r"#\1", src_clean)
 
     ph_map = {re.sub(r"\s+", "", ph): ph for ph in PLACEHOLDER_RE.findall(source_zh)}
     cn_exprs = COMPOUND_EXPR_RE.findall(cn_clean)
@@ -365,6 +368,16 @@ def reinject_formula_and_skeleton(
                     out,
                     count=1,
                 )
+
+    # 4. Handle trailing UI inspection hint if present in source_zh
+    ui_hint_m = re.search(
+        r"(\n*(?:<color=[^>]+>)*点击技能描述面板[，,].*?(?:</color>)?)$", source_zh
+    )
+    if ui_hint_m and not re.search(r"(?:Klik|Ketuk|Tap).*?panel deskripsi", out, flags=re.I):
+        hint_raw = ui_hint_m.group(1)
+        color_m = re.search(r"<color=([^>]+)>", hint_raw)
+        c_val = color_m.group(1) if color_m else "#7288a7"
+        out = out.rstrip() + f"\n<color={c_val}>Ketuk panel deskripsi Skill untuk melihat penjelasan detail</color>"
 
     # Wrap formula and stat spans if source_zh had them inside <color=...>...</color>
     # e.g. <color=#dfa15e>80+[194010p1q2/100]%物理攻击力的物理伤害</color> and <color=#dfa15e>[194011p1q2]点物理防御</color>

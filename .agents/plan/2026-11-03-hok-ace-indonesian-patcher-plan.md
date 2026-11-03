@@ -2432,7 +2432,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
 
 ### Task 25: Create Reproducible `scripts/01b_build_hybrid_vfs_index.py` & Zero-Leakage `src/acepatchindo/hybrid_classifier.py`
 
-- [x] **Step 25.1: Write `scripts/01b_build_hybrid_vfs_index.py` to Deterministically Generate `data/references/hybrid_vfs_index.json` From Real QtsVFS Tables + Tier 1/2 References**
+- [ ] **Step 25.1: Write `scripts/01b_build_hybrid_vfs_index.py` to Deterministically Generate `data/references/hybrid_vfs_index.json` From Real QtsVFS Tables + Tier 1/2 References** *(REOPENED BY MANAGER AUDIT ROUND 2 — English `.bytes` tables overwrote `m60_lookup[sfx]` and bypassed Chinese vetoes, leaking `2,086` conflicting `sfx` keys, Faction+Class tags `'Three Kingdoms Pejuang'`, Equipment `'Physical blood-sucking +20%'`, and `45+` Hero voice lines/quotes!)*
   - Define the **ONLY 32 Allowed Target Table Prefix Tags (`ALLOWED_TARGET_PREFIXES`)** across all 508 QtsVFS tables:
     - **Card Family (`12`):** `{"23F7", "8E55", "FBF3", "5AD1", "801D", "BC6D", "5A2E", "1825", "FCC7", "6D3B", "6E60", "60D2"}`
     - **True Skill Family (`5`):** `{"FCCD", "99AB", "4853", "865D", "CE46"}`
@@ -2461,7 +2461,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
          - `#2394`: records passing Equipment/Name vetoes with `len(plain_zh) >= 8` and sentence punctuation.
          - `#5CFD`: ONLY the 3 Contestant overview descriptions (`len(plain_zh) >= 15`).
 
-- [x] **Step 25.2: Simplify `src/acepatchindo/hybrid_classifier.py` to Pure Deterministic Index Lookup (ZERO Keyword Wildcards!)**
+- [ ] **Step 25.2: Simplify `src/acepatchindo/hybrid_classifier.py` to Pure Deterministic Index Lookup (ZERO Keyword Wildcards!)** *(REOPENED — `is_target_update` must never allow keys in `vfs_veto_keys` or `sfx` in `vfs_veto_sfx`!)*
   - **DELETE lines `102–121`** (the reckless `if any(kw in zh_clean for kw in ("物理伤害", ..., "生命值", "英雄牌", "召唤")): return True` wildcard) AND **DELETE `"D262"`, `"7D6E"`, `"BCDE"`** from blind whole-table `TALENT_TAGS`!
   - `is_target_unique(zh_src, en_base)`:
     1. Return `False` if `zh_clean` in `WINDOWS_108_NONTARGET_EN | veto_names_zh | veto_equip_zh | veto_effect_zh` or `normalize_plain_zh(zh_clean)` in `veto_equip_plain | veto_effect_plain`.
@@ -2476,7 +2476,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
 
 ### Task 26: Actually Implement Full Embedded Entity Name Protection & Fix Remaining Skill/Talent Prose Defects (`glossary.py` & `lexicon_id.py`)
 
-- [x] **Step 26.1: Fix `ThreeTierGlossary` (`src/acepatchindo/glossary.py`) So ALL Embedded Entity Names Stay 100% English**
+- [ ] **Step 26.1: Fix `ThreeTierGlossary` (`src/acepatchindo/glossary.py`) So ALL Embedded Entity Names Stay 100% English** *(REOPENED — `Luban No. 7` became `Luban Tidak. 7`, `[Great Wall]` became `[Hebat Dinding]`, `Mechanical Minion A1` became `Mechanical Minion sebuah1`!)*
   - Load `orig_cat["unique"]` inside `ThreeTierGlossary.from_reference_files` (from `Honor of Kings Ace English Patcher 1.4.12.exe_extracted/catalog/catalog.json.gz` when present).
   - Add `"Chaos Rift"` and `"Ancient Coin Machine"` to `CANONICAL_PROTECTED_TERMS`, and **DELETE** line `765` `(r"(?<![A-Za-z])Ancient Coin Machine(?![A-Za-z])", "Coin Machine")` so `Ancient Coin Machine` stays intact!
   - Actually populate **BOTH** `verified_entity_names_en.add(name)` **AND** `protected_set.add(name)` inside `_ingest_tier1`, `_ingest_tier2`, and `_ingest_tier2_details` for **EVERY** valid English entity name (`3 <= len(name) <= 45`, contains uppercase, not ending with `.`) across:
@@ -2486,7 +2486,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
   - Fix apostrophe/ampersand boundary in `instance._protected_re` (`glossary.py:529`) and `_POS_SWAP_RE` (`lexicon_id.py`) so names like `"Chang Xiao'e"` (`"Chang Xiao'e's Skill"` -> `"Skill Chang Xiao'e"`, NEVER `"Chang Xiao'Skill e"`!) and `"Gan & Mo"` are matched cleanly before possessive swapping!
   - Also ensure `protected_set |= verified_entity_names_en` before building `instance.protected_en_terms`!
 
-- [x] **Step 26.2: Fix the 5 Remaining Skill/Talent Prose Defects in `src/acepatchindo/lexicon_id.py` & `src/acepatchindo/glossary.py`**
+- [ ] **Step 26.2: Fix the Remaining Skill/Talent Prose & Formula Skeleton Defects in `src/acepatchindo/tag_aligner.py`, `src/acepatchindo/lexicon_id.py` & `src/acepatchindo/glossary.py`** *(REOPENED — `\[0\]` hardcoding in `tag_aligner.py` dropped 43+ main Hero skills (`Lu Bu`, `Augran`, `Allain`, `Donghuang`) to Tier 3, plus `Damage Atas`, `Mementalkan Atas`, `ke melepaskan`, `dasar Lu Bu serangan`!)*
   1. `"picks up"` / `"pick up"`: add `("picks", "up"): "mengangkat"`, `("pick", "up"): "mengangkat"`, `("picked", "up"): "mengangkat"` to `PHRASE_2` (eliminating `"Memilih atas target"`!).
   2. `"fans his/her/its wings"` & `"feather(s)"`: add pre-pattern in `glossary.py` `(r"\bfans\s+(?:his|her|its|their)\s+wings\b", "mengepakkan sayapnya")`, `(r"\bspreads\s+(?:his|her|its|their)\s+wings\s+to\s+dance\b", "membentangkan sayapnya dan menari")`, and in `lexicon_id.py` map `"feather": "bulu"`, `"feathers": "bulu"`, `("feather", "arrows"): "panah bulu"`, `("feather", "arrow"): "panah bulu"`!
   3. `"sebuah <tag>15%"` / `"sebuah 15%"`: in `glossary.py` post-tag restoration (or `tag_aligner.py`), strip `sebuah` before optional opening tags followed by a number (`re.sub(r"\bsebuah\s+((?:<[^>]+>\s*)*\d+)", r"\1", out, flags=re.I)`)!
@@ -2512,7 +2512,7 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
     2. Second `adaptive._run("install", ...)` with the SAME `catalog.json.gz` calls ONLY `["install"]` (idempotent, no redundant restore!).
     3. Third `adaptive._run("install", ...)` after changing `catalog.json.gz` bytes calls `["restore", "install"]` again!
 
-- [x] **Step 27.3: Add Iron-Clad Zero-Leakage & Zero-False-Negative Assertions to `tests/test_glossary_and_tiers.py` & `scripts/04_verify_real_windows_game.py`**
+- [ ] **Step 27.3: Add Iron-Clad Zero-Leakage & Zero-False-Negative Assertions to `tests/test_glossary_and_tiers.py` & `scripts/04_verify_real_windows_game.py`** *(REOPENED — must also assert 0 `sfx` conflicts, 0 voice line leaks, 0 Tier 1 parenthetical formula misses, and 0 `Luban Tidak` / `Damage Atas` / `Mementalkan Atas` / `Hebat Dinding`!)*
   - In `tests/test_glossary_and_tiers.py`:
     1. Assert **0** leaked Tier 1 Equipment descriptions (`for it in t1["equip"]: ... assert cat["unique"][d] == orig_cat["unique"][d]` when `d` not in Hero/Skill/Talent/Lord descriptions).
     2. Assert **0** leaked Tier 1 standalone Effect Card descriptions (`for it in t1["effect"]: ... assert cat["unique"][d] == orig_cat["unique"][d]` when `d` not in Hero/Skill/Talent/Lord descriptions).
@@ -2523,16 +2523,113 @@ curl -ILs https://github.com/voseu/acepatchindo/releases/download/v1.4.12-id.1/H
 
 ### Task 28: Rebuild Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Pass 100% `pytest -v` (`0` Failed, `0` Skipped), Commit, Re-Tag `v1.4.12-id.2`, & Re-Upload GitHub Release (`06`)
 
-- [x] **Step 28.1: Run Complete Pipeline & Verify All Tests Pass (`0` Failed, `0` Skipped)**
+- [ ] **Step 28.1: Run Complete Pipeline & Verify All Tests Pass (`0` Failed, `0` Skipped)** *(REOPENED)*
   1. `/home/whise/.local/bin/uv run --python 3.12 python scripts/01b_build_hybrid_vfs_index.py`
   2. `/home/whise/.local/bin/uv run --python 3.12 python scripts/02_build_indonesian_catalog.py`
   3. `/home/whise/.local/bin/uv run --python 3.12 python scripts/03_patch_worker_modules.py`
   4. `/home/whise/.local/bin/uv run --python 3.12 python scripts/04_verify_real_windows_game.py`
   5. `/home/whise/.local/bin/uv run --python 3.12 python scripts/05_repack_windows_exe.py`
   6. `/home/whise/.local/bin/uv run --python 3.12 pytest -v` (**must show >= 14 passed, 0 failed, 0 skipped!** Also adjust `tests/test_repack_integrity.py` `en_to_id` range bound if clean `en_to_id` is `2,000 <= len(cat["en_to_id"]) <= 10,000`!).
-- [x] **Step 28.2: Update Checksums in `README.md` & `scripts/06_publish_github_release.py`, Commit, Force-Update Tag `v1.4.12-id.2`, & Clobber-Upload Clean `.exe` + `SHA256SUMS.txt` to GitHub Release `v1.4.12-id.2`**
+- [ ] **Step 28.2: Update Checksums in `README.md` & `scripts/06_publish_github_release.py`, Commit, Force-Update Tag `v1.4.12-id.2`, & Clobber-Upload Clean `.exe` + `SHA256SUMS.txt` to GitHub Release `v1.4.12-id.2`** *(REOPENED)*
   - Update `README.md` and `scripts/06_publish_github_release.py` with exact new SHA-256 digests from `dist/SHA256SUMS.txt` and accurate Hybrid counts.
   - Check (`[x]`) all completed checkboxes in `.agents/plan/2026-11-03-hok-ace-indonesian-patcher-plan.md`, commit on `main`, `git push origin main`, `git tag -f v1.4.12-id.2 HEAD && git push -f origin v1.4.12-id.2`, run `scripts/06_publish_github_release.py`, and verify remote asset digests on GitHub Release `v1.4.12-id.2` match `dist/SHA256SUMS.txt` 100%!
+
+---
+
+## Phase 6 Remediation Round 2: Deep Structural & Prose Audit Fixes (Tasks 29–32)
+
+> [!CAUTION]
+> **Manager Forensic Audit of `commit 5a6306f` — REJECTED Due to 4 Deep Structural & Prose Defects:**
+> 1. **DUAL-TABLE OVERWRITE & ENGLISH-RECORD VETO BYPASS IN `scripts/01b_build_hybrid_vfs_index.py` (`2,086` Conflicting Row Suffixes `sfx`, `963` English Strings in `vfs_target_zh`, & Leaked Equipment / Faction+Class / Effect Cards):**
+>    - In QtsVFS `originals/` (`pkg=1`), several table prefixes have **two** `.bytes` tables: a **Chinese** table (e.g., `#60D2` at `hash=0x36B258373DA34185`, `#4853` at `0x4332819ABE8E29C8`, `#865D` at `0x7F7F60ACED822B5E`, `#BCDE` at `0x04F21C6735D0D555`) AND an **English** `english_updates` table (e.g., `#60D2` at `hash=0xDD400CE5E3F32E17`, `#4853` at `0xC8505EC8297580DA`, `#865D` at `0x42B1223EAA77E2CC`, `#BCDE` at `0x00E5A135114EEEC7`).
+>    - Because `0xDD400CE5E3F32E17 > 0x36B258373DA34185`, iterating `for h in sorted(pkg.entries)` caused the English `#60D2` table to **overwrite** `m60_lookup[sfx]` with English strings!
+>      - **Consequence A (`#60D2` Faction+Class Tags Leaked):** `if zh_str != m60_val:` compared Chinese `'三分之地   战士'` (`zh_str`) against overwritten English `'Three Kingdoms   Warrior'` (`m60_val`), marking `#60D2` Faction+Class tags as `is_target = True` and translating `'三分之地   战士'` -> `'Three Kingdoms Pejuang'`, `'日落海   战士'` -> `'Sunset Pejuang'`, `'河洛   战士'` -> `'Central Plain Pejuang'`, `'大河流域   战士'` -> `'Riverlands Pejuang'`, `'逐鹿   战士'` -> `'Zhulu Plateau Pejuang'`!
+>      - **Consequence B (`2,086` Vetoed Row Suffixes `sfx` Leaked via English Tables):** When iterating over the English `.bytes` tables (`#BCDE`, `#23F7`, `#4853`, `#865D`), `zh_str` was actually an **English string**, so all Chinese vetoes (`zh_str in veto_equip_zh`, `zh_str in veto_effect_zh`, `P_EQUIP_PATTERN`, `P_EFFECT_CARD_PATTERN`) were bypassed! That added `2,086` vetoed `sfx` suffixes into `vfs_target_keys` (such as `#BCDEFF3DCEF34F90#`: `'<color=#ffffff>Physical blood-sucking +20%</color>... Unique Passive: [Sunset Sea] When worn by the hero...'` and `'Obtain 1 piece of equipment [organ box]...'`) and `963` non-CJK English strings into `vfs_target_zh`!
+>      - **Consequence C (Unvetoed Equipment & `#9344` UI Strings):** Equipment strings with `唯一：` / `<color=#ffffff><b>唯一</b></color>` / `装备箱` / `件装备` / `特殊装备` / `高级装备` and `#9344` UI strings `'当前祝福：大河流域'` (`'Saat ini Berkah: Riverlands'`) and `'1张炸弹牌加入了对局，小心传递。'` leaked into `vfs_target_zh`.
+> 2. **45+ HERO VOICE LINES / LORE QUOTES & UNIT FLAVOR TEXTS IN `SKILL_PREFIXES` (`#CE46..#865D`) LEAKED INTO INDONESIAN:**
+>    - In `scripts/01b_build_hybrid_vfs_index.py:378`, `any(p in zh_str for p in ("，", "。", ...))` matched ANY sentence with a comma or period in `#CE46..#865D`, translating ~45 Hero Voice Lines / Lore Quotes and unit flavor texts into broken Indonesian:
+>      - `'女人，是水做的。'` -> `'Wanita dibuat dari air.'`, `'你已经被盯上了。'` -> `'Kamu telah ditargetkan.'`, `'你是我喜欢的口味。'` -> `'Kamu adalah favorit rasa milikku.'`, `'你需要接受电疗。'` -> `'Kamu perlu electrotherapy.'`, `'清理工作才刚刚开始。'` -> `'Cleanup memiliki hanya hanya dimulai.'`, `'现在，接受支配。'` -> `'Sekarang, mengirimkan ke domination.'`, `'我的枪去而复返，你的生命有去无回。'`, `'“哒哒哒，哒哒哒。”'`, `'一子定乾坤。'`, `'不坠命运之名。'`, `'不该背对我。'`, `'以圣剑的名义起誓。'`, `'以绝望挥剑，着逝者为铠。'`, `'以魂洗剑，以命度心。'`, `'先有破灭，然后重生。'`, `'兼爱、非攻、尚同。'`, `'听，是风在低语。'`, `'天不生夫子，万古如长夜。'`, `'带翅膀的不一定是天使。'`, `'把心事，都藏进花里。'`, `'敌动，我不动。'`, `'映照潮汐的起伏，以免迷失战场的道路。'`, `'春风吹又生，斩草又除根。'`, `'有缘千里来相会。'`, `'武道没有定式，人生亦是如此。'`, `'滴答，滴答，滴答，滴答~'`, `'玄微有灵，万物生长。'`, `'用兵之道，在于用阵。'`, `'眼界必须放长远。'`, `'福祸双依，天命难解。'`, `'良药苦口，蜜语伤人。'`, `'萤火庇护，万物复苏。'`, `'行到水穷处，坐看云起时。'`, `'言为心声，字为心画。'`, `'长枪所向，一往无前。'`, `'可爱的小鹿，可靠的前排坦克。'`, `'它最大的职责就是挨打。'`, `'机器仆从A1'` (`'Mechanical Minion sebuah1'`).
+> 3. **`normalize_formula_skeleton_zh` HARDCODED `\[0\]` INSTEAD OF `\[\d+\]` IN `src/acepatchindo/tag_aligner.py:226-227,350-351`, DROPPING `43+` MAIN HERO SKILL VARIANTS (`Lu Bu`, `Augran`, `Allain`, `Donghuang`, `Yang Jian`, `Dolia`, `Yao`, `Li Bai`, `Fang`, `Yuhuan`) FROM TIER 1 TO BROKEN TIER 3 INDLISH:**
+>    - `p = re.sub(r"\[0\]点(物理|法术|真实)伤害\(([^)]+)\)", r"\2的\1伤害", p)` and `p = re.sub(r"\[0\]点(护盾|生命值)\(([^)]+)\)", r"\2的\1", p)` only matched `[0]`! Any skill with a 2nd or 3rd parenthetical formula (`[1]点生命值（[2]%最大生命值）` in Donghuang, `[2]点物理伤害（[3]%物理攻击力）` in Allain, `[3]点生命（[4]%最大生命值）` in Lu Bu, `[2]点物理伤害（[3]+[4]%物理攻击力）` in Augran) or a trailing `点击技能描述面板，查看...详细解释` note failed `skel_zh in self.tier1_formula_zh_to_id` or failed `reinject_formula_and_skeleton` (`id_dmg_spans`), falling back to Tier 3 Indlish (`dasar Lu Bu serangan`, `Donghuang menciptakan 3 Bola energi itu orbit di sekitarnya`, `dasar Augran serangan`)!
+> 4. **MANGLED NAMES & BROKEN INDLISH IN TIER 3 (`Luban Tidak. 7`, `Damage Atas`, `Decay Bawah`, `Mementalkan Atas`, `[Hebat Dinding]`, `Mechanical Minion sebuah1`, `pada Menggunakan`, `ke melepaskan`, `dasar Lu Bu serangan`):**
+>    - `"Luban No. 7"` / `"Luban No.7"` / `"Luban No. 9"` / `"Luban No. 4"` / `"No. 7 laser cannon"` had `"No"` translated by `WORD_1["no"] = "tidak"`, producing **`Luban Tidak. 7`**, **`Luban Tidak. 9`**, **`Luban Tidak. 4`**, **`Tidak. laser 7 meriam`**!
+>    - Short Lv.10/40/100 skill enhancement summaries ending in `"Up"` / `"Down"` (`"Bullet Damage Up"`, `"Missile Decay Down"`, `"Passive Cap Up"`, `"Bounce Count Up"`) became **`Peluru Damage Atas`**, **`Rudal Decay Bawah`**, **`Pasif Batas Atas`**, **`Memantul Jumlah Atas`** (28 hits)!
+>    - `"Knock Up"` / `"knocking up"` / `"Knocking Up"` became **`Mementalkan Atas`** (34 hits) instead of `Knock-Up` / `memberi efek Knock-Up`!
+>    - `"on Skill Cast"` / `"on Cast"` became **`pada Skill Menggunakan`** / **`pada Menggunakan`** instead of `saat menggunakan Skill`.
+>    - Faction `"Great Wall"` (and `"Chang'an"`, `"Yaotian"`, `"Jixia"`, `"Cloudream"`, `"Xuanyong"`) was missing from `CANONICAL_PROTECTED_TERMS`, turning `[Great Wall]` into **`[Hebat Dinding]`**!
+>    - `"A1"` in `"Mechanical Minion A1"` had `"A"` replaced with `"sebuah"`, producing **`Mechanical Minion sebuah1`**!
+>    - Infinitive `"to <verb>"` (`"to cast"`, `"to reach"`, `"to deal"`, `"to attack"`, `"to trigger"`, `"to gain"`, `"to restore"`) became **`ke melepaskan`**, **`ke mencapai`**, **`ke memberikan`**, **`ke menyerang`** (318 hits) instead of `"untuk <verb>"`!
+>    - Possessive `"<Name>'s basic attacks"` (`"Lu Bu's basic attacks"`, `"Arthur's basic attacks"`, `"Augran's basic attacks"`) became **`dasar Lu Bu serangan`** instead of **`Basic Attack <Name>`**!
+
+### Task 29: Fix Dual-Table Chinese/English Separation, Suffix-Level Veto Propagation, & Voice-Line Filtering in `scripts/01b_build_hybrid_vfs_index.py` & `src/acepatchindo/hybrid_classifier.py`
+
+- [x] **Step 29.1: Never Let English `.bytes` Tables Overwrite `m60_lookup` or Bypass Chinese Vetoes in `scripts/01b_build_hybrid_vfs_index.py`**
+  1. **Require CJK Characters in Chinese Pass (`_has_cjk(s)`):**
+     - Define `_CJK_RE = re.compile(r"[\u4e00-\u9fff]")`.
+     - When populating `m60_lookup` (Pass 1), **ONLY** read records where `_CJK_RE.search(val)` is `True` (or explicitly only from the Chinese `#60D2` table `0x36B258373DA34185`) so English `#60D2` (`0xDD400CE5E3F32E17`) **NEVER** overwrites `m60_lookup[sfx]`!
+     - Explicitly **exclude `#60D2` (`tag == "60D2"`)** from `vfs_target_keys` and `vfs_target_zh` unless `zh_str in ref_target_zh` (all `#60D2` Faction+Class tags like `'三分之地   战士'`, `'日落海   战士'`, `'河洛   战士'` are category badges and must stay `100%` English!).
+  2. **Evaluate Target vs Veto ONLY on Chinese Records (`_CJK_RE.search(zh_str)`), Then Propagate by 48-Bit Suffix `sfx = key[5:17]` to Paired English Tables:**
+     - During Pass 2, separate tables/records into **Chinese records** (`_CJK_RE.search(zh_str)`) and **non-CJK English records** (`not _CJK_RE.search(zh_str)`).
+     - Never add a non-CJK string to `vfs_target_zh`! (`assert all(_CJK_RE.search(s) for s in vfs_target_zh)`!)
+     - Maintain `target_sfx_by_family` and `veto_sfx`: whenever a Chinese record with suffix `sfx = key[5:17]` is vetoed (`is_veto == True` or `is_target == False` in the same family), add `sfx` to `veto_sfx` and `key` to `vfs_veto_keys`.
+     - After evaluating all Chinese records, for every record `(key, val)` in the paired English tables (`not _CJK_RE.search(val)`): if `tag in ALLOWED_TARGET_PREFIXES - {"60D2"}` and `sfx in target_sfx` and `sfx not in veto_sfx`, add `key` to `vfs_target_keys`; otherwise add `key` to `vfs_veto_keys`!
+     - Enforce invariant at the end of `01b_build_hybrid_vfs_index.py`:
+       `assert len({k[5:17] for k in vfs_target_keys} & {k[5:17] for k in vfs_veto_keys}) == 0` (**ZERO** conflicting row suffixes `sfx` between `vfs_target_keys` and `vfs_veto_keys`!).
+  3. **Tighten Equipment, UI & Voice-Line Vetoes in `01b_build_hybrid_vfs_index.py`:**
+     - Expand `P_EQUIP_PATTERN` to also match: `唯一：`, `<color=#ffffff><b>唯一</b></color>`, `件装备`, `装备箱`, `特殊装备`, `高级装备`, `穿戴`, `佩戴` (when not in `ref_target_zh`).
+     - In `#BCDE..#CEDB` (including `#9344`), veto non-reference strings starting with `当前祝福：` or matching `炸弹牌加入了对局` or `卡牌\d+选\d+`.
+     - In `SKILL_PREFIXES` (`#FCCD`, `#99AB`, `#4853`, `#865D`, `#CE46`), a Chinese string NOT in `ref_target_zh` and `normalize_plain_zh(zh_str) not in ref_target_plain` is ONLY a target skill description if `plain_zh` contains a **genuine gameplay mechanic marker**:
+       `re.search(r"(\d+|%|\[0\]|\+|伤害|恢复|生命|护盾|法力|物理|法术|攻击|防御|速度|冷却|眩晕|击飞|减速|沉默|免疫|召唤|被动|主动|入场|登场|牺牲|觉醒|提升|降低|增加|减少|造成|获得|持续|范围|目标|友军|敌方|敌人|回合|技能|普攻|暴击|分身|层数|上限)", plain_zh)`
+       AND does **NOT** match unit flavor descriptions `r"^(?:可爱的小鹿|它最大的职责就是挨打|机器仆从)"`! This immediately eliminates all 45+ Hero voice lines / lore quotes (`女人，是水做的。`, `你已经被盯上了。`, `清理工作才刚刚开始。`, `现在，接受支配。`, `我的枪去而复返...`, `以圣剑的名义起誓。`, etc.) while keeping 100% of real skills & enhancements!
+
+### Task 30: Fix Multi-Index Formula Skeleton Alignment (`\[\d+\]`) in `src/acepatchindo/tag_aligner.py` So All `Lu Bu`, `Augran`, `Allain`, `Donghuang`, `Yang Jian`, `Dolia`, `Yao`, `Li Bai`, `Fang`, & `Yuhuan` Skills Hit Tier 1
+
+- [x] **Step 30.1: Generalize `normalize_formula_skeleton_zh` and `reinject_formula_and_skeleton` in `src/acepatchindo/tag_aligner.py`**
+  1. In `normalize_formula_skeleton_zh(zh_text: str) -> str` (`tag_aligner.py:217-230`):
+     - Before stripping tags, strip any trailing UI inspection hint line:
+       `p = re.sub(r"\n*(?:<color=[^>]+>)*点击技能描述面板[，,].*$", "", p)`
+     - Replace hardcoded `\[0\]` with `\[\d+\]点?` and `(护盾|生命值?)`:
+       ```python
+       p = re.sub(r"\[\d+\]点?(物理|法术|真实)伤害\(([^)]+)\)", r"\2的\1伤害", p)
+       p = re.sub(r"\[\d+\]点?(护盾|生命值?)\(([^)]+)\)", r"\2的\1", p)
+       p = re.sub(r"\[\d+\](%|秒|米|层|次|个|点|张|只|名|格|回合)", r"#\1", p)
+       ```
+  2. In `reinject_formula_and_skeleton(zh_src, id_trans, baseline_en)` (`tag_aligner.py:302-360`):
+     - When `zh_src` has trailing `点击技能描述面板，查看...详细解释`, translate/preserve that trailing note cleanly (or strip/re-append its Indonesian equivalent `\n<color=#7288a7>Klik panel deskripsi Skill untuk melihat penjelasan detail</color>`) instead of failing formula alignment!
+     - Generalize the parenthetical `[k]点...([m]...)` reinjection in `reinject_formula_and_skeleton` so it works for **1, 2, or more** parenthetical formulas (`\[\d+\]点?(?:物理伤害|法术伤害|真实伤害|护盾|生命值?)\s*[（(][^）)]+[）)]`) AND matches Indonesian spans across all Tier 1 phrasings (`sebagai Physical/Magic/True Damage`, `Physical/Magic/True Damage sebesar ...`, `Memulihkan ... HP`, `mendapatkan Shield sebesar ...`), OR directly substitutes the `{0}`/`#` placeholders from `zh_src`'s `[0]`, `[1]`, `[2]` tokens so **0** Tier 1 Hero skills fall back to Tier 3!
+
+### Task 31: Fix All Remaining Tier 3 Indlish & Name Mangling Bugs in `src/acepatchindo/glossary.py` & `src/acepatchindo/lexicon_id.py`
+
+- [x] **Step 31.1: Protect `"No. X"`, Faction Names (`Great Wall`), & Alphanumeric Suffixes (`A1`) in `src/acepatchindo/glossary.py`**
+  1. **Protect `Luban No. 7` / `No. 7` / `No. 9` / `No. 4` Before Tokenization:**
+     - Add `"Luban No. 7"`, `"Luban No.7"`, `"Luban No. 9"`, `"Luban No. 4"`, `"Mechanical Minion A1"` AND all Faction English names (`"Great Wall"`, `"Three Kingdoms"`, `"Sunset Sea"`, `"Central Plains"`, `"Central Plain"`, `"Riverlands"`, `"Zhulu Plateau"`, `"Zhulu"`, `"Cloudream"`, `"Chang'an"`, `"Yaotian"`, `"Jixia"`, `"Xuanyong"`, `"Chaos Rift"`) to `CANONICAL_PROTECTED_TERMS`!
+     - Also add a pre-pattern in `glossary.py` before tokenization that protects `r"\bNo\.\s*\d+\b"` (so `"No. 7"` / `"No.7"` / `"No. 9"` is NEVER split into `"No"` -> `"Tidak"` + `". 7"`!).
+     - In `lexicon_id.py` / `glossary.py`, never translate a letter immediately adjacent to digits (`A1`, `B2`) as `"sebuah"`.
+  2. **Fix `"<Name>'s basic attacks"`, `"Up/Down"` Stat Summaries, `"Knock Up"`, `"on Skill Cast"`, and Infinitive `"to <verb>"` in `src/acepatchindo/glossary.py` & `src/acepatchindo/lexicon_id.py`:**
+     - **Possessive Basic Attacks (`dasar Lu Bu serangan` -> `Basic Attack Lu Bu`):**
+       - Add pre-pattern in `glossary.py` (before tokenizing `"basic"`):
+         `(r"\b([A-Z][A-Za-z0-9'&.\- ]{1,25}?)'s\s+basic\s+attacks?\b", r"Basic Attack \1")`
+         and `(r"\b([A-Z][A-Za-z0-9'&.\- ]{1,25}?)'s\s+attacks?\b", r"serangan \1")`!
+     - **Short Stat Enhancement Summaries Ending in `"Up"` / `"Down"` (`Damage Atas` -> `Meningkat`, `Decay Bawah` -> `Berkurang`):**
+       - When a short skill enhancement string ends with `\bUp$` or `\bDown$` (or `Damage Up`, `Decay Down`, `Cap Up`, `Count Up`, `Range Up`, `Duration Up`, `Effect Up`, `Limit Up`, `Speed Up`, `Cooldown Down`), translate trailing `Up` as `"Meningkat"` and trailing `Down` as `"Berkurang"` (e.g., `"Bullet Damage Up"` -> `"Damage Peluru Meningkat"`, `"Missile Decay Down"` -> `"Penurunan Damage Rudal Berkurang"`, `"Passive Cap Up"` -> `"Batas Pasif Meningkat"`, `"Bounce Count Up"` -> `"Jumlah Pantulan Meningkat"`, `"Restore Effect Up"` -> `"Efek Pemulihan Meningkat"`)!
+     - **`"Knock Up"` / `"knocking up"` / `"knocked up"` (`Mementalkan Atas` -> `Knock-Up`):**
+       - In `lexicon_id.py` `PHRASE_2` / `PHRASE_3` and `glossary.py`, replace `"mementalkan atas"` with `"memberi efek Knock-Up"` / `"Knock-Up"` (`("knock", "up"): "Knock-Up"`, `("knocks", "up"): "memberi efek Knock-Up"`, `("knocked", "up"): "terkena Knock-Up"`, `("knocking", "up"): "memberi efek Knock-Up"`), and add cleanup `("Mementalkan Atas", "Knock-Up")`, `("mementalkan atas", "memberi efek Knock-Up")`!
+     - **`"on Skill Cast"` / `"on Cast"` (`pada Skill Menggunakan` -> `saat menggunakan Skill`):**
+       - Add `("on", "skill", "cast"): "saat menggunakan Skill"`, `("on", "cast"): "saat digunakan"` in `PHRASE_3` / `PHRASE_2`!
+     - **Infinitive `"to <verb>"` (`ke melepaskan` -> `untuk melepaskan`):**
+       - In `glossary.py` post-processing (or `lexicon_id.py`), replace `\bke\s+(me[a-z]+|ber[a-z]+|ter[a-z]+|di[a-z]+|memper[a-z]+|meng[a-z]+|meny[a-z]+|men[a-z]+|mem[a-z]+|mel[a-z]+|mer[a-z]+)\b` with `r"untuk \1"` so `"ke melepaskan"`, `"ke mencapai"`, `"ke memberikan"`, `"ke menyerang"`, `"ke memicu"`, `"ke mendapatkan"`, `"ke memulihkan"`, `"ke meningkatkan"` all become natural Indonesian **`"untuk <verb>"`**!
+
+### Task 32: Add Regression Assertions to `tests/test_glossary_and_tiers.py`, Re-Run Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Verify `14 passed`, & Re-Publish `v1.4.12-id.2` (`06`)
+
+- [x] **Step 32.1: Add Regression Checks to `tests/test_glossary_and_tiers.py`**
+  - Assert in `tests/test_glossary_and_tiers.py`:
+    1. `0` conflicting `sfx` suffixes between `vfs_target_keys` and `vfs_veto_keys` in `data/references/hybrid_vfs_index.json`, and `0` non-CJK strings in `vfs_target_zh`.
+    2. `0` `#60D2` Faction+Class tags translated (`cat["unique"]["三分之地   战士"] == orig_cat["unique"]["三分之地   战士"]`, `cat["unique"]["日落海   战士"] == orig_cat["unique"]["日落海   战士"]`).
+    3. `0` Hero voice lines / quotes translated (`cat["unique"]["女人，是水做的。"] == orig_cat["unique"]["女人，是水做的。"]`, `cat["unique"]["你已经被盯上了。"] == orig_cat["unique"]["你已经被盯上了。"]`, `cat["unique"]["清理工作才刚刚开始。"] == orig_cat["unique"]["清理工作才刚刚开始。"]`).
+    4. Parenthetical multi-formula Hero skills (`Lu Bu`, `Augran`, `Allain`, `Donghuang`) use Tier 1 translations (`"dasar Lu Bu serangan"` not in `cat["unique"].values()`, `"dasar Augran serangan"` not in `cat["unique"].values()`, `"orbit di sekitarnya"` not in `cat["unique"].values()`).
+    5. `0` occurrences across `cat["unique"]` and `cat["english_updates"]` of: `"Luban Tidak"`, `"Tidak. 7"`, `"Mementalkan Atas"`, `"mementalkan atas"`, `"Hebat Dinding"`, `"Damage Atas"`, `"Decay Bawah"`, `"Batas Atas"`, `"Mechanical Minion sebuah1"`, `"pada Skill Menggunakan"`, `"Three Kingdoms Pejuang"`, `"Sunset Pejuang"`, `"Physical blood-sucking"`.
+- [x] **Step 32.2: Re-Run Full Pipeline (`01b` -> `02` -> `03` -> `04` -> `05`), Run `pytest -v`, Commit, Force-Tag `v1.4.12-id.2`, & Re-Upload Release Assets (`06`)**
+
 
 
 

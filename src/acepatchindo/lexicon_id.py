@@ -9,6 +9,34 @@ import re
 # ---------------------------------------------------------------------------
 CLAUSE_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"\breceive in order:\b", re.I), "memperoleh secara berurutan:"),
+    # Specific gameplay action & timing patterns
+    (re.compile(r"\b([A-Z][A-Za-z0-9'&.\- ]{1,25}?)'s\s+basic\s+attacks?\b"), r"Basic Attack \1"),
+    (re.compile(r"\b([A-Z][A-Za-z0-9'&.\- ]{1,25}?)'s\s+attacks?\b"), r"serangan \1"),
+    (re.compile(r"\bNo\.\s*(\d+)\s+laser\s+cannon\b", re.I), r"Laser Cannon No.\1"),
+    (re.compile(r"\bNo\.\s*(\d+)\b", re.I), r"No.\1"),
+    (re.compile(r"\bon\s+skill\s+cast\b", re.I), "saat menggunakan Skill"),
+    (re.compile(r"\bon\s+casting\b", re.I), "saat menggunakan"),
+    (re.compile(r"\bon\s+cast\b", re.I), "saat digunakan"),
+    (re.compile(r"\bknocks?\s+up\b", re.I), "memberi efek Knock-Up"),
+    (re.compile(r"\bknocked\s+up\b", re.I), "terkena Knock-Up"),
+    (re.compile(r"\bknocking\s+up\b", re.I), "memberi efek Knock-Up"),
+    (re.compile(r"\bknock\s+up\b", re.I), "Knock-Up"),
+    (re.compile(r"\bknock-up\b", re.I), "Knock-Up"),
+    (re.compile(r"\bBullet Damage Up\b", re.I), "Peningkatan Damage Peluru"),
+    (re.compile(r"\bMissile Decay Down\b", re.I), "Pengurangan Decay Rudal"),
+    (re.compile(r"\bPassive Cap Up\b", re.I), "Peningkatan Batas Pasif"),
+    (re.compile(r"\bBounce Count Up\b", re.I), "Peningkatan Jumlah Pantulan"),
+    (re.compile(r"\bRestore Effect Up\b", re.I), "Peningkatan Efek Pemulihan"),
+    (re.compile(r"\bDamage Up\b", re.I), "Peningkatan Damage"),
+    (re.compile(r"\bDecay Down\b", re.I), "Pengurangan Decay"),
+    (re.compile(r"\bCap Up\b", re.I), "Peningkatan Batas"),
+    (re.compile(r"\bCount Up\b", re.I), "Peningkatan Jumlah"),
+    (re.compile(r"\bRange Up\b", re.I), "Peningkatan Jarak"),
+    (re.compile(r"\bDuration Up\b", re.I), "Peningkatan Durasi"),
+    (re.compile(r"\bEffect Up\b", re.I), "Peningkatan Efek"),
+    (re.compile(r"\bLimit Up\b", re.I), "Peningkatan Batas"),
+    (re.compile(r"\bSpeed Up\b", re.I), "Peningkatan Kecepatan"),
+    (re.compile(r"\bCooldown Down\b", re.I), "Pengurangan Cooldown"),
     # Conversational, social & UI idioms
     (re.compile(r"\(Optional\)", re.I), "(Opsional)"),
     (re.compile(r"\[Optional\]", re.I), "[Opsional]"),
@@ -351,6 +379,7 @@ PHRASE_4: dict[tuple[str, str, str, str], str] = {
 }
 
 PHRASE_3: dict[tuple[str, str, str], str] = {
+    ("on", "skill", "cast"): "saat menggunakan Skill",
     ("ancient", "coin", "machine"): "Ancient Coin Machine",
     ("there", "is", "a"): "ada",
     ("there", "is", "an"): "ada",
@@ -438,6 +467,13 @@ PHRASE_3: dict[tuple[str, str, str], str] = {
 }
 
 PHRASE_2: dict[tuple[str, str], str] = {
+    ("great", "wall"): "Great Wall",
+    ("knock", "up"): "Knock-Up",
+    ("knocks", "up"): "memberi efek Knock-Up",
+    ("knocked", "up"): "terkena Knock-Up",
+    ("knocking", "up"): "memberi efek Knock-Up",
+    ("on", "cast"): "saat digunakan",
+    ("on", "casting"): "saat menggunakan",
     ("picks", "up"): "mengangkat",
     ("pick", "up"): "mengangkat",
     ("picked", "up"): "mengangkat",
@@ -4206,7 +4242,7 @@ WORD_1: dict[str, str] = {
 }
 
 _TOKEN_RE = re.compile(
-    r"__WXQ[A-Z]+\d+__|__ROMAN_I__|[A-Za-z]+(?:'[A-Za-z]+)?|\d+(?:\.\d+)?|[^A-Za-z\d_]+"
+    r"__WXQ[A-Z]+\d+__|__ROMAN_I__|[A-Za-z]+[0-9]+|[A-Za-z]+(?:'[A-Za-z]+)?|\d+(?:\.\d+)?|[^A-Za-z\d_]+"
 )
 _WORD_CHECK_RE = re.compile(r"^[A-Za-z]+(?:'[A-Za-z]+)?$")
 
@@ -4470,6 +4506,25 @@ def translate_segment_en_to_id(segment: str) -> str:
     joined = re.sub(r" +([,.;:!?])", r"\1", joined)
 
     # Post-processing grammar cleanups
+    joined = re.sub(
+        r"\bke\s+(me[a-z]+|ber[a-z]+|ter[a-z]+|di[a-z]+|memper[a-z]+|meng[a-z]+|meny[a-z]+|men[a-z]+|mem[a-z]+|mel[a-z]+|mer[a-z]+)\b",
+        r"untuk \1",
+        joined,
+    )
+    joined = re.sub(r"\bLuban\s+Tidak(?:\.\s*|\s+)(\d+)\b", r"Luban No.\1", joined)
+    joined = re.sub(r"\bTidak\.\s*(\d+)\b", r"No.\1", joined)
+    joined = joined.replace("[Hebat Dinding]", "[Great Wall]")
+    joined = re.sub(r"\bHebat Dinding\b", "Great Wall", joined)
+    joined = re.sub(r"\bMechanical Minion sebuah(\d+)\b", r"Mechanical Minion A\1", joined)
+    joined = re.sub(r"(?i)\bmementalkan\s+atas\b", "Knock-Up", joined)
+    joined = re.sub(r"(?i)\bDamage\s+Atas\b", "Peningkatan Damage", joined)
+    joined = re.sub(r"(?i)\bDecay\s+Bawah\b", "Pengurangan Decay", joined)
+    joined = re.sub(r"(?i)\bBatas\s+Atas\b", "Peningkatan Batas", joined)
+    joined = re.sub(r"(?i)\bpada\s+skill\s+menggunakan\b", "saat menggunakan Skill", joined)
+    joined = re.sub(r"(?i)\bpada\s+menggunakan\b", "saat digunakan", joined)
+    joined = re.sub(r"\bdasar\s+([A-Z][A-Za-z0-9'&.\- ]{1,25}?)\s+serangan\b", r"Basic Attack \1", joined)
+    joined = re.sub(r"\bdasar\s+serangan\b", "Basic Attack", joined)
+
     # 1. Passive adalah di... / adalah ter... cleanup and redundant copulas
     joined = re.sub(r"\badalah\s+(di[a-z]{3,}\b)", r"\1", joined, flags=re.I)
     joined = re.sub(r"\badalah\s+(ter[a-z]{3,}\b)", r"\1", joined, flags=re.I)

@@ -71,6 +71,7 @@ class HybridClassifier:
         self.vfs_target_zh: frozenset[str] = frozenset(data.get("vfs_target_zh", []))
         self.vfs_veto_keys: frozenset[str] = frozenset(data.get("vfs_veto_keys", []))
         self.vfs_veto_zh: frozenset[str] = frozenset(data.get("vfs_veto_zh", []))
+        self.vfs_veto_sfx: frozenset[str] = frozenset(data.get("vfs_veto_sfx", []))
         self.ref_target_zh: frozenset[str] = frozenset(data.get("ref_target_zh", []))
         self.ref_target_plain: frozenset[str] = frozenset(data.get("ref_target_plain", []))
         self.nontarget_table_zh: frozenset[str] = frozenset(data.get("nontarget_table_zh", []))
@@ -86,8 +87,8 @@ class HybridClassifier:
         if not zh_clean:
             return False
 
-        # 1. Hard vetoes: non-target 108, known entity names, equipment, effect cards
-        if zh_clean in WINDOWS_108_NONTARGET_EN or zh_clean in self.veto_names_zh:
+        # 1. Hard vetoes: non-target 108, equipment, effect cards
+        if zh_clean in WINDOWS_108_NONTARGET_EN:
             return False
         if zh_clean in self.veto_equip_zh or zh_clean in self.veto_effect_zh:
             return False
@@ -96,15 +97,19 @@ class HybridClassifier:
         if p_zh in self.veto_equip_plain or p_zh in self.veto_effect_plain:
             return False
 
-        # 2. Authoritative positive references (checked BEFORE nontarget_table_zh!)
+        # 2. Authoritative positive references (checked BEFORE veto_names_zh & nontarget_table_zh!)
         if zh_clean in WINDOWS_108_TARGET_DESC_ID or zh_clean in self.ref_target_zh:
             return True
 
-        # 3. Hard isolation against all ~470 non-target tables
+        # 3. Known entity/hero/talent names veto
+        if zh_clean in self.veto_names_zh:
+            return False
+
+        # 4. Hard isolation against all ~470 non-target tables
         if zh_clean in self.nontarget_table_zh:
             return False
 
-        # 4. Target VFS strings or normalized reference match
+        # 5. Target VFS strings or normalized reference match
         if zh_clean in self.vfs_target_zh or p_zh in self.ref_target_plain:
             return True
 
@@ -123,11 +128,11 @@ class HybridClassifier:
         suffix = key[5:17] if key.startswith("#") and len(key) >= 17 else ""
 
         # 1. Immediate rejection if not in allowed target prefixes
-        if tag not in ALLOWED_TARGET_PREFIXES:
+        if tag not in ALLOWED_TARGET_PREFIXES or tag == "60D2":
             return False
 
-        # 2. Veto check
-        if key in self.vfs_veto_keys:
+        # 2. Veto check (key or suffix)
+        if key in self.vfs_veto_keys or suffix in self.vfs_veto_sfx:
             return False
 
         # 3. If Chinese source string is provided, use is_target_unique directly
@@ -137,10 +142,10 @@ class HybridClassifier:
         # 4. If no Chinese source string, fall back to key and structural heuristics
         if key in self.vfs_target_keys:
             return True
-        if tag in CARD_TAGS - {"60D2"} and suffix in self.hero_suffixes:
+        if tag in CARD_TAGS - {"60D2"} and suffix in self.hero_suffixes and suffix not in self.vfs_veto_sfx:
             if len(target_en) >= 15:
                 return True
-        if tag in SKILL_TAGS:
+        if tag in SKILL_TAGS and suffix not in self.vfs_veto_sfx:
             if len(target_en) >= 18 and not target_en.endswith("!") and "Skill-" not in target_en:
                 return True
 

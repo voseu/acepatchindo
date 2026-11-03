@@ -402,6 +402,21 @@ CANONICAL_PROTECTED_TERMS: tuple[str, ...] = (
     "Voucher Hero",
     "Chaos Rift",
     "Ancient Coin Machine",
+    "Luban No. 7",
+    "Luban No.7",
+    "Luban No. 9",
+    "Luban No. 4",
+    "Mechanical Minion A1",
+    "Mechanical Minion A2",
+    "Great Wall",
+    "Sunset",
+    "Zhulu",
+    "Cloudream",
+    "Chang'an",
+    "Yaotian",
+    "Jixia",
+    "Xuanyong",
+    "Knock-Up",
     "Shadow Servant",
     "Shadow Servants",
     "Illusory Totem",
@@ -960,6 +975,33 @@ class ThreeTierGlossary:
                 ),
                 (r"(?<![A-Za-z])faster growth(?![A-Za-z])", "pertumbuhan lebih cepat"),
                 (r"(?<![A-Za-z])growth methods?(?![A-Za-z])", "metode pertumbuhan"),
+                (r"\b([A-Z][A-Za-z0-9'&.\- ]{1,25}?)'s\s+basic\s+attacks?\b", r"Basic Attack \1"),
+                (r"\b([A-Z][A-Za-z0-9'&.\- ]{1,25}?)'s\s+attacks?\b", r"serangan \1"),
+                (r"\bNo\.\s*(\d+)\s+laser\s+cannon\b", r"Laser Cannon No.\1"),
+                (r"\bNo\.\s*(\d+)\b", r"No.\1"),
+                (r"\bBullet Damage Up\b", "Peningkatan Damage Peluru"),
+                (r"\bMissile Decay Down\b", "Pengurangan Decay Rudal"),
+                (r"\bPassive Cap Up\b", "Peningkatan Batas Pasif"),
+                (r"\bBounce Count Up\b", "Peningkatan Jumlah Pantulan"),
+                (r"\bRestore Effect Up\b", "Peningkatan Efek Pemulihan"),
+                (r"\bDamage Up\b", "Peningkatan Damage"),
+                (r"\bDecay Down\b", "Pengurangan Decay"),
+                (r"\bCap Up\b", "Peningkatan Batas"),
+                (r"\bCount Up\b", "Peningkatan Jumlah"),
+                (r"\bRange Up\b", "Peningkatan Jarak"),
+                (r"\bDuration Up\b", "Peningkatan Durasi"),
+                (r"\bEffect Up\b", "Peningkatan Efek"),
+                (r"\bLimit Up\b", "Peningkatan Batas"),
+                (r"\bSpeed Up\b", "Peningkatan Kecepatan"),
+                (r"\bCooldown Down\b", "Pengurangan Cooldown"),
+                (r"\bknocks?\s+up\b", "memberi efek Knock-Up"),
+                (r"\bknocked\s+up\b", "terkena Knock-Up"),
+                (r"\bknocking\s+up\b", "memberi efek Knock-Up"),
+                (r"\bknock\s+up\b", "Knock-Up"),
+                (r"\bKnock-up\b", "Knock-Up"),
+                (r"\bon\s+skill\s+cast\b", "saat menggunakan Skill"),
+                (r"\bon\s+cast\b", "saat digunakan"),
+                (r"\bon\s+casting\b", "saat menggunakan"),
             ]
             for pat, repl in var_subs:
                 out = re.sub(pat, repl, out, flags=re.IGNORECASE)
@@ -993,6 +1035,28 @@ class ThreeTierGlossary:
             )
             out = re.sub(r"\b(\d+)\s+[Aa]cak\s+(Kartu\s+[A-Za-z ]+)\b", r"\1 \2 acak", out)
 
+            out = re.sub(
+                r"\bke\s+(me[a-z]+|ber[a-z]+|ter[a-z]+|di[a-z]+|memper[a-z]+|meng[a-z]+|meny[a-z]+|men[a-z]+|mem[a-z]+|mel[a-z]+|mer[a-z]+)\b",
+                r"untuk \1",
+                out,
+            )
+            out = re.sub(r"\bLuban\s+Tidak(?:\.\s*|\s+)(\d+)\b", r"Luban No.\1", out)
+            out = re.sub(r"\bTidak\.\s*(\d+)\b", r"No.\1", out)
+            out = out.replace("[Hebat Dinding]", "[Great Wall]")
+            out = re.sub(r"\bHebat Dinding\b", "Great Wall", out)
+            out = re.sub(r"\bMechanical Minion sebuah(\d+)\b", r"Mechanical Minion A\1", out)
+            out = out.replace("Mechanical Minion sebuah1", "Mechanical Minion A1")
+            out = out.replace("Mechanical Minion sebuah2", "Mechanical Minion A2")
+            out = re.sub(r"(?i)\bmementalkan\s+atas\b", "Knock-Up", out)
+            out = re.sub(r"(?i)\bDamage\s+Atas\b", "Peningkatan Damage", out)
+            out = re.sub(r"(?i)\bDecay\s+Bawah\b", "Pengurangan Decay", out)
+            out = re.sub(r"(?i)\bBatas\s+Atas\b", "Peningkatan Batas", out)
+            out = re.sub(r"(?i)\bpada\s+skill\s+menggunakan\b", "saat menggunakan Skill", out)
+            out = re.sub(r"(?i)\bpada\s+menggunakan\b", "saat digunakan", out)
+            out = re.sub(r"\bdasar\s+([A-Z][A-Za-z0-9'&.\- ]{1,25}?)\s+serangan\b", r"Basic Attack \1", out)
+            out = re.sub(r"\bdasar\s+serangan\b", "Basic Attack", out)
+            out = out.replace("orbit di sekitarnya", "mengelilinginya")
+
             for old_ft, new_ft in (
                 ("Kartu Effect", "Kartu Efek"),
                 ("kartu Effect", "kartu Efek"),
@@ -1017,6 +1081,28 @@ class ThreeTierGlossary:
 
     def _fit_length_bound(self, source_zh: str, candidate: str) -> str:
         """Guarantee candidate satisfies len(candidate) <= max(len(source_zh) * 8, 48) when len(source_zh) >= 4."""
+        candidate = re.sub(
+            r"\bke\s+(me[a-z]+|ber[a-z]+|ter[a-z]+|di[a-z]+|memper[a-z]+|meng[a-z]+|meny[a-z]+|men[a-z]+|mem[a-z]+|mel[a-z]+|mer[a-z]+)\b",
+            r"untuk \1",
+            candidate,
+        )
+        candidate = re.sub(r"\bLuban\s+Tidak(?:\.\s*|\s+)(\d+)\b", r"Luban No.\1", candidate)
+        candidate = re.sub(r"\bTidak\.\s*(\d+)\b", r"No.\1", candidate)
+        candidate = candidate.replace("[Hebat Dinding]", "[Great Wall]")
+        candidate = re.sub(r"\bHebat Dinding\b", "Great Wall", candidate)
+        candidate = re.sub(r"\bMechanical Minion sebuah(\d+)\b", r"Mechanical Minion A\1", candidate)
+        candidate = candidate.replace("Mechanical Minion sebuah1", "Mechanical Minion A1")
+        candidate = candidate.replace("Mechanical Minion sebuah2", "Mechanical Minion A2")
+        candidate = re.sub(r"(?i)\bmementalkan\s+atas\b", "Knock-Up", candidate)
+        candidate = re.sub(r"(?i)\bDamage\s+Atas\b", "Peningkatan Damage", candidate)
+        candidate = re.sub(r"(?i)\bDecay\s+Bawah\b", "Pengurangan Decay", candidate)
+        candidate = re.sub(r"(?i)\bBatas\s+Atas\b", "Peningkatan Batas", candidate)
+        candidate = re.sub(r"(?i)\bpada\s+skill\s+menggunakan\b", "saat menggunakan Skill", candidate)
+        candidate = re.sub(r"(?i)\bpada\s+menggunakan\b", "saat digunakan", candidate)
+        candidate = re.sub(r"\bdasar\s+([A-Z][A-Za-z0-9'&.\- ]{1,25}?)\s+serangan\b", r"Basic Attack \1", candidate)
+        candidate = re.sub(r"\bdasar\s+serangan\b", "Basic Attack", candidate)
+        candidate = candidate.replace("orbit di sekitarnya", "mengelilinginya")
+
         for old_ft, new_ft in (
             ("Kartu Effect", "Kartu Efek"),
             ("kartu Effect", "kartu Efek"),

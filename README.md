@@ -72,7 +72,7 @@ uv run --python 3.12 --with lz4 --with httpx --with pytest pytest -v
 
 | Berkas / Komponen | Ukuran (Byte) | SHA-256 |
 | :--- | ---: | :--- |
-| `Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe` | `59.877.888` | `72a8e5a1e5bb57c4e9f9c1f25e54dcaf50e816830b74306e8317a271648fea6d` |
-| `ace-worker.exe` (*embedded* `0x4CAC4A..0x3838C00`) | `53.927.862` | `7aad79a996b1d80cdece54b910ac08784234a348b0975d6d56de7342cc28b679` |
+| `Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe` | `59.877.888` | `33f0261dd1b1c8e2f5ef0a164f45543e6c301299f55d7e88c8c4d29b0d00e034` |
+| `ace-worker.exe` (*embedded* `0x4CAC4A..0x3838C00`) | `53.927.862` | `92180f516402294ee321a0f133d04f0939e57e1d14addb276f8965bfd3591b8a` |
 
 

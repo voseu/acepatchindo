@@ -144,8 +144,8 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
             if PROSE_CALQUE_RE.search(stripped):
                 target_stopword_hits += 1
 
-    assert target_count >= 4000, (
-        f"Expected >= 4,000 target gameplay descriptions in unique, got {target_count}"
+    assert 3200 <= target_count <= 3600, (
+        f"Expected between 3,200 and 3,600 target gameplay descriptions in unique, got {target_count}"
     )
     assert target_stopword_hits < 50, (
         f"Expected < 50 prose calque hits in target descriptions, got {target_stopword_hits}"
@@ -375,6 +375,20 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
         "Chang Xiao'Skill",
         "Milady Memanggil Lineup",
         "I. Event Aturan",
+        "Luban Tidak",
+        "Tidak. 7",
+        "Mementalkan Atas",
+        "Hebat Dinding",
+        "Damage Atas",
+        "Decay Bawah",
+        "Batas Atas",
+        "Mechanical Minion sebuah1",
+        "pada Skill Menggunakan",
+        "Three Kingdoms Pejuang",
+        "Sunset Pejuang",
+        "orbit di sekitarnya",
+        "dasar Lu Bu serangan",
+        "dasar Augran serangan",
     ]
     for flt in forbidden_leak_terms:
         flt_low = flt.lower()
@@ -382,6 +396,36 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
             assert flt_low not in v.lower(), f"Found leaked/mangled term {flt!r} in unique: {v}"
         for r in cat["english_updates"]:
             assert flt_low not in r[3].lower(), f"Found leaked/mangled term {flt!r} in english_updates: {r[3]}"
+
+    # Phase 6 Round 2 Remediation Verifications:
+    # 1. 0 Voice lines / quotes leaked into Indonesian
+    voice_quotes = [
+        "女人，是水做的。",
+        "你已经被盯上了。",
+        "清理工作才刚刚开始。",
+        "生存，还是毁灭，这是个问题。",
+    ]
+    for vq in voice_quotes:
+        if vq in cat["unique"] and vq in orig_cat["unique"]:
+            assert cat["unique"][vq] == orig_cat["unique"][vq], f"Voice line translated to ID: {vq!r} -> {cat['unique'][vq]!r}"
+
+    # 2. Check hybrid VFS index invariants
+    vfs_index_path = REFS_DIR / "hybrid_vfs_index.json"
+    if vfs_index_path.exists():
+        vfs_data = json.loads(vfs_index_path.read_text(encoding="utf-8"))
+        assert len(vfs_data.get("vfs_target_keys", [])) >= 24000
+        # 0 conflicting sfx between target and veto
+        tgt_sfx = {k.split("#")[-1] for k in vfs_data.get("vfs_target_keys", [])}
+        veto_sfx = set(vfs_data.get("vfs_veto_sfx", []))
+        conflicts = tgt_sfx & veto_sfx
+        assert len(conflicts) == 0, f"Found conflicting sfx in VFS index: {conflicts}"
+        # 0 non-CJK in target zh
+        cjk_re = re.compile(r"[\u4e00-\u9fff]")
+        non_cjk = [z for z in vfs_data.get("vfs_target_zh", []) if not cjk_re.search(z)]
+        assert len(non_cjk) == 0, f"Found non-CJK strings in vfs_target_zh: {non_cjk[:5]}"
+        # 0 #60D2 tag leaks (e.g. '三分之地   战士')
+        assert all("三分之地   战士" not in z for z in vfs_data.get("vfs_target_zh", []))
+        assert all("三分之地\t" not in z for z in vfs_data.get("vfs_target_zh", []))
 
 
 
