@@ -17,6 +17,8 @@ COMPAT_EXE = DIST_DIR / "Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe"
 SUMS_ASSET = DIST_DIR / "SHA256SUMS.txt"
 PREVIEW_ID = ROOT / "assets" / "previews" / "xeno_patcher_id.png"
 PREVIEW_EN = ROOT / "assets" / "previews" / "xeno_patcher_en.png"
+PREVIEW_DASHBOARD = ROOT / "assets" / "previews" / "xeno_dashboard_id.png"
+PREVIEW_SETTINGS = ROOT / "assets" / "previews" / "xeno_settings_id.png"
 
 REPO = "voseu/acepatchindo"
 TAG = "v1.0.0-celeslib"
@@ -58,9 +60,9 @@ Rilis resmi pertama **Celeslib Honor of Kings: Ace Patcher v1.0.0** (`Celeslib-H
 ### Verifikasi Berkas & Checksum SHA-256
 
 ```text
-1e4ef69346602343d7d13a5d407d18540cce363118fd833f7019f739d0297261  Celeslib-HoK-Ace-Patcher-v1.0.0.exe
-1e4ef69346602343d7d13a5d407d18540cce363118fd833f7019f739d0297261  Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe
-abbfffec6bab992b31c25e32dc8a33571fd5f279033185f84361af87632253f2  ace-worker.exe (embedded @ offset 0x114A62..0x3482A18)
+806e8140d62c9c0a202154ec65358f0dfc0c2a72a1e30b9d720caa9e4cafd5f6  Celeslib-HoK-Ace-Patcher-v1.0.0.exe
+806e8140d62c9c0a202154ec65358f0dfc0c2a72a1e30b9d720caa9e4cafd5f6  Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe
+abbfffec6bab992b31c25e32dc8a33571fd5f279033185f84361af87632253f2  ace-worker.exe (embedded @ offset 0x11C262..0x348A218)
 ```
 """
 
@@ -84,6 +86,10 @@ def publish_via_gh_cli() -> bool:
         assets.append(str(PREVIEW_ID))
     if PREVIEW_EN.exists():
         assets.append(str(PREVIEW_EN))
+    if PREVIEW_DASHBOARD.exists():
+        assets.append(str(PREVIEW_DASHBOARD))
+    if PREVIEW_SETTINGS.exists():
+        assets.append(str(PREVIEW_SETTINGS))
 
     if view.returncode == 0:
         subprocess.run(
@@ -159,6 +165,10 @@ def publish_via_rest_api(token: str) -> None:
             assets_to_upload.append((PREVIEW_ID, "image/png"))
         if PREVIEW_EN.exists():
             assets_to_upload.append((PREVIEW_EN, "image/png"))
+        if PREVIEW_DASHBOARD.exists():
+            assets_to_upload.append((PREVIEW_DASHBOARD, "image/png"))
+        if PREVIEW_SETTINGS.exists():
+            assets_to_upload.append((PREVIEW_SETTINGS, "image/png"))
 
         for asset_path, ctype in assets_to_upload:
             if asset_path.name in existing:

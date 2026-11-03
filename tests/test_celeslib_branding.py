@@ -21,3 +21,4 @@ def test_celeslib_branding_assets_generated() -> None:
     header_txt = HEADER_PATH.read_text(encoding="utf-8")
     assert "CELESLIB_LOGO_64_BGRA" in header_txt
     assert "CELESLIB_LOGO_32_BGRA" in header_txt
+

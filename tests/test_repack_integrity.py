@@ -48,6 +48,13 @@ def test_celeslib_repack_integrity_and_worker_unpack() -> None:
     assert b"CPDD" not in raw
     assert b"cpdd-logo" not in raw
 
+    # Exact CLI argument strings for wxq_patch adaptive and mobile protocols
+    assert "--game-dir".encode("utf-16le") in raw
+    assert "--work".encode("utf-16le") in raw
+    assert "--result".encode("utf-16le") in raw
+    assert "mobile-worker".encode("utf-16le") in raw
+    assert "--operation".encode("utf-16le") in raw
+
     # 3. Locate embedded worker using 8-byte footer pointer
     sha_offset = struct.unpack_from("<Q", raw, len(raw) - 8)[0]
     assert 0 < sha_offset < len(raw) - WORKER_EXACT_SIZE

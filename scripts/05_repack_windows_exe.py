@@ -39,28 +39,6 @@ WORKER_SIZE = 53_927_862
 OUTER_SIZE = 59_877_888
 COOKIE_MAGIC = b"MEI\x0c\x0b\x0a\x0b\x0e"
 
-# Exact-byte-length GUI string localizations inside outer PE .rdata/.rsrc (after WORKER_END)
-GUI_STRING_PATCHES: tuple[tuple[bytes, bytes], ...] = (
-    (b"ENGLISH COMMUNITY PATCH", b"PATCH BAHASA INDONESIA "),
-    (b"Honor of Kings: Ace English Patcher", b"Honor of Kings: Ace Patch Indonesia"),
-    (b"Install English", b"Pasang Patch ID"),
-    (b"Restore Files", b"Pulihkan File"),
-    (b"Install the English patch?", b"Pasang patch B. Indonesia?"),
-    (b"Restore the saved game files?", b"Pulihkan berkas asli gim ini?"),
-    (
-        b"Installing and verifying the English patch",
-        b"Memasang dan memverifikasi patch Indonesia",
-    ),
-    (
-        b"Reading the selected Honor of Kings: Ace installation",
-        b"Membaca folder instalasi Honor of Kings: Ace terpilih",
-    ),
-    (
-        b"<description>Honor of Kings Ace English Patcher</description>",
-        b"<description>Honor of Kings Ace Patch Indonesia</description>",
-    ),
-)
-
 
 def build_combined_catalog_gz() -> bytes:
     with gzip.open(ID_CATALOG_GZ, "rt", encoding="utf-8") as f:
@@ -226,18 +204,6 @@ def repack_worker_carchive(
         f"Worker size mismatch: {len(repacked_worker)} != {WORKER_SIZE}"
     )
     return repacked_worker, pad_len
-
-
-def apply_gui_patches(outer_tail: bytearray) -> int:
-    applied = 0
-    for src, dst in GUI_STRING_PATCHES:
-        assert len(src) == len(dst), f"Length mismatch: {src!r} vs {dst!r}"
-        occurrences = outer_tail.count(src)
-        assert occurrences == 1, f"Expected 1 occurrence of {src!r}, found {occurrences}"
-        idx = outer_tail.find(src)
-        outer_tail[idx : idx + len(src)] = dst
-        applied += 1
-    return applied
 
 
 def build_release_exe() -> dict[str, str | int]:

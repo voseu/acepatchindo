@@ -13,6 +13,8 @@ Aplikasi pemasang *patch* lokalisasi resmi **Celeslib** untuk gim PC **Honor of 
 | Mode Bahasa Indonesia (`UI: ID` • `Mode: ID Hybrid`) | Mode Bahasa Inggris (`UI: EN` • `Mode: EN Full`) |
 | :---: | :---: |
 | ![Xeno Patcher ID](assets/previews/xeno_patcher_id.png) | ![Xeno Patcher EN](assets/previews/xeno_patcher_en.png) |
+| **Tab Dashboard Celeslib** | **Tab Pengaturan Mode & Bahasa** |
+| ![Xeno Dashboard](assets/previews/xeno_dashboard_id.png) | ![Xeno Settings](assets/previews/xeno_settings_id.png) |
 
 ---
 
@@ -97,6 +99,6 @@ uv run --python 3.12 pytest -v
 
 | Berkas / Komponen | Ukuran (Byte) | SHA-256 |
 | :--- | ---: | :--- |
-| `Celeslib-HoK-Ace-Patcher-v1.0.0.exe` | `55.061.024` | `1e4ef69346602343d7d13a5d407d18540cce363118fd833f7019f739d0297261` |
-| `Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe` | `55.061.024` | `1e4ef69346602343d7d13a5d407d18540cce363118fd833f7019f739d0297261` |
+| `Celeslib-HoK-Ace-Patcher-v1.0.0.exe` | `55.091.744` | `806e8140d62c9c0a202154ec65358f0dfc0c2a72a1e30b9d720caa9e4cafd5f6` |
+| `Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe` | `55.091.744` | `806e8140d62c9c0a202154ec65358f0dfc0c2a72a1e30b9d720caa9e4cafd5f6` |
 | `ace-worker.exe` (*embedded payload*) | `53.927.862` | `abbfffec6bab992b31c25e32dc8a33571fd5f279033185f84361af87632253f2` |

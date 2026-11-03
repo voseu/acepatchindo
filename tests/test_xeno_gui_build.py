@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import struct
 from pathlib import Path
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 STUB_EXE = ROOT / "build" / "celeslib_xeno_stub.exe"
+ASSETS_PREVIEWS = ROOT / "assets" / "previews"
 
 
 def test_compiled_xeno_gui_stub_pe_headers_and_branding() -> None:
@@ -28,3 +30,29 @@ def test_compiled_xeno_gui_stub_pe_headers_and_branding() -> None:
     # Must NOT contain legacy CPDD branding
     assert b"CPDD" not in raw
     assert b"cpdd-logo" not in raw
+
+    # Exact CLI argument strings for wxq_patch adaptive and mobile protocols
+    assert "--game-dir".encode("utf-16le") in raw
+    assert "--work".encode("utf-16le") in raw
+    assert "--result".encode("utf-16le") in raw
+    assert "mobile-worker".encode("utf-16le") in raw
+    assert "--operation".encode("utf-16le") in raw
+
+    # Must NOT contain obsolete or invalid CLI flags
+    assert '" --json '.encode("utf-16le") not in raw
+    assert ' --game "'.encode("utf-16le") not in raw
+
+
+def test_preview_pngs_integrity_and_no_missing_glyphs() -> None:
+    expected_previews = [
+        ASSETS_PREVIEWS / "xeno_patcher_id.png",
+        ASSETS_PREVIEWS / "xeno_patcher_en.png",
+        ASSETS_PREVIEWS / "xeno_dashboard_id.png",
+        ASSETS_PREVIEWS / "xeno_settings_id.png",
+    ]
+    for preview_path in expected_previews:
+        assert preview_path.exists(), f"Missing expected preview PNG: {preview_path}"
+        with Image.open(preview_path) as im:
+            assert im.format == "PNG"
+            assert im.size == (980, 620)
+            assert im.mode in ("RGB", "RGBA")

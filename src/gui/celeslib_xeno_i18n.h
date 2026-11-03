@@ -69,6 +69,7 @@ struct Strings {
     const wchar_t* android_desc;
     const wchar_t* android_btn_scan;
     const wchar_t* android_btn_patch;
+    const wchar_t* android_btn_recover;
 
     // Copyright / footer
     const wchar_t* copyright_label;
@@ -93,10 +94,10 @@ static const Strings STRINGS_ID = {
     L"Auto-Detect",
     L"Bersihkan",
 
-    L"🌐 UI: ID",
-    L"🌐 UI: EN",
-    L"🎯 Mode: ID Hybrid",
-    L"🎯 Mode: EN Full",
+    L"UI: ID",
+    L"UI: EN",
+    L"Mode: ID Hybrid",
+    L"Mode: EN Full",
 
     L"SIAP",
     L"MEMPROSES",
@@ -123,6 +124,7 @@ static const Strings STRINGS_ID = {
     L"Hubungkan perangkat Android dengan mode USB Debugging aktif untuk memasang patch.",
     L"Pindai Perangkat",
     L"Pasang ke Android",
+    L"Pulihkan Android",
 
     L"© 2026 Celeslib • https://celeslib.my.id"
 };
@@ -146,10 +148,10 @@ static const Strings STRINGS_EN = {
     L"Auto-Detect",
     L"Clear Log",
 
-    L"🌐 UI: ID",
-    L"🌐 UI: EN",
-    L"🎯 Mode: ID Hybrid",
-    L"🎯 Mode: EN Full",
+    L"UI: ID",
+    L"UI: EN",
+    L"Mode: ID Hybrid",
+    L"Mode: EN Full",
 
     L"READY",
     L"WORKING",
@@ -176,6 +178,7 @@ static const Strings STRINGS_EN = {
     L"Connect an Android device with USB Debugging enabled to apply the patch.",
     L"Scan Device",
     L"Patch Android",
+    L"Recover Android",
 
     L"© 2026 Celeslib • https://celeslib.my.id"
 };

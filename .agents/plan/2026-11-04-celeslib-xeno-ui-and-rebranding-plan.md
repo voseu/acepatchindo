@@ -545,3 +545,157 @@ git commit -m "feat(release): Celeslib Xeno v1.3.0 UI, v1.0.0-celeslib branding,
 git push origin main
 /home/whise/.local/bin/uv run --python 3.12 python scripts/06_publish_github_release.py
 ```
+
+---
+
+## Phase 2: Remediation of Executor Omissions & Critical Bugs (Tasks 5–7)
+
+> **Audit Findings (Mandatory Fixes):**
+> Deep forensic inspection of the executor's implementation revealed **6 critical defects/omissions** that MUST be fixed before the release can be considered functional:
+> 1. **Broken `ace-worker.exe` CLI Invocation (`src/gui/celeslib_xeno_gui.cpp`):** `ExecuteWorkerAction` invokes `ace-worker.exe --json <action> --game "<path>"`, which crashes immediately with `argparse` exit code `2` because `wxq_patch/adaptive.pyc:main` requires positional `action` (`status`, `install`, `restore`, `stage`, `discover`, `self-test`), optional `--game-dir <path>`, **required `--work <work_dir>`**, and **required `--result <result_json_path>`** (and has NO `--json` or `--game` flags!). Furthermore, `ExecuteWorkerAction` never reads `result.json` to display `result["message"]`, update `g_state.status_text` / `g_state.status_color` from `result["state"]`, or populate `g_state.game_dir` from `result["game_dir"]` after `discover` (`Auto-Detect`).
+> 2. **Dead Android (USB) Tab Buttons (`src/gui/celeslib_xeno_gui.cpp`):** `NavView::Android` renders buttons (`Pindai Perangkat` / `Scan Device`, `Pasang ke Android` / `Patch Android`), but `WM_LBUTTONDOWN` has zero click handlers for `NavView::Android`, and `NavView::Android` does not invoke `ace-worker.exe mobile-worker --work "<work_dir>" --operation devices|patch|recover` or render the diagnostic console output.
+> 3. **Missing Cryptographic SHA-256 Verification & 64-Bit File Seeking (`src/gui/celeslib_xeno_gui.cpp`):** `LocateAndExtractWorker` uses 32-bit `SetFilePointer` without a high-order `LONG` and never computes or verifies the actual SHA-256 digest of the extracted `53,927,862`-byte `ace-worker.exe` via Windows CryptoAPI (`CryptAcquireContextW` / `CryptCreateHash(CALG_SHA_256)`), nor checks that an already-cached `ace-worker.exe` on disk has exact size `53,927,862` bytes.
+> 4. **Incomplete Window Controls, Sidebar Collapse, Hover Tracking & CLI Pass-Through (`src/gui/celeslib_xeno_gui.cpp`):**
+>    - Maximize/Restore button `[□]` click handler is missing, and dragging the custom header bar (`y < 48`) does not move the window.
+>    - Collapsible sidebar toggle (`<` / `>`) and `WM_MOUSEMOVE` hover tracking (`hovered_btn`) were skipped.
+>    - CLI pass-through flags (`--status`, `--install`, `--restore`, `--discover`, `--self-test`) and 4-view `--smoke-ui` rendering (`xeno_patcher_id.png`, `xeno_patcher_en.png`, `xeno_dashboard_id.png`, `xeno_settings_id.png`) were skipped or stubbed.
+> 5. **Visual Defects in Preview PNGs (`scripts/08_compile_xeno_gui.py` & `src/gui/celeslib_xeno_i18n.h`):**
+>    - Header toggles `[🌐 UI: ID]` and `[🎯 Mode: ID Hybrid]` render with missing-glyph tofu boxes (`▯ UI: ID`, `▯ Mode: ID Hybrid`) in `assets/previews/xeno_patcher_id.png` and `xeno_patcher_en.png` because `DejaVuSans` lacks multicolor emoji glyphs. Replace emoji prefixes with crisp vector icons or BMP geometric symbols supported across all fonts.
+>    - Status badge in `scripts/08_compile_xeno_gui.py` draws both a green ellipse AND `"● SIAP"`, producing duplicate bullets (`🟢 ● SIAP`).
+> 6. **Dead Code & Uncommitted Working Tree Changes:** Remove unused `GUI_STRING_PATCHES` and `apply_gui_patches` from `scripts/05_repack_windows_exe.py` and ensure `git status` is 100% clean.
+
+---
+
+### Task 5: Fix `ace-worker.exe` CLI Protocol, `result.json` Parser, CryptoAPI SHA-256 Verification & Android USB Execution in `src/gui/celeslib_xeno_gui.cpp`
+
+**Files:**
+- Modify: `src/gui/celeslib_xeno_i18n.h`
+- Modify: `src/gui/celeslib_xeno_gui.cpp`
+- Modify: `scripts/08_compile_xeno_gui.py`
+- Modify: `tests/test_xeno_gui_build.py`
+
+- [x] **Step 1: Add regression assertions to `tests/test_xeno_gui_build.py` verifying the exact worker CLI flags (`--game-dir`, `--work`, `--result`, `mobile-worker`, `--operation`), CryptoAPI SHA-256 verification, and 4 preview PNGs without tofu glyphs**
+
+In `tests/test_xeno_gui_build.py`, assert that:
+1. `build/celeslib_xeno_stub.exe` contains the exact wide/ASCII argument strings required by `wxq_patch/adaptive.pyc` and `wxq_patch/mobile.pyc`:
+   - `"--game-dir".encode("utf-16le")`
+   - `"--work".encode("utf-16le")`
+   - `"--result".encode("utf-16le")`
+   - `"mobile-worker".encode("utf-16le")`
+   - `"--operation".encode("utf-16le")`
+   - And does **NOT** contain the broken `"\" --json ".encode("utf-16le")` or `" --game \"".encode("utf-16le")` string.
+2. `assets/previews/xeno_patcher_id.png`, `assets/previews/xeno_patcher_en.png`, `assets/previews/xeno_dashboard_id.png`, and `assets/previews/xeno_settings_id.png` all exist and are valid PNGs.
+
+- [x] **Step 2: Fix `src/gui/celeslib_xeno_i18n.h` & `src/gui/celeslib_xeno_gui.cpp`**
+
+1. **In `src/gui/celeslib_xeno_i18n.h`**:
+   - Replace `L"🌐 UI: ID"` / `L"🌐 UI: EN"` with `L"UI: ID"` / `L"UI: EN"` (and draw a clean vector globe/language badge icon in GDI+/Pillow instead of relying on font emoji support).
+   - Replace `L"🎯 Mode: ID Hybrid"` / `L"🎯 Mode: EN Full"` with `L"Mode: ID Hybrid"` / `L"Mode: EN Full"` (and draw a clean vector accent dot/diamond icon in GDI+/Pillow).
+   - Add `android_btn_recover` (`L"Pulihkan Android"` / `L"Recover Android"`).
+2. **In `src/gui/celeslib_xeno_gui.cpp`**:
+   - **64-bit File Seeking & CryptoAPI SHA-256 Verification in `LocateAndExtractWorker()`:**
+     - Use `SetFilePointerEx(hFile, liOffset, NULL, FILE_BEGIN)` instead of 32-bit `SetFilePointer`.
+     - Include `<wincrypt.h>` and write `ComputeBufferOrFileSha256Hex(HANDLE hFile, uint64_t offset, uint64_t length)` using `CryptAcquireContextW(&hProv, NULL, NULL, PROV_RSA_AES, CRYPT_VERIFYCONTEXT)`, `CryptCreateHash(hProv, CALG_SHA_256, 0, 0, &hHash)`, `CryptHashData`, and `CryptGetHashParam(hHash, HP_HASHVAL, ...)`.
+     - If `out_worker_path` already exists on disk, verify its file size is `WORKER_EXACT_SIZE` (`53,927,862` bytes); if not, re-extract.
+     - During extraction, compute the SHA-256 of the `53,927,862` bytes read from the executable and verify it matches `sha256_hex` case-insensitively before closing. If mismatched, delete `out_worker_path` and return `false`.
+   - **Correct `ace-worker.exe` CLI Protocol & `result.json` Parsing in `ExecuteWorkerAction()`:**
+     - Create `work_dir = GetCeleslibAppDataDir() + L"\\work"` and `result_path = work_dir + L"\\result.json"`. Delete any stale `result_path` before launching.
+     - Construct the command line matching `wxq_patch/adaptive.pyc:main`:
+       ```cpp
+       cmd << L"\"" << worker_path << L"\" " << action
+           << L" --work \"" << work_dir << L"\""
+           << L" --result \"" << result_path << L"\"";
+       if (!game_path.empty() && action != L"discover") {
+           cmd << L" --game-dir \"" << game_path << L"\"";
+       }
+       ```
+     - After `WaitForSingleObject(pi.hProcess, INFINITE)`, read `result_path` (UTF-8 JSON written by `ace-worker.exe`) and parse:
+       - `"state"` (`"installed"`, `"clean"`, `"error"`),
+       - `"message"` (append `[OK] <message>` or `[ERROR] <message>` to the console log!),
+       - `"game_dir"` (if non-empty, update `g_state.game_dir` so `Auto-Detect` / `discover` and `status` automatically populate the detected game path in the UI!),
+       - `"restore_available"` (log whether backup restore is available).
+     - Update `g_state.status_text` and `g_state.status_color` accurately based on `"state"` and `exit_code`:
+       - If `exit_code == 0`:
+         - If `action == L"restore"` or `state == "clean"`: set status to `s.status_ready` (`SIAP` / `READY`) or `s.status_originals` (`FILE ASLI` / `ORIGINALS`).
+         - If `action == L"install"` or `state == "installed"`: set status to `s.status_installed` (`TERPASANG` / `INSTALLED`).
+   - **Working Android (USB) Actions (`ExecuteMobileWorkerAction`):**
+     - Implement `ExecuteMobileWorkerAction(const std::wstring& operation)` which invokes:
+       - For `devices` or `patch`: `"<worker_path>" mobile-worker --work "<work_dir>" --operation <operation>`
+       - For `recover`: `"<worker_path>" mobile-recover --work "<work_dir>"`
+     - Render the diagnostic console panel below the Android USB card in `NavView::Android` (`con_y = 244`) so the user can see live ADB device scan and patching output directly in the `Android (USB)` tab!
+     - Wire up click handlers in `WM_LBUTTONDOWN` when `g_state.current_view == NavView::Android` for:
+       1. `Pindai Perangkat` / `Scan Device` -> `ExecuteMobileWorkerAction(L"devices")`
+       2. `Pasang ke Android` / `Patch Android` -> `ExecuteMobileWorkerAction(L"patch")`
+       3. `Pulihkan Android` / `Recover Android` -> `ExecuteMobileWorkerAction(L"recover")`
+   - **Complete Window Controls, Sidebar Collapse (`<`/`>`), Hover State (`WM_MOUSEMOVE`), and CLI Flags:**
+     - Handle maximize/restore button `[□]` (`x >= g_state.width - 65 && x <= g_state.width - 40`) in `WM_LBUTTONDOWN` and allow dragging the window when clicking empty header space (`y < 48`).
+     - Implement `bool sidebar_collapsed = false;` in `AppState` with a collapse toggle button `[<]` / `[>]` at the bottom/top of the sidebar, and implement `WM_MOUSEMOVE` to update `g_state.hovered_btn` for visual hover feedback on buttons.
+     - Implement CLI pass-through in `wWinMain` for `--status`, `--install`, `--restore`, `--discover`, and `--self-test` (synchronously invoking `ace-worker.exe` with the proper `--work` and `--result` flags and returning its exit code), and update `--smoke-ui <dir>` to render all 4 previews (`xeno_patcher_id.png`, `xeno_patcher_en.png`, `xeno_dashboard_id.png`, `xeno_settings_id.png`).
+
+- [x] **Step 3: Fix `scripts/08_compile_xeno_gui.py` Preview Generator (No Tofu Boxes, No Duplicate Status Dots, Render All 4 Views)**
+
+1. Update `compile_xeno_gui()` in `scripts/08_compile_xeno_gui.py` to link `-lcrypt32`.
+2. Update `render_xeno_preview()` in `scripts/08_compile_xeno_gui.py`:
+   - Draw a crisp vector globe/pill icon and target dot using `ImageDraw` instead of `🌐` and `🎯` characters so there are **zero missing-glyph tofu boxes (`▯`)**.
+   - Change `status_str` from `"● SIAP"` / `"● READY"` to `"SIAP"` / `"READY"` (since the green status dot is already drawn via `draw.ellipse(...)`).
+   - Support `view="patcher" | "dashboard" | "settings"` and generate all 4 preview images in `assets/previews/`:
+     - `assets/previews/xeno_patcher_id.png`
+     - `assets/previews/xeno_patcher_en.png`
+     - `assets/previews/xeno_dashboard_id.png`
+     - `assets/previews/xeno_settings_id.png`
+
+- [x] **Step 4: Compile and test `tests/test_xeno_gui_build.py`**
+
+Run:
+```bash
+/home/whise/.local/bin/uv run --python 3.12 python scripts/08_compile_xeno_gui.py
+/home/whise/.local/bin/uv run --python 3.12 pytest tests/test_xeno_gui_build.py -v
+```
+Expected: PASS
+
+---
+
+### Task 6: Clean Up Dead Legacy Code in `scripts/05_repack_windows_exe.py`, Rebuild Release Executables & Verify Full Test Suite
+
+**Files:**
+- Modify: `scripts/05_repack_windows_exe.py`
+- Modify: `tests/test_repack_integrity.py`
+
+- [x] **Step 1: Remove unused `GUI_STRING_PATCHES` and `apply_gui_patches` from `scripts/05_repack_windows_exe.py` and rebuild `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe`**
+
+Run:
+```bash
+/home/whise/.local/bin/uv run --python 3.12 python scripts/05_repack_windows_exe.py
+```
+
+- [x] **Step 2: Update `tests/test_repack_integrity.py` to also assert that the outer GUI stub inside `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe` embeds `--game-dir`, `--work`, `--result`, and `mobile-worker`, and run the entire test suite**
+
+Run:
+```bash
+/home/whise/.local/bin/uv run --python 3.12 pytest -v
+```
+Expected: 100% PASS across all test modules.
+
+---
+
+### Task 7: Update Checksums in `README.md` & `scripts/06_publish_github_release.py`, Refresh Graft, Commit Cleanly & Re-Upload GitHub Release `v1.0.0-celeslib`
+
+**Files:**
+- Modify: `README.md`
+- Modify: `scripts/06_publish_github_release.py`
+- Modify: `.agents/plan/2026-11-04-celeslib-xeno-ui-and-rebranding-plan.md`
+
+- [x] **Step 1: Update SHA-256 hashes and file sizes in `README.md` and `scripts/06_publish_github_release.py` to match the freshly built `dist/SHA256SUMS.txt`**
+- [x] **Step 2: Run `graft build` and verify `git status` has zero untracked/uncommitted files after commit**
+- [x] **Step 3: Commit, push to `origin main`, and re-upload the fixed release assets to `v1.0.0-celeslib` via `scripts/06_publish_github_release.py`**
+
+```bash
+graft build
+git add .
+git commit -m "fix(gui): fix ace-worker CLI protocol, result.json parser, CryptoAPI SHA-256 check, Android USB actions, and preview glyphs"
+git push origin main
+git tag -f v1.0.0-celeslib
+git push origin v1.0.0-celeslib --force
+/home/whise/.local/bin/uv run --python 3.12 python scripts/06_publish_github_release.py
+```
+
