@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publish GitHub Release v1.0.0-celeslib with Celeslib UI executable and SHA256SUMS.txt."""
+"""Publish GitHub Release v1.0.0-celeslib with Celeslib Single-Page UI executable and SHA256SUMS.txt."""
 
 from __future__ import annotations
 
@@ -17,8 +17,6 @@ COMPAT_EXE = DIST_DIR / "Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe"
 SUMS_ASSET = DIST_DIR / "SHA256SUMS.txt"
 PREVIEW_ID = ROOT / "assets" / "previews" / "celeslib_patcher_id.png"
 PREVIEW_EN = ROOT / "assets" / "previews" / "celeslib_patcher_en.png"
-PREVIEW_DASHBOARD = ROOT / "assets" / "previews" / "celeslib_dashboard_id.png"
-PREVIEW_SETTINGS = ROOT / "assets" / "previews" / "celeslib_settings_id.png"
 
 REPO = "voseu/acepatchindo"
 TAG = "v1.0.0-celeslib"
@@ -26,18 +24,22 @@ TITLE = "Celeslib Honor of Kings: Ace Patcher v1.0.0 (Game Build 1.4.12)"
 
 RELEASE_NOTES = """## Celeslib Honor of Kings: Ace Patcher `v1.0.0` (Target Game Build `1.4.12`)
 
-Rilis resmi pertama **Celeslib Honor of Kings: Ace Patcher v1.0.0** (`Celeslib-HoK-Ace-Patcher-v1.0.0.exe`) dengan antarmuka native Windows x86-64 **Celeslib Ultra-Dark Carbon** (`#09090B` background, aksen `#8B5CF6` Celeslib), pergantian bahasa UI real-time (`ID` / `EN`), dan pilihan mode patch terjemahan game (`Indonesian Hybrid Gameplay` / `Full English`).
+Rilis resmi pertama **Celeslib Honor of Kings: Ace Patcher v1.0.0** (`Celeslib-HoK-Ace-Patcher-v1.0.0.exe`) dengan antarmuka native Windows x86-64 **Single-Page Monochrome Obsidian UI** (`980 × 620`, canvas `#090909`, cards `#0D0D0D`, border `1px #333333`, tombol utama Putih Solid `#FFFFFF` teks Hitam Tebal `#000000`, serta ikon vektor presisi), pergantian bahasa UI real-time (`ID` / `EN`), dan pilihan mode patch terjemahan game (`Indonesian Hybrid Gameplay` / `Full English`).
 
 ---
 
 ### Fitur Utama & Pembaruan
 
-1. **Antarmuka Native Celeslib Ultra-Dark Carbon (Win32 + GDI+ + DWM Frameless):**
-   - Desain ultra-dark carbon modern dengan layout terstruktur dan responsif.
-   - Custom dark titlebar frameless dengan logo pixel-star resmi Celeslib, badge versi `v1.0.0`, target badge `Game Build 1.4.12`, serta tombol kontrol jendela (`—`, `□`, `×`).
-   - Left Sidebar navigasi (`Dashboard`, `Patcher`, `Android (USB)`, `Settings`).
-   - Top Pill Action Toolbar (`▷ Pasang Patch / Install Patch`, `↺ Pulihkan File / Restore Files`, `🔍 Periksa File / Check Files`, `📁 Pilih Folder / Browse Folder`, `⚡ Auto-Detect`, `🗑 Bersihkan / Clear Log`).
-   - Konsol diagnostik monospace bernomor baris (*editor-style line numbers gutter*) dengan pewarnaan sintaks dan minimap visual di sisi kanan.
+1. **Antarmuka Native Celeslib Single-Page Monochrome Obsidian (Win32 + GDI+ + DWM Frameless):**
+   - Mengusung palet warna *Monochrome Obsidian* murni (`#090909` canvas, `#0D0D0D` cards & toolbars, `#050505` input boxes/tracks, `1px solid #333333` crisp borders).
+   - Seluruh kontrol terintegrasi pada **Single-Page Layout** (`980 × 620`) tanpa tab tersembunyi.
+   - Custom dark titlebar frameless dengan logo 4-pointed star resmi Celeslib, badge versi `v1.0.0`, target badge `Game Build 1.4.12`, serta tombol kontrol jendela (`—`, `□`, `×`).
+   - Strip konfigurasi 3-kolom terpadu (*Connected 3-Column Strip*):
+     - **Kolom 1:** Direktori Game (HOK: Ace) dengan input path box dan tombol mini `[Auto-Detect]` & `[Pilih Folder / Browse]`.
+     - **Kolom 2:** Mode Bahasa Patch dengan segmented pill control high-contrast (`[ID Hybrid]` / `[EN Full]`).
+     - **Kolom 3:** Bahasa UI dengan segmented pill control (`[Indonesia]` / `[English]`).
+   - Unified Action Toolbar menggabungkan aksi PC (`[▶ Pasang Patch]`, `[↺ Pulihkan]`, `[✓ Periksa]`) dan aksi Android USB (`[📱 Pindai USB]`, `[⚡ Patch APK]`, `[↺ Pulihkan APK]`) serta tombol `[🗑 Clear]`.
+   - Konsol diagnostik monospace bernomor baris (*Monaco/executor-style gutter*) dengan status pill, pewarnaan log sintetis, dan minimap visual di sisi kanan.
 
 2. **Dua Mode Patch Terjemahan Game (`🎯 Mode Patch`):**
    - **`ID Hybrid Gameplay` (Default):** Menerjemahkan 100% deskripsi efek kartu hero (*On Play*, *Sacrifice*, *Awaken*), skill aktif/pasif, *Combine/Summon skills*, talent cards, dan deskripsi kontestan ke Bahasa Indonesia berkualitas tinggi, sementara seluruh nama entitas (Hero, Skill, Talent) dan sistem menu/UI tetap dalam bahasa Inggris resmi.
@@ -45,7 +47,7 @@ Rilis resmi pertama **Celeslib Honor of Kings: Ace Patcher v1.0.0** (`Celeslib-H
    - Penggantian mode otomatis melakukan *pre-install restore* dari cadangan `originals/` tanpa resiko tumpang tindih terjemahan.
 
 3. **Dukungan Dua Bahasa Antarmuka (`🌐 Bahasa UI`):**
-   - Quick header toggle **`[🌐 UI: ID | EN]`** dan pengaturan di menu **Settings** untuk mengganti seluruh teks antarmuka patcher antara **Bahasa Indonesia** dan **English** secara instan.
+   - Segmented toggle **`[Indonesia | English]`** untuk mengganti seluruh teks antarmuka patcher antara **Bahasa Indonesia** dan **English** secara instan.
    - Pesan laporan worker (`result.json`) otomatis disesuaikan dengan bahasa UI yang aktif.
 
 4. **Zero CPDD Branding Leakage:**
@@ -53,16 +55,16 @@ Rilis resmi pertama **Celeslib Honor of Kings: Ace Patcher v1.0.0** (`Celeslib-H
 
 5. **Integritas Binary & Keamanan Sertifikat:**
    - Penjaga digest SHA-256 64-karakter untuk memvalidasi integritas `ace-worker.exe` sebelum dieksekusi via Windows CryptoAPI.
-   - Beroperasi **100% offline** di komputer pengguna tanpa pengumpulan data atau koneksi eksternal. (Sertifikat Mozilla `cacert.pem` yang ada di dalam PyInstaller hanya bawaan pustaka dependensi upstream dan tidak pernah melakukan kontak jaringan saat patch PC).
+   - Beroperasi **100% offline** di komputer pengguna tanpa pengumpulan data atau koneksi eksternal.
 
 ---
 
 ### Verifikasi Berkas & Checksum SHA-256
 
 ```text
-5174030edcd9589fd708651bc51b9e8de08af5edda38a337c91088fc08bcd808  Celeslib-HoK-Ace-Patcher-v1.0.0.exe
-5174030edcd9589fd708651bc51b9e8de08af5edda38a337c91088fc08bcd808  Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe
-abbfffec6bab992b31c25e32dc8a33571fd5f279033185f84361af87632253f2  ace-worker.exe (embedded @ offset 0x11C462..0x348A418)
+8ded6277457c64705bc35da35be784b4f1f50b9f470319908b9730ecfcf877d9  Celeslib-HoK-Ace-Patcher-v1.0.0.exe
+8ded6277457c64705bc35da35be784b4f1f50b9f470319908b9730ecfcf877d9  Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe
+abbfffec6bab992b31c25e32dc8a33571fd5f279033185f84361af87632253f2  ace-worker.exe (embedded @ offset 0x11B062..0x3489018)
 ```
 """
 
@@ -84,6 +86,8 @@ def publish_via_gh_cli() -> bool:
         "xeno_patcher_en.png",
         "xeno_dashboard_id.png",
         "xeno_settings_id.png",
+        "celeslib_dashboard_id.png",
+        "celeslib_settings_id.png",
     ]
     for leg_name in legacy_names:
         subprocess.run(
@@ -100,10 +104,6 @@ def publish_via_gh_cli() -> bool:
         assets.append(str(PREVIEW_ID))
     if PREVIEW_EN.exists():
         assets.append(str(PREVIEW_EN))
-    if PREVIEW_DASHBOARD.exists():
-        assets.append(str(PREVIEW_DASHBOARD))
-    if PREVIEW_SETTINGS.exists():
-        assets.append(str(PREVIEW_SETTINGS))
 
     if view.returncode == 0:
         subprocess.run(
@@ -177,6 +177,8 @@ def publish_via_rest_api(token: str) -> None:
             "xeno_patcher_en.png",
             "xeno_dashboard_id.png",
             "xeno_settings_id.png",
+            "celeslib_dashboard_id.png",
+            "celeslib_settings_id.png",
         ]
         for leg_name in legacy_names:
             if leg_name in existing:
@@ -193,10 +195,6 @@ def publish_via_rest_api(token: str) -> None:
             assets_to_upload.append((PREVIEW_ID, "image/png"))
         if PREVIEW_EN.exists():
             assets_to_upload.append((PREVIEW_EN, "image/png"))
-        if PREVIEW_DASHBOARD.exists():
-            assets_to_upload.append((PREVIEW_DASHBOARD, "image/png"))
-        if PREVIEW_SETTINGS.exists():
-            assets_to_upload.append((PREVIEW_SETTINGS, "image/png"))
 
         for asset_path, ctype in assets_to_upload:
             if asset_path.name in existing:

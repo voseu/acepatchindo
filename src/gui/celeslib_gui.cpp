@@ -37,49 +37,44 @@
 #pragma comment(lib, "ole32.lib")
 #pragma comment(lib, "crypt32.lib")
 
-// Color Palette - Celeslib Ultra-Dark Carbon
+// Color Palette - Single-Page Monochrome Obsidian System
 namespace Theme {
-    static const Gdiplus::Color BgCanvas(0xFF, 0x09, 0x09, 0x0B);       // #09090B
-    static const Gdiplus::Color BgHeader(0xFF, 0x0B, 0x0B, 0x0E);       // #0B0B0E
-    static const Gdiplus::Color BgSidebar(0xFF, 0x0D, 0x0D, 0x11);      // #0D0D11
-    static const Gdiplus::Color BgPill(0xFF, 0x14, 0x14, 0x1A);         // #14141A
-    static const Gdiplus::Color BgPillHover(0xFF, 0x1E, 0x1E, 0x28);    // #1E1E28
-    static const Gdiplus::Color BgPillActive(0xFF, 0x2A, 0x20, 0x48);   // #2A2048
-    static const Gdiplus::Color BorderDark(0xFF, 0x24, 0x24, 0x2E);     // #24242E
-    static const Gdiplus::Color BorderHover(0xFF, 0x3E, 0x38, 0x56);    // #3E3856
-    static const Gdiplus::Color AccentViolet(0xFF, 0x8B, 0x5C, 0xF6);   // #8B5CF6 Celeslib
-    static const Gdiplus::Color AccentLight(0xFF, 0xA7, 0x8B, 0xFA);    // #A78BFA
-    static const Gdiplus::Color AccentEmerald(0xFF, 0x10, 0xB9, 0x81);  // #10B981 Status OK
-    static const Gdiplus::Color AccentRed(0xFF, 0xEF, 0x44, 0x44);      // #EF4444 Error
-    static const Gdiplus::Color TextPrimary(0xFF, 0xF4, 0xF4, 0xF5);    // #F4F4F5
-    static const Gdiplus::Color TextSecondary(0xFF, 0xA1, 0xA1, 0xAA);  // #A1A1AA
-    static const Gdiplus::Color TextMuted(0xFF, 0x52, 0x52, 0x5B);      // #52525B
-    static const Gdiplus::Color ConsoleBg(0xFF, 0x10, 0x10, 0x15);      // #101015
-    static const Gdiplus::Color ConsoleGutter(0xFF, 0x0C, 0x0C, 0x10);  // #0C0C10
-    static const Gdiplus::Color ConsoleMinimap(0xFF, 0x08, 0x08, 0x0C); // #08080C
+    static const Gdiplus::Color BgCanvas(0xFF, 0x09, 0x09, 0x09);       // #090909 Main Obsidian Canvas
+    static const Gdiplus::Color CardSurface(0xFF, 0x0D, 0x0D, 0x0D);    // #0D0D0D Cards / Toolbars
+    static const Gdiplus::Color CardSurfaceElevated(0xFF, 0x11, 0x11, 0x11); // #111111 Elevated elements
+    static const Gdiplus::Color InputSurface(0xFF, 0x05, 0x05, 0x05);   // #050505 Input boxes & Tracks
+    static const Gdiplus::Color BorderDark(0xFF, 0x33, 0x33, 0x33);     // #333333 Crisp borders
+    static const Gdiplus::Color BorderSubtle(0xFF, 0x26, 0x26, 0x26);   // #262626 Subtle dividers
+    static const Gdiplus::Color BorderFaint(0xFF, 0x1E, 0x1E, 0x1E);    // #1E1E1E Gutter/Minimap rails
+    static const Gdiplus::Color BorderHover(0xFF, 0x55, 0x55, 0x55);    // #555555 Button Hover Border
+    static const Gdiplus::Color PrimaryWhite(0xFF, 0xFF, 0xFF, 0xFF);   // #FFFFFF Active Segments & CTA Fill
+    static const Gdiplus::Color PrimaryBlack(0xFF, 0x00, 0x00, 0x00);   // #000000 Active CTA Text
+    static const Gdiplus::Color TextWhite(0xFF, 0xFF, 0xFF, 0xFF);      // #FFFFFF Primary Headings
+    static const Gdiplus::Color TextLight(0xFF, 0xE5, 0xE5, 0xE5);      // #E5E5E5 High readable text
+    static const Gdiplus::Color TextSilver(0xFF, 0xCC, 0xCC, 0xCC);     // #CCCCCC Secondary labels
+    static const Gdiplus::Color TextMuted(0xFF, 0x88, 0x88, 0x88);      // #888888 Muted descriptions
+    static const Gdiplus::Color TextSubtle(0xFF, 0x77, 0x77, 0x77);     // #777777 Card footers
+    static const Gdiplus::Color TextFaint(0xFF, 0x55, 0x55, 0x55);      // #555555 Line numbers
+    static const Gdiplus::Color AccentGreen(0xFF, 0x22, 0xC5, 0x5E);    // #22C55E Glowing status OK / [OK]
+    static const Gdiplus::Color AccentRed(0xFF, 0xEF, 0x44, 0x44);      // #EF4444 Error / Restore hover
+    static const Gdiplus::Color AccentYellow(0xFF, 0xEA, 0xB3, 0x08);   // #EAB308 Working status
+    static const Gdiplus::Color CloseHoverBg(0xFF, 0x4A, 0x00, 0x00);   // #4A0000 Close button hover
+    static const Gdiplus::Color SecondaryHoverBg(0xFF, 0x18, 0x18, 0x18); // #181818 Secondary button hover
+    static const Gdiplus::Color CtaHoverBg(0xFF, 0xE5, 0xE5, 0xE5);     // #E5E5E5 Primary CTA hover
 }
-
-enum class NavView {
-    Dashboard = 0,
-    Patcher = 1,
-    Android = 2,
-    Settings = 3
-};
 
 struct AppState {
     UiLang ui_lang = UiLang::ID;
     PatchMode patch_mode = PatchMode::ID_HYBRID;
-    NavView current_view = NavView::Patcher;
     std::wstring game_dir;
     std::vector<std::wstring> log_lines;
     std::wstring status_text = L"SIAP";
-    Gdiplus::Color status_color = Theme::AccentEmerald;
+    Gdiplus::Color status_color = Theme::AccentGreen;
     bool is_busy = false;
-    bool sidebar_collapsed = false;
     int hovered_btn = -1;
     std::mutex mtx;
 
-    // Window dimensions
+    // Window dimensions (Fixed single-page 980 x 620)
     int width = 980;
     int height = 620;
 };
@@ -124,9 +119,6 @@ void LoadConfig() {
         } else if (line.find("\"patch_mode\": \"id\"") != std::string::npos) {
             g_state.patch_mode = PatchMode::ID_HYBRID;
         }
-        if (line.find("\"sidebar_collapsed\": true") != std::string::npos) {
-            g_state.sidebar_collapsed = true;
-        }
     }
 }
 
@@ -136,8 +128,7 @@ void SaveConfig() {
     if (!f.is_open()) return;
     f << "{\n";
     f << "  \"ui_lang\": \"" << (g_state.ui_lang == UiLang::EN ? "en" : "id") << "\",\n";
-    f << "  \"patch_mode\": \"" << (g_state.patch_mode == PatchMode::EN_FULL ? "en" : "id") << "\",\n";
-    f << "  \"sidebar_collapsed\": " << (g_state.sidebar_collapsed ? "true" : "false") << "\n";
+    f << "  \"patch_mode\": \"" << (g_state.patch_mode == PatchMode::EN_FULL ? "en" : "id") << "\"\n";
     f << "}\n";
 }
 
@@ -436,7 +427,7 @@ void ExecuteWorkerAction(const std::wstring& action, const std::wstring& game_pa
     if (g_state.is_busy) return;
     g_state.is_busy = true;
     g_state.status_text = (g_state.ui_lang == UiLang::EN) ? L"WORKING" : L"MEMPROSES";
-    g_state.status_color = Theme::AccentViolet;
+    g_state.status_color = Theme::AccentYellow;
     if (g_hwnd) InvalidateRect(g_hwnd, NULL, FALSE);
 
     std::thread([action, game_path]() {
@@ -535,13 +526,13 @@ void ExecuteWorkerAction(const std::wstring& action, const std::wstring& game_pa
             if (exit_code == 0) {
                 if (action == L"restore" || res.state == L"clean") {
                     g_state.status_text = s.status_originals;
-                    g_state.status_color = Theme::AccentEmerald;
+                    g_state.status_color = Theme::AccentGreen;
                 } else if (action == L"install" || res.state == L"installed") {
                     g_state.status_text = s.status_installed;
-                    g_state.status_color = Theme::AccentEmerald;
+                    g_state.status_color = Theme::AccentGreen;
                 } else {
                     g_state.status_text = s.status_ready;
-                    g_state.status_color = Theme::AccentEmerald;
+                    g_state.status_color = Theme::AccentGreen;
                 }
                 AppendLog(L"[OK] Operasi selesai dengan sukses.");
             } else {
@@ -567,7 +558,7 @@ void ExecuteMobileWorkerAction(const std::wstring& operation) {
     if (g_state.is_busy) return;
     g_state.is_busy = true;
     g_state.status_text = (g_state.ui_lang == UiLang::EN) ? L"WORKING" : L"MEMPROSES";
-    g_state.status_color = Theme::AccentViolet;
+    g_state.status_color = Theme::AccentYellow;
     if (g_hwnd) InvalidateRect(g_hwnd, NULL, FALSE);
 
     std::thread([operation]() {
@@ -595,7 +586,7 @@ void ExecuteMobileWorkerAction(const std::wstring& operation) {
             cmd << L"\"" << worker_path << L"\" mobile-worker --work \"" << work_dir << L"\" --operation " << operation;
         }
 
-        AppendLog(L"[INFO] Menjalankan Android USB: " + cmd.str());
+        AppendLog(L"[ANDROID] Menjalankan Android USB: " + cmd.str());
 
         SECURITY_ATTRIBUTES sa = { sizeof(sa), NULL, TRUE };
         HANDLE hRead, hWrite;
@@ -645,7 +636,7 @@ void ExecuteMobileWorkerAction(const std::wstring& operation) {
             const Strings& s = GetStrings(g_state.ui_lang);
             if (exit_code == 0) {
                 g_state.status_text = s.status_ready;
-                g_state.status_color = Theme::AccentEmerald;
+                g_state.status_color = Theme::AccentGreen;
                 AppendLog(L"[OK] Operasi Android USB selesai.");
             } else {
                 g_state.status_text = s.status_error;
@@ -686,61 +677,97 @@ void DrawRoundRect(Gdiplus::Graphics& g, const Gdiplus::Pen& pen, float x, float
     g.DrawPath(&pen, &path);
 }
 
-// Draw line-numbered monospace console with minimap
-void RenderConsolePanel(Gdiplus::Graphics& g, int x, int y, int w, int h, const AppState& state,
-                        Gdiplus::Font* fontMono, Gdiplus::Brush* textMutedBrush,
-                        Gdiplus::Brush* textPrimaryBrush, Gdiplus::Brush* accentLightBrush,
-                        Gdiplus::Brush* accentBrush, Gdiplus::Brush* textSecBrush) {
+// Crisp Vector Stroke Icons (2px stroke, clean geometric shapes)
+void DrawCeleslibStar(Gdiplus::Graphics& g, float cx, float cy, float r, const Gdiplus::Brush& brush) {
     using namespace Gdiplus;
-    Pen borderPen(Theme::BorderDark, 1.0f);
-    int gutter_w = 42;
-    int minimap_w = 54;
-
-    SolidBrush conBg(Theme::ConsoleBg);
-    FillRoundRect(g, conBg, (float)x, (float)y, (float)w, (float)h, 6);
-    DrawRoundRect(g, borderPen, (float)x, (float)y, (float)w, (float)h, 6);
-
-    // Line number gutter
-    SolidBrush gutterBg(Theme::ConsoleGutter);
-    g.FillRectangle(&gutterBg, x, y, gutter_w, h);
-    g.DrawLine(&borderPen, x + gutter_w, y, x + gutter_w, y + h);
-
-    // Minimap strip
-    SolidBrush minimapBg(Theme::ConsoleMinimap);
-    g.FillRectangle(&minimapBg, x + w - minimap_w, y, minimap_w, h);
-    g.DrawLine(&borderPen, x + w - minimap_w, y, x + w - minimap_w, y + h);
-
-    const Strings& s = GetStrings(state.ui_lang);
-    if (state.log_lines.empty()) {
-        g.DrawString(L"001", -1, fontMono, PointF((float)x + 8, (float)y + 8), textMutedBrush);
-        g.DrawString(s.console_placeholder, -1, fontMono, PointF((float)x + gutter_w + 12, (float)y + 8), textMutedBrush);
-    } else {
-        int line_y = y + 8;
-        int max_visible = (h - 16) / 18;
-        int start_idx = (int)state.log_lines.size() > max_visible ? (int)state.log_lines.size() - max_visible : 0;
-        for (size_t i = start_idx; i < state.log_lines.size(); ++i) {
-            wchar_t num_str[16];
-            swprintf_s(num_str, L"%03d", (int)i + 1);
-            g.DrawString(num_str, -1, fontMono, PointF((float)x + 8, (float)line_y), textMutedBrush);
-
-            const std::wstring& line = state.log_lines[i];
-            Brush* lineBrush = textPrimaryBrush;
-            if (line.find(L"[OK]") != std::wstring::npos) lineBrush = accentLightBrush;
-            else if (line.find(L"[ERROR]") != std::wstring::npos) lineBrush = accentBrush;
-            else if (line.find(L"[INFO]") != std::wstring::npos) lineBrush = textSecBrush;
-
-            g.DrawString(line.c_str(), -1, fontMono, PointF((float)x + gutter_w + 12, (float)line_y), lineBrush);
-
-            // Minimap pixel line
-            Pen miniPen(Color(0x60, 0x8B, 0x5C, 0xF6), 1.0f);
-            g.DrawLine(&miniPen, x + w - minimap_w + 8, line_y + 4, x + w - 8, line_y + 4);
-
-            line_y += 18;
-        }
-    }
+    PointF pts[8];
+    float r_in = r * 0.32f;
+    pts[0] = PointF(cx, cy - r);
+    pts[1] = PointF(cx + r_in, cy - r_in);
+    pts[2] = PointF(cx + r, cy);
+    pts[3] = PointF(cx + r_in, cy + r_in);
+    pts[4] = PointF(cx, cy + r);
+    pts[5] = PointF(cx - r_in, cy + r_in);
+    pts[6] = PointF(cx - r, cy);
+    pts[7] = PointF(cx - r_in, cy - r_in);
+    g.FillPolygon(&brush, pts, 8);
 }
 
-// Master GDI+ Celeslib Frame Renderer
+void DrawVectorFolder(Gdiplus::Graphics& g, float x, float y, const Gdiplus::Pen& pen) {
+    // Folder icon 14x12
+    g.DrawRectangle(&pen, x, y + 3, 14.0f, 9.0f);
+    g.DrawLine(&pen, x, y + 3, x + 4, y);
+    g.DrawLine(&pen, x + 4, y, x + 8, y);
+    g.DrawLine(&pen, x + 8, y, x + 10, y + 3);
+}
+
+void DrawVectorLayers(Gdiplus::Graphics& g, float x, float y, const Gdiplus::Pen& pen) {
+    // Layers icon 14x14
+    Gdiplus::PointF p1[] = { Gdiplus::PointF(x + 7, y), Gdiplus::PointF(x + 14, y + 4), Gdiplus::PointF(x + 7, y + 8), Gdiplus::PointF(x, y + 4) };
+    g.DrawPolygon(&pen, p1, 4);
+    g.DrawLine(&pen, x + 1, y + 7, x + 7, y + 10);
+    g.DrawLine(&pen, x + 7, y + 10, x + 13, y + 7);
+    g.DrawLine(&pen, x + 1, y + 10, x + 7, y + 13);
+    g.DrawLine(&pen, x + 7, y + 13, x + 13, y + 10);
+}
+
+void DrawVectorGlobe(Gdiplus::Graphics& g, float x, float y, const Gdiplus::Pen& pen) {
+    // Globe icon circle with meridian & equator
+    g.DrawEllipse(&pen, x, y, 13.0f, 13.0f);
+    g.DrawEllipse(&pen, x + 3.5f, y, 6.0f, 13.0f);
+    g.DrawLine(&pen, x, y + 6.5f, x + 13, y + 6.5f);
+}
+
+void DrawVectorPlay(Gdiplus::Graphics& g, float x, float y, const Gdiplus::Brush& brush) {
+    // Triangle Play icon 10x12
+    Gdiplus::PointF pts[] = { Gdiplus::PointF(x, y), Gdiplus::PointF(x + 10, y + 6), Gdiplus::PointF(x, y + 12) };
+    g.FillPolygon(&brush, pts, 3);
+}
+
+void DrawVectorRotateCCW(Gdiplus::Graphics& g, float x, float y, const Gdiplus::Pen& pen) {
+    // Rotate counter-clockwise arc + arrow
+    g.DrawArc(&pen, x, y, 12.0f, 12.0f, 45, 270);
+    g.DrawLine(&pen, x + 6, y, x + 2, y);
+    g.DrawLine(&pen, x + 2, y, x + 2, y + 4);
+}
+
+void DrawVectorCheck(Gdiplus::Graphics& g, float x, float y, const Gdiplus::Pen& pen) {
+    // Checkmark
+    g.DrawLine(&pen, x, y + 6, x + 4, y + 10);
+    g.DrawLine(&pen, x + 4, y + 10, x + 11, y + 1);
+}
+
+void DrawVectorSmartphone(Gdiplus::Graphics& g, float x, float y, const Gdiplus::Pen& pen) {
+    // Phone outline + home button dot
+    DrawRoundRect(g, pen, x, y, 10.0f, 14.0f, 2.0f);
+    g.DrawLine(&pen, x + 4, y + 12, x + 6, y + 12);
+}
+
+void DrawVectorBolt(Gdiplus::Graphics& g, float x, float y, const Gdiplus::Brush& brush) {
+    // Lightning bolt polygon
+    Gdiplus::PointF pts[] = {
+        Gdiplus::PointF(x + 6, y),
+        Gdiplus::PointF(x, y + 7),
+        Gdiplus::PointF(x + 5, y + 7),
+        Gdiplus::PointF(x + 3, y + 14),
+        Gdiplus::PointF(x + 10, y + 5),
+        Gdiplus::PointF(x + 5, y + 5)
+    };
+    g.FillPolygon(&brush, pts, 6);
+}
+
+void DrawVectorTrash(Gdiplus::Graphics& g, float x, float y, const Gdiplus::Pen& pen) {
+    // Trash bin icon
+    g.DrawLine(&pen, x, y + 3, x + 12, y + 3);
+    g.DrawLine(&pen, x + 4, y + 1, x + 8, y + 1);
+    g.DrawLine(&pen, x + 2, y + 3, x + 3, y + 12);
+    g.DrawLine(&pen, x + 3, y + 12, x + 9, y + 12);
+    g.DrawLine(&pen, x + 9, y + 12, x + 10, y + 3);
+    g.DrawLine(&pen, x + 5, y + 5, x + 5, y + 10);
+    g.DrawLine(&pen, x + 7, y + 5, x + 7, y + 10);
+}
+
+// Master GDI+ Celeslib Frame Renderer (Single-Page Monochrome Obsidian UI)
 void RenderCeleslibFrame(Gdiplus::Graphics& g, int width, int height, const AppState& state) {
     using namespace Gdiplus;
     g.SetSmoothingMode(SmoothingModeAntiAlias);
@@ -748,282 +775,333 @@ void RenderCeleslibFrame(Gdiplus::Graphics& g, int width, int height, const AppS
 
     const Strings& s = GetStrings(state.ui_lang);
 
-    // 1. Background
-    SolidBrush bgBrush(Theme::BgCanvas);
-    g.FillRectangle(&bgBrush, 0, 0, width, height);
+    // 0. Base Canvas Fill (#090909)
+    SolidBrush bgCanvasBrush(Theme::BgCanvas);
+    g.FillRectangle(&bgCanvasBrush, 0, 0, width, height);
 
-    // 2. Custom Dark Header (Y: 0..48)
-    SolidBrush headerBrush(Theme::BgHeader);
-    g.FillRectangle(&headerBrush, 0, 0, width, 48);
-
-    Pen borderPen(Theme::BorderDark, 1.0f);
+    Pen borderDarkPen(Theme::BorderDark, 1.0f);
+    Pen borderSubtlePen(Theme::BorderSubtle, 1.0f);
+    Pen borderFaintPen(Theme::BorderFaint, 1.0f);
     Pen borderHoverPen(Theme::BorderHover, 1.0f);
-    g.DrawLine(&borderPen, 0, 48, width, 48);
+    Pen borderRedPen(Theme::AccentRed, 1.0f);
+    Pen iconWhitePen(Theme::TextWhite, 1.6f);
+    Pen iconMutedPen(Theme::TextMuted, 1.4f);
 
-    // 2a. Celeslib Star Logo
-    Bitmap logoBmp(CELESLIB_LOGO_32_BGRA_WIDTH, CELESLIB_LOGO_32_BGRA_HEIGHT,
-                   CELESLIB_LOGO_32_BGRA_WIDTH * 4, PixelFormat32bppARGB,
-                   (BYTE*)CELESLIB_LOGO_32_BGRA);
-    g.DrawImage(&logoBmp, 16, 8, 32, 32);
-
-    // 2b. Title & Version Badges
-    FontFamily sansFamily(L"Segoe UI");
-    Font fontTitle(&sansFamily, 13, FontStyleBold, UnitPixel);
-    Font fontBadge(&sansFamily, 10, FontStyleRegular, UnitPixel);
-    Font fontRegular(&sansFamily, 11, FontStyleRegular, UnitPixel);
-    Font fontMono(L"Consolas", 11, FontStyleRegular, UnitPixel);
-
-    SolidBrush textPrimaryBrush(Theme::TextPrimary);
-    SolidBrush textSecBrush(Theme::TextSecondary);
+    SolidBrush whiteBrush(Theme::PrimaryWhite);
+    SolidBrush blackBrush(Theme::PrimaryBlack);
+    SolidBrush textWhiteBrush(Theme::TextWhite);
+    SolidBrush textLightBrush(Theme::TextLight);
+    SolidBrush textSilverBrush(Theme::TextSilver);
     SolidBrush textMutedBrush(Theme::TextMuted);
-    SolidBrush accentBrush(Theme::AccentViolet);
-    SolidBrush accentLightBrush(Theme::AccentLight);
-    SolidBrush pillDarkBg(Theme::BgPill);
-    SolidBrush pillHoverBg(Theme::BgPillHover);
-    SolidBrush pillVioletBg(Color(0x33, 0x8B, 0x5C, 0xF6));
-    Pen pillVioletBorder(Theme::AccentViolet, 1.0f);
+    SolidBrush textSubtleBrush(Theme::TextSubtle);
+    SolidBrush textFaintBrush(Theme::TextFaint);
+    SolidBrush cardSurfaceBrush(Theme::CardSurface);
+    SolidBrush inputSurfaceBrush(Theme::InputSurface);
+    SolidBrush secHoverBrush(Theme::SecondaryHoverBg);
+    SolidBrush ctaHoverBrush(Theme::CtaHoverBg);
 
-    g.DrawString(s.app_name, -1, &fontTitle, PointF(56, 15), &textPrimaryBrush);
+    // Fonts
+    FontFamily sansFamily(L"Segoe UI");
+    Font fontTitle(&sansFamily, 11, FontStyleBold, UnitPoint);
+    Font fontHeader(&sansFamily, 8.5f, FontStyleBold, UnitPoint);
+    Font fontRegular(&sansFamily, 8.5f, FontStyleRegular, UnitPoint);
+    Font fontSmall(&sansFamily, 8.0f, FontStyleRegular, UnitPoint);
+    Font fontBadge(&sansFamily, 8.0f, FontStyleBold, UnitPoint);
+    Font fontMono(L"Consolas", 8.5f, FontStyleRegular, UnitPoint);
+    Font fontMonoBold(L"Consolas", 8.5f, FontStyleBold, UnitPoint);
+    Font fontMonoLog(L"Consolas", 9.5f, FontStyleRegular, UnitPoint);
 
-    // Version Badge [ v1.0.0 ]
-    FillRoundRect(g, pillVioletBg, 122, 14, 52, 20, 4);
-    DrawRoundRect(g, pillVioletBorder, 122, 14, 52, 20, 4);
-    g.DrawString(s.version_badge, -1, &fontBadge, PointF(128, 17), &accentLightBrush);
+    // =========================================================================
+    // ZONE 1: Custom Frameless Titlebar (Y: 0..38, X: 0..980)
+    // =========================================================================
+    g.DrawLine(&borderDarkPen, 0, 38, width, 38);
 
-    // Game Build Badge [ Game Build 1.4.12 ]
-    FillRoundRect(g, pillDarkBg, 182, 14, 118, 20, 4);
-    DrawRoundRect(g, borderPen, 182, 14, 118, 20, 4);
-    g.DrawString(s.game_badge, -1, &fontBadge, PointF(190, 17), &textSecBrush);
+    // 4-Point Geometric Celeslib Star Logo
+    DrawCeleslibStar(g, 27.0f, 19.0f, 7.5f, whiteBrush);
 
-    // 2c. Header Quick Toggles
-    // UI Language Toggle (button index 100)
-    bool ui_hover = (state.hovered_btn == 100);
-    const wchar_t* ui_toggle_txt = (state.ui_lang == UiLang::EN) ? s.toggle_ui_en : s.toggle_ui_id;
-    FillRoundRect(g, ui_hover ? pillHoverBg : pillDarkBg, width - 360, 12, 95, 24, 6);
-    DrawRoundRect(g, ui_hover ? borderHoverPen : borderPen, width - 360, 12, 95, 24, 6);
-    // Vector globe dot
-    SolidBrush globeDotBrush(Color(0xFF, 0x60, 0xA5, 0xFA));
-    g.FillEllipse(&globeDotBrush, width - 352, 19, 8, 8);
-    g.DrawString(ui_toggle_txt, -1, &fontRegular, PointF(width - 340, 16), &textPrimaryBrush);
+    // Brand Title: "Celeslib"
+    g.DrawString(s.app_name, -1, &fontTitle, PointF(40.0f, 8.0f), &textWhiteBrush);
 
-    // Patch Mode Toggle (button index 101)
-    bool mode_hover = (state.hovered_btn == 101);
-    const wchar_t* mode_toggle_txt = (state.patch_mode == PatchMode::EN_FULL) ? s.toggle_mode_en : s.toggle_mode_id;
-    FillRoundRect(g, mode_hover ? pillHoverBg : pillDarkBg, width - 255, 12, 145, 24, 6);
-    DrawRoundRect(g, mode_hover ? borderHoverPen : borderPen, width - 255, 12, 145, 24, 6);
-    // Vector target dot
-    SolidBrush targetDotBrush(Theme::AccentViolet);
-    g.FillEllipse(&targetDotBrush, width - 247, 19, 8, 8);
-    g.DrawString(mode_toggle_txt, -1, &fontRegular, PointF(width - 235, 16), &textPrimaryBrush);
+    // Version Pill: [ v1.0.0 ]
+    SolidBrush verPillBg(Color(0xFF, 0x14, 0x14, 0x14));
+    FillRoundRect(g, verPillBg, 114.0f, 10.0f, 52.0f, 18.0f, 3.0f);
+    DrawRoundRect(g, borderDarkPen, 114.0f, 10.0f, 52.0f, 18.0f, 3.0f);
+    g.DrawString(s.version_badge, -1, &fontBadge, PointF(120.0f, 11.5f), &textSilverBrush);
 
-    // Window Controls [—] [□] [×]
-    g.DrawString(L"—", -1, &fontRegular, PointF(width - 80, 14), (state.hovered_btn == 102) ? &textPrimaryBrush : &textSecBrush);
-    g.DrawString(L"□", -1, &fontRegular, PointF(width - 55, 14), (state.hovered_btn == 103) ? &textPrimaryBrush : &textSecBrush);
-    g.DrawString(L"×", -1, &fontRegular, PointF(width - 30, 14), (state.hovered_btn == 104) ? &textPrimaryBrush : &textSecBrush);
+    // Titlebar Subtitle: "Honor of Kings: Ace Patcher • Game Build 1.4.12"
+    g.DrawString(s.header_subtitle, -1, &fontRegular, PointF(176.0f, 11.0f), &textMutedBrush);
 
-    // 3. Left Sidebar (Dynamic width: collapsed = 48, expanded = 170)
-    int sidebar_w = state.sidebar_collapsed ? 48 : 170;
-    SolidBrush sidebarBrush(Theme::BgSidebar);
-    g.FillRectangle(&sidebarBrush, 0, 49, sidebar_w, height - 49);
-    g.DrawLine(&borderPen, sidebar_w, 49, sidebar_w, height);
+    // Window Controls: [—] [□] [×]
+    // Minimize (ID: 101)
+    if (state.hovered_btn == 101) {
+        g.FillRectangle(&secHoverBrush, 842, 0, 46, 38);
+    }
+    g.DrawString(L"—", -1, &fontRegular, PointF(858.0f, 9.0f), &textSilverBrush);
 
-    // Collapse toggle button (button index 200)
-    bool col_hover = (state.hovered_btn == 200);
-    FillRoundRect(g, col_hover ? pillHoverBg : pillDarkBg, 10, 56, sidebar_w - 20, 24, 4);
-    DrawRoundRect(g, col_hover ? borderHoverPen : borderPen, 10, 56, sidebar_w - 20, 24, 4);
-    const wchar_t* col_icon = state.sidebar_collapsed ? L">" : L"<";
-    g.DrawString(col_icon, -1, &fontBadge, PointF((float)(sidebar_w / 2 - 4), 60), &textSecBrush);
+    // Maximize/Restore (ID: 102)
+    if (state.hovered_btn == 102) {
+        g.FillRectangle(&secHoverBrush, 888, 0, 46, 38);
+    }
+    g.DrawString(L"□", -1, &fontRegular, PointF(904.0f, 9.0f), &textSilverBrush);
 
-    // Sidebar navigation tabs
-    struct NavItem {
-        NavView view;
-        const wchar_t* label;
-        const wchar_t* short_label;
-        int y;
-        int btn_id;
-    };
-    NavItem nav_items[] = {
-        { NavView::Dashboard, s.nav_dashboard, L"DB", 90, 201 },
-        { NavView::Patcher, s.nav_patcher, L"PC", 130, 202 },
-        { NavView::Android, s.nav_android, L"AD", 170, 203 },
-        { NavView::Settings, s.nav_settings, L"ST", 210, 204 }
-    };
+    // Close (ID: 103)
+    if (state.hovered_btn == 103) {
+        SolidBrush closeRedBrush(Theme::CloseHoverBg);
+        g.FillRectangle(&closeRedBrush, 934, 0, 46, 38);
+    }
+    g.DrawString(L"×", -1, &fontRegular, PointF(950.0f, 9.0f), (state.hovered_btn == 103) ? &textWhiteBrush : &textSilverBrush);
 
-    for (const auto& item : nav_items) {
-        bool is_active = (state.current_view == item.view);
-        bool is_hover = (state.hovered_btn == item.btn_id);
-        int tab_x = 8;
-        int tab_w = sidebar_w - 16;
-        if (is_active) {
-            FillRoundRect(g, pillVioletBg, (float)tab_x, (float)item.y, (float)tab_w, 32, 6);
-            DrawRoundRect(g, pillVioletBorder, (float)tab_x, (float)item.y, (float)tab_w, 32, 6);
-            if (state.sidebar_collapsed) {
-                g.DrawString(item.short_label, -1, &fontBadge, PointF((float)tab_x + 8, (float)item.y + 8), &textPrimaryBrush);
-            } else {
-                g.DrawString(item.label, -1, &fontRegular, PointF((float)tab_x + 14, (float)item.y + 7), &textPrimaryBrush);
+    // =========================================================================
+    // ZONE 2: Connected 3-Column Configuration Strip (Y: 50..146, X: 20..960)
+    // =========================================================================
+    FillRoundRect(g, cardSurfaceBrush, 20.0f, 50.0f, 940.0f, 96.0f, 10.0f);
+    DrawRoundRect(g, borderDarkPen, 20.0f, 50.0f, 940.0f, 96.0f, 10.0f);
+
+    // Vertical column dividers at X = 420 and X = 710
+    g.DrawLine(&borderSubtlePen, 420, 62, 420, 134);
+    g.DrawLine(&borderSubtlePen, 710, 62, 710, 134);
+
+    // --- COLUMN 1: Game Directory (X: 20..420) ---
+    DrawVectorFolder(g, 36.0f, 62.0f, iconMutedPen);
+    g.DrawString(s.lbl_game_dir, -1, &fontHeader, PointF(56.0f, 61.0f), &textMutedBrush);
+
+    // Mini Button [Auto-Detect] (ID: 201)
+    bool auto_hover = (state.hovered_btn == 201);
+    SolidBrush autoBg(auto_hover ? Theme::SecondaryHoverBg : Theme::BgCanvas);
+    FillRoundRect(g, autoBg, 318.0f, 56.0f, 88.0f, 22.0f, 4.0f);
+    DrawRoundRect(g, auto_hover ? borderHoverPen : borderDarkPen, 318.0f, 56.0f, 88.0f, 22.0f, 4.0f);
+    g.DrawString(s.btn_autodetect, -1, &fontBadge, PointF(326.0f, 60.0f), &textSilverBrush);
+
+    // Path Box (X: 34..312, Y: 86..120)
+    FillRoundRect(g, inputSurfaceBrush, 34.0f, 86.0f, 278.0f, 34.0f, 6.0f);
+    DrawRoundRect(g, borderSubtlePen, 34.0f, 86.0f, 278.0f, 34.0f, 6.0f);
+    std::wstring display_path = state.game_dir.empty() ? L"C:\\Program Files\\WXQLauncher\\WXQ" : state.game_dir;
+    g.DrawString(display_path.c_str(), -1, &fontMono, PointF(44.0f, 95.0f), &textLightBrush);
+
+    // [Pilih Folder / Browse] Button (ID: 202)
+    bool browse_hover = (state.hovered_btn == 202);
+    SolidBrush browseBg(browse_hover ? Color(0xFF, 0x22, 0x22, 0x22) : Color(0xFF, 0x14, 0x14, 0x14));
+    FillRoundRect(g, browseBg, 318.0f, 86.0f, 88.0f, 34.0f, 6.0f);
+    DrawRoundRect(g, browse_hover ? borderHoverPen : borderDarkPen, 318.0f, 86.0f, 88.0f, 34.0f, 6.0f);
+    g.DrawString(s.btn_browse, -1, &fontHeader, PointF(326.0f, 95.0f), &textWhiteBrush);
+
+    // --- COLUMN 2: Game Patch Mode (X: 420..710) ---
+    DrawVectorLayers(g, 436.0f, 62.0f, iconMutedPen);
+    g.DrawString(s.lbl_patch_mode, -1, &fontHeader, PointF(456.0f, 61.0f), &textMutedBrush);
+
+    // Segmented Control Pill (X: 434..696, Y: 86..120)
+    FillRoundRect(g, inputSurfaceBrush, 434.0f, 86.0f, 262.0f, 34.0f, 6.0f);
+    DrawRoundRect(g, borderDarkPen, 434.0f, 86.0f, 262.0f, 34.0f, 6.0f);
+
+    // [ID Hybrid] Segment (ID: 203)
+    bool id_mode_active = (state.patch_mode == PatchMode::ID_HYBRID);
+    if (id_mode_active) {
+        FillRoundRect(g, whiteBrush, 437.0f, 89.0f, 127.0f, 28.0f, 4.0f);
+        g.DrawString(s.seg_mode_id, -1, &fontHeader, PointF(472.0f, 95.0f), &blackBrush);
+    } else {
+        if (state.hovered_btn == 203) {
+            FillRoundRect(g, secHoverBrush, 437.0f, 89.0f, 127.0f, 28.0f, 4.0f);
+        }
+        g.DrawString(s.seg_mode_id, -1, &fontHeader, PointF(472.0f, 95.0f), &textMutedBrush);
+    }
+
+    // [EN Full] Segment (ID: 204)
+    bool en_mode_active = (state.patch_mode == PatchMode::EN_FULL);
+    if (en_mode_active) {
+        FillRoundRect(g, whiteBrush, 566.0f, 89.0f, 127.0f, 28.0f, 4.0f);
+        g.DrawString(s.seg_mode_en, -1, &fontHeader, PointF(606.0f, 95.0f), &blackBrush);
+    } else {
+        if (state.hovered_btn == 204) {
+            FillRoundRect(g, secHoverBrush, 566.0f, 89.0f, 127.0f, 28.0f, 4.0f);
+        }
+        g.DrawString(s.seg_mode_en, -1, &fontHeader, PointF(606.0f, 95.0f), &textMutedBrush);
+    }
+
+    // Subtitle
+    const wchar_t* mode_sub = (state.patch_mode == PatchMode::EN_FULL) ? s.desc_mode_en : s.desc_mode_id;
+    g.DrawString(mode_sub, -1, &fontSmall, PointF(436.0f, 126.0f), &textSubtleBrush);
+
+    // --- COLUMN 3: Interface Language (X: 710..960) ---
+    DrawVectorGlobe(g, 726.0f, 62.0f, iconMutedPen);
+    g.DrawString(s.lbl_ui_lang, -1, &fontHeader, PointF(746.0f, 61.0f), &textMutedBrush);
+
+    // Segmented Control Pill (X: 724..946, Y: 86..120)
+    FillRoundRect(g, inputSurfaceBrush, 724.0f, 86.0f, 222.0f, 34.0f, 6.0f);
+    DrawRoundRect(g, borderDarkPen, 724.0f, 86.0f, 222.0f, 34.0f, 6.0f);
+
+    // [Indonesia] Segment (ID: 205)
+    bool id_ui_active = (state.ui_lang == UiLang::ID);
+    if (id_ui_active) {
+        FillRoundRect(g, whiteBrush, 727.0f, 89.0f, 107.0f, 28.0f, 4.0f);
+        g.DrawString(s.seg_ui_id, -1, &fontHeader, PointF(752.0f, 95.0f), &blackBrush);
+    } else {
+        if (state.hovered_btn == 205) {
+            FillRoundRect(g, secHoverBrush, 727.0f, 89.0f, 107.0f, 28.0f, 4.0f);
+        }
+        g.DrawString(s.seg_ui_id, -1, &fontHeader, PointF(752.0f, 95.0f), &textMutedBrush);
+    }
+
+    // [English] Segment (ID: 206)
+    bool en_ui_active = (state.ui_lang == UiLang::EN);
+    if (en_ui_active) {
+        FillRoundRect(g, whiteBrush, 836.0f, 89.0f, 107.0f, 28.0f, 4.0f);
+        g.DrawString(s.seg_ui_en, -1, &fontHeader, PointF(868.0f, 95.0f), &blackBrush);
+    } else {
+        if (state.hovered_btn == 206) {
+            FillRoundRect(g, secHoverBrush, 836.0f, 89.0f, 107.0f, 28.0f, 4.0f);
+        }
+        g.DrawString(s.seg_ui_en, -1, &fontHeader, PointF(868.0f, 95.0f), &textMutedBrush);
+    }
+
+    // Subtitle
+    g.DrawString(s.desc_ui, -1, &fontSmall, PointF(726.0f, 126.0f), &textSubtleBrush);
+
+    // =========================================================================
+    // ZONE 3: Unified Action Toolbar (Y: 158..208, X: 20..960)
+    // =========================================================================
+    FillRoundRect(g, cardSurfaceBrush, 20.0f, 158.0f, 940.0f, 50.0f, 8.0f);
+    DrawRoundRect(g, borderDarkPen, 20.0f, 158.0f, 940.0f, 50.0f, 8.0f);
+
+    // 1. Primary CTA: [▶ Pasang Patch] (ID: 301, X: 30..186, Y: 166..200)
+    bool install_hover = (state.hovered_btn == 301);
+    FillRoundRect(g, install_hover ? ctaHoverBrush : whiteBrush, 30.0f, 166.0f, 156.0f, 34.0f, 6.0f);
+    DrawVectorPlay(g, 46.0f, 177.0f, blackBrush);
+    g.DrawString(s.btn_install, -1, &fontHeader, PointF(64.0f, 175.0f), &blackBrush);
+
+    // 2. [↺ Pulihkan] (ID: 302, X: 194..326, Y: 166..200)
+    bool restore_hover = (state.hovered_btn == 302);
+    SolidBrush restBg(restore_hover ? Theme::SecondaryHoverBg : Theme::BgCanvas);
+    FillRoundRect(g, restBg, 194.0f, 166.0f, 132.0f, 34.0f, 6.0f);
+    DrawRoundRect(g, restore_hover ? borderRedPen : borderDarkPen, 194.0f, 166.0f, 132.0f, 34.0f, 6.0f);
+    Pen restPen(restore_hover ? Theme::AccentRed : Theme::TextWhite, 1.4f);
+    DrawVectorRotateCCW(g, 208.0f, 177.0f, restPen);
+    g.DrawString(s.btn_restore, -1, &fontHeader, PointF(228.0f, 175.0f), restore_hover ? (SolidBrush*)&borderRedPen : &textWhiteBrush);
+
+    // 3. [✓ Periksa] (ID: 303, X: 334..462, Y: 166..200)
+    bool verify_hover = (state.hovered_btn == 303);
+    SolidBrush verBg(verify_hover ? Theme::SecondaryHoverBg : Theme::BgCanvas);
+    FillRoundRect(g, verBg, 334.0f, 166.0f, 128.0f, 34.0f, 6.0f);
+    DrawRoundRect(g, verify_hover ? borderHoverPen : borderDarkPen, 334.0f, 166.0f, 128.0f, 34.0f, 6.0f);
+    DrawVectorCheck(g, 348.0f, 178.0f, iconWhitePen);
+    g.DrawString(s.btn_verify, -1, &fontHeader, PointF(368.0f, 175.0f), &textWhiteBrush);
+
+    // Vertical Divider at X = 476
+    g.DrawLine(&borderSubtlePen, 476, 168, 476, 198);
+
+    // 4. Android USB Actions:
+    // [📱 Pindai USB] (ID: 304, X: 490..616, Y: 166..200)
+    bool scan_hover = (state.hovered_btn == 304);
+    SolidBrush scanBg(scan_hover ? Theme::SecondaryHoverBg : Theme::BgCanvas);
+    FillRoundRect(g, scanBg, 490.0f, 166.0f, 126.0f, 34.0f, 6.0f);
+    DrawRoundRect(g, scan_hover ? borderHoverPen : borderDarkPen, 490.0f, 166.0f, 126.0f, 34.0f, 6.0f);
+    DrawVectorSmartphone(g, 502.0f, 176.0f, iconWhitePen);
+    g.DrawString(s.btn_android_scan, -1, &fontHeader, PointF(520.0f, 175.0f), &textWhiteBrush);
+
+    // [⚡ Patch APK] (ID: 305, X: 624..740, Y: 166..200)
+    bool patch_hover = (state.hovered_btn == 305);
+    SolidBrush apkBg(patch_hover ? Theme::SecondaryHoverBg : Theme::BgCanvas);
+    FillRoundRect(g, apkBg, 624.0f, 166.0f, 116.0f, 34.0f, 6.0f);
+    DrawRoundRect(g, patch_hover ? borderHoverPen : borderDarkPen, 624.0f, 166.0f, 116.0f, 34.0f, 6.0f);
+    DrawVectorBolt(g, 636.0f, 176.0f, whiteBrush);
+    g.DrawString(s.btn_android_patch, -1, &fontHeader, PointF(654.0f, 175.0f), &textWhiteBrush);
+
+    // [↺ Pulihkan APK] (ID: 306, X: 748..868, Y: 166..200)
+    bool rec_hover = (state.hovered_btn == 306);
+    SolidBrush recBg(rec_hover ? Theme::SecondaryHoverBg : Theme::BgCanvas);
+    FillRoundRect(g, recBg, 748.0f, 166.0f, 120.0f, 34.0f, 6.0f);
+    DrawRoundRect(g, rec_hover ? borderRedPen : borderDarkPen, 748.0f, 166.0f, 120.0f, 34.0f, 6.0f);
+    Pen recPen(rec_hover ? Theme::AccentRed : Theme::TextWhite, 1.4f);
+    DrawVectorRotateCCW(g, 758.0f, 177.0f, recPen);
+    g.DrawString(s.btn_android_recover, -1, &fontHeader, PointF(776.0f, 175.0f), rec_hover ? (SolidBrush*)&borderRedPen : &textWhiteBrush);
+
+    // 5. Console [🗑 Clear] (ID: 307, X: 878..950, Y: 166..200)
+    bool clear_hover = (state.hovered_btn == 307);
+    SolidBrush clrBg(clear_hover ? Theme::SecondaryHoverBg : Theme::BgCanvas);
+    FillRoundRect(g, clrBg, 878.0f, 166.0f, 72.0f, 34.0f, 6.0f);
+    DrawRoundRect(g, clear_hover ? borderHoverPen : borderDarkPen, 878.0f, 166.0f, 72.0f, 34.0f, 6.0f);
+    DrawVectorTrash(g, 888.0f, 176.0f, iconWhitePen);
+    g.DrawString(s.btn_clear, -1, &fontHeader, PointF(906.0f, 175.0f), &textWhiteBrush);
+
+    // =========================================================================
+    // ZONE 4: Diagnostic Console (Y: 220..576, X: 20..960)
+    // =========================================================================
+    FillRoundRect(g, inputSurfaceBrush, 20.0f, 220.0f, 940.0f, 356.0f, 8.0f);
+    DrawRoundRect(g, borderDarkPen, 20.0f, 220.0f, 940.0f, 356.0f, 8.0f);
+
+    // Console Header Bar (Y: 220..252)
+    FillRoundRect(g, cardSurfaceBrush, 20.0f, 220.0f, 940.0f, 32.0f, 8.0f);
+    g.FillRectangle(&cardSurfaceBrush, 20, 240, 940, 12);
+    g.DrawLine(&borderSubtlePen, 20, 252, 960, 252);
+
+    // Header label: Terminal prompt ">_" + title
+    g.DrawString(L">_", -1, &fontMonoBold, PointF(34.0f, 228.0f), &textWhiteBrush);
+    g.DrawString(s.console_title, -1, &fontMono, PointF(56.0f, 228.0f), &textSilverBrush);
+
+    // Status Pill (X: 830..948, Y: 224..248)
+    SolidBrush statusPillBg(Theme::CardSurfaceElevated);
+    FillRoundRect(g, statusPillBg, 830.0f, 224.0f, 118.0f, 24.0f, 4.0f);
+    DrawRoundRect(g, borderDarkPen, 830.0f, 224.0f, 118.0f, 24.0f, 4.0f);
+
+    // Glowing dot 8x8
+    SolidBrush dotBrush(state.status_color);
+    g.FillEllipse(&dotBrush, 840, 232, 8, 8);
+    g.DrawString(state.status_text.c_str(), -1, &fontMonoBold, PointF(854.0f, 228.0f), &textWhiteBrush);
+
+    // Line Number Gutter (X: 21..64, Y: 253..575)
+    SolidBrush gutterBg(Theme::BgCanvas);
+    g.FillRectangle(&gutterBg, 21, 253, 43, 322);
+    g.DrawLine(&borderFaintPen, 64, 253, 64, 575);
+
+    // Minimap Rail (X: 908..959, Y: 253..575)
+    g.FillRectangle(&gutterBg, 908, 253, 51, 322);
+    g.DrawLine(&borderFaintPen, 908, 253, 908, 575);
+
+    // Render Log Lines in Viewport
+    if (state.log_lines.empty()) {
+        g.DrawString(L"001", -1, &fontMono, PointF(32.0f, 260.0f), &textFaintBrush);
+        g.DrawString(s.console_placeholder, -1, &fontMonoLog, PointF(76.0f, 260.0f), &textMutedBrush);
+    } else {
+        int max_visible = 16;
+        int start_idx = (int)state.log_lines.size() > max_visible ? (int)state.log_lines.size() - max_visible : 0;
+        int line_y = 260;
+        for (size_t i = start_idx; i < state.log_lines.size(); ++i) {
+            wchar_t num_str[16];
+            swprintf_s(num_str, L"%03d", (int)i + 1);
+            g.DrawString(num_str, -1, &fontMono, PointF(32.0f, (float)line_y), &textFaintBrush);
+
+            const std::wstring& line = state.log_lines[i];
+            Color lineCol(0xFF, 0xB0, 0xB0, 0xB0);
+            if (line.find(L"[OK]") != std::wstring::npos || line.find(L"[READY]") != std::wstring::npos) {
+                lineCol = Theme::AccentGreen;
+            } else if (line.find(L"[ERROR]") != std::wstring::npos || line.find(L"[FAIL]") != std::wstring::npos) {
+                lineCol = Theme::AccentRed;
+            } else if (line.find(L"[PATCH]") != std::wstring::npos || line.find(L"[CHECK]") != std::wstring::npos || line.find(L"[ANDROID]") != std::wstring::npos) {
+                lineCol = Theme::TextWhite;
             }
-        } else {
-            if (is_hover) {
-                FillRoundRect(g, pillHoverBg, (float)tab_x, (float)item.y, (float)tab_w, 32, 6);
-                DrawRoundRect(g, borderHoverPen, (float)tab_x, (float)item.y, (float)tab_w, 32, 6);
-            }
-            if (state.sidebar_collapsed) {
-                g.DrawString(item.short_label, -1, &fontBadge, PointF((float)tab_x + 8, (float)item.y + 8), &textSecBrush);
-            } else {
-                g.DrawString(item.label, -1, &fontRegular, PointF((float)tab_x + 14, (float)item.y + 7), &textSecBrush);
-            }
+
+            SolidBrush lineBrush(lineCol);
+            g.DrawString(line.c_str(), -1, &fontMonoLog, PointF(76.0f, (float)line_y), &lineBrush);
+
+            // Minimap micro-bar
+            Pen miniPen(lineCol, 1.0f);
+            g.DrawLine(&miniPen, 916, line_y + 6, 950, line_y + 6);
+
+            line_y += 19;
         }
     }
 
-    // Sidebar Bottom Copyright
-    if (!state.sidebar_collapsed) {
-        g.DrawString(L"Celeslib v1.0.0", -1, &fontBadge, PointF(16, (float)height - 40), &textMutedBrush);
-        g.DrawString(L"Game Build 1.4.12", -1, &fontBadge, PointF(16, (float)height - 25), &textMutedBrush);
-    }
+    // =========================================================================
+    // ZONE 5: Bottom Status Bar (Y: 588..620, X: 0..980)
+    // =========================================================================
+    g.DrawLine(&borderDarkPen, 0, 588, width, 588);
 
-    // 4. Main Body Content
-    int main_x = sidebar_w + 16;
-    int main_w = width - main_x - 16;
+    // Left Engine Status Info + Glowing Green Dot
+    SolidBrush greenDotBrush(Theme::AccentGreen);
+    g.FillEllipse(&greenDotBrush, 22, 600, 8, 8);
+    g.DrawString(s.bottom_engine_info, -1, &fontRegular, PointF(38.0f, 597.0f), &textSilverBrush);
 
-    if (state.current_view == NavView::Patcher) {
-        // 4a. Top Pill Action Toolbar
-        struct ActionBtn {
-            int id;
-            const wchar_t* label;
-            int w;
-            bool highlight;
-        };
-        ActionBtn actions[] = {
-            { 1, s.btn_install, 120, true },
-            { 2, s.btn_restore, 115, false },
-            { 3, s.btn_verify, 110, false },
-            { 4, s.btn_browse, 110, false },
-            { 5, s.btn_autodetect, 105, false },
-            { 6, s.btn_clear, 90, false }
-        };
-
-        int cur_x = main_x;
-        for (const auto& btn : actions) {
-            bool btn_hover = (state.hovered_btn == btn.id);
-            if (btn.highlight) {
-                SolidBrush installBg(btn_hover ? Color(0xFF, 0x8B, 0x5C, 0xF6) : Color(0xFF, 0x7C, 0x3A, 0xED));
-                FillRoundRect(g, installBg, (float)cur_x, 62, (float)btn.w, 32, 6);
-                g.DrawString(btn.label, -1, &fontRegular, PointF((float)cur_x + 10, 69), &textPrimaryBrush);
-            } else {
-                FillRoundRect(g, btn_hover ? pillHoverBg : pillDarkBg, (float)cur_x, 62, (float)btn.w, 32, 6);
-                DrawRoundRect(g, btn_hover ? borderHoverPen : borderPen, (float)cur_x, 62, (float)btn.w, 32, 6);
-                g.DrawString(btn.label, -1, &fontRegular, PointF((float)cur_x + 10, 69), &textSecBrush);
-            }
-            cur_x += btn.w + 8;
-        }
-
-        // 4b. Game Path & Status Bar
-        int bar_y = 104;
-        FillRoundRect(g, pillDarkBg, (float)main_x, (float)bar_y, (float)main_w, 32, 6);
-        DrawRoundRect(g, borderPen, (float)main_x, (float)bar_y, (float)main_w, 32, 6);
-
-        std::wstring path_display = std::wstring(s.console_game_path_label) + L" " +
-            (state.game_dir.empty() ? L"C:\\Program Files\\WXQLauncher\\WXQ (Auto-Detected)" : state.game_dir);
-        g.DrawString(path_display.c_str(), -1, &fontRegular, PointF((float)main_x + 12, (float)bar_y + 8), &textSecBrush);
-
-        // Status pill badge on right
-        SolidBrush statusBrush(state.status_color);
-        SolidBrush bgCanvasBrush(Theme::BgCanvas);
-        int badge_w = 110;
-        int badge_x = main_x + main_w - badge_w - 6;
-        FillRoundRect(g, bgCanvasBrush, (float)badge_x, (float)bar_y + 4, (float)badge_w, 24, 4);
-        DrawRoundRect(g, borderPen, (float)badge_x, (float)bar_y + 4, (float)badge_w, 24, 4);
-        g.FillEllipse(&statusBrush, badge_x + 8, bar_y + 12, 8, 8);
-        g.DrawString(state.status_text.c_str(), -1, &fontBadge, PointF((float)badge_x + 22, (float)bar_y + 8), &textPrimaryBrush);
-
-        // 4c. Editor-Style Line-Numbered Monospace Console
-        int con_y = 146;
-        int con_h = height - con_y - 16;
-        RenderConsolePanel(g, main_x, con_y, main_w, con_h, state,
-                           &fontMono, &textMutedBrush, &textPrimaryBrush,
-                           &accentLightBrush, (SolidBrush*)&accentBrush, &textSecBrush);
-    } else if (state.current_view == NavView::Settings) {
-        // Settings Card View
-        int card_y = 70;
-
-        // Card 1: UI Language
-        FillRoundRect(g, pillDarkBg, (float)main_x, (float)card_y, (float)main_w, 88, 6);
-        DrawRoundRect(g, borderPen, (float)main_x, (float)card_y, (float)main_w, 88, 6);
-        g.DrawString(s.settings_ui_lang_title, -1, &fontTitle, PointF((float)main_x + 16, (float)card_y + 14), &textPrimaryBrush);
-        g.DrawString(s.settings_ui_lang_desc, -1, &fontRegular, PointF((float)main_x + 16, (float)card_y + 36), &textSecBrush);
-
-        // Buttons for UI Lang
-        SolidBrush activePill(Color(0xFF, 0x7C, 0x3A, 0xED));
-        FillRoundRect(g, (state.ui_lang == UiLang::ID ? activePill : pillDarkBg), (float)main_x + 16, (float)card_y + 54, 140, 24, 4);
-        g.DrawString(L"Bahasa Indonesia", -1, &fontBadge, PointF((float)main_x + 24, (float)card_y + 58), &textPrimaryBrush);
-
-        FillRoundRect(g, (state.ui_lang == UiLang::EN ? activePill : pillDarkBg), (float)main_x + 166, (float)card_y + 54, 120, 24, 4);
-        g.DrawString(L"English", -1, &fontBadge, PointF((float)main_x + 180, (float)card_y + 58), &textPrimaryBrush);
-
-        // Card 2: Patch Mode
-        card_y += 104;
-        FillRoundRect(g, pillDarkBg, (float)main_x, (float)card_y, (float)main_w, 98, 6);
-        DrawRoundRect(g, borderPen, (float)main_x, (float)card_y, (float)main_w, 98, 6);
-        g.DrawString(s.settings_patch_mode_title, -1, &fontTitle, PointF((float)main_x + 16, (float)card_y + 14), &textPrimaryBrush);
-        g.DrawString(s.settings_patch_mode_desc, -1, &fontRegular, PointF((float)main_x + 16, (float)card_y + 36), &textSecBrush);
-
-        FillRoundRect(g, (state.patch_mode == PatchMode::ID_HYBRID ? activePill : pillDarkBg), (float)main_x + 16, (float)card_y + 60, 180, 26, 4);
-        g.DrawString(L"Indonesian Hybrid (ID)", -1, &fontBadge, PointF((float)main_x + 24, (float)card_y + 65), &textPrimaryBrush);
-
-        FillRoundRect(g, (state.patch_mode == PatchMode::EN_FULL ? activePill : pillDarkBg), (float)main_x + 206, (float)card_y + 60, 160, 26, 4);
-        g.DrawString(L"Full English (EN)", -1, &fontBadge, PointF((float)main_x + 220, (float)card_y + 65), &textPrimaryBrush);
-
-        // Card 3: Game Directory
-        card_y += 114;
-        FillRoundRect(g, pillDarkBg, (float)main_x, (float)card_y, (float)main_w, 80, 6);
-        DrawRoundRect(g, borderPen, (float)main_x, (float)card_y, (float)main_w, 80, 6);
-        g.DrawString(s.settings_game_dir_title, -1, &fontTitle, PointF((float)main_x + 16, (float)card_y + 14), &textPrimaryBrush);
-        g.DrawString(s.settings_game_dir_desc, -1, &fontRegular, PointF((float)main_x + 16, (float)card_y + 36), &textSecBrush);
-        g.DrawString(state.game_dir.empty() ? L"C:\\Program Files\\WXQLauncher\\WXQ" : state.game_dir.c_str(),
-                     -1, &fontMono, PointF((float)main_x + 16, (float)card_y + 54), &accentLightBrush);
-    } else if (state.current_view == NavView::Android) {
-        // Android USB View with 3 functional buttons and live console
-        FillRoundRect(g, pillDarkBg, (float)main_x, 70, (float)main_w, 160, 6);
-        DrawRoundRect(g, borderPen, (float)main_x, 70, (float)main_w, 160, 6);
-        g.DrawString(s.android_title, -1, &fontTitle, PointF((float)main_x + 16, 86), &textPrimaryBrush);
-        g.DrawString(s.android_desc, -1, &fontRegular, PointF((float)main_x + 16, 114), &textSecBrush);
-
-        SolidBrush activePill(Color(0xFF, 0x7C, 0x3A, 0xED));
-        // Button 1: Scan Device (button index 301)
-        bool scan_hover = (state.hovered_btn == 301);
-        FillRoundRect(g, scan_hover ? pillVioletBg : activePill, (float)main_x + 16, 150, 140, 32, 6);
-        g.DrawString(s.android_btn_scan, -1, &fontRegular, PointF((float)main_x + 28, 157), &textPrimaryBrush);
-
-        // Button 2: Patch Android (button index 302)
-        bool patch_hover = (state.hovered_btn == 302);
-        FillRoundRect(g, patch_hover ? pillHoverBg : pillDarkBg, (float)main_x + 166, 150, 150, 32, 6);
-        DrawRoundRect(g, patch_hover ? borderHoverPen : borderPen, (float)main_x + 166, 150, 150, 32, 6);
-        g.DrawString(s.android_btn_patch, -1, &fontRegular, PointF((float)main_x + 180, 157), &textSecBrush);
-
-        // Button 3: Recover Android (button index 303)
-        bool rec_hover = (state.hovered_btn == 303);
-        FillRoundRect(g, rec_hover ? pillHoverBg : pillDarkBg, (float)main_x + 326, 150, 150, 32, 6);
-        DrawRoundRect(g, rec_hover ? borderHoverPen : borderPen, (float)main_x + 326, 150, 150, 32, 6);
-        g.DrawString(s.android_btn_recover, -1, &fontRegular, PointF((float)main_x + 340, 157), &textSecBrush);
-
-        // Live Diagnostic Console Panel below Android card (con_y = 244)
-        int con_y = 244;
-        int con_h = height - con_y - 16;
-        RenderConsolePanel(g, main_x, con_y, main_w, con_h, state,
-                           &fontMono, &textMutedBrush, &textPrimaryBrush,
-                           &accentLightBrush, (SolidBrush*)&accentBrush, &textSecBrush);
-    } else if (state.current_view == NavView::Dashboard) {
-        // Dashboard Overview
-        FillRoundRect(g, pillDarkBg, (float)main_x, 70, (float)main_w, 180, 6);
-        DrawRoundRect(g, borderPen, (float)main_x, 70, (float)main_w, 180, 6);
-        g.DrawString(s.app_title, -1, &fontTitle, PointF((float)main_x + 16, 86), &textPrimaryBrush);
-        g.DrawString(s.sub_header, -1, &fontRegular, PointF((float)main_x + 16, 110), &textSecBrush);
-
-        std::wstring build_info = L"Engine Target: Honor of Kings: Ace Build 1.4.12 | Celeslib Native Release v1.0.0";
-        g.DrawString(build_info.c_str(), -1, &fontRegular, PointF((float)main_x + 16, 134), &accentLightBrush);
-
-        g.DrawString(s.copyright_label, -1, &fontBadge, PointF((float)main_x + 16, 210), &textMutedBrush);
-    }
+    // Right Copyright
+    g.DrawString(s.bottom_copyright, -1, &fontRegular, PointF(712.0f, 597.0f), &textMutedBrush);
 }
 
 // Window Procedure
@@ -1048,33 +1126,31 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             int y = GET_Y_LPARAM(lParam);
 
             int new_hover = -1;
-            int sidebar_w = g_state.sidebar_collapsed ? 48 : 170;
-            int main_x = sidebar_w + 16;
 
-            if (y >= 12 && y <= 36) {
-                if (x >= g_state.width - 360 && x <= g_state.width - 265) new_hover = 100;
-                else if (x >= g_state.width - 255 && x <= g_state.width - 110) new_hover = 101;
-                else if (x >= g_state.width - 90 && x <= g_state.width - 68) new_hover = 102;
-                else if (x >= g_state.width - 65 && x <= g_state.width - 40) new_hover = 103;
-                else if (x >= g_state.width - 38 && x <= g_state.width - 10) new_hover = 104;
-            } else if (x <= sidebar_w) {
-                if (y >= 56 && y <= 80) new_hover = 200;
-                else if (y >= 90 && y <= 122) new_hover = 201;
-                else if (y >= 130 && y <= 162) new_hover = 202;
-                else if (y >= 170 && y <= 202) new_hover = 203;
-                else if (y >= 210 && y <= 242) new_hover = 204;
-            } else if (g_state.current_view == NavView::Patcher && y >= 62 && y <= 94) {
-                int cur_x = main_x;
-                if (x >= cur_x && x <= cur_x + 120) new_hover = 1;
-                else if (x >= cur_x + 128 && x <= cur_x + 243) new_hover = 2;
-                else if (x >= cur_x + 251 && x <= cur_x + 361) new_hover = 3;
-                else if (x >= cur_x + 369 && x <= cur_x + 479) new_hover = 4;
-                else if (x >= cur_x + 487 && x <= cur_x + 592) new_hover = 5;
-                else if (x >= cur_x + 600 && x <= cur_x + 690) new_hover = 6;
-            } else if (g_state.current_view == NavView::Android && y >= 150 && y <= 182) {
-                if (x >= main_x + 16 && x <= main_x + 156) new_hover = 301;
-                else if (x >= main_x + 166 && x <= main_x + 316) new_hover = 302;
-                else if (x >= main_x + 326 && x <= main_x + 476) new_hover = 303;
+            // Zone 1: Window Controls
+            if (y >= 0 && y <= 38) {
+                if (x >= 842 && x <= 888) new_hover = 101;
+                else if (x >= 888 && x <= 934) new_hover = 102;
+                else if (x >= 934 && x <= 980) new_hover = 103;
+            }
+            // Zone 2: Configuration Strip
+            else if (y >= 50 && y <= 146) {
+                if (y >= 56 && y <= 78 && x >= 318 && x <= 406) new_hover = 201; // Auto-Detect
+                else if (y >= 86 && y <= 120 && x >= 318 && x <= 406) new_hover = 202; // Browse
+                else if (y >= 89 && y <= 117 && x >= 437 && x <= 564) new_hover = 203; // ID Hybrid
+                else if (y >= 89 && y <= 117 && x >= 566 && x <= 693) new_hover = 204; // EN Full
+                else if (y >= 89 && y <= 117 && x >= 727 && x <= 834) new_hover = 205; // ID Lang
+                else if (y >= 89 && y <= 117 && x >= 836 && x <= 943) new_hover = 206; // EN Lang
+            }
+            // Zone 3: Action Toolbar
+            else if (y >= 166 && y <= 200) {
+                if (x >= 30 && x <= 186) new_hover = 301;      // Install
+                else if (x >= 194 && x <= 326) new_hover = 302; // Restore
+                else if (x >= 334 && x <= 462) new_hover = 303; // Verify
+                else if (x >= 490 && x <= 616) new_hover = 304; // Android Scan
+                else if (x >= 624 && x <= 740) new_hover = 305; // Android Patch
+                else if (x >= 748 && x <= 868) new_hover = 306; // Android Recover
+                else if (x >= 878 && x <= 950) new_hover = 307; // Clear
             }
 
             if (new_hover != g_state.hovered_btn) {
@@ -1098,34 +1174,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_LBUTTONDOWN: {
             int x = GET_X_LPARAM(lParam);
             int y = GET_Y_LPARAM(lParam);
-            int sidebar_w = g_state.sidebar_collapsed ? 48 : 170;
-            int main_x = sidebar_w + 16;
 
-            // Header Toggles & Window Controls
-            if (y >= 12 && y <= 36) {
-                // UI Toggle
-                if (x >= g_state.width - 360 && x <= g_state.width - 265) {
-                    g_state.ui_lang = (g_state.ui_lang == UiLang::ID) ? UiLang::EN : UiLang::ID;
-                    SaveConfig();
-                    InvalidateRect(hwnd, NULL, FALSE);
-                    return 0;
-                }
-                // Patch Mode Toggle
-                if (x >= g_state.width - 255 && x <= g_state.width - 110) {
-                    g_state.patch_mode = (g_state.patch_mode == PatchMode::ID_HYBRID) ? PatchMode::EN_FULL : PatchMode::ID_HYBRID;
-                    SaveConfig();
-                    InvalidateRect(hwnd, NULL, FALSE);
-                    return 0;
-                }
-            }
-
-            // Window Controls [—] [□] [×]
-            if (y >= 8 && y <= 36) {
-                if (x >= g_state.width - 90 && x <= g_state.width - 68) {
+            // Zone 1: Window Controls & Dragging
+            if (y >= 0 && y <= 38) {
+                if (x >= 842 && x <= 888) {
                     ShowWindow(hwnd, SW_MINIMIZE);
                     return 0;
                 }
-                if (x >= g_state.width - 65 && x <= g_state.width - 40) {
+                if (x >= 888 && x <= 934) {
                     WINDOWPLACEMENT wp = { sizeof(wp) };
                     GetWindowPlacement(hwnd, &wp);
                     if (wp.showCmd == SW_MAXIMIZE) {
@@ -1135,67 +1191,28 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                     }
                     return 0;
                 }
-                if (x >= g_state.width - 38 && x <= g_state.width - 10) {
+                if (x >= 934 && x <= 980) {
                     PostQuitMessage(0);
                     return 0;
                 }
+                // Drag window on titlebar
+                if (x < 842) {
+                    ReleaseCapture();
+                    SendMessageW(hwnd, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+                    return 0;
+                }
             }
 
-            // Drag window on empty header space
-            if (y < 48 && x < g_state.width - 365) {
-                ReleaseCapture();
-                SendMessageW(hwnd, WM_NCLBUTTONDOWN, HTCAPTION, 0);
-                return 0;
-            }
-
-            // Sidebar Controls
-            if (x <= sidebar_w) {
-                // Collapse toggle
-                if (y >= 56 && y <= 80) {
-                    g_state.sidebar_collapsed = !g_state.sidebar_collapsed;
-                    SaveConfig();
-                    InvalidateRect(hwnd, NULL, FALSE);
+            // Zone 2: Configuration Strip
+            if (y >= 50 && y <= 146) {
+                // Auto-Detect (ID: 201)
+                if (y >= 56 && y <= 78 && x >= 318 && x <= 406) {
+                    ExecuteWorkerAction(L"discover", L"");
                     return 0;
                 }
-                // Nav items
-                if (y >= 90 && y <= 122) { g_state.current_view = NavView::Dashboard; InvalidateRect(hwnd, NULL, FALSE); return 0; }
-                if (y >= 130 && y <= 162) { g_state.current_view = NavView::Patcher; InvalidateRect(hwnd, NULL, FALSE); return 0; }
-                if (y >= 170 && y <= 202) { g_state.current_view = NavView::Android; InvalidateRect(hwnd, NULL, FALSE); return 0; }
-                if (y >= 210 && y <= 242) { g_state.current_view = NavView::Settings; InvalidateRect(hwnd, NULL, FALSE); return 0; }
-            }
-
-            // Patcher Action Toolbar Buttons
-            if (g_state.current_view == NavView::Patcher && y >= 62 && y <= 94) {
-                int cur_x = main_x;
-                const Strings& s = GetStrings(g_state.ui_lang);
-
-                // 1. Install
-                if (x >= cur_x && x <= cur_x + 120) {
-                    if (MessageBoxW(hwnd, s.confirm_install_msg, s.confirm_install_title, MB_YESNO | MB_ICONQUESTION) == IDYES) {
-                        ExecuteWorkerAction(L"install", g_state.game_dir);
-                    }
-                    return 0;
-                }
-                cur_x += 128;
-
-                // 2. Restore
-                if (x >= cur_x && x <= cur_x + 115) {
-                    if (MessageBoxW(hwnd, s.confirm_restore_msg, s.confirm_restore_title, MB_YESNO | MB_ICONQUESTION) == IDYES) {
-                        ExecuteWorkerAction(L"restore", g_state.game_dir);
-                    }
-                    return 0;
-                }
-                cur_x += 123;
-
-                // 3. Verify
-                if (x >= cur_x && x <= cur_x + 110) {
-                    ExecuteWorkerAction(L"status", g_state.game_dir);
-                    return 0;
-                }
-                cur_x += 118;
-
-                // 4. Browse Folder
-                if (x >= cur_x && x <= cur_x + 110) {
+                // Browse Folder (ID: 202)
+                if (y >= 86 && y <= 120 && x >= 318 && x <= 406) {
+                    const Strings& s = GetStrings(g_state.ui_lang);
                     BROWSEINFOW bi = { 0 };
                     bi.lpszTitle = s.btn_browse;
                     bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
@@ -1211,71 +1228,80 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                     }
                     return 0;
                 }
-                cur_x += 118;
-
-                // 5. Auto-Detect
-                if (x >= cur_x && x <= cur_x + 105) {
-                    ExecuteWorkerAction(L"discover", L"");
+                // Patch Mode: ID Hybrid (ID: 203)
+                if (y >= 89 && y <= 117 && x >= 437 && x <= 564) {
+                    g_state.patch_mode = PatchMode::ID_HYBRID;
+                    SaveConfig();
+                    InvalidateRect(hwnd, NULL, FALSE);
                     return 0;
                 }
-                cur_x += 113;
-
-                // 6. Clear
-                if (x >= cur_x && x <= cur_x + 90) {
-                    std::lock_guard<std::mutex> lock(g_state.mtx);
-                    g_state.log_lines.clear();
+                // Patch Mode: EN Full (ID: 204)
+                if (y >= 89 && y <= 117 && x >= 566 && x <= 693) {
+                    g_state.patch_mode = PatchMode::EN_FULL;
+                    SaveConfig();
+                    InvalidateRect(hwnd, NULL, FALSE);
+                    return 0;
+                }
+                // UI Language: Indonesia (ID: 205)
+                if (y >= 89 && y <= 117 && x >= 727 && x <= 834) {
+                    g_state.ui_lang = UiLang::ID;
+                    SaveConfig();
+                    InvalidateRect(hwnd, NULL, FALSE);
+                    return 0;
+                }
+                // UI Language: English (ID: 206)
+                if (y >= 89 && y <= 117 && x >= 836 && x <= 943) {
+                    g_state.ui_lang = UiLang::EN;
+                    SaveConfig();
                     InvalidateRect(hwnd, NULL, FALSE);
                     return 0;
                 }
             }
 
-            // Android USB Action Buttons
-            if (g_state.current_view == NavView::Android && y >= 150 && y <= 182) {
-                if (x >= main_x + 16 && x <= main_x + 156) {
+            // Zone 3: Unified Action Toolbar
+            if (y >= 166 && y <= 200) {
+                const Strings& s = GetStrings(g_state.ui_lang);
+
+                // 1. Install Patch (ID: 301)
+                if (x >= 30 && x <= 186) {
+                    if (MessageBoxW(hwnd, s.confirm_install_msg, s.confirm_install_title, MB_YESNO | MB_ICONQUESTION) == IDYES) {
+                        ExecuteWorkerAction(L"install", g_state.game_dir);
+                    }
+                    return 0;
+                }
+                // 2. Restore (ID: 302)
+                if (x >= 194 && x <= 326) {
+                    if (MessageBoxW(hwnd, s.confirm_restore_msg, s.confirm_restore_title, MB_YESNO | MB_ICONQUESTION) == IDYES) {
+                        ExecuteWorkerAction(L"restore", g_state.game_dir);
+                    }
+                    return 0;
+                }
+                // 3. Verify / Check (ID: 303)
+                if (x >= 334 && x <= 462) {
+                    ExecuteWorkerAction(L"status", g_state.game_dir);
+                    return 0;
+                }
+                // 4. Android Scan (ID: 304)
+                if (x >= 490 && x <= 616) {
                     ExecuteMobileWorkerAction(L"devices");
                     return 0;
                 }
-                if (x >= main_x + 166 && x <= main_x + 316) {
+                // 5. Android Patch (ID: 305)
+                if (x >= 624 && x <= 740) {
                     ExecuteMobileWorkerAction(L"patch");
                     return 0;
                 }
-                if (x >= main_x + 326 && x <= main_x + 476) {
+                // 6. Android Recover (ID: 306)
+                if (x >= 748 && x <= 868) {
                     ExecuteMobileWorkerAction(L"recover");
                     return 0;
                 }
-            }
-
-            // Settings interactive toggles
-            if (g_state.current_view == NavView::Settings) {
-                // UI Lang buttons (Y: 124..148)
-                if (y >= 124 && y <= 148) {
-                    if (x >= main_x + 16 && x <= main_x + 156) {
-                        g_state.ui_lang = UiLang::ID;
-                        SaveConfig();
-                        InvalidateRect(hwnd, NULL, FALSE);
-                        return 0;
-                    }
-                    if (x >= main_x + 166 && x <= main_x + 286) {
-                        g_state.ui_lang = UiLang::EN;
-                        SaveConfig();
-                        InvalidateRect(hwnd, NULL, FALSE);
-                        return 0;
-                    }
-                }
-                // Patch Mode buttons (Y: 234..260)
-                if (y >= 234 && y <= 260) {
-                    if (x >= main_x + 16 && x <= main_x + 196) {
-                        g_state.patch_mode = PatchMode::ID_HYBRID;
-                        SaveConfig();
-                        InvalidateRect(hwnd, NULL, FALSE);
-                        return 0;
-                    }
-                    if (x >= main_x + 206 && x <= main_x + 366) {
-                        g_state.patch_mode = PatchMode::EN_FULL;
-                        SaveConfig();
-                        InvalidateRect(hwnd, NULL, FALSE);
-                        return 0;
-                    }
+                // 7. Clear Log (ID: 307)
+                if (x >= 878 && x <= 950) {
+                    std::lock_guard<std::mutex> lock(g_state.mtx);
+                    g_state.log_lines.clear();
+                    InvalidateRect(hwnd, NULL, FALSE);
+                    return 0;
                 }
             }
 
@@ -1328,8 +1354,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     return DefWindowProcW(hwnd, msg, wParam, lParam);
 }
 
-// Offscreen PNG Smoke UI Exporter
-int RenderOffscreenPreview(const std::wstring& out_png_path, UiLang ui_lang, PatchMode mode, NavView view) {
+// Offscreen PNG Smoke UI Exporter (Single-Page)
+int RenderOffscreenPreview(const std::wstring& out_png_path, UiLang ui_lang, PatchMode mode) {
     using namespace Gdiplus;
     int w = 980, h = 620;
     Bitmap bmp(w, h, PixelFormat32bppARGB);
@@ -1338,11 +1364,11 @@ int RenderOffscreenPreview(const std::wstring& out_png_path, UiLang ui_lang, Pat
         AppState state;
         state.ui_lang = ui_lang;
         state.patch_mode = mode;
-        state.current_view = view;
         state.width = w;
         state.height = h;
-        state.sidebar_collapsed = false;
         state.game_dir = L"C:\\Program Files\\WXQLauncher\\WXQ";
+        state.status_text = (ui_lang == UiLang::EN) ? L"READY" : L"SIAP";
+        state.status_color = Theme::AccentGreen;
         state.log_lines = {
             L"[INFO] Menemukan instalasi Honor of Kings: Ace (Build 1.4.12)",
             L"[OK] Verifikasi integritas 508 tabel protoc berhasil.",
@@ -1372,10 +1398,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
         std::wstring arg = argv[i];
         if (arg == L"--smoke-ui" && i + 1 < argc) {
             std::wstring out_dir = argv[i + 1];
-            RenderOffscreenPreview(out_dir + L"\\celeslib_patcher_id.png", UiLang::ID, PatchMode::ID_HYBRID, NavView::Patcher);
-            RenderOffscreenPreview(out_dir + L"\\celeslib_patcher_en.png", UiLang::EN, PatchMode::EN_FULL, NavView::Patcher);
-            RenderOffscreenPreview(out_dir + L"\\celeslib_dashboard_id.png", UiLang::ID, PatchMode::ID_HYBRID, NavView::Dashboard);
-            RenderOffscreenPreview(out_dir + L"\\celeslib_settings_id.png", UiLang::ID, PatchMode::ID_HYBRID, NavView::Settings);
+            RenderOffscreenPreview(out_dir + L"\\celeslib_patcher_id.png", UiLang::ID, PatchMode::ID_HYBRID);
+            RenderOffscreenPreview(out_dir + L"\\celeslib_patcher_en.png", UiLang::EN, PatchMode::EN_FULL);
             Gdiplus::GdiplusShutdown(gdiplusToken);
             return 0;
         }
@@ -1440,7 +1464,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
         WS_EX_APPWINDOW,
         wc.lpszClassName,
         L"Celeslib Honor of Kings: Ace Patcher",
-        WS_OVERLAPPEDWINDOW,
+        WS_POPUP | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU,
         CW_USEDEFAULT, CW_USEDEFAULT, 980, 620,
         NULL, NULL, hInstance, NULL
     );

@@ -13,31 +13,39 @@ enum class PatchMode {
 };
 
 struct Strings {
+    // Header (Zone 1)
     const wchar_t* app_name;
-    const wchar_t* app_title;
     const wchar_t* version_badge;
-    const wchar_t* game_badge;
-    const wchar_t* sub_header;
+    const wchar_t* header_subtitle;
 
-    // Navigation
-    const wchar_t* nav_dashboard;
-    const wchar_t* nav_patcher;
-    const wchar_t* nav_android;
-    const wchar_t* nav_settings;
+    // 3-Column Configuration Strip (Zone 2)
+    const wchar_t* lbl_game_dir;
+    const wchar_t* btn_autodetect;
+    const wchar_t* btn_browse;
 
-    // Toolbar Actions
+    const wchar_t* lbl_patch_mode;
+    const wchar_t* seg_mode_id;
+    const wchar_t* seg_mode_en;
+    const wchar_t* desc_mode_id;
+    const wchar_t* desc_mode_en;
+
+    const wchar_t* lbl_ui_lang;
+    const wchar_t* seg_ui_id;
+    const wchar_t* seg_ui_en;
+    const wchar_t* desc_ui;
+
+    // Action Toolbar (Zone 3)
     const wchar_t* btn_install;
     const wchar_t* btn_restore;
     const wchar_t* btn_verify;
-    const wchar_t* btn_browse;
-    const wchar_t* btn_autodetect;
+    const wchar_t* btn_android_scan;
+    const wchar_t* btn_android_patch;
+    const wchar_t* btn_android_recover;
     const wchar_t* btn_clear;
 
-    // Header Quick Toggles
-    const wchar_t* toggle_ui_id;
-    const wchar_t* toggle_ui_en;
-    const wchar_t* toggle_mode_id;
-    const wchar_t* toggle_mode_en;
+    // Diagnostic Console (Zone 4)
+    const wchar_t* console_title;
+    const wchar_t* console_placeholder;
 
     // Status Badges
     const wchar_t* status_ready;
@@ -52,52 +60,41 @@ struct Strings {
     const wchar_t* confirm_restore_title;
     const wchar_t* confirm_restore_msg;
 
-    // Console Header & Hints
-    const wchar_t* console_game_path_label;
-    const wchar_t* console_placeholder;
-
-    // Settings
-    const wchar_t* settings_ui_lang_title;
-    const wchar_t* settings_ui_lang_desc;
-    const wchar_t* settings_patch_mode_title;
-    const wchar_t* settings_patch_mode_desc;
-    const wchar_t* settings_game_dir_title;
-    const wchar_t* settings_game_dir_desc;
-
-    // Android USB
-    const wchar_t* android_title;
-    const wchar_t* android_desc;
-    const wchar_t* android_btn_scan;
-    const wchar_t* android_btn_patch;
-    const wchar_t* android_btn_recover;
-
-    // Copyright / footer
-    const wchar_t* copyright_label;
+    // Bottom Bar (Zone 5)
+    const wchar_t* bottom_engine_info;
+    const wchar_t* bottom_copyright;
 };
 
 static const Strings STRINGS_ID = {
     L"Celeslib",
-    L"Celeslib Honor of Kings: Ace Patcher",
     L"v1.0.0",
-    L"Game Build 1.4.12",
-    L"Eksekutor Patch & Lokalisasi Honor of Kings: Ace",
+    L"Honor of Kings: Ace Patcher • Game Build 1.4.12",
 
-    L"Dashboard",
-    L"Patcher",
-    L"Android (USB)",
-    L"Pengaturan",
+    L"DIREKTORI GAME (HOK: ACE)",
+    L"Auto-Detect",
+    L"Pilih Folder",
+
+    L"MODE BAHASA PATCH",
+    L"ID Hybrid",
+    L"EN Full",
+    L"UI Indonesia + Istilah MOBA English",
+    L"100% Lokalisasi Bahasa Inggris",
+
+    L"BAHASA UI",
+    L"Indonesia",
+    L"English",
+    L"Engine: 508 Tabel • 72.186 Entri",
 
     L"Pasang Patch",
-    L"Pulihkan File",
-    L"Periksa File",
-    L"Pilih Folder",
-    L"Auto-Detect",
-    L"Bersihkan",
+    L"Pulihkan",
+    L"Periksa",
+    L"Pindai USB",
+    L"Patch APK",
+    L"Pulihkan APK",
+    L"Clear",
 
-    L"UI: ID",
-    L"UI: EN",
-    L"Mode: ID Hybrid",
-    L"Mode: EN Full",
+    L"output.log — Celeslib Dual-State VFS Engine",
+    L"Sistem siap. Klik 'Pasang Patch' atau 'Periksa' untuk memulai verifikasi VFS.",
 
     L"SIAP",
     L"MEMPROSES",
@@ -108,50 +105,42 @@ static const Strings STRINGS_ID = {
     L"Konfirmasi Pemasangan",
     L"Pasang patch Honor of Kings: Ace ke direktori game terpilih?",
     L"Konfirmasi Pemulihan",
-    L"Pulihkan seluruh file asli game dari cadangan?",
+    L"Pulihkan seluruh berkas asli game dari cadangan?",
 
-    L"Jalur Game:",
-    L"Belum ada aktivitas. Klik 'Pasang Patch' atau 'Periksa File' untuk memulai.",
-
-    L"Bahasa Antarmuka (UI Language)",
-    L"Pilih bahasa tampilan untuk menu dan antarmuka aplikasi patcher.",
-    L"Mode Bahasa Patch Game (Game Patch Mode)",
-    L"Pilih mode terjemahan: ID Hybrid (Bahasa Indonesia) atau EN Full (Bahasa Inggris 100%).",
-    L"Direktori Game Honor of Kings: Ace",
-    L"Jalur folder yang berisi berkas WXQ.exe dan WXQ_Data/Package/builtin.",
-
-    L"Patcher Honor of Kings: Ace Android (USB)",
-    L"Hubungkan perangkat Android dengan mode USB Debugging aktif untuk memasang patch.",
-    L"Pindai Perangkat",
-    L"Pasang ke Android",
-    L"Pulihkan Android",
-
-    L"© 2026 Celeslib • https://celeslib.my.id"
+    L"Offline Dual-State VFS Engine • 508 Protobuf Tables • SHA-256 Verified",
+    L"© 2026 Celeslib • HoK: Ace 1.4.12 • v1.0.0"
 };
 
 static const Strings STRINGS_EN = {
     L"Celeslib",
-    L"Celeslib Honor of Kings: Ace Patcher",
     L"v1.0.0",
-    L"Game Build 1.4.12",
-    L"Honor of Kings: Ace Localization & Patch Executor",
+    L"Honor of Kings: Ace Patcher • Game Build 1.4.12",
 
-    L"Dashboard",
-    L"Patcher",
-    L"Android (USB)",
-    L"Settings",
+    L"GAME DIRECTORY (HOK: ACE)",
+    L"Auto-Detect",
+    L"Browse Folder",
+
+    L"GAME PATCH MODE",
+    L"ID Hybrid",
+    L"EN Full",
+    L"Indonesian UI + MOBA English Terms",
+    L"100% Full English Localization",
+
+    L"UI LANGUAGE",
+    L"Indonesia",
+    L"English",
+    L"Engine: 508 Tables • 72,186 Entries",
 
     L"Install Patch",
-    L"Restore Files",
-    L"Check Files",
-    L"Browse Folder",
-    L"Auto-Detect",
-    L"Clear Log",
+    L"Restore",
+    L"Check",
+    L"Scan USB",
+    L"Patch APK",
+    L"Recover APK",
+    L"Clear",
 
-    L"UI: ID",
-    L"UI: EN",
-    L"Mode: ID Hybrid",
-    L"Mode: EN Full",
+    L"output.log — Celeslib Dual-State VFS Engine",
+    L"System ready. Click 'Install Patch' or 'Check' to begin VFS verification.",
 
     L"READY",
     L"WORKING",
@@ -164,23 +153,8 @@ static const Strings STRINGS_EN = {
     L"Confirm Restore",
     L"Restore original untouched game files from backup?",
 
-    L"Game Path:",
-    L"No recent activity. Click 'Install Patch' or 'Check Files' to begin.",
-
-    L"User Interface Language",
-    L"Select the display language for the patcher menus and application interface.",
-    L"Game Patch Language Mode",
-    L"Select patch translation mode: ID Hybrid (Indonesian gameplay) or EN Full (100% English).",
-    L"Honor of Kings: Ace Game Directory",
-    L"Path containing WXQ.exe and WXQ_Data/Package/builtin.",
-
-    L"Honor of Kings: Ace Android Patcher (USB)",
-    L"Connect an Android device with USB Debugging enabled to apply the patch.",
-    L"Scan Device",
-    L"Patch Android",
-    L"Recover Android",
-
-    L"© 2026 Celeslib • https://celeslib.my.id"
+    L"Offline Dual-State VFS Engine • 508 Protobuf Tables • SHA-256 Verified",
+    L"© 2026 Celeslib • HoK: Ace 1.4.12 • v1.0.0"
 };
 
 inline const Strings& GetStrings(UiLang lang) {

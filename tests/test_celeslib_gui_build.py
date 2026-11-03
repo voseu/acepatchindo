@@ -53,11 +53,17 @@ def test_preview_pngs_integrity_and_no_missing_glyphs() -> None:
     legacy_xeno = list(ASSETS_PREVIEWS.glob("xeno_*.png"))
     assert not legacy_xeno, f"Found legacy xeno preview files: {legacy_xeno}"
 
+    # Assert obsolete multi-page preview files no longer exist
+    obsolete_previews = [
+        ASSETS_PREVIEWS / "celeslib_dashboard_id.png",
+        ASSETS_PREVIEWS / "celeslib_settings_id.png",
+    ]
+    for obs in obsolete_previews:
+        assert not obs.exists(), f"Obsolete multi-page preview should not exist: {obs}"
+
     expected_previews = [
         ASSETS_PREVIEWS / "celeslib_patcher_id.png",
         ASSETS_PREVIEWS / "celeslib_patcher_en.png",
-        ASSETS_PREVIEWS / "celeslib_dashboard_id.png",
-        ASSETS_PREVIEWS / "celeslib_settings_id.png",
     ]
     for preview_path in expected_previews:
         assert preview_path.exists(), f"Missing expected preview PNG: {preview_path}"
@@ -65,3 +71,18 @@ def test_preview_pngs_integrity_and_no_missing_glyphs() -> None:
             assert im.format == "PNG"
             assert im.size == (980, 620)
             assert im.mode in ("RGB", "RGBA")
+
+            # Check single-page obsidian palette and elements
+            rgb_im = im.convert("RGB")
+            # 1. Background obsidian canvas (#090909)
+            bg_pixel = rgb_im.getpixel((5, 5))
+            assert bg_pixel == (9, 9, 9), f"Expected #090909 canvas, got {bg_pixel}"
+
+            # 2. Primary CTA white fill (#FFFFFF) inside [30, 166, 186, 200]
+            cta_pixel = rgb_im.getpixel((36, 180))
+            assert cta_pixel == (255, 255, 255), f"Expected #FFFFFF CTA fill, got {cta_pixel}"
+
+            # 3. Status emerald green dot (#22C55E = rgb(34, 197, 94))
+            dot_pixel = rgb_im.getpixel((24, 604))
+            assert dot_pixel == (34, 197, 94), f"Expected #22C55E status dot, got {dot_pixel}"
+

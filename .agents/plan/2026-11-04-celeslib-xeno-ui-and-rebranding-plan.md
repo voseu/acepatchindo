@@ -759,4 +759,134 @@ Run:
   - Run `graft build` and verify `graft grep "xeno"` and `graft grep "Xeno"` return **0 hits** across all indexed source/script/test files!
   - Commit, push, and run `scripts/06_publish_github_release.py`.
 
+---
+
+## Phase 4: Single-Page Monochrome Obsidian UI Redesign (Tasks 9–10)
+
+> **User Feedback & Reference Binary Inspection (`/home/whise/Downloads/xeno/Xeno-v1.3.65.exe`):**
+> Inspecting the unpacked reference binary (`main.8f5e9cb7.css` & `main.cd475328.js`) revealed why its UI looks far cleaner and sharper than the current 4-tab layout:
+> 1. **Single-Page Architecture (Zero Sidebar):**
+>    - A patcher utility does NOT need 4 separate sidebar tabs (`Dashboard`, `Patcher`, `Android (USB)`, `Settings`) that hide controls and leave 70% empty space on `Dashboard` and `Settings`.
+>    - Consolidating everything into a **Single-Page Layout (`980 × 620`, zero left sidebar)** lets the user view and operate Game Directory (`Browse` / `Auto-Detect`), Patch Mode (`ID Hybrid` / `EN Full`), UI Language (`ID` / `EN`), PC Patch Actions (`Install`, `Restore`, `Check`), Android USB Actions (`Scan`, `Patch`, `Recover`), the Line-Numbered Diagnostic Console + Minimap, and the Bottom Status Bar on one unified screen.
+> 2. **Authentic Monochrome Obsidian Palette (No Neon Purple Blocks):**
+>    - **Main Canvas / Titlebar / Status Bar:** `#090909` (`rgb(9, 9, 9)`)
+>    - **Connected Cards / Toolbar Surface:** `#0D0D0D` to `#111111` (`rgb(13, 13, 13)` / `rgb(17, 17, 17)`) with crisp `1px solid #333333` borders (`#FFFFFF` or `#555555` on hover).
+>    - **Primary Action Button & Active Segmented Toggle (`.card-button` / `.filter-segment-button.active`):** High-contrast **Pure White Fill (`#FFFFFF`) with Bold Pure Black Text (`#000000`)**, `6px` border radius.
+>    - **Secondary Action Buttons (`.toolbar-button`):** `#090909` background, `1px solid #333333` border, `#FFFFFF` text, hovering to `#181818` with `#555555` border (and Restore/Destructive buttons hovering with `#EF4444` border & text).
+>    - **Connected 3-Column Strip (`.connected-section`):** A unified `#0D0D0D` rounded box (`border: 1px solid #333333; border-radius: 10px`) divided into 3 equal columns by subtle vertical gradient dividers.
+>    - **Crisp Vector Stroke Icons:** Every card header and action button includes a clean `14×14` or `16×16` vector stroke icon (`2px` stroke width: Folder, Search, Layers, Globe, Play triangle, Rotate-CCW arrow, Checkmark, Smartphone, Trash can) drawn via GDI+ (`celeslib_gui.cpp`) and Pillow (`scripts/08_compile_celeslib_gui.py`).
+> 3. **Zero "Xeno" Naming:**
+>    - Keep **zero** `"xeno"` / `"Xeno"` strings anywhere in code, binaries, filenames, or GitHub Release. Because the UI is now Single-Page, delete the obsolete multi-page preview files `assets/previews/celeslib_dashboard_id.png` and `assets/previews/celeslib_settings_id.png`, leaving only `assets/previews/celeslib_patcher_id.png` and `assets/previews/celeslib_patcher_en.png`.
+
+### Task 9: Redesign `src/gui/celeslib_gui.cpp`, `src/gui/celeslib_i18n.h`, and `scripts/08_compile_celeslib_gui.py` into a Single-Page Monochrome Obsidian UI
+
+**Files:**
+- Modify: `src/gui/celeslib_i18n.h`
+- Modify: `src/gui/celeslib_gui.cpp`
+- Modify: `scripts/08_compile_celeslib_gui.py`
+- Modify: `tests/test_celeslib_gui_build.py`
+- Delete (`git rm -f`): `assets/previews/celeslib_dashboard_id.png`, `assets/previews/celeslib_settings_id.png`
+- Regenerate: `assets/previews/celeslib_patcher_id.png`, `assets/previews/celeslib_patcher_en.png`
+
+- [x] **Step 1: Update `src/gui/celeslib_gui.cpp` and `src/gui/celeslib_i18n.h` to implement the 5-Zone Single-Page Monochrome Obsidian Layout (`980 × 620`)**
+  - Remove `NavView` tab switching and the left sidebar completely. Every control lives on the single canvas (`980 × 620`):
+    1. **Zone 1 — Custom Frameless Titlebar (`Y: 0..38`, `X: 0..980`, `#090909`, `1px` bottom border `#333333`):**
+       - Left (`X: 18`): Celeslib `18×18` geometric 4-point star emblem (`#FFFFFF` stroke) + `"Celeslib"` bold title (`#FFFFFF`, `11pt`) + `"v1.0.0"` pill badge (`#141414` fill, `#333333` border, `#CCCCCC` text) + `"Honor of Kings: Ace Patcher • Game Build 1.4.12"` subtitle (`#888888`, `9pt`).
+       - Right (`X: 842..980`): Window control buttons `[—]` (`X: 842..888`), `[□]` (`X: 888..934`), `[×]` (`X: 934..980`, `#4A0000` fill on hover).
+    2. **Zone 2 — Connected 3-Column Configuration Strip (`Y: 50..146`, `X: 20..960`, `#0D0D0D` fill, `1px` `#333333` border, `10px` radius):**
+       - Vertical dividers at `X = 420` and `X = 710` (`Y: 62..134`, `#262626` with `#3A3A3A` center).
+       - **Column 1 — Game Directory (`X: 20..420`):**
+         - Header (`Y: 60`): Vector `Folder` icon + `L.lbl_game_dir` (`"DIREKTORI GAME (HOK: ACE)"` / `"GAME DIRECTORY (HOK: ACE)"`, `#888888`, `8.5pt` bold) + right-aligned `[Auto-Detect]` mini button (`X: 318..406, Y: 56..78`, `#090909` fill, `#333333` border).
+         - Path Input Box + Browse Button (`Y: 86..120`): Path box (`X: 34..312, Y: 86..120`, `#050505` fill, `#262626` border, `Consolas 9pt` `#E5E5E5` text) + `[Pilih Folder / Browse]` button (`X: 318..406, Y: 86..120`, `#141414` fill, `#333333` border, `#FFFFFF` text).
+       - **Column 2 — Game Patch Mode (`X: 420..710`):**
+         - Header (`Y: 60`): Vector `Layers` icon + `L.lbl_patch_mode` (`"MODE BAHASA PATCH"` / `"GAME PATCH MODE"`, `#888888`, `8.5pt` bold).
+         - Segmented Control Pill (`X: 434..696, Y: 86..120`, `#050505` outer track with `#333333` border, `6px` radius):
+           - `[ID Hybrid]` (`X: 437..564, Y: 89..117`): When active (`patch_mode == MODE_ID_HYBRID`), fill `#FFFFFF` with bold `#000000` text; when inactive, transparent fill with `#888888` text.
+           - `[EN Full]` (`X: 566..693, Y: 89..117`): When active (`patch_mode == MODE_EN_FULL`), fill `#FFFFFF` with bold `#000000` text; when inactive, transparent fill with `#888888` text.
+         - Subtitle (`Y: 124`): `"UI Indonesia + Istilah MOBA English"` (or `"100% Full English Localization"`, `#777777`, `8pt`).
+       - **Column 3 — Interface Language (`X: 710..960`):**
+         - Header (`Y: 60`): Vector `Globe` icon + `L.lbl_ui_lang` (`"BAHASA UI"` / `"UI LANGUAGE"`, `#888888`, `8.5pt` bold).
+         - Segmented Control Pill (`X: 724..946, Y: 86..120`, `#050505` outer track with `#333333` border, `6px` radius):
+           - `[Indonesia]` (`X: 727..834, Y: 89..117`): Active = `#FFFFFF` fill + `#000000` bold text; Inactive = `#888888` text.
+           - `[English]` (`X: 836..943, Y: 89..117`): Active = `#FFFFFF` fill + `#000000` bold text; Inactive = `#888888` text.
+         - Subtitle (`Y: 124`): `"Engine: 508 Tabel • 72.186 Entri"` / `"Engine: 508 Tables • 72,186 Entries"` (`#777777`, `8pt`).
+    3. **Zone 3 — Unified Action Toolbar (`Y: 158..208`, `X: 20..960`, `#0D0D0D` fill, `1px` `#333333` border, `8px` radius):**
+       - **PC Actions (Left):**
+         - **Primary CTA `[▶ Pasang Patch / Install Patch]` (`X: 30..186, Y: 166..200`):** `#FFFFFF` pure white fill (`#E5E5E5` on hover), `#000000` bold text + vector Play triangle icon.
+         - **`[↺ Pulihkan / Restore]` (`X: 194..326, Y: 166..200`):** `#090909` fill, `1px` `#333333` border (`#EF4444` red border & text on hover) + vector Rotate-CCW icon.
+         - **`[✓ Periksa / Check]` (`X: 334..462, Y: 166..200`):** `#090909` fill, `1px` `#333333` border (`#555555` on hover) + vector Checkmark icon.
+       - **Vertical Divider at `X = 476` (`Y: 168..198`, `#262626`)**
+       - **Android USB Actions (Center-Right, on the same page):**
+         - **`[📱 Pindai USB / Scan USB]` (`X: 490..616, Y: 166..200`):** `#090909` fill, `#333333` border + vector Smartphone icon -> invokes `RunAndroidOperation(L"devices")`.
+         - **`[⚡ Patch APK]` (`X: 624..740, Y: 166..200`):** `#090909` fill, `#333333` border + vector Bolt/Play icon -> invokes `RunAndroidOperation(L"patch")`.
+         - **`[↺ Pulihkan APK / Recover]` (`X: 748..868, Y: 166..200`):** `#090909` fill, `#333333` border (`#EF4444` hover) -> invokes `RunAndroidOperation(L"recover")`.
+       - **Console Clear Button (Right):**
+         - **`[🗑 Clear]` (`X: 878..950, Y: 166..200`):** `#090909` fill, `#333333` border + vector Trash icon -> clears console log lines.
+    4. **Zone 4 — Monaco/Executor-Style Diagnostic Console (`Y: 220..576`, `X: 20..960`, `#050505` fill, `1px` `#333333` border, `8px` radius):**
+       - **Console Top Header Bar (`Y: 220..252`, `#0D0D0D` fill, `1px` bottom border `#262626`):**
+         - Left (`X: 34`): Vector Terminal `>_` icon + `"output.log — Celeslib Dual-State VFS Engine"` (`Consolas 9pt`, `#CCCCCC`).
+         - Right (`X: 780..948`): Status Pill (`#111111` fill, `#333333` border, `8×8` glowing status dot `#22C55E` / `#EF4444` / `#EAB308` + status label `SIAP / READY`, `TERPASANG / INSTALLED`, etc.).
+       - **Line-Number Gutter (`X: 21..64, Y: 253..575`, `#090909` fill, `1px` right border `#1E1E1E`):** Right-aligned line numbers `1..14` in `Consolas 9pt` (`#555555`).
+       - **Log Viewport (`X: 74..904, Y: 258..570`):** `Consolas 9.5pt` log lines:
+         - `[OK]` / `[READY]` lines in `#22C55E` (emerald green)
+         - `[ERROR]` lines in `#EF4444` (crimson red)
+         - `[PATCH]` / `[CHECK]` / `[ANDROID]` lines in `#FFFFFF` (bright white)
+         - `[INFO]` / `[ENGINE]` lines in `#B0B0B0` (clean light gray)
+       - **Right Minimap Rail (`X: 908..959, Y: 253..575`, `#090909` fill, `1px` left border `#1E1E1E`):** Minimap viewport slider block (`#1A1A1A` fill, `#333333` border) + color-coded micro-bars matching the log lines.
+    5. **Zone 5 — Bottom Status Bar (`Y: 588..620`, `X: 0..980`, `#090909` fill, `1px` top border `#333333`):**
+       - Left (`X: 20`): `8×8` glowing green dot (`#22C55E`) + `"Offline Dual-State VFS Engine • 508 Protobuf Tables • SHA-256 Verified"` (`#CCCCCC`, `8.5pt`).
+       - Right (`X: 680..960`, right-aligned): `"© 2026 Celeslib • HoK: Ace 1.4.12 • v1.0.0"` (`#888888`, `8.5pt`).
+
+- [x] **Step 2: Update `scripts/08_compile_celeslib_gui.py` and `tests/test_celeslib_gui_build.py` to match the Single-Page Monochrome Obsidian UI and remove obsolete multi-tab previews**
+  - Delete `assets/previews/celeslib_dashboard_id.png` and `assets/previews/celeslib_settings_id.png` via `git rm -f`.
+  - Update `render_celeslib_preview(lang, out_path)` in `scripts/08_compile_celeslib_gui.py` so it renders the exact same 5-Zone Single-Page Monochrome Obsidian layout (`980 × 620`) with crisp Pillow vector icons (Folder, Layers, Globe, Play, Rotate-CCW, Check, Smartphone, Bolt, Trash), producing `assets/previews/celeslib_patcher_id.png` and `assets/previews/celeslib_patcher_en.png`.
+  - Update `--smoke-ui` in `src/gui/celeslib_gui.cpp` so it only generates `celeslib_patcher_id.png` and `celeslib_patcher_en.png`.
+  - Update `tests/test_celeslib_gui_build.py` to verify the single-page preview images (`980 × 620`, `#090909` obsidian background, `#FFFFFF` primary CTA button pixels, `#22C55E` emerald status dot) and assert that `celeslib_dashboard_id.png` and `celeslib_settings_id.png` no longer exist.
+
+### Task 10: Repack Executables, Update `README.md` & `scripts/06_publish_github_release.py`, Clean Old Multi-Tab Previews from GitHub Release `v1.0.0-celeslib`, and Publish
+
+**Files:**
+- Modify: `scripts/05_repack_windows_exe.py`
+- Modify: `scripts/06_publish_github_release.py`
+- Modify: `tests/test_repack_integrity.py`
+- Modify: `README.md`
+- Modify: `.agents/plan/2026-11-04-celeslib-xeno-ui-and-rebranding-plan.md`
+
+- [x] **Step 1: Compile `build/celeslib_gui_stub.exe`, repack `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe`, and run `pytest -v`**
+
+Run:
+```bash
+/home/whise/.local/bin/uv run --python 3.12 python scripts/08_compile_celeslib_gui.py
+/home/whise/.local/bin/uv run --python 3.12 python scripts/05_repack_windows_exe.py
+/home/whise/.local/bin/uv run --python 3.12 pytest -v
+```
+
+- [x] **Step 2: Update `README.md` and `scripts/06_publish_github_release.py` for the Single-Page UI (5 Release Assets total)**
+  - In `README.md`:
+    - Show the Single-Page preview images (`assets/previews/celeslib_patcher_id.png` and `assets/previews/celeslib_patcher_en.png`) and remove links to `celeslib_dashboard_id.png` / `celeslib_settings_id.png`.
+    - Update the SHA-256 hashes and byte sizes to match the newly repacked `dist/SHA256SUMS.txt`.
+  - In `scripts/06_publish_github_release.py`:
+    - Update `RELEASE_ASSETS` so it uploads the **5 official files**:
+      1. `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe`
+      2. `dist/Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe`
+      3. `dist/SHA256SUMS.txt`
+      4. `assets/previews/celeslib_patcher_id.png`
+      5. `assets/previews/celeslib_patcher_en.png`
+    - Add `"celeslib_dashboard_id.png"` and `"celeslib_settings_id.png"` to `LEGACY_ASSET_NAMES` so `scripts/06_publish_github_release.py` automatically deletes those 2 old multi-page preview files from GitHub Release `v1.0.0-celeslib`!
+    - Update `RELEASE_NOTES` to showcase only `celeslib_patcher_id.png` and `celeslib_patcher_en.png` and the updated SHA-256 checksums.
+
+- [x] **Step 3: Refresh Graft, commit, push, and publish to GitHub Release `v1.0.0-celeslib`**
+
+Run:
+```bash
+graft build
+git add -A
+git commit -m "feat(gui): redesign into single-page monochrome obsidian UI with unified PC & Android controls"
+git push origin main
+git tag -f v1.0.0-celeslib
+git push origin v1.0.0-celeslib --force
+/home/whise/.local/bin/uv run --python 3.12 python scripts/06_publish_github_release.py
+```
+
+
 
