@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compile the Celeslib Xeno v1.3.0 Win32 GUI stub and render visual previews."""
+"""Compile the Celeslib native Win32 GUI stub and render visual previews."""
 
 from __future__ import annotations
 
@@ -13,17 +13,17 @@ BUILD_DIR = ROOT / "build"
 SRC_GUI = ROOT / "src" / "gui"
 ASSETS_PREVIEWS = ROOT / "assets" / "previews"
 BRAND_DIR = ROOT / "assets" / "branding"
-OUT_STUB = BUILD_DIR / "celeslib_xeno_stub.exe"
+OUT_STUB = BUILD_DIR / "celeslib_gui_stub.exe"
 
 
-def compile_xeno_gui() -> None:
+def compile_celeslib_gui() -> None:
     BUILD_DIR.mkdir(parents=True, exist_ok=True)
-    res_obj = BUILD_DIR / "celeslib_xeno_res.o"
+    res_obj = BUILD_DIR / "celeslib_gui_res.o"
 
     # 1. Compile Windows resource script (.rc -> .o)
     windres_cmd = [
         "x86_64-w64-mingw32-windres",
-        "-i", str(SRC_GUI / "celeslib_xeno.rc"),
+        "-i", str(SRC_GUI / "celeslib_gui.rc"),
         "-o", str(res_obj),
         "-O", "coff",
     ]
@@ -37,7 +37,7 @@ def compile_xeno_gui() -> None:
         "-std=c++17",
         "-municode",
         "-mwindows",
-        str(SRC_GUI / "celeslib_xeno_gui.cpp"),
+        str(SRC_GUI / "celeslib_gui.cpp"),
         str(res_obj),
         "-o", str(OUT_STUB),
         "-lgdiplus",
@@ -59,10 +59,10 @@ def compile_xeno_gui() -> None:
     ]
     print("Running:", " ".join(gxx_cmd))
     subprocess.run(gxx_cmd, check=True)
-    print(f"Successfully compiled native Xeno GUI stub: {OUT_STUB} ({OUT_STUB.stat().st_size:,} bytes)")
+    print(f"Successfully compiled native Celeslib GUI stub: {OUT_STUB} ({OUT_STUB.stat().st_size:,} bytes)")
 
 
-def render_xeno_preview(out_png: Path, lang: str = "id", mode: str = "id", view: str = "patcher") -> None:
+def render_celeslib_preview(out_png: Path, lang: str = "id", mode: str = "id", view: str = "patcher") -> None:
     ASSETS_PREVIEWS.mkdir(parents=True, exist_ok=True)
     w, h = 980, 620
     im = Image.new("RGBA", (w, h), (9, 9, 11, 255))
@@ -269,15 +269,15 @@ def render_xeno_preview(out_png: Path, lang: str = "id", mode: str = "id", view:
         draw.text((main_x + 16, card_y + 54), "C:\\Program Files\\WXQLauncher\\WXQ", fill=(167, 139, 250, 255), font=f_mono)
 
     im.save(out_png)
-    print(f"Rendered Xeno UI preview: {out_png}")
+    print(f"Rendered Celeslib UI preview: {out_png}")
 
 
 def main() -> None:
-    compile_xeno_gui()
-    render_xeno_preview(ASSETS_PREVIEWS / "xeno_patcher_id.png", lang="id", mode="id", view="patcher")
-    render_xeno_preview(ASSETS_PREVIEWS / "xeno_patcher_en.png", lang="en", mode="en", view="patcher")
-    render_xeno_preview(ASSETS_PREVIEWS / "xeno_dashboard_id.png", lang="id", mode="id", view="dashboard")
-    render_xeno_preview(ASSETS_PREVIEWS / "xeno_settings_id.png", lang="id", mode="id", view="settings")
+    compile_celeslib_gui()
+    render_celeslib_preview(ASSETS_PREVIEWS / "celeslib_patcher_id.png", lang="id", mode="id", view="patcher")
+    render_celeslib_preview(ASSETS_PREVIEWS / "celeslib_patcher_en.png", lang="en", mode="en", view="patcher")
+    render_celeslib_preview(ASSETS_PREVIEWS / "celeslib_dashboard_id.png", lang="id", mode="id", view="dashboard")
+    render_celeslib_preview(ASSETS_PREVIEWS / "celeslib_settings_id.png", lang="id", mode="id", view="settings")
 
 
 if __name__ == "__main__":

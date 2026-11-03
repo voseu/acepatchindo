@@ -29,7 +29,7 @@ DIST_DIR = ROOT / "dist"
 CELESLIB_EXE = DIST_DIR / "Celeslib-HoK-Ace-Patcher-v1.0.0.exe"
 COMPAT_EXE = DIST_DIR / "Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe"
 OUT_EXE = CELESLIB_EXE
-STUB_EXE = ROOT / "build" / "celeslib_xeno_stub.exe"
+STUB_EXE = ROOT / "build" / "celeslib_gui_stub.exe"
 SHA256SUMS_PATH = DIST_DIR / "SHA256SUMS.txt"
 
 SHA256_OFFSET = 0x4CABFA
@@ -210,7 +210,7 @@ def build_release_exe() -> dict[str, str | int]:
     DIST_DIR.mkdir(parents=True, exist_ok=True)
     if not STUB_EXE.exists():
         subprocess.run(
-            [sys.executable, str(ROOT / "scripts" / "08_compile_xeno_gui.py")],
+            [sys.executable, str(ROOT / "scripts" / "08_compile_celeslib_gui.py")],
             check=True,
         )
 
@@ -232,7 +232,7 @@ def build_release_exe() -> dict[str, str | int]:
 
     worker_sha256 = hashlib.sha256(repacked_worker).hexdigest().upper().encode("ascii")
 
-    # Assemble Celeslib Xeno Release Executable
+    # Assemble Celeslib Release Executable
     stub_raw = STUB_EXE.read_bytes()
     pad_stub = (16 - (len(stub_raw) % 16)) % 16
     stub_aligned = stub_raw + (b"\x00" * pad_stub)

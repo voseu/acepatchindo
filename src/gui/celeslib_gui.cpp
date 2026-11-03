@@ -27,7 +27,7 @@
 #include <vector>
 
 #include "celeslib_logo_rgba.h"
-#include "celeslib_xeno_i18n.h"
+#include "celeslib_i18n.h"
 
 #pragma comment(lib, "gdiplus.lib")
 #pragma comment(lib, "dwmapi.lib")
@@ -37,7 +37,7 @@
 #pragma comment(lib, "ole32.lib")
 #pragma comment(lib, "crypt32.lib")
 
-// Color Palette - Xeno v1.3.0 Ultra-Dark Carbon
+// Color Palette - Celeslib Ultra-Dark Carbon
 namespace Theme {
     static const Gdiplus::Color BgCanvas(0xFF, 0x09, 0x09, 0x0B);       // #09090B
     static const Gdiplus::Color BgHeader(0xFF, 0x0B, 0x0B, 0x0E);       // #0B0B0E
@@ -740,8 +740,8 @@ void RenderConsolePanel(Gdiplus::Graphics& g, int x, int y, int w, int h, const 
     }
 }
 
-// Master GDI+ Xeno Frame Renderer
-void RenderXenoFrame(Gdiplus::Graphics& g, int width, int height, const AppState& state) {
+// Master GDI+ Celeslib Frame Renderer
+void RenderCeleslibFrame(Gdiplus::Graphics& g, int width, int height, const AppState& state) {
     using namespace Gdiplus;
     g.SetSmoothingMode(SmoothingModeAntiAlias);
     g.SetTextRenderingHint(TextRenderingHintClearTypeGridFit);
@@ -1029,6 +1029,13 @@ void RenderXenoFrame(Gdiplus::Graphics& g, int width, int height, const AppState
 // Window Procedure
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
+        case WM_NCCALCSIZE: {
+            if (wParam == TRUE) {
+                return 0; // True Frameless Window: client area covers whole window
+            }
+            break;
+        }
+
         case WM_CREATE: {
             // Enable Dark Titlebar Mode via DWM
             BOOL darkMode = TRUE;
@@ -1298,7 +1305,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
             {
                 Gdiplus::Graphics g(memDC);
-                RenderXenoFrame(g, w, h, g_state);
+                RenderCeleslibFrame(g, w, h, g_state);
             }
 
             BitBlt(hdc, 0, 0, w, h, memDC, 0, 0, SRCCOPY);
@@ -1342,7 +1349,7 @@ int RenderOffscreenPreview(const std::wstring& out_png_path, UiLang ui_lang, Pat
             L"[OK] Celeslib Dual-State Engine siap beroperasi.",
             L"[OK] Siap memasang patch Bahasa Indonesia."
         };
-        RenderXenoFrame(g, w, h, state);
+        RenderCeleslibFrame(g, w, h, state);
     }
 
     // CLSID for PNG encoder: {557CF406-1A04-11D3-9A73-0000F81EF32E}
@@ -1365,10 +1372,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
         std::wstring arg = argv[i];
         if (arg == L"--smoke-ui" && i + 1 < argc) {
             std::wstring out_dir = argv[i + 1];
-            RenderOffscreenPreview(out_dir + L"\\xeno_patcher_id.png", UiLang::ID, PatchMode::ID_HYBRID, NavView::Patcher);
-            RenderOffscreenPreview(out_dir + L"\\xeno_patcher_en.png", UiLang::EN, PatchMode::EN_FULL, NavView::Patcher);
-            RenderOffscreenPreview(out_dir + L"\\xeno_dashboard_id.png", UiLang::ID, PatchMode::ID_HYBRID, NavView::Dashboard);
-            RenderOffscreenPreview(out_dir + L"\\xeno_settings_id.png", UiLang::ID, PatchMode::ID_HYBRID, NavView::Settings);
+            RenderOffscreenPreview(out_dir + L"\\celeslib_patcher_id.png", UiLang::ID, PatchMode::ID_HYBRID, NavView::Patcher);
+            RenderOffscreenPreview(out_dir + L"\\celeslib_patcher_en.png", UiLang::EN, PatchMode::EN_FULL, NavView::Patcher);
+            RenderOffscreenPreview(out_dir + L"\\celeslib_dashboard_id.png", UiLang::ID, PatchMode::ID_HYBRID, NavView::Dashboard);
+            RenderOffscreenPreview(out_dir + L"\\celeslib_settings_id.png", UiLang::ID, PatchMode::ID_HYBRID, NavView::Settings);
             Gdiplus::GdiplusShutdown(gdiplusToken);
             return 0;
         }
@@ -1424,7 +1431,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
     WNDCLASSEXW wc = { sizeof(wc) };
     wc.lpfnWndProc = WndProc;
     wc.hInstance = hInstance;
-    wc.lpszClassName = L"CeleslibXenoUI";
+    wc.lpszClassName = L"CeleslibPatcherUI";
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hIcon = LoadIconW(hInstance, MAKEINTRESOURCEW(1));
     RegisterClassExW(&wc);

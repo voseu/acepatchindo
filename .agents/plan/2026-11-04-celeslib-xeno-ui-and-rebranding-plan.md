@@ -699,3 +699,64 @@ git push origin v1.0.0-celeslib --force
 /home/whise/.local/bin/uv run --python 3.12 python scripts/06_publish_github_release.py
 ```
 
+---
+
+## Phase 3: Complete Removal of "Xeno" Reference Naming & Frameless Window Polish (Task 8)
+
+> **User Feedback & Audit Findings:**
+> `https://www.xeno.now/` was strictly a **visual layout reference**, NOT part of the product brand. The product brand is **100% Celeslib (`Celeslib Honor of Kings: Ace Patcher`)**. Currently, `"xeno"` / `"Xeno"` is leaked into:
+> 1. **GitHub Release `v1.0.0-celeslib` Assets & Release Notes (`scripts/06_publish_github_release.py`):**
+>    - Uploaded preview files are named `xeno_patcher_id.png`, `xeno_patcher_en.png`, `xeno_dashboard_id.png`, `xeno_settings_id.png`, and the release description references `"Xeno v1.3.0 (https://www.xeno.now/)"`.
+> 2. **Repository Preview Assets, Scripts, C++ Sources, and Tests:**
+>    - `assets/previews/xeno_*.png` -> must be renamed to `assets/previews/celeslib_patcher_id.png`, `celeslib_patcher_en.png`, `celeslib_dashboard_id.png`, `celeslib_settings_id.png` (and old `assets/previews/xeno_*.png` deleted via `git rm`).
+>    - `src/gui/celeslib_xeno_gui.cpp`, `src/gui/celeslib_xeno.rc`, `src/gui/celeslib_xeno_i18n.h` -> must be renamed to `src/gui/celeslib_gui.cpp`, `src/gui/celeslib_gui.rc`, `src/gui/celeslib_i18n.h` (and old files removed).
+>    - `scripts/08_compile_xeno_gui.py` -> must be renamed to `scripts/08_compile_celeslib_gui.py`, producing `build/celeslib_gui_stub.exe`.
+>    - `tests/test_xeno_gui_build.py` -> must be renamed to `tests/test_celeslib_gui_build.py`.
+>    - Inside `src/gui/celeslib_gui.cpp`, `wc.lpszClassName` must be `L"CeleslibPatcherUI"` (NOT `L"CeleslibXenoUI"`), `RenderXenoFrame` must be `RenderCeleslibFrame`, and `--smoke-ui` must output `celeslib_patcher_id.png`, `celeslib_patcher_en.png`, `celeslib_dashboard_id.png`, `celeslib_settings_id.png`.
+>    - `README.md` must have zero mentions of `Xeno` or `xeno.now` (use **"Antarmuka Native Celeslib Ultra-Dark Carbon"**).
+> 3. **True Frameless Custom Titlebar (`WM_NCCALCSIZE` in `src/gui/celeslib_gui.cpp`):**
+>    - Because `RenderCeleslibFrame` draws a custom dark titlebar at `Y: 0..48` with `[—] [□] [×]` controls, handle `WM_NCCALCSIZE` (`if (wParam == TRUE) return 0;`) or use `WS_POPUP | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU` so Windows does not draw a duplicate second titlebar above the custom Celeslib header!
+
+### Task 8: Purge All "Xeno" Naming Across Files, Binary, Docs & GitHub Release Assets
+
+**Files:**
+- Rename (`git mv`): `src/gui/celeslib_xeno_gui.cpp` -> `src/gui/celeslib_gui.cpp`
+- Rename (`git mv`): `src/gui/celeslib_xeno.rc` -> `src/gui/celeslib_gui.rc`
+- Rename (`git mv`): `src/gui/celeslib_xeno_i18n.h` -> `src/gui/celeslib_i18n.h`
+- Rename (`git mv`): `scripts/08_compile_xeno_gui.py` -> `scripts/08_compile_celeslib_gui.py`
+- Rename (`git mv`): `tests/test_xeno_gui_build.py` -> `tests/test_celeslib_gui_build.py`
+- Delete (`git rm -f`): `assets/previews/xeno_patcher_id.png`, `assets/previews/xeno_patcher_en.png`, `assets/previews/xeno_dashboard_id.png`, `assets/previews/xeno_settings_id.png`
+- Create: `assets/previews/celeslib_patcher_id.png`, `assets/previews/celeslib_patcher_en.png`, `assets/previews/celeslib_dashboard_id.png`, `assets/previews/celeslib_settings_id.png`
+- Modify: `scripts/05_repack_windows_exe.py`, `scripts/06_publish_github_release.py`, `tests/test_repack_integrity.py`, `README.md`
+
+- [x] **Step 1: Rename files with `git mv`, remove `assets/previews/xeno_*.png`, and update all internal symbols/strings so `xeno` / `Xeno` does not exist anywhere in `src/`, `scripts/`, `tests/`, `assets/`, or `README.md`**
+  - In `src/gui/celeslib_gui.cpp`:
+    - Change `#include "celeslib_xeno_i18n.h"` -> `#include "celeslib_i18n.h"`.
+    - Change `RenderXenoFrame` -> `RenderCeleslibFrame`.
+    - Change `wc.lpszClassName = L"CeleslibXenoUI"` -> `wc.lpszClassName = L"CeleslibPatcherUI"`.
+    - Change `--smoke-ui` output filenames to `celeslib_patcher_id.png`, `celeslib_patcher_en.png`, `celeslib_dashboard_id.png`, `celeslib_settings_id.png`.
+    - Add `case WM_NCCALCSIZE: if (wParam == TRUE) return 0; break;` in `WndProc` so the custom dark header (`Y: 0..48`) serves as the single frameless titlebar without a duplicate OS titlebar.
+  - In `scripts/08_compile_celeslib_gui.py` & `scripts/05_repack_windows_exe.py`:
+    - Build `build/celeslib_gui_stub.exe` (and remove old `build/celeslib_xeno_stub.exe`).
+    - Generate `assets/previews/celeslib_patcher_id.png`, `celeslib_patcher_en.png`, `celeslib_dashboard_id.png`, `celeslib_settings_id.png`.
+  - In `tests/test_celeslib_gui_build.py` & `tests/test_repack_integrity.py`:
+    - Assert that `b"xeno"`, `b"Xeno"`, `"xeno".encode("utf-16le")`, and `"Xeno".encode("utf-16le")` are **NOT** present in `build/celeslib_gui_stub.exe` or in the outer GUI stub of `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe`!
+
+- [x] **Step 2: Rebuild GUI stub, repack release executables, and run `pytest -v`**
+
+Run:
+```bash
+/home/whise/.local/bin/uv run --python 3.12 python scripts/08_compile_celeslib_gui.py
+/home/whise/.local/bin/uv run --python 3.12 python scripts/05_repack_windows_exe.py
+/home/whise/.local/bin/uv run --python 3.12 pytest -v
+```
+
+- [x] **Step 3: Update `README.md` & `scripts/06_publish_github_release.py`, delete old `xeno_*.png` assets from GitHub Release `v1.0.0-celeslib`, and publish clean Celeslib release**
+  - In `scripts/06_publish_github_release.py`:
+    - Remove all mentions of `Xeno` / `xeno.now` from `RELEASE_NOTES` and docstrings.
+    - Reference `celeslib_patcher_id.png`, `celeslib_patcher_en.png`, `celeslib_dashboard_id.png`, `celeslib_settings_id.png`.
+    - Before uploading assets in `publish_via_gh_cli()` and `publish_via_rest_api()`, explicitly delete any legacy `xeno_patcher_id.png`, `xeno_patcher_en.png`, `xeno_dashboard_id.png`, `xeno_settings_id.png` assets from the GitHub Release (`gh release delete-asset v1.0.0-celeslib <name> -y --repo voseu/acepatchindo` / `DELETE /repos/.../releases/assets/<id>`) so zero `xeno_*.png` files remain on the GitHub Release page!
+  - Run `graft build` and verify `graft grep "xeno"` and `graft grep "Xeno"` return **0 hits** across all indexed source/script/test files!
+  - Commit, push, and run `scripts/06_publish_github_release.py`.
+
+

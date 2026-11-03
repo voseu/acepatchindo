@@ -4,23 +4,23 @@
   <img src="assets/branding/celeslib_logo_64.png" alt="Celeslib Logo" width="64" height="64" />
 </p>
 
-Aplikasi pemasang *patch* lokalisasi resmi **Celeslib** untuk gim PC **Honor of Kings: Ace (`WXQ.exe`)**, dibangun dengan antarmuka native Windows x86-64 bergaya **Xeno v1.3.0 Ultra-Dark Carbon** (`#09090B` canvas, aksen violet `#8B5CF6`), pergantian bahasa UI real-time (**`🌐 UI: ID | EN`**), dan mode patch game fleksibel (**`🎯 Mode: ID Hybrid | EN Full`**).
+Aplikasi pemasang *patch* lokalisasi resmi **Celeslib** untuk gim PC **Honor of Kings: Ace (`WXQ.exe`)**, dibangun dengan antarmuka native Windows x86-64 **Celeslib Ultra-Dark Carbon** (`#09090B` canvas, aksen violet `#8B5CF6`), pergantian bahasa UI real-time (**`🌐 UI: ID | EN`**), dan mode patch game fleksibel (**`🎯 Mode: ID Hybrid | EN Full`**).
 
 ---
 
-## Pratinjau Antarmuka Xeno v1.3.0
+## Pratinjau Antarmuka Celeslib
 
 | Mode Bahasa Indonesia (`UI: ID` • `Mode: ID Hybrid`) | Mode Bahasa Inggris (`UI: EN` • `Mode: EN Full`) |
 | :---: | :---: |
-| ![Xeno Patcher ID](assets/previews/xeno_patcher_id.png) | ![Xeno Patcher EN](assets/previews/xeno_patcher_en.png) |
+| ![Celeslib Patcher ID](assets/previews/celeslib_patcher_id.png) | ![Celeslib Patcher EN](assets/previews/celeslib_patcher_en.png) |
 | **Tab Dashboard Celeslib** | **Tab Pengaturan Mode & Bahasa** |
-| ![Xeno Dashboard](assets/previews/xeno_dashboard_id.png) | ![Xeno Settings](assets/previews/xeno_settings_id.png) |
+| ![Celeslib Dashboard](assets/previews/celeslib_dashboard_id.png) | ![Celeslib Settings](assets/previews/celeslib_settings_id.png) |
 
 ---
 
 ## Fitur Utama
 
-1. **Antarmuka Native Windows Xeno v1.3.0 (`Win32` + `GDI+` + `DWM Dark Mode`):**
+1. **Antarmuka Native Windows Celeslib Ultra-Dark Carbon (`Win32` + `GDI+` + `DWM Frameless Dark Mode`):**
    - Mengusung palet warna *Ultra-Dark Carbon* (`#09090B` background, `#0D0D11` sidebar, `#14141A` cards/buttons, `#24242E` border 1px, `#8B5CF6` Celeslib violet accent).
    - Custom header terintegrasi logo pixel-star resmi Celeslib, badge versi `v1.0.0`, target game badge `Game Build 1.4.12`, dan kontrol jendela (`—`, `□`, `×`).
    - Navigasi sidebar 4 tab: **Dashboard**, **Patcher**, **Android (USB)**, dan **Settings**.
@@ -61,18 +61,18 @@ Aplikasi pemasang *patch* lokalisasi resmi **Celeslib** untuk gim PC **Honor of 
 ```text
 ├── assets/
 │   ├── branding/                      # celeslib.ico (multi-size), celeslib_logo_512/64/32.png
-│   └── previews/                      # xeno_patcher_id.png, xeno_patcher_en.png
+│   └── previews/                      # celeslib_patcher_id.png, celeslib_patcher_en.png
 ├── data/references/                   # Ekstraksi referensi Tier 1 (ID), Tier 2 (EN), hybrid_vfs_index.json
 ├── scripts/
 │   ├── 07_build_celeslib_assets.py    # Ekstraksi logo Celeslib & pembuatan header C++ BGRA
-│   ├── 08_compile_xeno_gui.py         # Kompilasi Win32 GUI stub MinGW-w64 & render preview
+│   ├── 08_compile_celeslib_gui.py     # Kompilasi Win32 GUI stub MinGW-w64 & render preview
 │   ├── 03_patch_worker_modules.py     # Kompilasi modul Python 3.12 Dual-State
 │   ├── 04_verify_real_windows_game.py # Verifikasi 508 tabel Protobuf terhadap file asli gim
 │   ├── 05_repack_windows_exe.py       # Pengemasan deterministik Celeslib Release Executable
 │   └── 06_publish_github_release.py   # Publikasi rilis GitHub v1.0.0-celeslib
 ├── src/
 │   ├── acepatchindo/                  # Engine klasifikasi hybrid, leksikon, & dual-state bytecode
-│   └── gui/                           # celeslib_xeno_gui.cpp, celeslib_xeno.rc, celeslib_xeno_i18n.h
+│   └── gui/                           # celeslib_gui.cpp, celeslib_gui.rc, celeslib_i18n.h
 └── tests/                             # Rangkaian pengujian integritas PE, branding, & dual-state engine
 ```
 
@@ -82,8 +82,8 @@ Aplikasi pemasang *patch* lokalisasi resmi **Celeslib** untuk gim PC **Honor of 
 # 1. Ekstrak aset branding Celeslib
 uv run --python 3.12 python scripts/07_build_celeslib_assets.py
 
-# 2. Kompilasi GUI native Xeno v1.3.0
-uv run --python 3.12 python scripts/08_compile_xeno_gui.py
+# 2. Kompilasi GUI native Celeslib Ultra-Dark Carbon
+uv run --python 3.12 python scripts/08_compile_celeslib_gui.py
 
 # 3. Patch worker modules & rakit executable rilis
 uv run --python 3.12 python scripts/03_patch_worker_modules.py
@@ -99,6 +99,6 @@ uv run --python 3.12 pytest -v
 
 | Berkas / Komponen | Ukuran (Byte) | SHA-256 |
 | :--- | ---: | :--- |
-| `Celeslib-HoK-Ace-Patcher-v1.0.0.exe` | `55.091.744` | `806e8140d62c9c0a202154ec65358f0dfc0c2a72a1e30b9d720caa9e4cafd5f6` |
-| `Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe` | `55.091.744` | `806e8140d62c9c0a202154ec65358f0dfc0c2a72a1e30b9d720caa9e4cafd5f6` |
+| `Celeslib-HoK-Ace-Patcher-v1.0.0.exe` | `55.092.256` | `5174030edcd9589fd708651bc51b9e8de08af5edda38a337c91088fc08bcd808` |
+| `Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe` | `55.092.256` | `5174030edcd9589fd708651bc51b9e8de08af5edda38a337c91088fc08bcd808` |
 | `ace-worker.exe` (*embedded payload*) | `53.927.862` | `abbfffec6bab992b31c25e32dc8a33571fd5f279033185f84361af87632253f2` |

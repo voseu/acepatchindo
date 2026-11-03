@@ -5,11 +5,11 @@ from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
-STUB_EXE = ROOT / "build" / "celeslib_xeno_stub.exe"
+STUB_EXE = ROOT / "build" / "celeslib_gui_stub.exe"
 ASSETS_PREVIEWS = ROOT / "assets" / "previews"
 
 
-def test_compiled_xeno_gui_stub_pe_headers_and_branding() -> None:
+def test_compiled_celeslib_gui_stub_pe_headers_and_branding() -> None:
     assert STUB_EXE.exists(), f"Missing compiled GUI stub: {STUB_EXE}"
     raw = STUB_EXE.read_bytes()
     assert raw[:2] == b"MZ"
@@ -31,6 +31,12 @@ def test_compiled_xeno_gui_stub_pe_headers_and_branding() -> None:
     assert b"CPDD" not in raw
     assert b"cpdd-logo" not in raw
 
+    # Must NOT contain xeno / Xeno references
+    assert b"xeno" not in raw
+    assert b"Xeno" not in raw
+    assert "xeno".encode("utf-16le") not in raw
+    assert "Xeno".encode("utf-16le") not in raw
+
     # Exact CLI argument strings for wxq_patch adaptive and mobile protocols
     assert "--game-dir".encode("utf-16le") in raw
     assert "--work".encode("utf-16le") in raw
@@ -44,11 +50,14 @@ def test_compiled_xeno_gui_stub_pe_headers_and_branding() -> None:
 
 
 def test_preview_pngs_integrity_and_no_missing_glyphs() -> None:
+    legacy_xeno = list(ASSETS_PREVIEWS.glob("xeno_*.png"))
+    assert not legacy_xeno, f"Found legacy xeno preview files: {legacy_xeno}"
+
     expected_previews = [
-        ASSETS_PREVIEWS / "xeno_patcher_id.png",
-        ASSETS_PREVIEWS / "xeno_patcher_en.png",
-        ASSETS_PREVIEWS / "xeno_dashboard_id.png",
-        ASSETS_PREVIEWS / "xeno_settings_id.png",
+        ASSETS_PREVIEWS / "celeslib_patcher_id.png",
+        ASSETS_PREVIEWS / "celeslib_patcher_en.png",
+        ASSETS_PREVIEWS / "celeslib_dashboard_id.png",
+        ASSETS_PREVIEWS / "celeslib_settings_id.png",
     ]
     for preview_path in expected_previews:
         assert preview_path.exists(), f"Missing expected preview PNG: {preview_path}"

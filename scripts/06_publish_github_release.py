@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publish GitHub Release v1.0.0-celeslib with Celeslib Xeno UI executable and SHA256SUMS.txt."""
+"""Publish GitHub Release v1.0.0-celeslib with Celeslib UI executable and SHA256SUMS.txt."""
 
 from __future__ import annotations
 
@@ -15,10 +15,10 @@ DIST_DIR = ROOT / "dist"
 CELESLIB_EXE = DIST_DIR / "Celeslib-HoK-Ace-Patcher-v1.0.0.exe"
 COMPAT_EXE = DIST_DIR / "Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe"
 SUMS_ASSET = DIST_DIR / "SHA256SUMS.txt"
-PREVIEW_ID = ROOT / "assets" / "previews" / "xeno_patcher_id.png"
-PREVIEW_EN = ROOT / "assets" / "previews" / "xeno_patcher_en.png"
-PREVIEW_DASHBOARD = ROOT / "assets" / "previews" / "xeno_dashboard_id.png"
-PREVIEW_SETTINGS = ROOT / "assets" / "previews" / "xeno_settings_id.png"
+PREVIEW_ID = ROOT / "assets" / "previews" / "celeslib_patcher_id.png"
+PREVIEW_EN = ROOT / "assets" / "previews" / "celeslib_patcher_en.png"
+PREVIEW_DASHBOARD = ROOT / "assets" / "previews" / "celeslib_dashboard_id.png"
+PREVIEW_SETTINGS = ROOT / "assets" / "previews" / "celeslib_settings_id.png"
 
 REPO = "voseu/acepatchindo"
 TAG = "v1.0.0-celeslib"
@@ -26,14 +26,14 @@ TITLE = "Celeslib Honor of Kings: Ace Patcher v1.0.0 (Game Build 1.4.12)"
 
 RELEASE_NOTES = """## Celeslib Honor of Kings: Ace Patcher `v1.0.0` (Target Game Build `1.4.12`)
 
-Rilis resmi pertama **Celeslib Honor of Kings: Ace Patcher v1.0.0** (`Celeslib-HoK-Ace-Patcher-v1.0.0.exe`) dengan antarmuka native Windows x86-64 bergaya **Xeno v1.3.0 Ultra-Dark Carbon** (`#09090B` background, aksen `#8B5CF6` Celeslib), pergantian bahasa UI real-time (`ID` / `EN`), dan pilihan mode patch terjemahan game (`Indonesian Hybrid Gameplay` / `Full English`).
+Rilis resmi pertama **Celeslib Honor of Kings: Ace Patcher v1.0.0** (`Celeslib-HoK-Ace-Patcher-v1.0.0.exe`) dengan antarmuka native Windows x86-64 **Celeslib Ultra-Dark Carbon** (`#09090B` background, aksen `#8B5CF6` Celeslib), pergantian bahasa UI real-time (`ID` / `EN`), dan pilihan mode patch terjemahan game (`Indonesian Hybrid Gameplay` / `Full English`).
 
 ---
 
 ### Fitur Utama & Pembaruan
 
-1. **Antarmuka Native Celeslib Xeno v1.3.0 (Win32 + GDI+ + DWM):**
-   - Desain ultra-dark carbon modern terinspirasi langsung dari layout Xeno v1.3.0 (`https://www.xeno.now/`).
+1. **Antarmuka Native Celeslib Ultra-Dark Carbon (Win32 + GDI+ + DWM Frameless):**
+   - Desain ultra-dark carbon modern dengan layout terstruktur dan responsif.
    - Custom dark titlebar frameless dengan logo pixel-star resmi Celeslib, badge versi `v1.0.0`, target badge `Game Build 1.4.12`, serta tombol kontrol jendela (`—`, `□`, `×`).
    - Left Sidebar navigasi (`Dashboard`, `Patcher`, `Android (USB)`, `Settings`).
    - Top Pill Action Toolbar (`▷ Pasang Patch / Install Patch`, `↺ Pulihkan File / Restore Files`, `🔍 Periksa File / Check Files`, `📁 Pilih Folder / Browse Folder`, `⚡ Auto-Detect`, `🗑 Bersihkan / Clear Log`).
@@ -52,7 +52,7 @@ Rilis resmi pertama **Celeslib Honor of Kings: Ace Patcher v1.0.0** (`Celeslib-H
    - Seluruh biner luar, resources Windows PE, dan aset grafis 100% menggunakan logo bintang resmi Celeslib dan identitas Celeslib (`0` string CPDD di executable luar).
 
 5. **Integritas Binary & Keamanan Sertifikat:**
-   - Penjaga digest SHA-256 64-karakter untuk memvalidasi integritas `ace-worker.exe` sebelum dieksekusi.
+   - Penjaga digest SHA-256 64-karakter untuk memvalidasi integritas `ace-worker.exe` sebelum dieksekusi via Windows CryptoAPI.
    - Beroperasi **100% offline** di komputer pengguna tanpa pengumpulan data atau koneksi eksternal. (Sertifikat Mozilla `cacert.pem` yang ada di dalam PyInstaller hanya bawaan pustaka dependensi upstream dan tidak pernah melakukan kontak jaringan saat patch PC).
 
 ---
@@ -60,9 +60,9 @@ Rilis resmi pertama **Celeslib Honor of Kings: Ace Patcher v1.0.0** (`Celeslib-H
 ### Verifikasi Berkas & Checksum SHA-256
 
 ```text
-806e8140d62c9c0a202154ec65358f0dfc0c2a72a1e30b9d720caa9e4cafd5f6  Celeslib-HoK-Ace-Patcher-v1.0.0.exe
-806e8140d62c9c0a202154ec65358f0dfc0c2a72a1e30b9d720caa9e4cafd5f6  Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe
-abbfffec6bab992b31c25e32dc8a33571fd5f279033185f84361af87632253f2  ace-worker.exe (embedded @ offset 0x11C262..0x348A218)
+5174030edcd9589fd708651bc51b9e8de08af5edda38a337c91088fc08bcd808  Celeslib-HoK-Ace-Patcher-v1.0.0.exe
+5174030edcd9589fd708651bc51b9e8de08af5edda38a337c91088fc08bcd808  Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe
+abbfffec6bab992b31c25e32dc8a33571fd5f279033185f84361af87632253f2  ace-worker.exe (embedded @ offset 0x11C462..0x348A418)
 ```
 """
 
@@ -77,6 +77,20 @@ def publish_via_gh_cli() -> bool:
         capture_output=True,
         text=True,
     )
+
+    # Clean up any legacy preview asset names from GitHub Release
+    legacy_names = [
+        "xeno_patcher_id.png",
+        "xeno_patcher_en.png",
+        "xeno_dashboard_id.png",
+        "xeno_settings_id.png",
+    ]
+    for leg_name in legacy_names:
+        subprocess.run(
+            ["gh", "release", "delete-asset", TAG, leg_name, "-y", "--repo", REPO],
+            capture_output=True,
+        )
+
     assets = [
         str(CELESLIB_EXE),
         str(COMPAT_EXE),
@@ -156,6 +170,20 @@ def publish_via_rest_api(token: str) -> None:
         upload_base = release["upload_url"].split("{")[0]
 
         existing = {a["name"]: a["id"] for a in release.get("assets", [])}
+
+        # Delete any legacy preview names
+        legacy_names = [
+            "xeno_patcher_id.png",
+            "xeno_patcher_en.png",
+            "xeno_dashboard_id.png",
+            "xeno_settings_id.png",
+        ]
+        for leg_name in legacy_names:
+            if leg_name in existing:
+                client.delete(
+                    f"https://api.github.com/repos/{REPO}/releases/assets/{existing[leg_name]}"
+                ).raise_for_status()
+
         assets_to_upload = [
             (CELESLIB_EXE, "application/vnd.microsoft.portable-executable"),
             (COMPAT_EXE, "application/vnd.microsoft.portable-executable"),

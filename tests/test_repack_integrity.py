@@ -1,4 +1,4 @@
-"""Binary integrity and PyInstaller CArchive extraction tests for the Celeslib Xeno release .exe."""
+"""Binary integrity and PyInstaller CArchive extraction tests for the Celeslib release .exe."""
 
 from __future__ import annotations
 
@@ -47,6 +47,14 @@ def test_celeslib_repack_integrity_and_worker_unpack() -> None:
     assert b"CELESLIB_PATCH_LANG" in raw
     assert b"CPDD" not in raw
     assert b"cpdd-logo" not in raw
+
+    # Must NOT contain xeno / Xeno references in outer GUI stub
+    sha_offset_check = struct.unpack_from("<Q", raw, len(raw) - 8)[0]
+    outer_stub = raw[:sha_offset_check]
+    assert b"xeno" not in outer_stub
+    assert b"Xeno" not in outer_stub
+    assert "xeno".encode("utf-16le") not in outer_stub
+    assert "Xeno".encode("utf-16le") not in outer_stub
 
     # Exact CLI argument strings for wxq_patch adaptive and mobile protocols
     assert "--game-dir".encode("utf-16le") in raw
