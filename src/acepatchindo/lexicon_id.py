@@ -246,7 +246,7 @@ CLAUSE_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"\beveryone's\b", re.I), "milik semua orang"),
     (
         re.compile(
-            r"\b(?:the\s+)?([A-Za-z0-9_]+)'s\s+(__WXQ[A-Z]+\d+__|[A-Za-z0-9_]+(?:\s+__WXQ[A-Z]+\d+__)?)\b"
+            r"\b(?:the\s+)?([A-Za-z0-9_]+(?:['’][A-Za-z0-9_]+)?|__WXQ[A-Z]+\d+__)'s\s+(__WXQ[A-Z]+\d+__|[A-Za-z0-9_]+(?:\s+__WXQ[A-Z]+\d+__)?)\b"
         ),
         r"\2 \1",
     ),
@@ -351,6 +351,10 @@ PHRASE_4: dict[tuple[str, str, str, str], str] = {
 }
 
 PHRASE_3: dict[tuple[str, str, str], str] = {
+    ("ancient", "coin", "machine"): "Ancient Coin Machine",
+    ("there", "is", "a"): "ada",
+    ("there", "is", "an"): "ada",
+    ("attack", "miliknya", "sebesar"): "Attack miliknya sebesar",
     ("all", "allied", "heroes"): "semua Hero sekutu",
     ("all", "friendly", "heroes"): "semua Hero sekutu",
     ("all", "enemy", "heroes"): "semua Hero musuh",
@@ -429,11 +433,19 @@ PHRASE_3: dict[tuple[str, str, str], str] = {
     ("refined", "ancient", "coins"): "Refined Ancient Coin",
     ("exquisite", "ancient", "coin"): "Refined Ancient Coin",
     ("exquisite", "ancient", "coins"): "Refined Ancient Coin",
-    ("ancient", "coin", "machine"): "Coin Machine",
+    ("ancient", "coin", "machine"): "Ancient Coin Machine",
     ("left", "and", "right"): "kiri dan kanan",
 }
 
 PHRASE_2: dict[tuple[str, str], str] = {
+    ("picks", "up"): "mengangkat",
+    ("pick", "up"): "mengangkat",
+    ("picked", "up"): "mengangkat",
+    ("feather", "arrows"): "panah bulu",
+    ("feather", "arrow"): "panah bulu",
+    ("there", "is"): "terdapat",
+    ("there", "are"): "terdapat",
+    ("chaos", "rift"): "Chaos Rift",
     ("a", "single"): "1",
     ("right", "side"): "sisi kanan",
     ("right", "grid"): "petak kanan",
@@ -463,6 +475,18 @@ PHRASE_2: dict[tuple[str, str], str] = {
     ("magic", "penetration"): "Magic Penetration",
     ("spell", "penetration"): "Magic Penetration",
     ("physical", "penetration"): "Physical Penetration",
+    ("wolf", "soul"): "Wolf Soul",
+    ("wolf", "souls"): "Wolf Souls",
+    ("bear", "spirit"): "Bear Spirit",
+    ("bear", "spirits"): "Bear Spirits",
+    ("shadow", "servant"): "Shadow Servant",
+    ("shadow", "servants"): "Shadow Servants",
+    ("chaos", "rift"): "Chaos Rift",
+    ("chaos", "rifts"): "Chaos Rifts",
+    ("mechanical", "puppet"): "Mechanical Puppet",
+    ("mechanical", "puppets"): "Mechanical Puppets",
+    ("spinning", "blade"): "Spinning Blade",
+    ("spinning", "blades"): "Spinning Blades",
     ("rapid", "growth"): "Rapid Growth",
     ("perfect", "revive"): "Perfect Revive",
     ("perfect", "revival"): "Perfect Revive",
@@ -2357,6 +2381,8 @@ WORD_1: dict[str, str] = {
     "crossbow": "busur silang",
     "arrow": "panah",
     "arrows": "panah",
+    "feather": "bulu",
+    "feathers": "bulu",
     "dart": "dart",
     "darts": "dart",
     "bullet": "peluru",
@@ -4192,7 +4218,7 @@ _POS_MAP = {
     "KITA": "kita",
     "MEREKA": "mereka",
 }
-_NON_COPULA_WORD = r"(?:__WXQ[A-Z]+\d+__|__ROMAN_I__|(?!adalah\b|akan\b|dapat\b|tidak\b|telah\b|sudah\b|sedang\b|harus\b|perlu\b|menjadi\b)[A-Za-z]+)"
+_NON_COPULA_WORD = r"(?:__WXQ[A-Z]+\d+__|__ROMAN_I__|(?!adalah\b|akan\b|dapat\b|tidak\b|telah\b|sudah\b|sedang\b|harus\b|perlu\b|menjadi\b)[A-Za-z0-9_]+(?:['’][A-Za-z0-9_]+)?)"
 _POS_SWAP_RE = re.compile(
     r"__POS_(KU|MU|NYA|KITA|MEREKA)__\s+"
     rf"({_NON_COPULA_WORD}(?:\s+{_NON_COPULA_WORD}){{0,2}})"

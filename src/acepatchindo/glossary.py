@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import gzip
 import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Callable
 
 from acepatchindo.lexicon_id import translate_segment_en_to_id
 from acepatchindo.tag_aligner import (
@@ -398,6 +400,21 @@ CANONICAL_PROTECTED_TERMS: tuple[str, ...] = (
     "Kartu Efek",
     "Kartu Equipment",
     "Voucher Hero",
+    "Chaos Rift",
+    "Ancient Coin Machine",
+    "Shadow Servant",
+    "Shadow Servants",
+    "Illusory Totem",
+    "Ancestor Bear Spirit",
+    "Ancestral Bear Spirit",
+    "Bear Spirit",
+    "Bear Spirits",
+    "Wolf Soul",
+    "Wolf Souls",
+    "Mechanical Puppet",
+    "Mechanical Puppets",
+    "Spinning Blade",
+    "Spinning Blades",
 )
 
 STOPWORD_GUARD_RE = re.compile(
@@ -438,6 +455,24 @@ TIER1_EMBEDDED_EN_CLEANUP: tuple[tuple[str, str], ...] = (
     ("kartu Effect", "kartu Efek"),
 )
 
+GENERIC_SKILL_EXCLUSIONS: set[str] = {
+    "Passive",
+    "Active",
+    "Awaken",
+    "Preparation",
+    "On Play",
+    "Sacrifice",
+    "Charge",
+    "Slash",
+    "Slam",
+    "Sweep",
+    "Pierce",
+    "Sprint",
+    "Reload",
+    "Bombard",
+    "Devour",
+}
+
 
 def _normalize_en_key(text: str) -> str:
     cleaned = TAG_RE.sub("", text)
@@ -466,48 +501,65 @@ class ThreeTierGlossary:
     ) -> "ThreeTierGlossary":
         instance = cls()
         protected_set: set[str] = set(CANONICAL_PROTECTED_TERMS)
-        verified_entity_names_en: set[str] = {
-            "Symphony of Tides",
-            "Three Kingdoms Banner",
-            "Super Copier",
-            "Build Upgrade",
-            "Maple Leaf Dance",
-            "Graceful Dance",
-            "Gentle Call",
-            "Indomitable Will",
-            "Try Your Luck",
-            "Embrace of the Sea",
-            "Use for My Own",
-            "Lady Sun: Empowered",
-            "Glory of the Old Guard",
-            "Quench with Illusions",
-            "Muster the Troops",
-            "Power of the Source",
-            "Bane of the Mighty",
-            "Tidal Symphony",
-        }
-        for term in CANONICAL_PROTECTED_TERMS:
-            verified_entity_names_en.add(term)
+        verified_entity_names_en: set[str] = set(CANONICAL_PROTECTED_TERMS)
+
+        orig_unique: dict[str, str] = {}
+        cat_candidates = [
+            Path("Honor of Kings Ace English Patcher 1.4.12.exe_extracted/catalog/catalog.json.gz"),
+            tier1_path.parent.parent.parent / "Honor of Kings Ace English Patcher 1.4.12.exe_extracted/catalog/catalog.json.gz",
+            Path("data/catalog_checkpoints/catalog.json.gz"),
+        ]
+        for cpath in cat_candidates:
+            if cpath.exists():
+                try:
+                    cdata = json.loads(gzip.decompress(cpath.read_bytes()))
+                    orig_unique = cdata.get("unique", {})
+                    if orig_unique:
+                        break
+                except Exception:
+                    pass
+
+        def _add_entity_name(name: str | None) -> None:
+            if not name:
+                return
+            name = name.strip()
+            if (
+                3 <= len(name) <= 45
+                and any(c.isupper() for c in name)
+                and not name.endswith(".")
+                and name not in GENERIC_SKILL_EXCLUSIONS
+            ):
+                verified_entity_names_en.add(name)
+                protected_set.add(name)
+                if not name.endswith("s") and not name.endswith("'"):
+                    plural = name + "s"
+                    verified_entity_names_en.add(plural)
+                    protected_set.add(plural)
+                if not name.endswith("s") and not name.endswith("'"):
+                    plural = name + "s"
+                    verified_entity_names_en.add(plural)
+                    protected_set.add(plural)
 
         t1_data: dict = {}
         if tier1_path.exists():
             t1_data = json.loads(tier1_path.read_text(encoding="utf-8"))
-            instance._ingest_tier1(t1_data, protected_set, verified_entity_names_en)
+            instance._ingest_tier1(t1_data, protected_set, verified_entity_names_en, orig_unique, _add_entity_name)
         if tier2_path.exists():
             t2 = json.loads(tier2_path.read_text(encoding="utf-8"))
-            instance._ingest_tier2(t2, protected_set, verified_entity_names_en)
+            instance._ingest_tier2(t2, protected_set, verified_entity_names_en, orig_unique, _add_entity_name)
 
         if tier2_details_path is None:
             tier2_details_path = tier2_path.with_name("tier2_wiki_details_en.json")
         if tier2_details_path.exists():
             t2_details = json.loads(tier2_details_path.read_text(encoding="utf-8"))
-            instance._ingest_tier2_details(t1_data, t2_details, protected_set, verified_entity_names_en)
+            instance._ingest_tier2_details(t1_data, t2_details, protected_set, verified_entity_names_en, _add_entity_name)
 
         for zh_k, id_v in BRACKET_TERM_MAP.items():
             instance.tier1_exact_zh_to_id.setdefault(zh_k, id_v)
         for zh_k, id_v in WINDOWS_108_ZH_TO_ID.items():
             instance._register_t1_pair(zh_k, id_v)
 
+        protected_set |= verified_entity_names_en
         # Sort protected multi-word proper names longest-first
         # Verified entity names bypass STOPWORD_GUARD_RE
         instance.protected_en_terms = sorted(
@@ -526,7 +578,7 @@ class ThreeTierGlossary:
         )
         if instance.protected_en_terms:
             escaped = "|".join(re.escape(t) for t in instance.protected_en_terms)
-            instance._protected_re = re.compile(rf"(?<![A-Za-z])(?:{escaped})(?![A-Za-z])")
+            instance._protected_re = re.compile(rf"(?<![A-Za-z0-9_])(?:{escaped})(?![A-Za-z0-9_])")
         return instance
 
     def _register_t1_pair(self, zh: str, id_val: str) -> None:
@@ -557,25 +609,58 @@ class ThreeTierGlossary:
         if norm:
             self.tier2_plain_zh_to_en.setdefault(norm, en_val)
 
-    def _ingest_tier1(self, t1: dict, protected_set: set[str], verified_entity_names_en: set[str] | None = None) -> None:
+    def _ingest_tier1(
+        self,
+        t1: dict,
+        protected_set: set[str],
+        verified_entity_names_en: set[str] | None = None,
+        orig_unique: dict[str, str] | None = None,
+        _add_entity_name: Callable[[str | None], None] | None = None,
+    ) -> None:
+        if verified_entity_names_en is None:
+            verified_entity_names_en = set()
+        if _add_entity_name is None:
+            def _add_entity_name(name: str | None) -> None:
+                if not name:
+                    return
+                name = name.strip()
+                if (
+                    3 <= len(name) <= 45
+                    and any(c.isupper() for c in name)
+                    and not name.endswith(".")
+                    and name not in GENERIC_SKILL_EXCLUSIONS
+                ):
+                    verified_entity_names_en.add(name)
+                    protected_set.add(name)
+                    if not name.endswith("s") and not name.endswith("'"):
+                        plural = name + "s"
+                        verified_entity_names_en.add(plural)
+                        protected_set.add(plural)
+        if orig_unique is None:
+            orig_unique = {}
+
         # 1. Factions & Keywords (stored as dicts on hok-ace-translate-id.netlify.app)
         factions = t1.get("factions", {})
         if isinstance(factions, dict):
             for zh_f, en_f in factions.items():
                 self._register_t1_pair(zh_f, en_f)
-                protected_set.add(en_f)
+                _add_entity_name(en_f)
+                if zh_f in orig_unique:
+                    _add_entity_name(orig_unique[zh_f])
         elif isinstance(factions, list):
             for item in factions:
                 if isinstance(item, dict):
-                    self._register_t1_pair(
-                        item.get("cn") or item.get("nameCn") or "",
-                        item.get("name") or "",
-                    )
+                    zh_f = item.get("cn") or item.get("nameCn") or ""
+                    en_f = item.get("name") or ""
+                    self._register_t1_pair(zh_f, en_f)
+                    _add_entity_name(en_f)
+                    if zh_f in orig_unique:
+                        _add_entity_name(orig_unique[zh_f])
 
         keywords = t1.get("keywords", {})
         if isinstance(keywords, dict):
             for kw_name in keywords:
-                protected_set.add(kw_name)
+                _add_entity_name(kw_name)
 
         # 2. Heroes, Effect Cards, Equipment, Talents (including awaken, skills, and Lv enhancements)
         for category in ("hero", "effect", "equip", "talent"):
@@ -584,6 +669,10 @@ class ThreeTierGlossary:
                 name_en = (item.get("name") or "").strip()
                 desc_cn = (item.get("descCn") or "").strip()
                 desc_id = (item.get("desc") or "").strip()
+                if name_en:
+                    _add_entity_name(name_en)
+                if name_cn and name_cn in orig_unique:
+                    _add_entity_name(orig_unique[name_cn])
                 if name_cn and name_en:
                     if category in ("hero", "equip") and not STOPWORD_GUARD_RE.search(name_en):
                         self._register_t1_pair(name_cn, name_en)
@@ -602,6 +691,10 @@ class ThreeTierGlossary:
                 for sk in item.get("skills", []):
                     sk_cn = (sk.get("cn") or sk.get("nameCn") or "").strip()
                     sk_name = (sk.get("name") or "").strip()
+                    if sk_name:
+                        _add_entity_name(sk_name)
+                    if sk_cn and sk_cn in orig_unique:
+                        _add_entity_name(orig_unique[sk_cn])
                     if sk_cn and sk_name:
                         if not STOPWORD_GUARD_RE.search(sk_name):
                             self._register_t1_pair(sk_cn, sk_name)
@@ -621,27 +714,56 @@ class ThreeTierGlossary:
             lord_name = (lord.get("name") or "").strip()
             lord_cn = (lord.get("cn") or lord.get("nameCn") or "").strip()
             if lord_name:
-                protected_set.add(lord_name)
+                _add_entity_name(lord_name)
+            if lord_cn and lord_cn in orig_unique:
+                _add_entity_name(orig_unique[lord_cn])
             if lord_cn and lord_name:
                 self._register_t1_pair(lord_cn, lord_name)
             for tal in lord.get("talents", []):
                 c_name = (tal.get("cardName") or "").strip()
                 c_desc = (tal.get("desc") or "").strip()
                 if c_name:
-                    if not STOPWORD_GUARD_RE.search(c_name):
-                        protected_set.add(c_name)
+                    _add_entity_name(c_name)
                     if c_desc:
                         self.tier1_en_card_to_id_desc[c_name] = c_desc
             for rel in lord.get("related", []):
                 r_name = (rel.get("name") or "").strip()
                 r_desc = (rel.get("desc") or "").strip()
                 if r_name:
-                    if not STOPWORD_GUARD_RE.search(r_name):
-                        protected_set.add(r_name)
+                    _add_entity_name(r_name)
                     if r_desc:
                         self.tier1_en_card_to_id_desc[r_name] = r_desc
 
-    def _ingest_tier2(self, t2: list[dict], protected_set: set[str], verified_entity_names_en: set[str] | None = None) -> None:
+    def _ingest_tier2(
+        self,
+        t2: list[dict],
+        protected_set: set[str],
+        verified_entity_names_en: set[str] | None = None,
+        orig_unique: dict[str, str] | None = None,
+        _add_entity_name: Callable[[str | None], None] | None = None,
+    ) -> None:
+        if verified_entity_names_en is None:
+            verified_entity_names_en = set()
+        if _add_entity_name is None:
+            def _add_entity_name(name: str | None) -> None:
+                if not name:
+                    return
+                name = name.strip()
+                if (
+                    3 <= len(name) <= 45
+                    and any(c.isupper() for c in name)
+                    and not name.endswith(".")
+                    and name not in GENERIC_SKILL_EXCLUSIONS
+                ):
+                    verified_entity_names_en.add(name)
+                    protected_set.add(name)
+                    if not name.endswith("s") and not name.endswith("'"):
+                        plural = name + "s"
+                        verified_entity_names_en.add(plural)
+                        protected_set.add(plural)
+        if orig_unique is None:
+            orig_unique = {}
+
         for entry in t2:
             alt_zh = (entry.get("alt") or "").strip()
             name_en = (entry.get("name") or "").strip()
@@ -649,10 +771,40 @@ class ThreeTierGlossary:
                 self._register_t2_pair(alt_zh, name_en)
                 if entry.get("type") in ("Hero", "Chess player") and not STOPWORD_GUARD_RE.search(name_en):
                     protected_set.add(name_en)
+            if entry.get("type") in ("Hero", "Summon", "Talent", "Chess player", "Equipment", "Effect card"):
+                if name_en:
+                    _add_entity_name(name_en)
+                if alt_zh and alt_zh in orig_unique:
+                    _add_entity_name(orig_unique[alt_zh])
 
     def _ingest_tier2_details(
-        self, t1: dict, t2_details: list[dict], protected_set: set[str], verified_entity_names_en: set[str] | None = None
+        self,
+        t1: dict,
+        t2_details: list[dict],
+        protected_set: set[str],
+        verified_entity_names_en: set[str] | None = None,
+        _add_entity_name: Callable[[str | None], None] | None = None,
     ) -> None:
+        if verified_entity_names_en is None:
+            verified_entity_names_en = set()
+        if _add_entity_name is None:
+            def _add_entity_name(name: str | None) -> None:
+                if not name:
+                    return
+                name = name.strip()
+                if (
+                    3 <= len(name) <= 45
+                    and any(c.isupper() for c in name)
+                    and not name.endswith(".")
+                    and name not in GENERIC_SKILL_EXCLUSIONS
+                ):
+                    verified_entity_names_en.add(name)
+                    protected_set.add(name)
+                    if not name.endswith("s") and not name.endswith("'"):
+                        plural = name + "s"
+                        verified_entity_names_en.add(plural)
+                        protected_set.add(plural)
+
         t2_players_by_alt: dict[str, dict] = {}
         for item in t2_details:
             if item.get("type") == "Chess player" and item.get("alt"):
@@ -664,14 +816,19 @@ class ThreeTierGlossary:
                 for zh_s, en_s in zip(zh_block.get(key, []), en_block.get(key, [])):
                     self._register_t2_pair(zh_s, en_s)
 
+            for sk in en_block.get("skill_names", []):
+                _add_entity_name(sk)
+
             for ab_zh, ab_en in zip(
                 zh_block.get("abilities", []), en_block.get("abilities", [])
             ):
-                self._register_t2_pair(ab_zh.get("name", ""), ab_en.get("name", ""))
-                self._register_t2_pair(ab_zh.get("desc", ""), ab_en.get("desc", ""))
-                # If ab_en["name"] is in tier1_en_card_to_id_desc, map ab_en["desc"] and ab_zh["desc"] to Tier 1 ID!
                 ab_en_name = (ab_en.get("name") or "").strip()
                 ab_en_desc = (ab_en.get("desc") or "").strip()
+                if ab_en_name:
+                    _add_entity_name(ab_en_name)
+                self._register_t2_pair(ab_zh.get("name", ""), ab_en_name)
+                self._register_t2_pair(ab_zh.get("desc", ""), ab_en_desc)
+                # If ab_en["name"] is in tier1_en_card_to_id_desc, map ab_en["desc"] and ab_zh["desc"] to Tier 1 ID!
                 if ab_en_name in self.tier1_en_card_to_id_desc:
                     id_desc = self.tier1_en_card_to_id_desc[ab_en_name]
                     zh_d = ab_zh.get("desc", "")
@@ -762,7 +919,27 @@ class ThreeTierGlossary:
                     r"(?<![A-Za-z])(?:Exquisite Ancient Coins|Exquisite Ancient Coin|Refined Ancient Coins)(?![A-Za-z])",
                     "Refined Ancient Coin",
                 ),
-                (r"(?<![A-Za-z])Ancient Coin Machine(?![A-Za-z])", "Coin Machine"),
+                (r"\bfans\s+(?:his|her|its|their)\s+wings\b", "mengepakkan sayapnya"),
+                (r"(?<![A-Za-z])wolf\s+souls(?![A-Za-z])", "Wolf Souls"),
+                (r"(?<![A-Za-z])wolf\s+soul(?![A-Za-z])", "Wolf Soul"),
+                (r"(?<![A-Za-z])bear\s+spirits(?![A-Za-z])", "Bear Spirits"),
+                (r"(?<![A-Za-z])bear\s+spirit(?![A-Za-z])", "Bear Spirit"),
+                (r"(?<![A-Za-z])shadow\s+servants(?![A-Za-z])", "Shadow Servants"),
+                (r"(?<![A-Za-z])shadow\s+servant(?![A-Za-z])", "Shadow Servant"),
+                (r"(?<![A-Za-z])chaos\s+rifts(?![A-Za-z])", "Chaos Rifts"),
+                (r"(?<![A-Za-z])chaos\s+rift(?![A-Za-z])", "Chaos Rift"),
+                (r"(?<![A-Za-z])mechanical\s+puppets(?![A-Za-z])", "Mechanical Puppets"),
+                (r"(?<![A-Za-z])mechanical\s+puppet(?![A-Za-z])", "Mechanical Puppet"),
+                (r"(?<![A-Za-z])spinning\s+blades(?![A-Za-z])", "Spinning Blades"),
+                (r"(?<![A-Za-z])spinning\s+blade(?![A-Za-z])", "Spinning Blade"),
+                (
+                    r"\bspreads\s+(?:his|her|its|their)\s+wings\s+to\s+dance\b",
+                    "membentangkan sayapnya dan menari",
+                ),
+                (
+                    r"\bimproving\s+(?:his|her|its|their)\s+attack\s+by\b",
+                    "meningkatkan Attack miliknya sebesar",
+                ),
                 (r"(?<![A-Za-z])Ancient Coins(?![A-Za-z])", "Ancient Coin"),
                 (r"(?<![A-Za-z])Perfect Resurrection(?![A-Za-z])", "Perfect Revive"),
                 (r"(?<![A-Za-z])Arcomia Core(?![A-Za-z])", "Akomia Core"),
@@ -829,12 +1006,14 @@ class ThreeTierGlossary:
                 out = out.replace(old_ft, new_ft)
             out = re.sub(r"(?i)sempurna kebangkitan", "Perfect Revive", out)
             out = re.sub(r"(?i)\bTemporary Level\s+atas\b", "Peningkatan Temporary Level", out)
-            out = re.sub(r"\bsebuah\s+(?=\d)", "", out, flags=re.I)
+            out = re.sub(r"\bsebuah\s+((?:<[^>]+>\s*)*\d+)", r"\1", out, flags=re.I)
             out = re.sub(r"\badalah\s+milikmu\b", "milikmu", out, flags=re.I)
 
             return out
 
-        return translate_preserving_skeleton(en_text, _convert_segment)
+        res = translate_preserving_skeleton(en_text, _convert_segment)
+        res = re.sub(r"\bsebuah\s+((?:<[^>]+>\s*)*\d+)", r"\1", res, flags=re.I)
+        return res
 
     def _fit_length_bound(self, source_zh: str, candidate: str) -> str:
         """Guarantee candidate satisfies len(candidate) <= max(len(source_zh) * 8, 48) when len(source_zh) >= 4."""
@@ -851,7 +1030,7 @@ class ThreeTierGlossary:
             candidate = candidate.replace(old_ft, new_ft)
         candidate = re.sub(r"(?i)sempurna kebangkitan", "Perfect Revive", candidate)
         candidate = re.sub(r"(?i)\bTemporary Level\s+atas\b", "Peningkatan Temporary Level", candidate)
-        candidate = re.sub(r"\bsebuah\s+(?=\d)", "", candidate, flags=re.I)
+        candidate = re.sub(r"\bsebuah\s+((?:<[^>]+>\s*)*\d+)", r"\1", candidate, flags=re.I)
         candidate = re.sub(r"\badalah\s+milikmu\b", "milikmu", candidate, flags=re.I)
 
         if len(source_zh) < 4:

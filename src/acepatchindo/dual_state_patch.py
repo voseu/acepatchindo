@@ -241,10 +241,10 @@ def _needs_pre_install_restore(resolved_game: Path, cat_sha: str) -> bool:
 
         for r_dir in receipt_dirs:
             sha_file = r_dir / "patcher_catalog_sha256.txt"
-            if sha_file.exists() and sha_file.read_text(encoding="utf-8").strip() == cat_sha:
-                return False
+            if not sha_file.exists() or sha_file.read_text(encoding="utf-8").strip() != cat_sha:
+                return True
 
-        return True
+        return False
     except Exception:
         return False
 

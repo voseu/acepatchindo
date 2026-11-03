@@ -72,8 +72,8 @@ def test_repacked_exe_sizes_sha256_guard_and_pyinstaller_unpack() -> None:
             cat = json.load(f)
         assert len(cat["unique"]) == 41_483
         assert len(cat["english_updates"]) == 29_750
-        # Phase 6 (Hybrid): en_to_id only maps target gameplay descriptions (approx 5,000 - 8,000)
-        assert 5_000 <= len(cat["en_to_id"]) <= 10_000
+        # Phase 6 (Hybrid): en_to_id only maps target gameplay descriptions (approx 3,000 - 5,000)
+        assert 3_000 <= len(cat["en_to_id"]) <= 6_000
 
         tc_pyc = ext_dir / "PYZ.pyz_extracted" / "wxq_patch" / "table_catalog.pyc"
         ad_pyc = ext_dir / "PYZ.pyz_extracted" / "wxq_patch" / "adaptive.pyc"

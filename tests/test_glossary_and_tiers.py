@@ -12,6 +12,7 @@ from wxq_patch import translation_rules as runtime_rules
 from acepatchindo.glossary import WINDOWS_108_ZH_TO_ID, ThreeTierGlossary
 from acepatchindo.hybrid_classifier import HybridClassifier
 from acepatchindo.validator import PLACEHOLDER_RE, TAG_RE, validate_translation
+from acepatchindo.windows_108_split import WINDOWS_108_TARGET_DESC_ID
 
 ROOT = Path(__file__).resolve().parents[1]
 REFS_DIR = ROOT / "data" / "references"
@@ -143,8 +144,8 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
             if PROSE_CALQUE_RE.search(stripped):
                 target_stopword_hits += 1
 
-    assert target_count >= 4700, (
-        f"Expected >= 4,700 target gameplay descriptions in unique, got {target_count}"
+    assert target_count >= 4000, (
+        f"Expected >= 4,000 target gameplay descriptions in unique, got {target_count}"
     )
     assert target_stopword_hits < 50, (
         f"Expected < 50 prose calque hits in target descriptions, got {target_stopword_hits}"
@@ -175,13 +176,20 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
 
     empty_tag_re = re.compile(r"<(color=[^>]+|b|i|a[^>]*|size=[^>]+)>\s*</(?:color|b|i|a|size)>")
     for zh_src, id_val in cat["unique"].items():
-        if empty_tag_re.search(id_val) and not empty_tag_re.search(zh_src):
-            raise AssertionError(f"Empty tag shell in unique: {id_val!r} for {zh_src!r}")
+        if classifier.is_target_unique(zh_src):
+            if empty_tag_re.search(id_val) and not empty_tag_re.search(zh_src):
+                raise AssertionError(f"Empty tag shell in target unique: {id_val!r} for {zh_src!r}")
+        else:
+            orig_en = orig_cat["unique"].get(zh_src, "")
+            if empty_tag_re.search(id_val) and not empty_tag_re.search(orig_en):
+                raise AssertionError(f"New empty tag shell in non-target unique: {id_val!r} for {zh_src!r}")
+
     for r in cat["english_updates"]:
         src_val = r[4] if len(r) == 5 else r[2]
         id_val = r[3]
-        if empty_tag_re.search(id_val) and not empty_tag_re.search(src_val):
-            raise AssertionError(f"Empty tag shell in english_updates: {id_val!r} for {src_val!r}")
+        if classifier.is_target_update(r[0], r[1], r[2], r[3], src_val):
+            if empty_tag_re.search(id_val) and not empty_tag_re.search(src_val):
+                raise AssertionError(f"Empty tag shell in target english_updates: {id_val!r} for {src_val!r}")
 
     glued_words = ["untuksetiap", "secaraacak", "sebelumnyaLevel", "KartuAncientCoin", "SetiapkaliHero"]
     for gw in glued_words:
@@ -270,10 +278,13 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
     ]
     for ft in phase5_forbidden:
         ft_low = ft.lower()
-        for v in cat["unique"].values():
-            assert ft_low not in v.lower(), f"Found forbidden Phase 5 term '{ft}' in unique: {v}"
+        for zh, v in cat["unique"].items():
+            if classifier.is_target_unique(zh) or ft != "4Chang":
+                assert ft_low not in v.lower(), f"Found forbidden Phase 5 term '{ft}' in unique: {v}"
         for r in cat["english_updates"]:
-            assert ft_low not in r[3].lower(), f"Found forbidden Phase 5 term '{ft}' in english_updates: {r[3]}"
+            src_val = r[4] if len(r) == 5 else r[2]
+            if classifier.is_target_update(r[0], r[1], r[2], r[3], src_val) or ft != "4Chang":
+                assert ft_low not in r[3].lower(), f"Found forbidden Phase 5 term '{ft}' in english_updates: {r[3]}"
 
     # In Phase 6 (Hybrid Gameplay Edition), target gameplay descriptions translated to ID
     # must have zero glued tag boundaries. Non-target strings keep their authentic English baseline
@@ -301,6 +312,77 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
     assert arthur_src in cat["unique"], "Arthur skill missing in unique"
     assert not cat["unique"][arthur_src].startswith("<color=#d487e4>Arthur")
     assert "<color=#d487e4>Magic Damage" in cat["unique"][arthur_src]
+
+    # Phase 6 Remediation Verifications:
+    t1_data = json.loads((REFS_DIR / "tier1_wiki_id.json").read_text(encoding="utf-8"))
+    ref_hero_skill_talent_lord_zh: set[str] = set()
+    for h in t1_data.get("hero", []):
+        if h.get("descCn"):
+            ref_hero_skill_talent_lord_zh.add(h["descCn"].strip())
+        if h.get("awaken", {}).get("descCn"):
+            ref_hero_skill_talent_lord_zh.add(h["awaken"]["descCn"].strip())
+        for sk in h.get("skills", []):
+            if sk.get("descCn"):
+                ref_hero_skill_talent_lord_zh.add(sk["descCn"].strip())
+            for enh in sk.get("enh", []):
+                if enh.get("descCn"):
+                    ref_hero_skill_talent_lord_zh.add(enh["descCn"].strip())
+    for t in t1_data.get("talent", []):
+        if t.get("descCn"):
+            ref_hero_skill_talent_lord_zh.add(t["descCn"].strip())
+    for l in t1_data.get("lords", []):
+        for tal in l.get("talents", []):
+            if tal.get("desc"):
+                ref_hero_skill_talent_lord_zh.add(tal["desc"].strip())
+
+    # 1. Assert 0 leaked Tier 1 Equipment descriptions
+    for it in t1_data.get("equip", []):
+        d = (it.get("descCn") or "").strip()
+        if d and d in orig_cat["unique"] and d not in ref_hero_skill_talent_lord_zh and d not in WINDOWS_108_TARGET_DESC_ID:
+            assert cat["unique"][d] == orig_cat["unique"][d], f"Tier 1 equipment leaked into Indonesian: {d!r} -> {cat['unique'][d]!r}"
+
+    # 2. Assert 0 leaked Tier 1 standalone Effect Card descriptions
+    for it in t1_data.get("effect", []):
+        d = (it.get("descCn") or "").strip()
+        if d and d in orig_cat["unique"] and d not in ref_hero_skill_talent_lord_zh and d not in WINDOWS_108_TARGET_DESC_ID:
+            assert cat["unique"][d] == orig_cat["unique"][d], f"Tier 1 effect card leaked into Indonesian: {d!r} -> {cat['unique'][d]!r}"
+
+    # 3. Assert 0 missed Tier 1 Hero, Skill, Skill enh, or Talent descriptions
+    for h in t1_data.get("hero", []):
+        for sk in h.get("skills", []):
+            sk_d = (sk.get("descCn") or "").strip()
+            if sk_d and sk_d in orig_cat["unique"]:
+                assert cat["unique"][sk_d] != orig_cat["unique"][sk_d], f"Missed skill translation: {sk_d!r}"
+            for enh in sk.get("enh", []):
+                enh_d = (enh.get("descCn") or "").strip()
+                if enh_d and enh_d in orig_cat["unique"]:
+                    assert cat["unique"][enh_d] != orig_cat["unique"][enh_d], f"Missed skill enh translation: {enh_d!r}"
+    for t in t1_data.get("talent", []):
+        t_d = (t.get("descCn") or "").strip()
+        if t_d and t_d in orig_cat["unique"]:
+            assert cat["unique"][t_d] != orig_cat["unique"][t_d], f"Missed talent translation: {t_d!r}"
+
+    # 4. Assert 0 occurrences of mangled embedded names or leaked strings
+    forbidden_leak_terms = [
+        "Maple Menari",
+        "Moment dari Epiphany",
+        "Serigala Jiwa",
+        "Kekacauan Celah",
+        "Physical darah-sucking",
+        "Netral{0}/{1}",
+        "Memilih atas target",
+        "di sana adalah",
+        "Chang Xiao'Skill",
+        "Milady Memanggil Lineup",
+        "I. Event Aturan",
+    ]
+    for flt in forbidden_leak_terms:
+        flt_low = flt.lower()
+        for v in cat["unique"].values():
+            assert flt_low not in v.lower(), f"Found leaked/mangled term {flt!r} in unique: {v}"
+        for r in cat["english_updates"]:
+            assert flt_low not in r[3].lower(), f"Found leaked/mangled term {flt!r} in english_updates: {r[3]}"
+
 
 
 

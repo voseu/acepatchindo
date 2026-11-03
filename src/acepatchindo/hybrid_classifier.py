@@ -11,7 +11,7 @@ Strictly classifies catalog strings into:
    - Standalone Names/Titles (Hero, Skill, Talent, Lord, Equipment, Effect Card names)
    - Equipment items and summaries (#ADCF, #D891, #C32E, #1881)
    - Standalone Effect Cards
-   - UI, Menus, Settings, Lobby, Shop, Tutorials, Loading Tips (#341F), Events, Missions,
+   - UI, Menus, Settings, Lobby, Shop, Tutorials (#D262, #7D6E), Loading Tips (#341F), Events, Missions,
      Achievements (#637E), Quick-Chat, Rank Titles, Cosmetics (#E2B0), General Rules (#A360, #1F89)
    - Exactly the 90 Windows missing non-target strings in WINDOWS_108_NONTARGET_EN
 """
@@ -19,9 +19,9 @@ Strictly classifies catalog strings into:
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
 
+from acepatchindo.tag_aligner import normalize_plain_zh
 from acepatchindo.windows_108_split import (
     WINDOWS_108_NONTARGET_EN,
     WINDOWS_108_TARGET_DESC_ID,
@@ -31,25 +31,30 @@ DEFAULT_INDEX_PATH = (
     Path(__file__).resolve().parents[2] / "data" / "references" / "hybrid_vfs_index.json"
 )
 
+ALLOWED_TARGET_PREFIXES: frozenset[str] = frozenset(
+    {
+        # Card Family (12)
+        "23F7", "8E55", "FBF3", "5AD1", "801D", "BC6D",
+        "5A2E", "1825", "FCC7", "6D3B", "6E60", "60D2",
+        # True Skill Family (5)
+        "FCCD", "99AB", "4853", "865D", "CE46",
+        # Talent & Contestant Trait Family (12)
+        "BCDE", "75CA", "9344", "31CF", "A40D", "BE08",
+        "1632", "E222", "E378", "0977", "BF5A", "CEDB",
+        # Mode Talent, Hotfix & Contestant Overview (3)
+        "0955", "2394", "5CFD",
+    }
+)
+
 CARD_TAGS: frozenset[str] = frozenset(
-    {"23F7", "8E55", "FBF3", "5AD1", "801D", "BC6D", "5A2E", "1825", "FCC7", "6D3B", "6E60"}
+    {"23F7", "8E55", "FBF3", "5AD1", "801D", "BC6D", "5A2E", "1825", "FCC7", "6D3B", "6E60", "60D2"}
 )
 SKILL_TAGS: frozenset[str] = frozenset(
     {"FCCD", "99AB", "4853", "865D", "CE46"}
 )
 TALENT_TAGS: frozenset[str] = frozenset(
-    {"0955", "2394", "BCDE", "7D6E", "5CFD", "D262"}
+    {"BCDE", "75CA", "9344", "31CF", "A40D", "BE08", "1632", "E222", "E378", "0977", "BF5A", "CEDB", "0955", "2394", "5CFD"}
 )
-VETO_TAGS: frozenset[str] = frozenset(
-    {"ADCF", "D891", "C32E", "1881", "341F", "A360", "1F89", "637E", "E2B0"}
-)
-
-NORM_ZH_RE = re.compile(r"[\s\d\[\]【】{}|%pPqQ_.:：,，。！？!#═╬]+")
-
-
-def normalize_zh_skeleton(s: str) -> str:
-    """Strip punctuation, numbers, and tags to allow fuzzy skeleton matching."""
-    return NORM_ZH_RE.sub("", s)
 
 
 class HybridClassifier:
@@ -67,8 +72,13 @@ class HybridClassifier:
         self.vfs_veto_keys: frozenset[str] = frozenset(data.get("vfs_veto_keys", []))
         self.vfs_veto_zh: frozenset[str] = frozenset(data.get("vfs_veto_zh", []))
         self.ref_target_zh: frozenset[str] = frozenset(data.get("ref_target_zh", []))
-        self.ref_target_norm: frozenset[str] = frozenset(data.get("ref_target_norm", []))
+        self.ref_target_plain: frozenset[str] = frozenset(data.get("ref_target_plain", []))
+        self.nontarget_table_zh: frozenset[str] = frozenset(data.get("nontarget_table_zh", []))
         self.veto_names_zh: frozenset[str] = frozenset(data.get("veto_names_zh", []))
+        self.veto_equip_zh: frozenset[str] = frozenset(data.get("veto_equip_zh", []))
+        self.veto_equip_plain: frozenset[str] = frozenset(data.get("veto_equip_plain", []))
+        self.veto_effect_zh: frozenset[str] = frozenset(data.get("veto_effect_zh", []))
+        self.veto_effect_plain: frozenset[str] = frozenset(data.get("veto_effect_plain", []))
 
     def is_target_unique(self, zh_src: str, en_base: str = "") -> bool:
         """Return True if a unique Chinese string is a target gameplay description."""
@@ -76,47 +86,26 @@ class HybridClassifier:
         if not zh_clean:
             return False
 
-        # 1. Hard vetoes: non-target 108, known entity names, VFS vetoes
+        # 1. Hard vetoes: non-target 108, known entity names, equipment, effect cards
         if zh_clean in WINDOWS_108_NONTARGET_EN or zh_clean in self.veto_names_zh:
             return False
-        if zh_clean in self.vfs_veto_zh:
+        if zh_clean in self.veto_equip_zh or zh_clean in self.veto_effect_zh:
             return False
 
-        # Short strings <= 4 chars without punctuation/verbs are names or tags
-        if len(zh_clean) <= 4 and not any(c in zh_clean for c in "：:。，,!！?？"):
+        p_zh = normalize_plain_zh(zh_clean)
+        if p_zh in self.veto_equip_plain or p_zh in self.veto_effect_plain:
             return False
 
-        # Voice quotes and audio lines stay English
-        if zh_clean.endswith("！") or zh_clean.endswith("!") or "技能-" in zh_clean:
-            if not ("造成" in zh_clean or "恢复" in zh_clean or "获得" in zh_clean):
-                return False
-
-        # 2. Positive inclusions
-        if zh_clean in WINDOWS_108_TARGET_DESC_ID:
-            return True
-        if zh_clean in self.ref_target_zh or normalize_zh_skeleton(zh_clean) in self.ref_target_norm:
-            return True
-        if zh_clean in self.vfs_target_zh:
+        # 2. Authoritative positive references (checked BEFORE nontarget_table_zh!)
+        if zh_clean in WINDOWS_108_TARGET_DESC_ID or zh_clean in self.ref_target_zh:
             return True
 
-        # Gameplay mechanics pattern matching (Hero skills, combat rules, formulas)
-        if any(m in zh_clean for m in ("被动：", "主动：", "被动:", "主动:", "融合技：", "融合技:", "战歌：")):
-            return True
-        if re.search(r"\[\d+p\d+q\d+[^\]]*\]", zh_clean) or re.search(r"\[[0-9]\]%", zh_clean):
-            return True
-        if any(
-            kw in zh_clean
-            for kw in (
-                "物理伤害", "法术伤害", "真实伤害",
-                "物理攻击力", "法术攻击力", "物理攻击", "法术攻击",
-                "物理防御", "法术防御",
-                "临时等级", "真实等级", "英雄等级",
-                "生命值", "最大生命", "法力值", "护盾",
-                "回合开始时", "回合结束时", "战斗开始时",
-                "英雄牌", "连续施法", "共战时", "战歌：",
-                "牺牲", "召唤",
-            )
-        ):
+        # 3. Hard isolation against all ~470 non-target tables
+        if zh_clean in self.nontarget_table_zh:
+            return False
+
+        # 4. Target VFS strings or normalized reference match
+        if zh_clean in self.vfs_target_zh or p_zh in self.ref_target_plain:
             return True
 
         return False
@@ -133,47 +122,27 @@ class HybridClassifier:
         tag = key[1:5] if key.startswith("#") and len(key) >= 5 else ""
         suffix = key[5:17] if key.startswith("#") and len(key) >= 17 else ""
 
-        # 1. Veto checks
-        if key in self.vfs_veto_keys or tag in VETO_TAGS:
-            return False
-        if opt_zh and (
-            opt_zh in self.veto_names_zh
-            or opt_zh in WINDOWS_108_NONTARGET_EN
-            or opt_zh in self.vfs_veto_zh
-        ):
+        # 1. Immediate rejection if not in allowed target prefixes
+        if tag not in ALLOWED_TARGET_PREFIXES:
             return False
 
-        # 2. Direct VFS key match
+        # 2. Veto check
+        if key in self.vfs_veto_keys:
+            return False
+
+        # 3. If Chinese source string is provided, use is_target_unique directly
+        if opt_zh:
+            return self.is_target_unique(opt_zh, target_en)
+
+        # 4. If no Chinese source string, fall back to key and structural heuristics
         if key in self.vfs_target_keys:
             return True
-
-        # 3. Card table family (Hero cards matching 425 hero suffixes)
-        if tag in CARD_TAGS and suffix in self.hero_suffixes:
-            if opt_zh:
-                if len(opt_zh) >= 10 and not opt_zh.startswith("效果") and not opt_zh.startswith("装备"):
-                    return True
-            elif len(target_en) >= 20:
+        if tag in CARD_TAGS - {"60D2"} and suffix in self.hero_suffixes:
+            if len(target_en) >= 15:
                 return True
-
-        # 4. True skill tables
         if tag in SKILL_TAGS:
-            if opt_zh:
-                if len(opt_zh) >= 10 and not opt_zh.endswith("！") and not opt_zh.endswith("!"):
-                    return True
-            elif len(target_en) >= 20 and not target_en.endswith("!"):
+            if len(target_en) >= 18 and not target_en.endswith("!") and "Skill-" not in target_en:
                 return True
-
-        # 5. Talent tables
-        if tag in TALENT_TAGS:
-            if opt_zh:
-                if len(opt_zh) >= 10:
-                    return True
-            elif len(target_en) >= 20:
-                return True
-
-        # 6. Fallback to Chinese string classification
-        if opt_zh and self.is_target_unique(opt_zh, target_en):
-            return True
 
         return False
 
@@ -192,7 +161,7 @@ class HybridClassifier:
 
         if zh_src in WINDOWS_108_TARGET_DESC_ID:
             return "contestant_desc"
-        if any(w in zh_src for w in ("棋手", "秘技", "阿离", "乔汐", "武凤", "常小娥")):
+        if any(w in zh_src for w in ("棋手", "秘技", "阿离", "乔汐", "武凤", "常小娥", "安琪拉")):
             return "contestant_desc"
         if any(w in zh_src for w in ("技能", "被动：", "主动：", "物理伤害", "法术伤害")):
             return "skill_desc"
