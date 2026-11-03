@@ -1,4 +1,4 @@
-"""Self-contained Python 3.12 Dual-State (ZH->ID & EN->ID) bytecode generator for wxq_patch.
+"""Self-contained Python 3.12 Dual-State (ZH->ID, EN->ID, ZH->EN, ID->EN) bytecode generator for wxq_patch.
 
 Embeds original marshalled code objects directly as bytes constants so modules execute
 identically both from disk and inside PyInstaller's in-memory PYZ.pyz importer on Windows.
@@ -8,12 +8,14 @@ from __future__ import annotations
 
 
 def render_table_catalog_source(orig_marshal_bytes: bytes) -> str:
-    return f'''"""Dual-state (ZH->ID and EN->ID) table_catalog module for HoK Ace Indonesian Patcher."""
+    return f'''"""Dual-state (ZH->ID, EN->ID, ZH->EN, ID->EN) table_catalog module for Celeslib HoK Ace Patcher."""
 from __future__ import annotations
 
+import copy
 import gzip
 import json
 import marshal
+import os
 from collections import Counter
 from pathlib import Path
 
@@ -25,16 +27,64 @@ _OrigCatalog = Catalog
 
 class Catalog(_OrigCatalog):
     def __init__(self, data: dict) -> None:
+        patch_lang = os.environ.get("CELESLIB_PATCH_LANG", "id").strip().lower()
+        self.patch_lang = "en" if patch_lang == "en" else "id"
+
+        raw_en_to_id = data.get("en_to_id") if isinstance(data.get("en_to_id"), dict) else {{}}
+        raw_id_to_en = data.get("id_to_en") if isinstance(data.get("id_to_en"), dict) else {{
+            v: k for k, v in raw_en_to_id.items() if isinstance(k, str) and isinstance(v, str) and k != v
+        }}
+        raw_zh_to_en = data.get("zh_to_en_gameplay") if isinstance(data.get("zh_to_en_gameplay"), dict) else {{}}
+
+        if self.patch_lang == "en" and (raw_zh_to_en or raw_id_to_en):
+            data = copy.copy(data)
+            if "unique" in data and isinstance(data["unique"], dict):
+                u = dict(data["unique"])
+                for zh_k, en_v in raw_zh_to_en.items():
+                    if zh_k in u:
+                        u[zh_k] = en_v
+                data["unique"] = u
+            if "assets" in data and isinstance(data["assets"], dict):
+                new_assets = {{}}
+                for a_k, a_map in data["assets"].items():
+                    if isinstance(a_map, dict):
+                        am = dict(a_map)
+                        for rec_k, val in list(am.items()):
+                            if isinstance(val, str) and val in raw_id_to_en:
+                                am[rec_k] = raw_id_to_en[val]
+                        new_assets[a_k] = am
+                    else:
+                        new_assets[a_k] = a_map
+                data["assets"] = new_assets
+            if "english_updates" in data and isinstance(data["english_updates"], list):
+                new_eu = []
+                for item in data["english_updates"]:
+                    if isinstance(item, list) and len(item) >= 4 and item[3] in raw_id_to_en:
+                        it = list(item)
+                        it[3] = raw_id_to_en[item[3]]
+                        new_eu.append(it)
+                    elif isinstance(item, dict) and item.get("target") in raw_id_to_en:
+                        it = dict(item)
+                        it["target"] = raw_id_to_en[item["target"]]
+                        new_eu.append(it)
+                    else:
+                        new_eu.append(item)
+                data["english_updates"] = new_eu
+
         super().__init__(data)
-        raw_en_map = data.get("en_to_id")
-        if isinstance(raw_en_map, dict):
+
+        if self.patch_lang == "en":
             self.en_to_id: dict[str, str] = {{
                 k: v
-                for k, v in raw_en_map.items()
+                for k, v in raw_id_to_en.items()
                 if isinstance(k, str) and isinstance(v, str) and k != v and k not in self.targets
             }}
         else:
-            self.en_to_id = {{}}
+            self.en_to_id = {{
+                k: v
+                for k, v in raw_en_to_id.items()
+                if isinstance(k, str) and isinstance(v, str) and k != v and k not in self.targets
+            }}
 
 
 def load_catalog(path: Path) -> Catalog:
@@ -124,10 +174,11 @@ def translate_table(
 
 
 def render_adaptive_source(orig_marshal_bytes: bytes) -> str:
-    return f'''"""Auto-restore Chinese originals before installing Indonesian patch if prior receipt matches."""
+    return f'''"""Auto-restore Chinese originals before installing patch if prior receipt or mode differs."""
 from __future__ import annotations
 
 import marshal
+import os
 from pathlib import Path
 
 _ORIG_MARSHAL = {orig_marshal_bytes!r}
@@ -166,7 +217,7 @@ _ID_MESSAGE_REPLACEMENTS: tuple[tuple[str, str], ...] = (
     ),
     (
         "English files are installed, but launcher file-size metadata needs repair.",
-        "File Bahasa Indonesia sudah terpasang, tetapi metadata ukuran file launcher perlu diperbaiki.",
+        "File terjemahan sudah terpasang, tetapi metadata ukuran file launcher perlu diperbaiki.",
     ),
     (
         "Installed package metadata repaired; translated files were already installed.",
@@ -201,41 +252,101 @@ _ID_MESSAGE_REPLACEMENTS: tuple[tuple[str, str], ...] = (
 
 
 def _localize_report_message(report: dict) -> dict:
-    if isinstance(report, dict) and isinstance(report.get("message"), str):
-        msg = report["message"]
-        for en_sub, id_sub in _ID_MESSAGE_REPLACEMENTS:
-            if en_sub in msg:
-                msg = msg.replace(en_sub, id_sub)
+    if not (isinstance(report, dict) and isinstance(report.get("message"), str)):
+        return report
+    msg = report["message"]
+    ui_lang = os.environ.get("CELESLIB_UI_LANG", "id").strip().lower()
+    patch_lang = os.environ.get("CELESLIB_PATCH_LANG", "id").strip().lower()
+
+    if ui_lang == "en":
+        if patch_lang == "id":
+            msg = msg.replace(
+                "English installed and verified. Unknown text was preserved.",
+                "Indonesian Hybrid patch installed and verified. Unknown text was preserved.",
+            ).replace(
+                "English installed and verified.",
+                "Indonesian Hybrid patch installed and verified.",
+            ).replace(
+                "English files are installed",
+                "Indonesian Hybrid files are installed",
+            )
+        else:
+            msg = msg.replace(
+                "English installed and verified. Unknown text was preserved.",
+                "Full English patch installed and verified. Unknown text was preserved.",
+            ).replace(
+                "English installed and verified.",
+                "Full English patch installed and verified.",
+            ).replace(
+                "English files are installed",
+                "Full English files are installed",
+            )
         report["message"] = msg
+        return report
+
+    # ui_lang == "id" (default)
+    if patch_lang == "en":
+        msg = msg.replace(
+            "English installed and verified. Unknown text was preserved.",
+            "Bahasa Inggris (Full) berhasil dipasang dan diverifikasi. Teks tidak dikenal dipertahankan.",
+        ).replace(
+            "English installed and verified.",
+            "Bahasa Inggris (Full) berhasil dipasang dan diverifikasi.",
+        ).replace(
+            "English files are installed",
+            "File Bahasa Inggris (Full) sudah terpasang",
+        )
+    for en_sub, id_sub in _ID_MESSAGE_REPLACEMENTS:
+        if en_sub in msg:
+            msg = msg.replace(en_sub, id_sub)
+    report["message"] = msg
     return report
 
 
 def _catalog_fingerprint(assets: Path) -> str:
     cat_path = (assets / "catalog.json.gz") if assets.is_dir() else assets
+    patch_lang = os.environ.get("CELESLIB_PATCH_LANG", "id").strip().lower()
     if cat_path.exists():
         import hashlib
-        return hashlib.sha256(cat_path.read_bytes()).hexdigest()
-    return "legacy"
+        sha = hashlib.sha256(cat_path.read_bytes()).hexdigest()
+        return f"{{sha}}:{{patch_lang}}"
+    return f"legacy:{{patch_lang}}"
+
+
+def _find_all_receipt_dirs(resolved_game: Path) -> set[Path]:
+    receipt_dirs: set[Path] = set()
+    try:
+        matches = _matching_restore_items(resolved_game)
+        if matches:
+            for item in matches:
+                if isinstance(item, tuple) and len(item) >= 1 and isinstance(item[0], Path):
+                    receipt_dirs.add(item[0].parent)
+                elif isinstance(item, Path):
+                    receipt_dirs.add(item.parent if item.is_file() else item)
+    except Exception:
+        pass
+
+    try:
+        root = receipt_root(resolved_game)
+        roots = [root]
+        root_str = str(root)
+        if "HoK Ace English Patch" in root_str:
+            roots.append(Path(root_str.replace("HoK Ace English Patch", "Celeslib/HoK Ace Patcher")))
+        elif "Celeslib" in root_str:
+            roots.append(Path(root_str.replace("Celeslib/HoK Ace Patcher", "HoK Ace English Patch")))
+        for r in roots:
+            if r.exists():
+                for r_json in r.glob("*/receipt.json"):
+                    receipt_dirs.add(r_json.parent)
+    except Exception:
+        pass
+
+    return receipt_dirs
 
 
 def _needs_pre_install_restore(resolved_game: Path, cat_sha: str) -> bool:
     try:
-        matches = _matching_restore_items(resolved_game)
-        if not matches:
-            return False
-        receipt_dirs: set[Path] = set()
-        for item in matches:
-            if isinstance(item, tuple) and len(item) >= 1 and isinstance(item[0], Path):
-                receipt_dirs.add(item[0].parent)
-            elif isinstance(item, Path):
-                receipt_dirs.add(item.parent if item.is_file() else item)
-
-        if not receipt_dirs:
-            root = receipt_root(resolved_game)
-            if root.exists():
-                for r_json in root.glob("*/receipt.json"):
-                    receipt_dirs.add(r_json.parent)
-
+        receipt_dirs = _find_all_receipt_dirs(resolved_game)
         if not receipt_dirs:
             return False
 
@@ -251,11 +362,9 @@ def _needs_pre_install_restore(resolved_game: Path, cat_sha: str) -> bool:
 
 def _stamp_receipt_catalog_sha(resolved_game: Path, cat_sha: str) -> None:
     try:
-        root = receipt_root(resolved_game)
-        if not root.exists():
-            return
-        for r_json in root.glob("*/receipt.json"):
-            sha_file = r_json.parent / "patcher_catalog_sha256.txt"
+        receipt_dirs = _find_all_receipt_dirs(resolved_game)
+        for r_dir in receipt_dirs:
+            sha_file = r_dir / "patcher_catalog_sha256.txt"
             sha_file.write_text(cat_sha, encoding="utf-8")
     except Exception:
         pass

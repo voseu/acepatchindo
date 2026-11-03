@@ -14,6 +14,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ORIG_EXE = ROOT / "reff" / "Honor of Kings Ace English Patcher 1.4.12.exe"
 ORIG_PYZ = ROOT / "Honor of Kings Ace English Patcher 1.4.12.exe_extracted" / "PYZ.pyz"
+ORIG_CATALOG_GZ = (
+    ROOT
+    / "Honor of Kings Ace English Patcher 1.4.12.exe_extracted"
+    / "catalog"
+    / "catalog.json.gz"
+)
 WXQ_DIR = ROOT / "extracted_source" / "wxq_patch"
 ID_CATALOG_GZ = ROOT / "data" / "catalog_checkpoints" / "catalog.json.gz"
 EN_TO_ID_JSON = ROOT / "data" / "catalog_checkpoints" / "en_to_id_map.json"
@@ -54,7 +60,20 @@ GUI_STRING_PATCHES: tuple[tuple[bytes, bytes], ...] = (
 def build_combined_catalog_gz() -> bytes:
     with gzip.open(ID_CATALOG_GZ, "rt", encoding="utf-8") as f:
         payload = json.load(f)
-    payload["en_to_id"] = json.loads(EN_TO_ID_JSON.read_text(encoding="utf-8"))
+    en_to_id = json.loads(EN_TO_ID_JSON.read_text(encoding="utf-8"))
+    payload["en_to_id"] = en_to_id
+    payload["id_to_en"] = {v: k for k, v in en_to_id.items() if k != v}
+
+    if ORIG_CATALOG_GZ.exists():
+        with gzip.open(ORIG_CATALOG_GZ, "rt", encoding="utf-8") as f:
+            orig_cat = json.load(f)
+        orig_unique = orig_cat.get("unique", {})
+        cur_unique = payload.get("unique", {})
+        payload["zh_to_en_gameplay"] = {
+            zh: en_val
+            for zh, en_val in orig_unique.items()
+            if zh in cur_unique and cur_unique[zh] != en_val
+        }
     raw_json = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode(
         "utf-8"
     )

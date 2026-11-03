@@ -162,7 +162,7 @@ def test_adaptive_unconditionally_restores_v1_full_id_when_catalog_sha_differs(
     assert sha_file.exists()
     assert (
         sha_file.read_text(encoding="utf-8").strip()
-        == hashlib.sha256(b"initial_catalog_bytes_v1").hexdigest()
+        == f"{hashlib.sha256(b'initial_catalog_bytes_v1').hexdigest()}:id"
     )
 
     # 2. Second run: matching catalog SHA is idempotent (no redundant restore)
@@ -179,7 +179,82 @@ def test_adaptive_unconditionally_restores_v1_full_id_when_catalog_sha_differs(
     assert res3["action"] == "install"
     assert (
         sha_file.read_text(encoding="utf-8").strip()
-        == hashlib.sha256(b"modified_catalog_bytes_v2").hexdigest()
+        == f"{hashlib.sha256(b'modified_catalog_bytes_v2').hexdigest()}:id"
     )
+
+
+def test_dual_state_patch_lang_switch_id_and_en(monkeypatch) -> None:
+    # Test catalog data with dual maps
+    data = {
+        "schema": 1,
+        "version": "1.4.12",
+        "baseline_occurrences": 0,
+        "reviewed_updates": 0,
+        "contextual": [],
+        "graphics": [],
+        "table_hashes": [],
+        "assets": {},
+        "unique": {
+            "普攻": "Serangan Dasar",  # Chinese -> Indonesian
+        },
+        "english_updates": [],
+        "en_to_id": {
+            "Basic Attack": "Serangan Dasar",
+        },
+        "id_to_en": {
+            "Serangan Dasar": "Basic Attack",
+        },
+        "zh_to_en_gameplay": {
+            "普攻": "Basic Attack",
+        },
+    }
+
+    # 1. Mode ID: translates Chinese & English to Indonesian
+    monkeypatch.setenv("CELESLIB_PATCH_LANG", "id")
+    cat_id = table_catalog.Catalog(data)
+    assert getattr(cat_id, "patch_lang", "id") == "id"
+
+    zh_proto = _make_wxq_table_record("skill_desc_1", "普攻")
+    res_zh_id, stats_zh_id = table_catalog.translate_table(zh_proto, 0x1, cat_id)
+    assert res_zh_id is not None
+    assert "Serangan Dasar".encode("utf-8") in res_zh_id
+    assert stats_zh_id["translated"] == 1
+
+    en_proto = _make_wxq_table_record("skill_desc_2", "Basic Attack")
+    res_en_id, stats_en_id = table_catalog.translate_table(en_proto, 0x1, cat_id)
+    assert res_en_id is not None
+    assert "Serangan Dasar".encode("utf-8") in res_en_id
+    assert stats_en_id["translated"] == 1
+
+    # 2. Mode EN: translates Chinese & Indonesian back to 100% English
+    monkeypatch.setenv("CELESLIB_PATCH_LANG", "en")
+    cat_en = table_catalog.Catalog(data)
+    assert getattr(cat_en, "patch_lang", "id") == "en"
+
+    res_zh_en, stats_zh_en = table_catalog.translate_table(zh_proto, 0x1, cat_en)
+    assert res_zh_en is not None
+    assert "Basic Attack".encode("utf-8") in res_zh_en
+    assert stats_zh_en["translated"] == 1
+
+    id_proto = _make_wxq_table_record("skill_desc_3", "Serangan Dasar")
+    res_id_en, stats_id_en = table_catalog.translate_table(id_proto, 0x1, cat_en)
+    assert res_id_en is not None
+    assert "Basic Attack".encode("utf-8") in res_id_en
+    assert stats_id_en["translated"] == 1
+
+    # 3. UI Language localization
+    monkeypatch.setenv("CELESLIB_UI_LANG", "en")
+    monkeypatch.setenv("CELESLIB_PATCH_LANG", "id")
+    rep_en_ui = adaptive._localize_report_message({
+        "message": "English installed and verified. Unknown text was preserved."
+    })
+    assert "Indonesian Hybrid patch installed" in rep_en_ui["message"]
+
+    monkeypatch.setenv("CELESLIB_UI_LANG", "id")
+    rep_id_ui = adaptive._localize_report_message({
+        "message": "English installed and verified. Unknown text was preserved."
+    })
+    assert "Bahasa Indonesia berhasil dipasang" in rep_id_ui["message"]
+
 
 
