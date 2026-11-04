@@ -62,9 +62,9 @@ Rilis resmi pertama **Celeslib Honor of Kings: Ace Patcher v1.0.0** (`Celeslib-H
 ### Verifikasi Berkas & Checksum SHA-256
 
 ```text
-2f0a4bb02f9ccdd91feb95ad8eb04296c62877386b0f3dd61b84da525acff1fa  Celeslib-HoK-Ace-Patcher-v1.0.0.exe
-2f0a4bb02f9ccdd91feb95ad8eb04296c62877386b0f3dd61b84da525acff1fa  Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe
-abbfffec6bab992b31c25e32dc8a33571fd5f279033185f84361af87632253f2  ace-worker.exe (embedded @ offset 0x11B662..0x3489618)
+bb52ffcde848e0988698512aa2e64f6617d6733fc4b2ce5f7ea9148d69cc0d9e  Celeslib-HoK-Ace-Patcher-v1.0.0.exe
+bb52ffcde848e0988698512aa2e64f6617d6733fc4b2ce5f7ea9148d69cc0d9e  Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe
+abbfffec6bab992b31c25e32dc8a33571fd5f279033185f84361af87632253f2  ace-worker.exe (embedded @ offset 0x11CC62..0x348AC18)
 ```
 """
 

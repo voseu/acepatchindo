@@ -86,3 +86,14 @@ def test_preview_pngs_integrity_and_no_missing_glyphs() -> None:
             dot_pixel = rgb_im.getpixel((24, 604))
             assert dot_pixel == (34, 197, 94), f"Expected #22C55E status dot, got {dot_pixel}"
 
+
+def test_no_dangling_temporary_iterators_or_null_browseinfo() -> None:
+    cpp_src = (ROOT / "src" / "gui" / "celeslib_gui.cpp").read_text(encoding="utf-8")
+    # Must never pass .begin() and .end() from two separate temporary cmd.str() calls
+    assert "cmd.str().begin()" not in cpp_src
+    assert "cmd.str().end()" not in cpp_src
+    # Must provide non-NULL pszDisplayName buffer and OleInitialize for SHBrowseForFolderW
+    assert "bi.pszDisplayName = display_name;" in cpp_src
+    assert "OleInitialize(NULL);" in cpp_src
+
+

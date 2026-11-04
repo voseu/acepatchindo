@@ -172,29 +172,31 @@ WorkerResult ParseWorkerResult(const std::wstring& json_file_path) {
         std::string pattern = "\"" + key + "\"";
         size_t p = json.find(pattern);
         if (p == std::string::npos) return "";
-        p = json.find(':', p);
+        p = json.find(':', p + pattern.size());
         if (p == std::string::npos) return "";
-        p = json.find('"', p);
-        if (p == std::string::npos) return "";
-        size_t start = p + 1;
-        size_t end = start;
-        while (end < json.size()) {
-            if (json[end] == '"' && json[end - 1] != '\\') break;
-            end++;
+        size_t pos = p + 1;
+        while (pos < json.size() && (json[pos] == ' ' || json[pos] == '\t' || json[pos] == '\r' || json[pos] == '\n')) {
+            pos++;
         }
-        if (end > json.size()) return "";
-        std::string raw = json.substr(start, end - start);
+        if (pos >= json.size() || json[pos] != '"') return "";
+        size_t i = pos + 1;
         std::string unescaped;
-        for (size_t i = 0; i < raw.size(); ++i) {
-            if (raw[i] == '\\' && i + 1 < raw.size()) {
-                if (raw[i + 1] == '"') { unescaped += '"'; i++; }
-                else if (raw[i + 1] == '\\') { unescaped += '\\'; i++; }
-                else if (raw[i + 1] == 'n') { unescaped += '\n'; i++; }
-                else if (raw[i + 1] == 'r') { unescaped += '\r'; i++; }
-                else if (raw[i + 1] == 't') { unescaped += '\t'; i++; }
-                else unescaped += raw[i];
+        while (i < json.size()) {
+            if (json[i] == '\\' && i + 1 < json.size()) {
+                char next = json[i + 1];
+                if (next == '"') unescaped += '"';
+                else if (next == '\\') unescaped += '\\';
+                else if (next == '/') unescaped += '/';
+                else if (next == 'n') unescaped += '\n';
+                else if (next == 'r') unescaped += '\r';
+                else if (next == 't') unescaped += '\t';
+                else unescaped += next;
+                i += 2;
+            } else if (json[i] == '"') {
+                break;
             } else {
-                unescaped += raw[i];
+                unescaped += json[i];
+                i++;
             }
         }
         return unescaped;
@@ -424,234 +426,329 @@ int RunWorkerProcessSync(const std::wstring& cmd_str, std::wstring& out_stdout) 
 
 // Asynchronously execute worker action with exact adaptive CLI protocol and result.json parsing
 void ExecuteWorkerAction(const std::wstring& action, const std::wstring& game_path) {
-    if (g_state.is_busy) return;
-    g_state.is_busy = true;
-    g_state.status_text = (g_state.ui_lang == UiLang::EN) ? L"WORKING" : L"MEMPROSES";
-    g_state.status_color = Theme::AccentYellow;
+    {
+        std::lock_guard<std::mutex> lock(g_state.mtx);
+        if (g_state.is_busy) return;
+        g_state.is_busy = true;
+        g_state.status_text = (g_state.ui_lang == UiLang::EN) ? L"WORKING" : L"MEMPROSES";
+        g_state.status_color = Theme::AccentYellow;
+    }
     if (g_hwnd) InvalidateRect(g_hwnd, NULL, FALSE);
 
     std::thread([action, game_path]() {
-        std::wstring worker_path;
-        if (!LocateAndExtractWorker(worker_path)) {
-            AppendLog(L"[ERROR] Gagal mengekstrak worker engine!");
-            g_state.is_busy = false;
-            g_state.status_text = (g_state.ui_lang == UiLang::EN) ? L"ERROR" : L"GALAT";
-            g_state.status_color = Theme::AccentRed;
-            if (g_hwnd) InvalidateRect(g_hwnd, NULL, FALSE);
-            return;
-        }
+        try {
+            std::wstring worker_path;
+            if (!LocateAndExtractWorker(worker_path)) {
+                AppendLog(L"[ERROR] Gagal mengekstrak worker engine!");
+                {
+                    std::lock_guard<std::mutex> lock(g_state.mtx);
+                    g_state.is_busy = false;
+                    g_state.status_text = (g_state.ui_lang == UiLang::EN) ? L"ERROR" : L"GALAT";
+                    g_state.status_color = Theme::AccentRed;
+                }
+                if (g_hwnd) InvalidateRect(g_hwnd, NULL, FALSE);
+                return;
+            }
 
-        std::wstring app_data = GetCeleslibAppDataDir();
-        std::wstring work_dir = app_data + L"\\work";
-        CreateDirectoryW(work_dir.c_str(), NULL);
-        std::wstring result_path = work_dir + L"\\result.json";
-        DeleteFileW(result_path.c_str());
+            std::wstring app_data = GetCeleslibAppDataDir();
+            std::wstring work_dir = app_data + L"\\work";
+            CreateDirectoryW(work_dir.c_str(), NULL);
+            std::wstring result_path = work_dir + L"\\result.json";
+            DeleteFileW(result_path.c_str());
 
-        // Set environmental language triggers
-        SetEnvironmentVariableW(L"CELESLIB_UI_LANG", g_state.ui_lang == UiLang::EN ? L"en" : L"id");
-        SetEnvironmentVariableW(L"CELESLIB_PATCH_LANG", g_state.patch_mode == PatchMode::EN_FULL ? L"en" : L"id");
+            UiLang cur_ui_lang;
+            PatchMode cur_patch_mode;
+            {
+                std::lock_guard<std::mutex> lock(g_state.mtx);
+                cur_ui_lang = g_state.ui_lang;
+                cur_patch_mode = g_state.patch_mode;
+            }
 
-        std::wstringstream cmd;
-        cmd << L"\"" << worker_path << L"\" " << action
-            << L" --work \"" << work_dir << L"\""
-            << L" --result \"" << result_path << L"\"";
-        if (!game_path.empty() && action != L"discover") {
-            cmd << L" --game-dir \"" << game_path << L"\"";
-        }
+            // Set environmental language triggers
+            SetEnvironmentVariableW(L"CELESLIB_UI_LANG", cur_ui_lang == UiLang::EN ? L"en" : L"id");
+            SetEnvironmentVariableW(L"CELESLIB_PATCH_LANG", cur_patch_mode == PatchMode::EN_FULL ? L"en" : L"id");
 
-        AppendLog(L"[INFO] Menjalankan: " + cmd.str());
+            std::wstringstream cmd;
+            cmd << L"\"" << worker_path << L"\" " << action
+                << L" --work \"" << work_dir << L"\""
+                << L" --result \"" << result_path << L"\"";
+            if (!game_path.empty() && action != L"discover") {
+                cmd << L" --game-dir \"" << game_path << L"\"";
+            }
 
-        SECURITY_ATTRIBUTES sa = { sizeof(sa), NULL, TRUE };
-        HANDLE hRead, hWrite;
-        CreatePipe(&hRead, &hWrite, &sa, 0);
-        SetHandleInformation(hRead, HANDLE_FLAG_INHERIT, 0);
+            std::wstring cmd_str = cmd.str();
+            AppendLog(L"[INFO] Menjalankan: " + cmd_str);
 
-        STARTUPINFOW si = { sizeof(si) };
-        si.dwFlags |= STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
-        si.hStdOutput = hWrite;
-        si.hStdError = hWrite;
-        si.wShowWindow = SW_HIDE;
+            SECURITY_ATTRIBUTES sa = { sizeof(sa), NULL, TRUE };
+            HANDLE hRead = NULL, hWrite = NULL;
+            if (!CreatePipe(&hRead, &hWrite, &sa, 0)) {
+                AppendLog(L"[ERROR] Gagal membuat pipe proses worker!");
+                std::lock_guard<std::mutex> lock(g_state.mtx);
+                g_state.is_busy = false;
+                g_state.status_text = (g_state.ui_lang == UiLang::EN) ? L"ERROR" : L"GALAT";
+                g_state.status_color = Theme::AccentRed;
+                if (g_hwnd) InvalidateRect(g_hwnd, NULL, FALSE);
+                return;
+            }
+            SetHandleInformation(hRead, HANDLE_FLAG_INHERIT, 0);
 
-        PROCESS_INFORMATION pi = { 0 };
-        std::vector<wchar_t> cmd_buf(cmd.str().begin(), cmd.str().end());
-        cmd_buf.push_back(0);
+            STARTUPINFOW si = { sizeof(si) };
+            si.dwFlags |= STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
+            si.hStdOutput = hWrite;
+            si.hStdError = hWrite;
+            si.wShowWindow = SW_HIDE;
 
-        if (CreateProcessW(NULL, cmd_buf.data(), NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
-            CloseHandle(hWrite);
+            PROCESS_INFORMATION pi = { 0 };
+            std::vector<wchar_t> cmd_buf(cmd_str.begin(), cmd_str.end());
+            cmd_buf.push_back(0);
 
-            char buf[512];
-            DWORD read_bytes = 0;
-            std::string line_accum;
-            while (ReadFile(hRead, buf, sizeof(buf) - 1, &read_bytes, NULL) && read_bytes > 0) {
-                buf[read_bytes] = 0;
-                line_accum += buf;
-                size_t nl;
-                while ((nl = line_accum.find('\n')) != std::string::npos) {
-                    std::string single_line = line_accum.substr(0, nl);
-                    if (!single_line.empty() && single_line.back() == '\r') single_line.pop_back();
-                    line_accum.erase(0, nl + 1);
-                    if (!single_line.empty()) {
-                        AppendLog(Utf8ToWide(single_line));
+            if (CreateProcessW(NULL, cmd_buf.data(), NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
+                CloseHandle(hWrite);
+
+                char buf[512];
+                DWORD read_bytes = 0;
+                std::string line_accum;
+                while (ReadFile(hRead, buf, sizeof(buf) - 1, &read_bytes, NULL) && read_bytes > 0) {
+                    buf[read_bytes] = 0;
+                    line_accum += buf;
+                    size_t nl;
+                    while ((nl = line_accum.find('\n')) != std::string::npos) {
+                        std::string single_line = line_accum.substr(0, nl);
+                        if (!single_line.empty() && single_line.back() == '\r') single_line.pop_back();
+                        line_accum.erase(0, nl + 1);
+                        if (!single_line.empty()) {
+                            AppendLog(Utf8ToWide(single_line));
+                        }
                     }
                 }
-            }
-            if (!line_accum.empty()) {
-                AppendLog(Utf8ToWide(line_accum));
-            }
+                if (!line_accum.empty()) {
+                    AppendLog(Utf8ToWide(line_accum));
+                }
 
-            WaitForSingleObject(pi.hProcess, INFINITE);
-            DWORD exit_code = 0;
-            GetExitCodeProcess(pi.hProcess, &exit_code);
-            CloseHandle(pi.hProcess);
-            CloseHandle(pi.hThread);
-            CloseHandle(hRead);
+                WaitForSingleObject(pi.hProcess, INFINITE);
+                DWORD exit_code = 0;
+                GetExitCodeProcess(pi.hProcess, &exit_code);
+                CloseHandle(pi.hProcess);
+                CloseHandle(pi.hThread);
+                CloseHandle(hRead);
 
-            // Read and parse result.json
-            WorkerResult res = ParseWorkerResult(result_path);
-            if (!res.message.empty()) {
+                // Read and parse result.json
+                WorkerResult res = ParseWorkerResult(result_path);
+                if (!res.message.empty()) {
+                    if (exit_code == 0) {
+                        AppendLog(L"[OK] " + res.message);
+                    } else {
+                        AppendLog(L"[ERROR] " + res.message);
+                    }
+                }
+
+                // Auto-update game_dir if discovered
+                if (!res.game_dir.empty()) {
+                    {
+                        std::lock_guard<std::mutex> lock(g_state.mtx);
+                        g_state.game_dir = res.game_dir;
+                    }
+                    AppendLog(L"[INFO] Direktori game terdeteksi: " + res.game_dir);
+                }
+
                 if (exit_code == 0) {
-                    AppendLog(L"[OK] " + res.message);
+                    {
+                        std::lock_guard<std::mutex> lock(g_state.mtx);
+                        const Strings& s = GetStrings(g_state.ui_lang);
+                        if (action == L"restore" || res.state == L"clean") {
+                            g_state.status_text = s.status_originals;
+                            g_state.status_color = Theme::AccentGreen;
+                        } else if (action == L"install" || res.state == L"installed") {
+                            g_state.status_text = s.status_installed;
+                            g_state.status_color = Theme::AccentGreen;
+                        } else {
+                            g_state.status_text = s.status_ready;
+                            g_state.status_color = Theme::AccentGreen;
+                        }
+                    }
+                    AppendLog(L"[OK] Operasi selesai dengan sukses.");
                 } else {
-                    AppendLog(L"[ERROR] " + res.message);
+                    {
+                        std::lock_guard<std::mutex> lock(g_state.mtx);
+                        const Strings& s = GetStrings(g_state.ui_lang);
+                        g_state.status_text = s.status_error;
+                        g_state.status_color = Theme::AccentRed;
+                    }
+                    AppendLog(L"[ERROR] Operasi worker berakhir dengan kode: " + std::to_wstring(exit_code));
                 }
-            }
-
-            // Auto-update game_dir if discovered
-            if (!res.game_dir.empty()) {
-                g_state.game_dir = res.game_dir;
-                AppendLog(L"[INFO] Direktori game terdeteksi: " + res.game_dir);
-            }
-
-            const Strings& s = GetStrings(g_state.ui_lang);
-            if (exit_code == 0) {
-                if (action == L"restore" || res.state == L"clean") {
-                    g_state.status_text = s.status_originals;
-                    g_state.status_color = Theme::AccentGreen;
-                } else if (action == L"install" || res.state == L"installed") {
-                    g_state.status_text = s.status_installed;
-                    g_state.status_color = Theme::AccentGreen;
-                } else {
-                    g_state.status_text = s.status_ready;
-                    g_state.status_color = Theme::AccentGreen;
-                }
-                AppendLog(L"[OK] Operasi selesai dengan sukses.");
             } else {
-                g_state.status_text = s.status_error;
+                CloseHandle(hWrite);
+                CloseHandle(hRead);
+                AppendLog(L"[ERROR] Gagal meluncurkan proses worker!");
+                std::lock_guard<std::mutex> lock(g_state.mtx);
+                g_state.status_text = (g_state.ui_lang == UiLang::EN) ? L"ERROR" : L"GALAT";
                 g_state.status_color = Theme::AccentRed;
-                AppendLog(L"[ERROR] Operasi worker berakhir dengan kode: " + std::to_wstring(exit_code));
             }
-        } else {
-            CloseHandle(hWrite);
-            CloseHandle(hRead);
-            AppendLog(L"[ERROR] Gagal meluncurkan proses worker!");
+        } catch (const std::exception& ex) {
+            AppendLog(L"[ERROR] Exception di thread worker: " + Utf8ToWide(ex.what()));
+            std::lock_guard<std::mutex> lock(g_state.mtx);
+            g_state.status_text = (g_state.ui_lang == UiLang::EN) ? L"ERROR" : L"GALAT";
+            g_state.status_color = Theme::AccentRed;
+        } catch (...) {
+            AppendLog(L"[ERROR] Unknown exception di thread worker!");
+            std::lock_guard<std::mutex> lock(g_state.mtx);
             g_state.status_text = (g_state.ui_lang == UiLang::EN) ? L"ERROR" : L"GALAT";
             g_state.status_color = Theme::AccentRed;
         }
 
-        g_state.is_busy = false;
+        {
+            std::lock_guard<std::mutex> lock(g_state.mtx);
+            g_state.is_busy = false;
+        }
         if (g_hwnd) InvalidateRect(g_hwnd, NULL, FALSE);
     }).detach();
 }
 
 // Asynchronously execute Android (USB) mobile-worker or mobile-recover action
 void ExecuteMobileWorkerAction(const std::wstring& operation) {
-    if (g_state.is_busy) return;
-    g_state.is_busy = true;
-    g_state.status_text = (g_state.ui_lang == UiLang::EN) ? L"WORKING" : L"MEMPROSES";
-    g_state.status_color = Theme::AccentYellow;
+    {
+        std::lock_guard<std::mutex> lock(g_state.mtx);
+        if (g_state.is_busy) return;
+        g_state.is_busy = true;
+        g_state.status_text = (g_state.ui_lang == UiLang::EN) ? L"WORKING" : L"MEMPROSES";
+        g_state.status_color = Theme::AccentYellow;
+    }
     if (g_hwnd) InvalidateRect(g_hwnd, NULL, FALSE);
 
     std::thread([operation]() {
-        std::wstring worker_path;
-        if (!LocateAndExtractWorker(worker_path)) {
-            AppendLog(L"[ERROR] Gagal mengekstrak worker engine!");
-            g_state.is_busy = false;
-            g_state.status_text = (g_state.ui_lang == UiLang::EN) ? L"ERROR" : L"GALAT";
-            g_state.status_color = Theme::AccentRed;
-            if (g_hwnd) InvalidateRect(g_hwnd, NULL, FALSE);
-            return;
-        }
+        try {
+            std::wstring worker_path;
+            if (!LocateAndExtractWorker(worker_path)) {
+                AppendLog(L"[ERROR] Gagal mengekstrak worker engine!");
+                {
+                    std::lock_guard<std::mutex> lock(g_state.mtx);
+                    g_state.is_busy = false;
+                    g_state.status_text = (g_state.ui_lang == UiLang::EN) ? L"ERROR" : L"GALAT";
+                    g_state.status_color = Theme::AccentRed;
+                }
+                if (g_hwnd) InvalidateRect(g_hwnd, NULL, FALSE);
+                return;
+            }
 
-        std::wstring app_data = GetCeleslibAppDataDir();
-        std::wstring work_dir = app_data + L"\\work";
-        CreateDirectoryW(work_dir.c_str(), NULL);
+            std::wstring app_data = GetCeleslibAppDataDir();
+            std::wstring work_dir = app_data + L"\\work";
+            CreateDirectoryW(work_dir.c_str(), NULL);
 
-        SetEnvironmentVariableW(L"CELESLIB_UI_LANG", g_state.ui_lang == UiLang::EN ? L"en" : L"id");
-        SetEnvironmentVariableW(L"CELESLIB_PATCH_LANG", g_state.patch_mode == PatchMode::EN_FULL ? L"en" : L"id");
+            UiLang cur_ui_lang;
+            PatchMode cur_patch_mode;
+            {
+                std::lock_guard<std::mutex> lock(g_state.mtx);
+                cur_ui_lang = g_state.ui_lang;
+                cur_patch_mode = g_state.patch_mode;
+            }
 
-        std::wstringstream cmd;
-        if (operation == L"recover") {
-            cmd << L"\"" << worker_path << L"\" mobile-recover --work \"" << work_dir << L"\"";
-        } else {
-            cmd << L"\"" << worker_path << L"\" mobile-worker --work \"" << work_dir << L"\" --operation " << operation;
-        }
+            SetEnvironmentVariableW(L"CELESLIB_UI_LANG", cur_ui_lang == UiLang::EN ? L"en" : L"id");
+            SetEnvironmentVariableW(L"CELESLIB_PATCH_LANG", cur_patch_mode == PatchMode::EN_FULL ? L"en" : L"id");
 
-        AppendLog(L"[ANDROID] Menjalankan Android USB: " + cmd.str());
+            std::wstringstream cmd;
+            if (operation == L"recover") {
+                cmd << L"\"" << worker_path << L"\" mobile-recover --work \"" << work_dir << L"\"";
+            } else {
+                cmd << L"\"" << worker_path << L"\" mobile-worker --work \"" << work_dir << L"\" --operation " << operation;
+            }
 
-        SECURITY_ATTRIBUTES sa = { sizeof(sa), NULL, TRUE };
-        HANDLE hRead, hWrite;
-        CreatePipe(&hRead, &hWrite, &sa, 0);
-        SetHandleInformation(hRead, HANDLE_FLAG_INHERIT, 0);
+            std::wstring cmd_str = cmd.str();
+            AppendLog(L"[ANDROID] Menjalankan Android USB: " + cmd_str);
 
-        STARTUPINFOW si = { sizeof(si) };
-        si.dwFlags |= STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
-        si.hStdOutput = hWrite;
-        si.hStdError = hWrite;
-        si.wShowWindow = SW_HIDE;
+            SECURITY_ATTRIBUTES sa = { sizeof(sa), NULL, TRUE };
+            HANDLE hRead = NULL, hWrite = NULL;
+            if (!CreatePipe(&hRead, &hWrite, &sa, 0)) {
+                AppendLog(L"[ERROR] Gagal membuat pipe proses mobile-worker!");
+                std::lock_guard<std::mutex> lock(g_state.mtx);
+                g_state.is_busy = false;
+                g_state.status_text = (g_state.ui_lang == UiLang::EN) ? L"ERROR" : L"GALAT";
+                g_state.status_color = Theme::AccentRed;
+                if (g_hwnd) InvalidateRect(g_hwnd, NULL, FALSE);
+                return;
+            }
+            SetHandleInformation(hRead, HANDLE_FLAG_INHERIT, 0);
 
-        PROCESS_INFORMATION pi = { 0 };
-        std::vector<wchar_t> cmd_buf(cmd.str().begin(), cmd.str().end());
-        cmd_buf.push_back(0);
+            STARTUPINFOW si = { sizeof(si) };
+            si.dwFlags |= STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
+            si.hStdOutput = hWrite;
+            si.hStdError = hWrite;
+            si.wShowWindow = SW_HIDE;
 
-        if (CreateProcessW(NULL, cmd_buf.data(), NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
-            CloseHandle(hWrite);
+            PROCESS_INFORMATION pi = { 0 };
+            std::vector<wchar_t> cmd_buf(cmd_str.begin(), cmd_str.end());
+            cmd_buf.push_back(0);
 
-            char buf[512];
-            DWORD read_bytes = 0;
-            std::string line_accum;
-            while (ReadFile(hRead, buf, sizeof(buf) - 1, &read_bytes, NULL) && read_bytes > 0) {
-                buf[read_bytes] = 0;
-                line_accum += buf;
-                size_t nl;
-                while ((nl = line_accum.find('\n')) != std::string::npos) {
-                    std::string single_line = line_accum.substr(0, nl);
-                    if (!single_line.empty() && single_line.back() == '\r') single_line.pop_back();
-                    line_accum.erase(0, nl + 1);
-                    if (!single_line.empty()) {
-                        AppendLog(Utf8ToWide(single_line));
+            if (CreateProcessW(NULL, cmd_buf.data(), NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
+                CloseHandle(hWrite);
+
+                char buf[512];
+                DWORD read_bytes = 0;
+                std::string line_accum;
+                while (ReadFile(hRead, buf, sizeof(buf) - 1, &read_bytes, NULL) && read_bytes > 0) {
+                    buf[read_bytes] = 0;
+                    line_accum += buf;
+                    size_t nl;
+                    while ((nl = line_accum.find('\n')) != std::string::npos) {
+                        std::string single_line = line_accum.substr(0, nl);
+                        if (!single_line.empty() && single_line.back() == '\r') single_line.pop_back();
+                        line_accum.erase(0, nl + 1);
+                        if (!single_line.empty()) {
+                            AppendLog(Utf8ToWide(single_line));
+                        }
                     }
                 }
-            }
-            if (!line_accum.empty()) {
-                AppendLog(Utf8ToWide(line_accum));
-            }
+                if (!line_accum.empty()) {
+                    AppendLog(Utf8ToWide(line_accum));
+                }
 
-            WaitForSingleObject(pi.hProcess, INFINITE);
-            DWORD exit_code = 0;
-            GetExitCodeProcess(pi.hProcess, &exit_code);
-            CloseHandle(pi.hProcess);
-            CloseHandle(pi.hThread);
-            CloseHandle(hRead);
+                WaitForSingleObject(pi.hProcess, INFINITE);
+                DWORD exit_code = 0;
+                GetExitCodeProcess(pi.hProcess, &exit_code);
+                CloseHandle(pi.hProcess);
+                CloseHandle(pi.hThread);
+                CloseHandle(hRead);
 
-            const Strings& s = GetStrings(g_state.ui_lang);
-            if (exit_code == 0) {
-                g_state.status_text = s.status_ready;
-                g_state.status_color = Theme::AccentGreen;
-                AppendLog(L"[OK] Operasi Android USB selesai.");
+                if (exit_code == 0) {
+                    {
+                        std::lock_guard<std::mutex> lock(g_state.mtx);
+                        const Strings& s = GetStrings(g_state.ui_lang);
+                        g_state.status_text = s.status_ready;
+                        g_state.status_color = Theme::AccentGreen;
+                    }
+                    AppendLog(L"[OK] Operasi Android USB selesai.");
+                } else {
+                    {
+                        std::lock_guard<std::mutex> lock(g_state.mtx);
+                        const Strings& s = GetStrings(g_state.ui_lang);
+                        g_state.status_text = s.status_error;
+                        g_state.status_color = Theme::AccentRed;
+                    }
+                    AppendLog(L"[ERROR] Android USB berakhir dengan kode: " + std::to_wstring(exit_code));
+                }
             } else {
-                g_state.status_text = s.status_error;
+                CloseHandle(hWrite);
+                CloseHandle(hRead);
+                AppendLog(L"[ERROR] Gagal meluncurkan proses mobile-worker!");
+                std::lock_guard<std::mutex> lock(g_state.mtx);
+                g_state.status_text = (g_state.ui_lang == UiLang::EN) ? L"ERROR" : L"GALAT";
                 g_state.status_color = Theme::AccentRed;
-                AppendLog(L"[ERROR] Android USB berakhir dengan kode: " + std::to_wstring(exit_code));
             }
-        } else {
-            CloseHandle(hWrite);
-            CloseHandle(hRead);
-            AppendLog(L"[ERROR] Gagal meluncurkan proses mobile-worker!");
+        } catch (const std::exception& ex) {
+            AppendLog(L"[ERROR] Exception di thread mobile-worker: " + Utf8ToWide(ex.what()));
+            std::lock_guard<std::mutex> lock(g_state.mtx);
+            g_state.status_text = (g_state.ui_lang == UiLang::EN) ? L"ERROR" : L"GALAT";
+            g_state.status_color = Theme::AccentRed;
+        } catch (...) {
+            AppendLog(L"[ERROR] Unknown exception di thread mobile-worker!");
+            std::lock_guard<std::mutex> lock(g_state.mtx);
             g_state.status_text = (g_state.ui_lang == UiLang::EN) ? L"ERROR" : L"GALAT";
             g_state.status_color = Theme::AccentRed;
         }
 
-        g_state.is_busy = false;
+        {
+            std::lock_guard<std::mutex> lock(g_state.mtx);
+            g_state.is_busy = false;
+        }
         if (g_hwnd) InvalidateRect(g_hwnd, NULL, FALSE);
     }).detach();
 }
@@ -1216,16 +1313,28 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 }
                 // Browse Folder (ID: 202)
                 if (y >= 86 && y <= 120 && x >= 318 && x <= 406) {
-                    const Strings& s = GetStrings(g_state.ui_lang);
+                    UiLang cur_lang;
+                    {
+                        std::lock_guard<std::mutex> lock(g_state.mtx);
+                        cur_lang = g_state.ui_lang;
+                    }
+                    const Strings& s = GetStrings(cur_lang);
+                    wchar_t display_name[MAX_PATH] = { 0 };
                     BROWSEINFOW bi = { 0 };
+                    bi.hwndOwner = hwnd;
+                    bi.pszDisplayName = display_name;
                     bi.lpszTitle = s.btn_browse;
-                    bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
+                    bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE | BIF_USENEWUI;
                     LPITEMIDLIST pidl = SHBrowseForFolderW(&bi);
                     if (pidl) {
-                        wchar_t path[MAX_PATH];
+                        wchar_t path[MAX_PATH] = { 0 };
                         if (SHGetPathFromIDListW(pidl, path)) {
-                            g_state.game_dir = path;
-                            AppendLog(L"[INFO] Direktori game dipilih: " + g_state.game_dir);
+                            std::wstring selected_dir(path);
+                            {
+                                std::lock_guard<std::mutex> lock(g_state.mtx);
+                                g_state.game_dir = selected_dir;
+                            }
+                            AppendLog(L"[INFO] Direktori game dipilih: " + selected_dir);
                             InvalidateRect(hwnd, NULL, FALSE);
                         }
                         CoTaskMemFree(pidl);
@@ -1234,41 +1343,53 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 }
                 // Patch Mode: ID Hybrid (ID: 203)
                 if (y >= 89 && y <= 117 && x >= 437 && x <= 564) {
-                    g_state.patch_mode = PatchMode::ID_HYBRID;
-                    SaveConfig();
+                    {
+                        std::lock_guard<std::mutex> lock(g_state.mtx);
+                        g_state.patch_mode = PatchMode::ID_HYBRID;
+                        SaveConfig();
+                    }
                     InvalidateRect(hwnd, NULL, FALSE);
                     return 0;
                 }
                 // Patch Mode: EN Full (ID: 204)
                 if (y >= 89 && y <= 117 && x >= 566 && x <= 693) {
-                    g_state.patch_mode = PatchMode::EN_FULL;
-                    SaveConfig();
+                    {
+                        std::lock_guard<std::mutex> lock(g_state.mtx);
+                        g_state.patch_mode = PatchMode::EN_FULL;
+                        SaveConfig();
+                    }
                     InvalidateRect(hwnd, NULL, FALSE);
                     return 0;
                 }
                 // UI Language: Indonesia (ID: 205)
                 if (y >= 89 && y <= 117 && x >= 727 && x <= 834) {
-                    g_state.ui_lang = UiLang::ID;
-                    if (!g_state.is_busy) {
-                        if (g_state.status_text == STRINGS_EN.status_ready) g_state.status_text = STRINGS_ID.status_ready;
-                        else if (g_state.status_text == STRINGS_EN.status_installed) g_state.status_text = STRINGS_ID.status_installed;
-                        else if (g_state.status_text == STRINGS_EN.status_originals) g_state.status_text = STRINGS_ID.status_originals;
-                        else if (g_state.status_text == STRINGS_EN.status_error) g_state.status_text = STRINGS_ID.status_error;
+                    {
+                        std::lock_guard<std::mutex> lock(g_state.mtx);
+                        g_state.ui_lang = UiLang::ID;
+                        if (!g_state.is_busy) {
+                            if (g_state.status_text == STRINGS_EN.status_ready) g_state.status_text = STRINGS_ID.status_ready;
+                            else if (g_state.status_text == STRINGS_EN.status_installed) g_state.status_text = STRINGS_ID.status_installed;
+                            else if (g_state.status_text == STRINGS_EN.status_originals) g_state.status_text = STRINGS_ID.status_originals;
+                            else if (g_state.status_text == STRINGS_EN.status_error) g_state.status_text = STRINGS_ID.status_error;
+                        }
+                        SaveConfig();
                     }
-                    SaveConfig();
                     InvalidateRect(hwnd, NULL, FALSE);
                     return 0;
                 }
                 // UI Language: English (ID: 206)
                 if (y >= 89 && y <= 117 && x >= 836 && x <= 943) {
-                    g_state.ui_lang = UiLang::EN;
-                    if (!g_state.is_busy) {
-                        if (g_state.status_text == STRINGS_ID.status_ready) g_state.status_text = STRINGS_EN.status_ready;
-                        else if (g_state.status_text == STRINGS_ID.status_installed) g_state.status_text = STRINGS_EN.status_installed;
-                        else if (g_state.status_text == STRINGS_ID.status_originals) g_state.status_text = STRINGS_EN.status_originals;
-                        else if (g_state.status_text == STRINGS_ID.status_error) g_state.status_text = STRINGS_EN.status_error;
+                    {
+                        std::lock_guard<std::mutex> lock(g_state.mtx);
+                        g_state.ui_lang = UiLang::EN;
+                        if (!g_state.is_busy) {
+                            if (g_state.status_text == STRINGS_ID.status_ready) g_state.status_text = STRINGS_EN.status_ready;
+                            else if (g_state.status_text == STRINGS_ID.status_installed) g_state.status_text = STRINGS_EN.status_installed;
+                            else if (g_state.status_text == STRINGS_ID.status_originals) g_state.status_text = STRINGS_EN.status_originals;
+                            else if (g_state.status_text == STRINGS_ID.status_error) g_state.status_text = STRINGS_EN.status_error;
+                        }
+                        SaveConfig();
                     }
-                    SaveConfig();
                     InvalidateRect(hwnd, NULL, FALSE);
                     return 0;
                 }
@@ -1276,25 +1397,32 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
             // Zone 3: Unified Action Toolbar
             if (y >= 166 && y <= 200) {
-                const Strings& s = GetStrings(g_state.ui_lang);
+                UiLang cur_lang;
+                std::wstring cur_game_dir;
+                {
+                    std::lock_guard<std::mutex> lock(g_state.mtx);
+                    cur_lang = g_state.ui_lang;
+                    cur_game_dir = g_state.game_dir;
+                }
+                const Strings& s = GetStrings(cur_lang);
 
                 // 1. Install Patch (ID: 301)
                 if (x >= 30 && x <= 186) {
                     if (MessageBoxW(hwnd, s.confirm_install_msg, s.confirm_install_title, MB_YESNO | MB_ICONQUESTION) == IDYES) {
-                        ExecuteWorkerAction(L"install", g_state.game_dir);
+                        ExecuteWorkerAction(L"install", cur_game_dir);
                     }
                     return 0;
                 }
                 // 2. Restore (ID: 302)
                 if (x >= 194 && x <= 326) {
                     if (MessageBoxW(hwnd, s.confirm_restore_msg, s.confirm_restore_title, MB_YESNO | MB_ICONQUESTION) == IDYES) {
-                        ExecuteWorkerAction(L"restore", g_state.game_dir);
+                        ExecuteWorkerAction(L"restore", cur_game_dir);
                     }
                     return 0;
                 }
                 // 3. Verify / Check (ID: 303)
                 if (x >= 334 && x <= 462) {
-                    ExecuteWorkerAction(L"status", g_state.game_dir);
+                    ExecuteWorkerAction(L"status", cur_game_dir);
                     return 0;
                 }
                 // 4. Android Scan (ID: 304)
@@ -1325,8 +1453,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         }
 
         case WM_SIZE: {
-            g_state.width = LOWORD(lParam);
-            g_state.height = HIWORD(lParam);
+            {
+                std::lock_guard<std::mutex> lock(g_state.mtx);
+                g_state.width = LOWORD(lParam);
+                g_state.height = HIWORD(lParam);
+            }
             InvalidateRect(hwnd, NULL, FALSE);
             return 0;
         }
@@ -1347,6 +1478,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
             {
                 Gdiplus::Graphics g(memDC);
+                std::lock_guard<std::mutex> lock(g_state.mtx);
                 RenderCeleslibFrame(g, w, h, g_state);
             }
 
@@ -1402,6 +1534,8 @@ int RenderOffscreenPreview(const std::wstring& out_png_path, UiLang ui_lang, Pat
 
 // Entry Point
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow) {
+    OleInitialize(NULL);
+
     Gdiplus::GdiplusStartupInput gdiplusStartupInput;
     ULONG_PTR gdiplusToken;
     Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
@@ -1417,18 +1551,21 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
             RenderOffscreenPreview(out_dir + L"\\celeslib_patcher_id.png", UiLang::ID, PatchMode::ID_HYBRID);
             RenderOffscreenPreview(out_dir + L"\\celeslib_patcher_en.png", UiLang::EN, PatchMode::EN_FULL);
             Gdiplus::GdiplusShutdown(gdiplusToken);
+            OleUninitialize();
             return 0;
         }
         if (arg == L"--verify-bundle") {
             std::wstring worker;
             bool ok = LocateAndExtractWorker(worker);
             Gdiplus::GdiplusShutdown(gdiplusToken);
+            OleUninitialize();
             return ok ? 0 : 2;
         }
         if (arg == L"--self-test") {
             std::wstring worker;
             if (!LocateAndExtractWorker(worker)) {
                 Gdiplus::GdiplusShutdown(gdiplusToken);
+                OleUninitialize();
                 return 2;
             }
             std::wstring work_dir = GetCeleslibAppDataDir() + L"\\work";
@@ -1439,12 +1576,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
             std::wstring out;
             int ret = RunWorkerProcessSync(cmd.str(), out);
             Gdiplus::GdiplusShutdown(gdiplusToken);
+            OleUninitialize();
             return ret;
         }
         if (arg == L"--status" || arg == L"--install" || arg == L"--restore" || arg == L"--discover") {
             std::wstring worker;
             if (!LocateAndExtractWorker(worker)) {
                 Gdiplus::GdiplusShutdown(gdiplusToken);
+                OleUninitialize();
                 return 2;
             }
             std::wstring action = arg.substr(2); // strip "--"
@@ -1462,6 +1601,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
             std::wstring out;
             int ret = RunWorkerProcessSync(cmd.str(), out);
             Gdiplus::GdiplusShutdown(gdiplusToken);
+            OleUninitialize();
             return ret;
         }
     }
@@ -1506,5 +1646,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
     }
 
     Gdiplus::GdiplusShutdown(gdiplusToken);
+    OleUninitialize();
     return (int)msg.wParam;
 }
