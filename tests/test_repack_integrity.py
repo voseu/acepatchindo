@@ -24,11 +24,9 @@ WORKER_EXACT_SIZE = 53_927_862
 
 def test_celeslib_repack_integrity_and_worker_unpack() -> None:
     assert CELESLIB_EXE.exists(), f"Missing primary release executable: {CELESLIB_EXE}"
-    assert COMPAT_EXE.exists(), f"Missing compatibility release executable: {COMPAT_EXE}"
+    assert not COMPAT_EXE.exists(), f"Legacy executable should not exist in dist: {COMPAT_EXE}"
 
     raw = CELESLIB_EXE.read_bytes()
-    compat_raw = COMPAT_EXE.read_bytes()
-    assert raw == compat_raw, "Compatibility copy must match primary release executable bit-for-bit"
 
     # 1. PE32+ GUI Header verification
     assert raw[:2] == b"MZ"
@@ -86,7 +84,7 @@ def test_celeslib_repack_integrity_and_worker_unpack() -> None:
     exe_hash = hashlib.sha256(raw).hexdigest()
     assert exe_hash in sums_text
     assert CELESLIB_EXE.name in sums_text
-    assert COMPAT_EXE.name in sums_text
+    assert COMPAT_EXE.name not in sums_text
 
     # 5. Unpack embedded ace-worker.exe via pyinstxtractor under Python 3.12
     unpack_root = Path("/tmp/verify_celeslib_worker_unpack")

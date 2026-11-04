@@ -27,7 +27,7 @@ ID_CATALOG_GZ = ROOT / "data" / "catalog_checkpoints" / "catalog.json.gz"
 EN_TO_ID_JSON = ROOT / "data" / "catalog_checkpoints" / "en_to_id_map.json"
 DIST_DIR = ROOT / "dist"
 CELESLIB_EXE = DIST_DIR / "Celeslib-HoK-Ace-Patcher-v1.0.0.exe"
-COMPAT_EXE = DIST_DIR / "Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe"
+LEGACY_COMPAT_EXE = DIST_DIR / "Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe"
 OUT_EXE = CELESLIB_EXE
 STUB_EXE = ROOT / "build" / "celeslib_gui_stub.exe"
 SHA256SUMS_PATH = DIST_DIR / "SHA256SUMS.txt"
@@ -250,20 +250,19 @@ def build_release_exe() -> dict[str, str | int]:
     )
 
     CELESLIB_EXE.write_bytes(celeslib_payload)
-    COMPAT_EXE.write_bytes(celeslib_payload)
+    if LEGACY_COMPAT_EXE.exists():
+        LEGACY_COMPAT_EXE.unlink()
 
     exe_sha256 = hashlib.sha256(celeslib_payload).hexdigest()
     worker_sha_lower = worker_sha256.decode("ascii").lower()
     SHA256SUMS_PATH.write_text(
         f"{exe_sha256}  {CELESLIB_EXE.name}\n"
-        f"{exe_sha256}  {COMPAT_EXE.name}\n"
         f"{worker_sha_lower}  ace-worker.exe (embedded @ offset 0x{sha_offset + 80:X}..0x{len(celeslib_payload) - 8:X})\n",
         encoding="utf-8",
     )
 
     summary = {
         "primary_exe_path": str(CELESLIB_EXE),
-        "compat_exe_path": str(COMPAT_EXE),
         "exe_size": len(celeslib_payload),
         "exe_sha256": exe_sha256,
         "worker_size": len(repacked_worker),
