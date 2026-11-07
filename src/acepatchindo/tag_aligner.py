@@ -308,6 +308,16 @@ ATOMIC_KEYWORD_ALIASES: dict[str, tuple[str, ...]] = {
     "阿科米亚核心": ("Arcomia Core", "Akomia Core"),
     "干剑·莫邪": ("Twin Blade · Male", "Twin Blade · Female", "Twin Blades", "Twin Blade"),
     "图腾": ("Totem",),
+    "转瞬": ("Instant", "Fleeting", "Sekilas"),
+    "唯一": ("Unique", "Satu-satunya"),
+    "无法拆卸": (
+        "tidak dapat dilepas",
+        "tidak dapat dibongkar",
+        "tidak bisa dibongkar",
+        "Cannot be dismantled",
+        "Indismantlable",
+        "Non-dismantlable",
+    ),
 }
 
 GLYPH_KEYWORD_MAP: dict[str, tuple[str, ...]] = {
@@ -501,6 +511,20 @@ def reinject_formula_and_skeleton(
     src_clean = normalize_plain_zh(body_source_zh).replace("（", "(").replace("）", ")")
     src_clean = zh_num_counter_re.sub(lambda m: f"{ZH_DIGIT_MAP.get(m.group(1), m.group(1))}{m.group(2)}", src_clean)
     cn_clean = zh_num_counter_re.sub(lambda m: f"{ZH_DIGIT_MAP.get(m.group(1), m.group(1))}{m.group(2)}", cn_clean)
+
+    # Pre-align custom/translated placeholders in `out` (e.g. {Advanced Simulation Tactic:-10} -> {推演高级战术:-20})
+    src_named_phs = [
+        ph for ph in PLACEHOLDER_RE.findall(body_source_zh)
+        if not re.match(r"^\{(?:Energy|LordExp|LordHp)\}$", ph)
+    ]
+    out_named_phs = [
+        ph for ph in PLACEHOLDER_RE.findall(out)
+        if not re.match(r"^\{(?:Energy|LordExp|LordHp)\}$", ph)
+    ]
+    if len(src_named_phs) == len(out_named_phs):
+        for ph_out, ph_src in zip(out_named_phs, src_named_phs):
+            if ph_out != ph_src:
+                out = out.replace(ph_out, ph_src)
 
     # Pre-bind {num_ph}{Energy|LordExp|LordHp} using letter-only sentinels BEFORE COMPOUND_EXPR_RE
     icon_sentinels: list[tuple[str, str]] = []
@@ -888,6 +912,15 @@ HIGHLIGHT_TAG_ALIAS_MAP: dict[str, tuple[str, ...]] = {
     "至少穿戴2件装备": ("mengenakan minimal 2 Equipment", "memakai minimal 2 Equipment", "minimal 2 Equipment"),
     "模型缩小": ("model Hero mengecil", "model mengecil"),
     "回满法力值": ("Mana langsung penuh", "memulihkan penuh Mana"),
+    "攻速上限改为5.0": (
+        "Batas Attack Speed diubah jadi 5.0",
+        "Attack Speed limit 5.0",
+        "Attack Speed cap changed to 5.0",
+        "Batas Attack Speed diubah menjadi 5.0",
+    ),
+    "法术攻击力+20": ("Magic Attack +20",),
+    "法术攻击力+30": ("Magic Attack +30",),
+    "物理攻击力+10": ("Physical Attack +10",),
 }
 
 

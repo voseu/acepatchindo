@@ -64,6 +64,28 @@ def test_tier1_contestant_related_cards_match_chinese_source() -> None:
     assert "klon" in translated.lower() or "bayangan" in translated.lower() or "tiruan" in translated.lower()
 
 
+def test_classifier_includes_effect_cards_equipment_and_all_contestant_skills() -> None:
+    from acepatchindo.hybrid_classifier import get_hybrid_classifier
+    clf = get_hybrid_classifier()
+    # Effect Card description (e.g., Sharpening Weapons Before Battle)
+    assert clf.is_target_unique(
+        "获得1件普通装备，本回合己方英雄获得25%物理攻击加成。",
+        "Gain 1 Normal Equipment. Allied heroes gain +25% Physical Attack this Round.",
+    )
+    # Contestant card with #60D2 = "棋手" (Prestigious Lineage)
+    assert clf.is_target_unique(
+        "每回合首次刷新商店免费，且额外获得{0|3}{Energy}。",
+        "The first Shop Refresh each Round is free and grants {0|3}{Energy}.",
+    )
+    # Previously vetoed Talent (Copier)
+    assert clf.is_target_unique(
+        "每使用3张效果牌，随机获得1张效果牌。",
+        "For every 3 Effect Cards used, gain 1 random Effect Card.",
+    )
+    # Card Titles and #60D2 category badges must remain KEEP_EN (non-target)
+    assert not clf.is_target_unique("临阵磨枪", "Sharpening Weapons Before Battle")
+    assert not clf.is_target_unique("效果", "Effect")
+
 
 def test_tier2_fallback_and_proper_noun_protection() -> None:
     glossary = ThreeTierGlossary.from_reference_files(

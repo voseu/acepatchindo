@@ -46,6 +46,8 @@ ALLOWED_TARGET_PREFIXES: frozenset[str] = frozenset(
         "1632", "E222", "E378", "0977", "BF5A", "CEDB",
         # Mode Talent, Hotfix & Contestant Overview (3)
         "0955", "2394", "5CFD",
+        # Equipment Family (4)
+        "ADCF", "D891", "C32E", "1881",
     }
 )
 
@@ -167,6 +169,18 @@ def build_index() -> dict:
         if t.get("descCn"):
             _add_ref_desc(t["descCn"])
 
+    for eq in t1.get("equip", []):
+        if eq.get("descCn"):
+            _add_ref_desc(eq["descCn"])
+        elif eq.get("desc") and _CJK_RE.search(eq["desc"]):
+            _add_ref_desc(eq["desc"])
+
+    for eff in t1.get("effect", []):
+        if eff.get("descCn"):
+            _add_ref_desc(eff["descCn"])
+        elif eff.get("desc") and _CJK_RE.search(eff["desc"]):
+            _add_ref_desc(eff["desc"])
+
     for lord in t1.get("lords", []):
         for tal in lord.get("talents", []):
             if tal.get("descCn"):
@@ -180,7 +194,7 @@ def build_index() -> dict:
                 _add_ref_desc(rel["desc"])
 
     for item in t2d:
-        if item.get("type") in ("Hero", "Summon", "Talent", "Chess player"):
+        if item.get("type") in ("Hero", "Summon", "Talent", "Chess player", "Equipment", "Effect card"):
             zh = item.get("zh", {})
             for ab in zh.get("abilities", []):
                 d = ab.get("desc", "").strip()
@@ -271,53 +285,11 @@ def build_index() -> dict:
             for k in d:
                 veto_names_zh.add(k.strip())
 
-    # Equipment vetoes
+    # Equipment and Effect descriptions are targets; keep veto sets empty
     veto_equip_zh: set[str] = set()
-    for item in t1.get("equip", []):
-        desc = (item.get("descCn") or "").strip()
-        if desc and desc not in ref_target_zh:
-            veto_equip_zh.add(desc)
-
-    for item in t2d:
-        if item.get("type") == "Equipment":
-            zh = item.get("zh", {})
-            for ab in zh.get("abilities", []):
-                desc = (ab.get("desc") or "").strip()
-                if desc and desc not in ref_target_zh:
-                    veto_equip_zh.add(desc)
-            for k in ("effect_copies", "calc_copies", "rule_notes"):
-                for s in zh.get(k, []):
-                    s_str = s.strip()
-                    if s_str and s_str not in ref_target_zh:
-                        veto_equip_zh.add(s_str)
-
-    veto_equip_plain: set[str] = {
-        normalize_plain_zh(s) for s in veto_equip_zh if normalize_plain_zh(s)
-    }
-
-    # Effect Card vetoes
+    veto_equip_plain: set[str] = set()
     veto_effect_zh: set[str] = set()
-    for item in t1.get("effect", []):
-        desc = (item.get("descCn") or "").strip()
-        if desc and desc not in ref_target_zh:
-            veto_effect_zh.add(desc)
-
-    for item in t2d:
-        if item.get("type") == "Effect card":
-            zh = item.get("zh", {})
-            for ab in zh.get("abilities", []):
-                desc = (ab.get("desc") or "").strip()
-                if desc and desc not in ref_target_zh:
-                    veto_effect_zh.add(desc)
-            for k in ("effect_copies", "calc_copies", "rule_notes"):
-                for s in zh.get(k, []):
-                    s_str = s.strip()
-                    if s_str and s_str not in ref_target_zh:
-                        veto_effect_zh.add(s_str)
-
-    veto_effect_plain: set[str] = {
-        normalize_plain_zh(s) for s in veto_effect_zh if normalize_plain_zh(s)
-    }
+    veto_effect_plain: set[str] = set()
 
     # 3. Scan all 508 tables across discovered packages
     print("Scanning 508 tables across packages...")
@@ -366,15 +338,6 @@ def build_index() -> dict:
                                 if s_str not in ref_target_zh:
                                     veto_names_zh.add(s_str)
                     continue
-
-                if prefix in EQUIPMENT_TABLE_PREFIXES:
-                    for _, s in records:
-                        if _CJK_RE.search(s):
-                            s_str = s.strip()
-                            veto_equip_zh.add(s_str)
-                            p_s = normalize_plain_zh(s_str)
-                            if p_s:
-                                veto_equip_plain.add(p_s)
 
                 if prefix not in ALLOWED_TARGET_PREFIXES:
                     for _, s in records:
@@ -439,16 +402,7 @@ def build_index() -> dict:
         elif zh_str in WINDOWS_108_NONTARGET_EN:
             is_vetoed = True
             hard_veto_sfx.add(sfx)
-        elif zh_str in veto_equip_zh or plain_zh in veto_equip_plain:
-            is_vetoed = True
-            hard_veto_sfx.add(sfx)
-        elif zh_str in veto_effect_zh or plain_zh in veto_effect_plain:
-            is_vetoed = True
-            hard_veto_sfx.add(sfx)
         elif P_UNIT_FLAVOR_RE.match(plain_zh):
-            is_vetoed = True
-            hard_veto_sfx.add(sfx)
-        elif P_EQUIP_PATTERN.search(zh_str) and not is_ref and sfx not in m60_hero_suffixes:
             is_vetoed = True
             hard_veto_sfx.add(sfx)
         elif zh_str in veto_names_zh and not is_ref:
@@ -474,10 +428,7 @@ def build_index() -> dict:
 
         elif tag in CARD_PREFIXES:
             m60_val = m60_lookup.get(sfx, "")
-            if m60_val == "效果" or P_EFFECT_CARD_PATTERN.match(plain_zh) or P_UNIT_FLAVOR_RE.match(plain_zh):
-                is_vetoed = True
-                hard_veto_sfx.add(sfx)
-            elif P_EQUIP_PATTERN.search(zh_str) and not is_ref and sfx not in m60_hero_suffixes:
+            if P_UNIT_FLAVOR_RE.match(plain_zh):
                 is_vetoed = True
                 hard_veto_sfx.add(sfx)
             elif is_ref:
@@ -485,8 +436,8 @@ def build_index() -> dict:
             elif sfx in m60_hero_suffixes:
                 if zh_str != m60_val and len(plain_zh) >= 4:
                     is_target = True
-            elif m60_val in ("秘技", "技能", "专属"):
-                if len(plain_zh) >= 8 and any(p in zh_str for p in ("，", "。", "：", ":", "\n")):
+            elif m60_val in ("秘技", "技能", "专属", "棋手", "棋手·秘技", "任务", "天赋", "效果", "装备"):
+                if len(plain_zh) >= 4 and any(p in zh_str for p in ("，", "。", "：", ":", "\n", "+", "-", "%")):
                     is_target = True
             else:
                 is_vetoed = True
@@ -510,17 +461,20 @@ def build_index() -> dict:
             # Must NOT be UI counter pattern
             if "{0}/{1}" in zh_str or re.search(r"\{0\}(?:/\{1\})?$", plain_zh):
                 is_vetoed = True
-            elif P_EFFECT_CARD_PATTERN.match(plain_zh):
-                is_vetoed = True
-                hard_veto_sfx.add(sfx)
-            elif P_EQUIP_PATTERN.search(zh_str) and not is_ref:
-                is_vetoed = True
-                hard_veto_sfx.add(sfx)
             elif zh_str.startswith("当前祝福：") or "炸弹牌加入了对局" in zh_str:
                 is_vetoed = True
             elif is_ref:
                 is_target = True
             elif len(plain_zh) >= 9 and any(p in zh_str for p in ("，", "。", "：", ":", "\n")):
+                is_target = True
+            else:
+                is_vetoed = True
+
+        elif tag in EQUIPMENT_TABLE_PREFIXES:
+            if len(plain_zh) >= 6 and (
+                any(p in zh_str for p in ("，", "。", "：", ":", "\n", "+", "%"))
+                or is_ref
+            ):
                 is_target = True
             else:
                 is_vetoed = True

@@ -10,7 +10,7 @@ WINDOWS_108_TARGET_DESC_ID: dict[str, str] = {
     "转移后获得20%伤害加成。": "Setelah berpindah, dapatkan +20% Bonus Damage.",
     "战斗开始时，随机传送1个4-5阶临时等级为回合数×12的英雄进入战场（不含卡牌效果），并携带3件适配装备。": (
         "Saat Combat dimulai, pindahkan secara acak 1 Hero Tier 4-5 dengan Temporary Level sebesar "
-        "(Round x12) ke medan tempur (tanpa efek kartu), membawa 3 Equipment yang sesuai."
+        "(Round x12) ke arena (tanpa efek kartu), membawa 3 Equipment yang sesuai."
     ),
     "若<color=#ffffff><b>枫叶舞</b></color>英雄被移除，其真实等级的25%会保留给下一个<color=#ffffff><b>枫叶舞</b></color>英雄，若为被出售，则保留75%真实等级，限一次。": (
         "Jika Hero <color=#ffffff><b>Maple Leaf Dance</b></color> dihapus, 25% True Level-nya diwariskan ke Hero "
@@ -25,8 +25,8 @@ WINDOWS_108_TARGET_DESC_ID: dict[str, str] = {
         "[Three Kingdoms] secara merata sebesar 40% dari Damage yang diberikan (hanya untuk Hero [Three Kingdoms])."
     ),
     "场上随机英雄等级+5，触发{DaQiao_TideTimes:3}次，若对象为<b>温柔呼唤</b>的英雄则额外等级+5，每次使用后，触发次数+2。": (
-        "Hero acak di medan tempur mendapat Level +5, terpicu {DaQiao_TideTimes:3} kali; jika target adalah Hero "
-        "<b>Gentle Call</b>, mendapat tambahan Level +5. Setiap digunakan, jumlah picuan +2."
+        "Hero acak di arena mendapat +5 Level, terpicu {DaQiao_TideTimes:3} kali; jika target adalah Hero "
+        "<b>Gentle Call</b>, mendapat tambahan +5 Level. Setiap digunakan, jumlah picuan +2."
     ),
     "枫叶舞指定的英雄击败3/5/9/15名敌方英雄，获得1张秘技牌<b>翩跹舞步</b>并为枫叶舞解锁1项特性（共4项）。": (
         "Hero yang ditunjuk Maple Leaf Dance mengalahkan 3/5/9/15 Hero musuh, dapatkan 1 Kartu Secret Art "
@@ -39,13 +39,13 @@ WINDOWS_108_TARGET_DESC_ID: dict[str, str] = {
     ),
     "每4个回合，乔汐获得1张<color=#FFE897>潮汐的交响</color>。\n<color=#FFE897>潮汐的交响</color>：场上随机5个英雄等级+4。": (
         "Setiap 4 Round, Qiao Xi mendapat 1 <color=#FFE897>Symphony of Tides</color>.\n"
-        "<color=#FFE897>Symphony of Tides</color>: 5 Hero acak di medan tempur mendapat Level +4."
+        "<color=#FFE897>Symphony of Tides</color>: 5 Hero acak di arena mendapat +4 Level."
     ),
     "每4个回合，获得1张秘技牌<b>潮汐的交响</b>。": (
         "Setiap 4 Round, dapatkan 1 Kartu Secret Art <b>Symphony of Tides</b>."
     ),
     "每回合开始时，自动触发1次孙尚香【登场】词条效果。": (
-        "Di awal setiap Round, otomatis memicu efek [On Play] Lady Sun 1 kali."
+        "Di awal setiap Round, otomatis memicu efek [Deploy] Lady Sun 1 kali."
     ),
     "每回合开始时，触发1次<color=#FFE897>孙尚香</color>卡牌效果。": (
         "Di awal setiap Round, memicu efek kartu <color=#FFE897>Lady Sun</color> 1 kali."
@@ -73,25 +73,66 @@ WINDOWS_108_TARGET_DESC_ID: dict[str, str] = {
         "Pilih Chess Player Wu Feng dan kuasai segala jurus! Lewat Skill Chess Player, dapatkan acak 1 Kartu Secret Art "
         "milik lawan untuk menciptakan kombo tak terduga di setiap pertandingan."
     ),
-}
-
-# Exactly 90 non-target strings kept in clean English
-WINDOWS_108_NONTARGET_EN: dict[str, str] = {
-    "孙尚香·强化": "Lady Sun: Empowered",
-    "<color=#ffffff><color=#ffffff><b>唯一</b></color></color>\n攻击速度+30%。攻速上限改为5.0。战斗期间，每获得2点法力值，提升1%攻击速度。": (
-        "<color=#ffffff><color=#ffffff><b>Unique</b></color></color>\n"
-        "Attack Speed +30%. Max Attack Speed increased to 5.0. During Combat, gain 1% Attack Speed for every 2 Mana gained."
+    "<color=#ffffff><b>唯一</b></color>。攻击速度+30%。<color=#ffffff>攻速上限改为5.0</color>。战斗期间，每获得2点法力值，提升1%攻击速度。": (
+        "<color=#ffffff><b>Unique</b></color>. Attack Speed +30%. <color=#ffffff>Batas Attack Speed diubah jadi 5.0</color>. Selama Combat, setiap memperoleh 2 Mana, meningkatkan 1% Attack Speed."
     ),
     "仅三分英雄穿戴。将受到伤害的40%转化为治疗量，平摊给所有场上【三分】英雄。": (
-        "Three Kingdoms Heroes only. Converts 40% of Damage taken into Healing, shared equally among all Three Kingdoms Heroes on the field."
+        "Hanya dapat dikenakan Hero [Three Kingdoms]. Mengubah 40% Damage yang diterima menjadi pemulihan HP, dibagi rata ke seluruh Hero [Three Kingdoms] di arena."
     ),
     "仅三分英雄穿戴。将造成伤害的40%转化为治疗量，平摊给所有【三分】英雄。": (
-        "Three Kingdoms Heroes only. Converts 40% of Damage dealt into Healing, shared equally among all Three Kingdoms Heroes."
+        "Hanya dapat dikenakan Hero [Three Kingdoms]. Mengubah 40% Damage yang diberikan menjadi pemulihan HP, dibagi rata ke seluruh Hero [Three Kingdoms]."
     ),
-    "传送{0}级": "Teleport Lv.{0}",
     "将造成伤害的40%转化为治疗量，平摊给所有【三分】英雄。": (
-        "Converts 40% of Damage dealt into Healing, shared equally among all Three Kingdoms Heroes."
+        "Mengubah 40% Damage yang diberikan menjadi pemulihan HP, dibagi rata ke seluruh Hero [Three Kingdoms]."
     ),
+    # Curated live server hotfix v1.9.1 / v1.9.4 strings
+    "马可波罗掏出华丽左轮朝当前方向连续射出8颗子弹，每颗子弹造成<color=#dfa15e>25+15%物理攻击力的物理伤害</color>，通过技能击败敌人后，下1次技能额外增加8发子弹。": (
+        "Marco Polo mengeluarkan Fancy Revolver dan menembakkan 8 peluru beruntun ke arah saat ini, masing-masing memberikan <color=#dfa15e>25+15% Physical Attack sebagai Physical Damage</color>. Setelah mengalahkan musuh dengan Skill, Skill berikutnya menembakkan tambahan 8 peluru."
+    ),
+    "马可波罗掏出华丽左轮朝当前方向连续射出8颗子弹，每颗子弹造成<color=#dfa15e>25+[0]%物理攻击力的物理伤害</color>，通过技能击败敌人后，下一次技能额外增加8发子弹。": (
+        "Marco Polo mengeluarkan Fancy Revolver dan menembakkan 8 peluru beruntun ke arah saat ini, masing-masing memberikan <color=#dfa15e>25+[0]% Physical Attack sebagai Physical Damage</color>. Setelah mengalahkan musuh dengan Skill, Skill berikutnya menembakkan tambahan 8 peluru."
+    ),
+    "战斗开始时，随机获得1张卡牌，本局每获胜1次，其等级额外+3。": (
+        "Saat Combat dimulai, peroleh 1 kartu acak secara cuma-cuma. Setiap kali menang dalam pertandingan ini, Level-nya bertambah +3."
+    ),
+    "战斗开始时，随机获得1张卡牌，本局每获胜1次，其等级额外+3（当前胜场：{0}）。": (
+        "Saat Combat dimulai, peroleh 1 kartu acak secara cuma-cuma. Setiap kali menang dalam pertandingan ini, Level-nya bertambah +3 (Kemenangan saat ini: {0})."
+    ),
+    # Task 5 Target Gameplay & Hotfix strings
+    "获得1件普通装备，本回合己方英雄获得25%物理攻击加成。": (
+        "Dapatkan 1 Normal Equipment, hero sekutu mendapat +25% Physical Attack Round ini."
+    ),
+    "每回合首次刷新商店免费，且额外获得{0|3}{Energy}。": (
+        "Refresh Toko pertama setiap Round gratis, dan mendapat tambahan {0|3}{Energy}."
+    ),
+    "每使用3张效果牌，随机获得1张效果牌。": (
+        "Setiap menggunakan 3 Kartu Efek, dapatkan 1 Kartu Efek acak."
+    ),
+}
+
+# Non-target strings kept in clean English
+WINDOWS_108_NONTARGET_EN: dict[str, str] = {
+    "乘胜追击": "Pursue Victory",
+    "四人同行": "Four Companions",
+    "厉兵秣马": "Prepare for War",
+    "控制感应": "Control Sensing",
+    "机关秘术": "Mechanism Secret Art",
+    "孙尚香·强化": "Lady Sun: Empowered",
+    "神奇小鹿·奉献": "Magic Deer · Devotion",
+    "小菟送福": "Bunny's Blessing",
+    "如梦似幻": "Dreamlike Illusion",
+    "永恒时之回环": "Eternal Time Loop",
+    "效果": "Effect",
+    "装备": "Equipment",
+    "技能": "Skill",
+    "棋手": "Contestant",
+    "棋手·秘技": "Secret Skill",
+    "任务": "Quest",
+    "天赋": "Talent",
+    "大河流域": "River Basin",
+    "日落海": "Sunset Sea",
+    "三分之地": "Three Kingdoms",
+    "传送{0}级": "Teleport Lv.{0}",
     "万象大赛每个英雄首次达100级可领取奖励": (
         "Claim rewards when each Hero reaches Lv.100 for the first time in the ACE Tournament"
     ),

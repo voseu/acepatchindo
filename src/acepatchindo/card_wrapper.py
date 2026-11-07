@@ -146,3 +146,4 @@ def wrap_card_description(text: str, max_width: int = 26) -> str:
     paragraphs = text.split("\n")
     wrapped_paragraphs = [_wrap_single_paragraph(p, max_width=max_width) for p in paragraphs]
     return "\n".join(wrapped_paragraphs)
+

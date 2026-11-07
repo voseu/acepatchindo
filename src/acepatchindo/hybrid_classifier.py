@@ -47,6 +47,8 @@ ALLOWED_TARGET_PREFIXES: frozenset[str] = frozenset(
         "1632", "E222", "E378", "0977", "BF5A", "CEDB",
         # Mode Talent, Hotfix & Contestant Overview (3)
         "0955", "2394", "5CFD",
+        # Equipment Family (4)
+        "ADCF", "D891", "C32E", "1881",
     }
 )
 
@@ -60,10 +62,8 @@ TALENT_TAGS: frozenset[str] = frozenset(
     {"BCDE", "75CA", "9344", "31CF", "A40D", "BE08", "1632", "E222", "E378", "0977", "BF5A", "CEDB", "0955", "2394", "5CFD"}
 )
 
-P_CHOICE_CARD_RE = re.compile(
-    r"^(?:卡牌\d+选\d+|\d+阶卡牌\d+选\d+|(?:2选1|3选1|4选1|5选2)(?:一件|高级|普通|英雄|【)?|"
-    r"获得\d+张.+英雄牌。|\d+选1.+英雄，获得\d+张该英雄牌。|"
-    r"随机抽取\d+张.*英雄牌。|指定1名英雄等级\+\d+.*|\d+件装备选\d+件。|立即使所有手牌费用-\d+。)"
+EQUIPMENT_TAGS: frozenset[str] = frozenset(
+    {"ADCF", "D891", "C32E", "1881"}
 )
 P_UNIT_FLAVOR_RE = re.compile(r"^(?:可爱的小鹿|它最大的职责就是挨打|机器仆从|训练用人偶|404\s*Error)")
 
@@ -99,17 +99,13 @@ class HybridClassifier:
         if not zh_clean:
             return False
 
-        # 1. Hard vetoes: non-target 108, equipment, effect cards, choice cards, training dummy
+        # 1. Hard vetoes: non-target 108, training dummy
         if zh_clean in WINDOWS_108_NONTARGET_EN:
             return False
-        if zh_clean in self.veto_equip_zh or zh_clean in self.veto_effect_zh:
-            return False
-        if P_CHOICE_CARD_RE.search(zh_clean) or P_UNIT_FLAVOR_RE.search(zh_clean):
+        if P_UNIT_FLAVOR_RE.search(zh_clean):
             return False
 
         p_zh = normalize_plain_zh(zh_clean)
-        if p_zh in self.veto_equip_plain or p_zh in self.veto_effect_plain:
-            return False
 
         # 2. Authoritative positive references (checked BEFORE veto_names_zh & nontarget_table_zh!)
         if (
@@ -161,13 +157,8 @@ class HybridClassifier:
             if (
                 opt_zh in WINDOWS_108_NONTARGET_EN
                 or opt_zh in self.veto_names_zh
-                or opt_zh in self.veto_equip_zh
-                or opt_zh in self.veto_effect_zh
                 or opt_zh in self.nontarget_table_zh
             ):
-                return False
-            p_zh = normalize_plain_zh(opt_zh)
-            if p_zh in self.veto_equip_plain or p_zh in self.veto_effect_plain:
                 return False
             if self.is_target_unique(opt_zh, target_en):
                 return True
@@ -196,6 +187,8 @@ class HybridClassifier:
         tag = key[1:5] if key.startswith("#") and len(key) >= 5 else ""
         if tag in CARD_TAGS:
             return "hero_card_desc"
+        if tag in EQUIPMENT_TAGS:
+            return "equipment_desc"
         if tag in SKILL_TAGS:
             return "skill_desc"
         if tag in TALENT_TAGS:
@@ -211,3 +204,15 @@ class HybridClassifier:
             return "talent_desc"
 
         return "hero_card_desc"
+
+
+_GLOBAL_HYBRID_CLASSIFIER: HybridClassifier | None = None
+
+
+def get_hybrid_classifier(index_path: Path | None = None) -> HybridClassifier:
+    """Return a cached singleton instance of HybridClassifier."""
+    global _GLOBAL_HYBRID_CLASSIFIER
+    if _GLOBAL_HYBRID_CLASSIFIER is None or index_path is not None:
+        _GLOBAL_HYBRID_CLASSIFIER = HybridClassifier(index_path=index_path)
+    return _GLOBAL_HYBRID_CLASSIFIER
+
