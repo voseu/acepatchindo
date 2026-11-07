@@ -18,6 +18,19 @@ from acepatchindo.tag_aligner import (
     reinject_skeleton_from_source,
     translate_preserving_skeleton,
 )
+from acepatchindo.card_rewriter import (
+    CANONICAL_FACTION_MAP,
+    CANONICAL_HERO_NAME_MAP,
+    CANONICAL_MECHANIC_MAP,
+    CANONICAL_RELATED_CARD_MAP,
+    polish_indonesian_card_text,
+    rewrite_en_card_to_id,
+)
+from acepatchindo.card_wrapper import (
+    ensure_placeholder_spacing,
+    normalize_brackets,
+    wrap_card_description,
+)
 from acepatchindo.windows_108_split import (
     WINDOWS_108_HYBRID_MAP,
     WINDOWS_108_NONTARGET_EN,
@@ -160,9 +173,9 @@ EN_TO_ID_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"\brandom ally\b", re.I), "sekutu acak"),
     (re.compile(r"\brandom allies\b", re.I), "sekutu acak"),
     (re.compile(r"\badjacent allies\b", re.I), "sekutu di sekitarnya"),
-    (re.compile(r"\bon the field\b", re.I), "di medan tempur"),
+    (re.compile(r"\bon the field\b", re.I), "di arena"),
     (re.compile(r"\bon the board\b", re.I), "di papan"),
-    (re.compile(r"\benters the field\b", re.I), "masuk ke medan tempur"),
+    (re.compile(r"\benters the field\b", re.I), "masuk ke arena"),
     (re.compile(r"\bsame row\b", re.I), "baris yang sama"),
     (re.compile(r"\bsame column\b", re.I), "kolom yang sama"),
     (re.compile(r"\bfront row\b", re.I), "baris depan"),
@@ -378,6 +391,7 @@ CANONICAL_PROTECTED_TERMS: tuple[str, ...] = (
     "Coin Machine",
     "Rapid Growth",
     "Perfect Revive",
+    "Arcomia Core",
     "Akomia Core",
     "Steal Fire",
     "Symphony of Tides",
@@ -696,12 +710,21 @@ class ThreeTierGlossary:
                         self._register_t2_pair(name_cn, name_en)
                 if desc_cn and desc_id:
                     self._register_t1_pair(desc_cn, desc_id)
+                    if desc_cn in orig_unique:
+                        en_desc = orig_unique[desc_cn]
+                        if en_desc and len(en_desc) >= 20:
+                            self.tier1_en_desc_to_id_desc[_normalize_en_key(en_desc)] = desc_id
 
                 awaken = item.get("awaken")
                 if isinstance(awaken, dict):
-                    self._register_t1_pair(
-                        awaken.get("descCn") or "", awaken.get("desc") or ""
-                    )
+                    awk_cn = (awaken.get("descCn") or "").strip()
+                    awk_id = (awaken.get("desc") or "").strip()
+                    if awk_cn and awk_id:
+                        self._register_t1_pair(awk_cn, awk_id)
+                        if awk_cn in orig_unique:
+                            en_awk = orig_unique[awk_cn]
+                            if en_awk and len(en_awk) >= 20:
+                                self.tier1_en_desc_to_id_desc[_normalize_en_key(en_awk)] = awk_id
 
                 for sk in item.get("skills", []):
                     sk_cn = (sk.get("cn") or sk.get("nameCn") or "").strip()
@@ -716,13 +739,23 @@ class ThreeTierGlossary:
                             protected_set.add(sk_name)
                         else:
                             self._register_t2_pair(sk_cn, sk_name)
-                    self._register_t1_pair(
-                        sk.get("descCn") or "", sk.get("desc") or ""
-                    )
+                    sk_desc_cn = (sk.get("descCn") or "").strip()
+                    sk_desc_id = (sk.get("desc") or "").strip()
+                    if sk_desc_cn and sk_desc_id:
+                        self._register_t1_pair(sk_desc_cn, sk_desc_id)
+                        if sk_desc_cn in orig_unique:
+                            en_sk = orig_unique[sk_desc_cn]
+                            if en_sk and len(en_sk) >= 20:
+                                self.tier1_en_desc_to_id_desc[_normalize_en_key(en_sk)] = sk_desc_id
                     for enh in sk.get("enh", []):
-                        self._register_t1_pair(
-                            enh.get("descCn") or "", enh.get("desc") or ""
-                        )
+                        enh_desc_cn = (enh.get("descCn") or "").strip()
+                        enh_desc_id = (enh.get("desc") or "").strip()
+                        if enh_desc_cn and enh_desc_id:
+                            self._register_t1_pair(enh_desc_cn, enh_desc_id)
+                            if enh_desc_cn in orig_unique:
+                                en_enh = orig_unique[enh_desc_cn]
+                                if en_enh and len(en_enh) >= 20:
+                                    self.tier1_en_desc_to_id_desc[_normalize_en_key(en_enh)] = enh_desc_id
 
         # 3. Lords / Chess Players (19 items)
         for lord in t1.get("lords", []):
@@ -748,6 +781,15 @@ class ThreeTierGlossary:
                     _add_entity_name(r_name)
                     if r_desc:
                         self.tier1_en_card_to_id_desc[r_name] = r_desc
+                        if " · " in r_name:
+                            self.tier1_en_card_to_id_desc[r_name.replace(" · ", " • ")] = r_desc
+                            self.tier1_en_card_to_id_desc[r_name.replace(" · ", ": ")] = r_desc
+                        elif " • " in r_name:
+                            self.tier1_en_card_to_id_desc[r_name.replace(" • ", " · ")] = r_desc
+                            self.tier1_en_card_to_id_desc[r_name.replace(" • ", ": ")] = r_desc
+                        elif ": " in r_name:
+                            self.tier1_en_card_to_id_desc[r_name.replace(": ", " · ")] = r_desc
+                            self.tier1_en_card_to_id_desc[r_name.replace(": ", " • ")] = r_desc
 
     def _ingest_tier2(
         self,
@@ -913,17 +955,143 @@ class ThreeTierGlossary:
                         self.tier1_en_desc_to_id_desc[_normalize_en_key(en_ab_desc)] = c_desc
 
             # Direct registration for all related cards
-            for rel in rels:
+            for rel_idx, rel in enumerate(rels):
                 r_name = (rel.get("name") or "").strip()
                 r_name_cn = (rel.get("nameCn") or "").strip()
                 r_desc = (rel.get("desc") or "").strip()
                 if not r_desc:
                     continue
-                for ab in zh_abs:
+
+                if r_name:
+                    self.tier1_en_card_to_id_desc[r_name] = r_desc
+                    if " · " in r_name:
+                        self.tier1_en_card_to_id_desc[r_name.replace(" · ", " • ")] = r_desc
+                        self.tier1_en_card_to_id_desc[r_name.replace(" · ", ": ")] = r_desc
+                    elif " • " in r_name:
+                        self.tier1_en_card_to_id_desc[r_name.replace(" • ", " · ")] = r_desc
+                        self.tier1_en_card_to_id_desc[r_name.replace(" • ", ": ")] = r_desc
+                    elif ": " in r_name:
+                        self.tier1_en_card_to_id_desc[r_name.replace(": ", " · ")] = r_desc
+                        self.tier1_en_card_to_id_desc[r_name.replace(": ", " • ")] = r_desc
+
+                matched_ab = None
+                for ab_idx, ab in enumerate(zh_abs):
                     ab_name = (ab.get("name") or "").strip()
-                    ab_desc = (ab.get("desc") or "").strip()
-                    if (r_name and ab_name == r_name) or (r_name_cn and ab_name == r_name_cn):
+                    en_ab_name = (
+                        (en_abs[ab_idx].get("name") or "").strip()
+                        if ab_idx < len(en_abs)
+                        else ""
+                    )
+                    if (r_name_cn and ab_name == r_name_cn) or (
+                        r_name and en_ab_name and r_name.lower() == en_ab_name.lower()
+                    ):
+                        matched_ab = ab
+                        break
+                if not matched_ab and len(rels) == len(zh_abs) and rel_idx < len(zh_abs):
+                    matched_ab = zh_abs[rel_idx]
+
+                if matched_ab:
+                    ab_desc = (matched_ab.get("desc") or "").strip()
+                    if len(normalize_plain_zh(ab_desc)) >= 8:
                         self._register_t1_pair(ab_desc, r_desc)
+
+        # Arli One Leaf, Twin Life variants
+        zh_one_leaf_variants = [
+            "位移时，在原地生成1个继承30%最大生命值的分身，分身阵亡时晕眩最近的敌人。分身无法普攻，生成时嘲讽最近的敌人2秒。",
+            "转移时在原地创造1个具有30%最大生命值，退场时会眩晕周围敌人的分身，分身无法攻击且召唤时嘲讽周围敌人2秒。",
+            "转移时在原地创造1个具有30%最大生命值，阵亡时会眩晕周围敌人的分身，分身无法攻击且被创造时嘲讽周围敌人2秒。",
+            "转移时在原地创造1个具有30%最大生命值，╈<b>退场</b>时会眩晕周围敌人的分身，分身无法攻击且召唤时嘲讽周围敌人2秒。",
+        ]
+        en_one_leaf_variants = [
+            "When shifting, creates a clone at the original location with 30% Max HP. Upon death, it stuns the nearest enemy. The clone cannot Attack and taunts the nearest enemy for 2 seconds upon creation.",
+            "Upon shifting, create a clone at the original position with 30% Max HP that stuns nearby enemies upon withdrawal. The clone cannot Attack and taunts nearby enemies for 2 seconds upon summoning.",
+            "When transferring, create a clone at the original spot with 30% Max HP. When the clone ╈<b>is defeated</b>, it stuns nearby enemies. The clone cannot Attack and taunts nearby enemies for 2 seconds upon summoning.",
+            "When shifting, create a clone at the original location with 30% Max HP. Upon death, it stuns nearby enemies. The clone cannot Attack and taunts nearby enemies for 2 seconds upon creation.",
+        ]
+        id_one_leaf = (
+            "Saat berpindah, membuat 1 sosok tiruan di posisi asal dengan 30% Max HP, "
+            "yang akan memberikan Stun ke musuh sekitarnya saat gugur; sosok ini tidak dapat menyerang, "
+            "dan memberikan Taunt ke musuh sekitarnya selama 2 detik saat dibuat."
+        )
+        for zh_v in zh_one_leaf_variants:
+            self._register_t1_pair(zh_v, id_one_leaf)
+        for en_v in en_one_leaf_variants:
+            self.tier1_en_desc_to_id_desc[_normalize_en_key(en_v)] = id_one_leaf
+        self.tier1_en_card_to_id_desc["One Leaf, Twin Life"] = id_one_leaf
+        self.tier1_en_card_to_id_desc["One Leaf, Two Lives"] = id_one_leaf
+
+        # Yao Mei Magic Deer variants
+        yao_deer_map = [
+            (
+                [
+                    "小鹿等级+30，并获得1件<color=#ffffff><b>小鹿的庇护</b></color>。",
+                    "小鹿等级+30，获得一件<color=#FFE897>小鹿的庇护</color>。",
+                    "小鹿等级+30，获得1件小鹿的庇护。",
+                ],
+                [
+                    "Deer Level +30, and gain 1 Deer's Protection.",
+                    "Fawn Level +30, and gain 1 Deer's Protection.",
+                ],
+                "Level Rusa +30, dan dapatkan 1 <color=#ffffff><b>Deer's Protection</b></color>.",
+                ["Giant Plushie", "Huge Plushie"],
+            ),
+            (
+                [
+                    "小鹿阵亡时，会将自身等级以<a href=3130011>═<b>临时等级</b></a>均分给你的英雄。",
+                    "小鹿阵亡时，会将自身等级以═<b>临时等级</b>均分给你的英雄。",
+                    "小鹿阵亡均分等级",
+                ],
+                [
+                    "When the deer dies, its Level is distributed equally among your Heroes as Temporary Level.",
+                    "When the deer is Defeated, its own Level is distributed equally among your heroes as Temporary Level.",
+                    "Deer death shares levels",
+                ],
+                "Saat rusa gugur, Level miliknya akan dibagi rata sebagai Temporary Level ke seluruh Hero milikmu.",
+                ["Magic Deer · Devotion", "Magic Deer: Devotion"],
+            ),
+            (
+                [
+                    "小鹿等级翻倍。",
+                ],
+                [
+                    "Deer Level is doubled.",
+                    "deer Level is doubled.",
+                ],
+                "Level rusa menjadi dua kali lipat.",
+                ["Magic Deer · Resonance", "Magic Deer: Resonance"],
+            ),
+            (
+                [
+                    "开战时，小鹿会在附近生成1个自身的复制体。如果本局获得过5次胜利，小鹿等级+12（当前胜利次数：{Yao_Count:0}）。",
+                    "开战时，小鹿会在附近生成一个自身的复制体。如果本局获得过5次胜利，小鹿等级+12（胜利次数：{Yao_Count:0}）。",
+                ],
+                [
+                    "At the start of combat, Yao generates a Copy of herself nearby. If you have achieved 5 victories this match, Yao +12 Levels (Current victories: {Yao_Count:0}).",
+                ],
+                "Saat Combat dimulai, rusa akan membuat 1 salinan dirinya di dekatnya. Jika sudah menang 5 kali dalam pertandingan ini, Level rusa +12 (jumlah menang saat ini: {Yao_Count:0}).",
+                ["Magic Deer · Twin", "Magic Deer: Twin"],
+            ),
+            (
+                [
+                    "小鹿可以穿戴普通装备，且立即穿戴1件<b>极寒风暴</b>，等级+10。",
+                    "小鹿可以穿戴装备，且立即穿戴1件<b>极寒风暴</b>，等级+10。",
+                    "小鹿可以穿戴装备，且立即穿戴1件<color=#FFE897>极寒风暴</color>。",
+                ],
+                [
+                    "Fawn can equip standard gear and immediately equips 1 Frozen Heart, Level +10.",
+                    "Fawn can equip items, immediately equips 1 Frozen Heart, and increases Level by 10.",
+                ],
+                "Rusa dapat mengenakan Normal Equipment, dan langsung mengenakan 1 Extreme Frost Storm, Level +10.",
+                ["Magic Deer · Heavy Armor", "Magic Deer: Heavy Armor"],
+            ),
+        ]
+        for zh_list, en_list, id_desc, card_names in yao_deer_map:
+            for zh_v in zh_list:
+                self._register_t1_pair(zh_v, id_desc)
+            for en_v in en_list:
+                self.tier1_en_desc_to_id_desc[_normalize_en_key(en_v)] = id_desc
+            for c_name in card_names:
+                self.tier1_en_card_to_id_desc[c_name] = id_desc
 
         # Explicit registration for Bai Ge's Burst of Inspiration card
         self._register_t1_pair(
@@ -935,10 +1103,19 @@ class ThreeTierGlossary:
             "Melepaskan 3 tebasan energi pedang, menebas 3 Kartu Hero non-Awaken secara acak di tangan, membelah setiap kartu menjadi 2 salinan Fleeting.",
         )
 
-    def translate_en_to_id(self, en_text: str) -> str:
+    def translate_en_to_id(self, en_text: str, source_zh: str = "") -> str:
         """Convert English HoK Ace text into natural Indonesian while preserving tags, proper nouns, and tokens."""
         if not en_text or not en_text.strip():
             return en_text
+
+        clean_en = TAG_RE.sub("", en_text).strip()
+        if (
+            clean_en in self.tier1_en_card_to_id_desc
+            and not TAG_RE.findall(en_text)
+            and not PLACEHOLDER_RE.findall(en_text)
+        ):
+            cand = self.tier1_en_card_to_id_desc[clean_en]
+            return self._finalize_output(source_zh, cand, en_text)
 
         norm_en = _normalize_en_key(en_text)
         if (
@@ -947,9 +1124,11 @@ class ThreeTierGlossary:
             and not TAG_RE.findall(en_text)
             and not PLACEHOLDER_RE.findall(en_text)
         ):
-            return self.tier1_en_desc_to_id_desc[norm_en]
+            cand = self.tier1_en_desc_to_id_desc[norm_en]
+            return self._finalize_output(source_zh, cand, en_text)
 
         def _convert_segment(seg: str) -> str:
+            seg = rewrite_en_card_to_id(source_zh, seg)
             out = seg.replace("The First Lands", "First Lands")
 
             # Normalize English baseline variants to canonical Tier 1 terms
@@ -995,7 +1174,7 @@ class ThreeTierGlossary:
                 ),
                 (r"(?<![A-Za-z])Ancient Coins(?![A-Za-z])", "Ancient Coin"),
                 (r"(?<![A-Za-z])Perfect Resurrection(?![A-Za-z])", "Perfect Revive"),
-                (r"(?<![A-Za-z])Arcomia Core(?![A-Za-z])", "Akomia Core"),
+                (r"(?<![A-Za-z])Akomia Core(?![A-Za-z])", "Arcomia Core"),
                 (r"(?<![A-Za-z])Fire Thief(?![A-Za-z])", "Steal Fire"),
                 (r"(?<![A-Za-z])(?:Talent Cards|Talent Card)(?![A-Za-z])", "Kartu Talent"),
                 (r"(?<![A-Za-z])(?:Effect Cards|Effect Card)(?![A-Za-z])", "Kartu Efek"),
@@ -1041,7 +1220,7 @@ class ThreeTierGlossary:
                 (r"\bon\s+cast\b", "saat digunakan"),
                 (r"\bon\s+casting\b", "saat menggunakan"),
                 (r"\bCombat Start\b", "Awal Combat"),
-                (r"\bprepares?\s+for\s+war\b", "Preparation"),
+                (r"\bprepares?\s+for\s+war\b", "Prepare"),
                 (r"\bplayed\s+at\s+the\s+same\s+time\b", "diterjunkan bersamaan"),
                 (r"\bplay\s+at\s+the\s+same\s+time\b", "diterjunkan bersamaan"),
                 (r"\bhighest-Tier\s+Hero\b", "Hero Tier tertinggi"),
@@ -1149,7 +1328,7 @@ class ThreeTierGlossary:
             out = re.sub(r"\badalah\s+milikmu\b", "milikmu", out, flags=re.I)
 
             out = re.sub(r"\bCombat\s+Mulai\b", "Awal Combat", out, flags=re.I)
-            out = re.sub(r"\bPreparation\s+untuk\s+perang\b", "Preparation", out, flags=re.I)
+            out = re.sub(r"\bPreparation\s+untuk\s+perang\b", "Prepare", out, flags=re.I)
             out = re.sub(r"\bbermain\s+pada\s+saat\s+yang\s+sama\b", "diterjunkan bersamaan", out, flags=re.I)
             out = re.sub(r"\btertinggi-Tier\s+Hero\b", "Hero Tier tertinggi", out, flags=re.I)
             out = re.sub(r"\btertinggi\s+milikmu-Level\s+Hero\b", "Hero milikmu dengan Level tertinggi", out, flags=re.I)
@@ -1169,7 +1348,7 @@ class ThreeTierGlossary:
 
         res = translate_preserving_skeleton(en_text, _convert_segment)
         res = re.sub(r"\bsebuah\s+((?:<[^>]+>\s*)*\d+)", r"\1", res, flags=re.I)
-        return res
+        return self._finalize_output(source_zh, res, en_text)
 
     def _fit_length_bound(self, source_zh: str, candidate: str) -> str:
         """Guarantee candidate satisfies len(candidate) <= max(len(source_zh) * 8, 48) when len(source_zh) >= 4."""
@@ -1231,7 +1410,7 @@ class ThreeTierGlossary:
         candidate = re.sub(r"\badalah\s+milikmu\b", "milikmu", candidate, flags=re.I)
 
         candidate = re.sub(r"\bCombat\s+Mulai\b", "Awal Combat", candidate, flags=re.I)
-        candidate = re.sub(r"\bPreparation\s+untuk\s+perang\b", "Preparation", candidate, flags=re.I)
+        candidate = re.sub(r"\bPreparation\s+untuk\s+perang\b", "Prepare", candidate, flags=re.I)
         candidate = re.sub(r"\bbermain\s+pada\s+saat\s+yang\s+sama\b", "diterjunkan bersamaan", candidate, flags=re.I)
         candidate = re.sub(r"\btertinggi-Tier\s+Hero\b", "Hero Tier tertinggi", candidate, flags=re.I)
         candidate = re.sub(r"\btertinggi\s+milikmu-Level\s+Hero\b", "Hero milikmu dengan Level tertinggi", candidate, flags=re.I)
@@ -1274,7 +1453,7 @@ class ThreeTierGlossary:
             ("secara permanen", "permanen"),
             ("secara acak", "acak"),
             ("untuk pertama kalinya", "pertama kali"),
-            ("di medan tempur", "di field"),
+            ("di medan tempur", "di arena"),
             ("pertandingan", "match"),
             ("meningkatkan", "+"),
             ("mengurangi", "-"),
@@ -1299,6 +1478,18 @@ class ThreeTierGlossary:
             out = (head.rsplit(" ", 1)[0] if " " in head else head).rstrip(" ,;:-.")
         return out
 
+    def _finalize_output(self, source_zh: str, text: str, baseline_en: str = "") -> str:
+        """Apply canonical glossary polishing, placeholder spacing, bracket normalization, and card wrapping."""
+        if not text:
+            return text
+        polished = polish_indonesian_card_text(source_zh, text, baseline_en)
+        spaced = ensure_placeholder_spacing(normalize_brackets(polished))
+        if ";" not in spaced and len(spaced) > 20:
+            wrapped = wrap_card_description(spaced)
+            if validate_translation(source_zh, wrapped)[0]:
+                return wrapped
+        return spaced
+
     def translate_entry(
         self, source_zh: str, baseline_en: str | None = None
     ) -> tuple[str, str]:
@@ -1311,7 +1502,7 @@ class ThreeTierGlossary:
             raw_t1 = self.tier1_exact_zh_to_id[source_zh]
             ok_direct, _ = validate_translation(source_zh, raw_t1)
             if ok_direct:
-                return (raw_t1, "tier1")
+                return (self._finalize_output(source_zh, raw_t1, baseline_en or ""), "tier1")
             cand = self._fit_length_bound(
                 source_zh,
                 reinject_skeleton_from_source(
@@ -1334,7 +1525,7 @@ class ThreeTierGlossary:
                 )
             )
             if ok and not has_chunk_slice:
-                return (cand, "tier1")
+                return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
 
         # 2. Tier 1 normalized (tag-stripped) match + skeleton re-injection
         norm_zh = normalize_plain_zh(source_zh)
@@ -1361,7 +1552,7 @@ class ThreeTierGlossary:
                 )
             )
             if ok and not has_chunk_slice:
-                return (cand, "tier1")
+                return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
 
         # 2b. Tier 1 formula-skeleton match (handles all 234 dynamic formula Hero skills/enhancements/awakenings)
         skel_zh = normalize_formula_skeleton_zh(source_zh)
@@ -1400,7 +1591,7 @@ class ThreeTierGlossary:
                 )
             )
             if ok and not has_chunk_slice:
-                return (cand, "tier1")
+                return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
 
         # 2c. Tier 1 Lord card name / description match via baseline_en
         if baseline_en:
@@ -1417,7 +1608,7 @@ class ThreeTierGlossary:
                     ),
                 )
                 if validate_translation(source_zh, cand)[0]:
-                    return (cand, "tier1")
+                    return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
 
             norm_en = _normalize_en_key(baseline_en)
             if norm_en in self.tier1_en_desc_to_id_desc and len(source_zh) >= 8:
@@ -1432,14 +1623,14 @@ class ThreeTierGlossary:
                     ),
                 )
                 if validate_translation(source_zh, cand)[0]:
-                    return (cand, "tier1")
+                    return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
 
         # 3. Tier 2 exact or plain entity/detail match -> EN -> ID
         t2_en = self.tier2_zh_to_en.get(source_zh) or (
             self.tier2_plain_zh_to_en.get(norm_zh) if norm_zh else None
         )
         if t2_en:
-            t2_id = self.translate_en_to_id(t2_en)
+            t2_id = self.translate_en_to_id(t2_en, source_zh=source_zh)
             cand = self._fit_length_bound(
                 source_zh,
                 reinject_skeleton_from_source(
@@ -1452,17 +1643,17 @@ class ThreeTierGlossary:
             )
             ok, _ = validate_translation(source_zh, cand)
             if ok:
-                return (cand, "tier2")
+                return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier2")
 
         # 4. Tier 3: Use baseline_en (ZH -> EN -> ID)
         if baseline_en:
             cand = self._fit_length_bound(
                 source_zh,
-                sanitize_target_text(source_zh, self.translate_en_to_id(baseline_en)),
+                sanitize_target_text(source_zh, self.translate_en_to_id(baseline_en, source_zh=source_zh)),
             )
             ok, _ = validate_translation(source_zh, cand)
             if ok:
-                return (cand, "tier3")
+                return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier3")
 
             repaired = self._fit_length_bound(
                 source_zh,
@@ -1476,14 +1667,14 @@ class ThreeTierGlossary:
             )
             ok2, _ = validate_translation(source_zh, repaired)
             if ok2:
-                return (repaired, "tier3")
+                return (self._finalize_output(source_zh, repaired, baseline_en or ""), "tier3")
 
             if validate_translation(source_zh, baseline_en)[0]:
-                return (baseline_en, "tier3")
+                return (self._finalize_output(source_zh, baseline_en, baseline_en or ""), "tier3")
 
         # 5. Fallback for unmapped raw Chinese strings
         cand = self._fit_length_bound(source_zh, self._translate_raw_zh_to_id(source_zh))
-        return (cand, "tier3")
+        return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier3")
 
     def _translate_raw_zh_to_id(self, source_zh: str) -> str:
         """Translate a raw Chinese string (with tags/placeholders) into validated Indonesian."""
@@ -1530,7 +1721,7 @@ class ThreeTierGlossary:
             ("恢复", "Memulihkan "),
             ("造成", "Memberikan "),
             ("召唤", "Memanggil "),
-            ("登场", "On Play"),
+            ("登场", "Deploy"),
             ("光环", "Aura"),
             ("激发", "Inspire"),
             ("连携", "Synergy"),
@@ -1612,4 +1803,26 @@ class ThreeTierGlossary:
                 en_translator=self.translate_en_to_id,
             )
         return cand
+
+
+_GLOBAL_GLOSSARY_ENGINE: ThreeTierGlossary | None = None
+
+
+def get_glossary_engine() -> ThreeTierGlossary:
+    """Return a cached singleton instance of ThreeTierGlossary loaded from reference files."""
+    global _GLOBAL_GLOSSARY_ENGINE
+    if _GLOBAL_GLOSSARY_ENGINE is None:
+        refs_dir = Path(__file__).resolve().parent.parent.parent / "data" / "references"
+        if not refs_dir.exists():
+            refs_dir = Path("data/references")
+        t1_path = refs_dir / "tier1_wiki_id.json"
+        t2_path = refs_dir / "tier2_wiki_en.json"
+        t2_details_path = refs_dir / "tier2_wiki_details_en.json"
+        _GLOBAL_GLOSSARY_ENGINE = ThreeTierGlossary.from_reference_files(
+            t1_path,
+            t2_path,
+            tier2_details_path=t2_details_path,
+        )
+    return _GLOBAL_GLOSSARY_ENGINE
+
 

@@ -47,6 +47,24 @@ def test_three_tier_glossary_loads_and_prioritizes_tier1() -> None:
     assert runtime_rules.validate_translation(tagged_cn, translated) == (True, "ok")
 
 
+def test_tier1_contestant_related_cards_match_chinese_source() -> None:
+    from acepatchindo.glossary import get_glossary_engine
+    glossary = get_glossary_engine()
+    zh_one_leaf = (
+        "位移时，在原地生成1个继承30%最大生命值的分身，分身阵亡时晕眩最近的敌人。"
+        "分身无法普攻，生成时嘲讽最近的敌人2秒。"
+    )
+    translated, tier = glossary.translate_entry(
+        zh_one_leaf,
+        baseline_en="When shifting, creates a clone at the original location with 30% Max HP. Upon death, it stuns the nearest enemy. The clone cannot Attack and taunts the nearest enemy for 2 seconds upon creation.",
+    )
+    assert tier == "tier1"
+    assert "asli lokasi" not in translated
+    assert "terdekat musuh" not in translated
+    assert "klon" in translated.lower() or "bayangan" in translated.lower() or "tiruan" in translated.lower()
+
+
+
 def test_tier2_fallback_and_proper_noun_protection() -> None:
     glossary = ThreeTierGlossary.from_reference_files(
         REFS_DIR / "tier1_wiki_id.json",

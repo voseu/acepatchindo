@@ -874,6 +874,23 @@ def normalize_tag_boundary_spacing(source: str, text: str) -> str:
     return spaced if ok else text
 
 
+HIGHLIGHT_TAG_ALIAS_MAP: dict[str, tuple[str, ...]] = {
+    "你的召唤单位": ("Unit Summon milikmu", "Summoned Unit milikmu", "unit Summon milikmu", "Unit panggilan", "Unit Summon"),
+    "棋手": ("Kontestan", "Player", "Pemain"),
+    "棋手升级时": ("Saat Player naik Level", "Saat Kontestan naik Level", "Ketika Player naik Level", "Player naik Level"),
+    "碰碰运气": ("Try Your Luck", "Cobalah Keberuntunganmu"),
+    "镜像": ("Mirror", "cermin"),
+    "万镜": ("All Mirrors", "cermin"),
+    "英雄总等级": ("total Level Hero", "Total Level Hero"),
+    "等价交换": ("Equal Exchange", "Pertukaran Setara"),
+    "无限释放技能": ("menggunakan Skill tanpa batas", "Skill tanpa batas"),
+    "20%攻速": ("20% Attack Speed", "20% Kecepatan Serangan"),
+    "至少穿戴2件装备": ("mengenakan minimal 2 Equipment", "memakai minimal 2 Equipment", "minimal 2 Equipment"),
+    "模型缩小": ("model Hero mengecil", "model mengecil"),
+    "回满法力值": ("Mana langsung penuh", "memulihkan penuh Mana"),
+}
+
+
 def _wrap_keyword_or_entity(u_open: str, u_close: str, u_zh: str, text_segment: str) -> str:
     """Safely wrap only the keyword/proper noun entity inside text_segment rather than swallowing the whole clause."""
     raw = text_segment.strip()
@@ -888,6 +905,8 @@ def _wrap_keyword_or_entity(u_open: str, u_close: str, u_zh: str, text_segment: 
         candidates.extend(ATOMIC_KEYWORD_ALIASES[u_zh])
     if u_zh in BRACKET_TERM_MAP:
         candidates.append(BRACKET_TERM_MAP[u_zh])
+    if u_zh in HIGHLIGHT_TAG_ALIAS_MAP:
+        candidates.extend(HIGHLIGHT_TAG_ALIAS_MAP[u_zh])
     for ch in re.findall(r"[\u2540-\u257f]", u_open + u_zh):
         if ch in GLYPH_KEYWORD_MAP:
             candidates.extend(GLYPH_KEYWORD_MAP[ch])
@@ -948,11 +967,18 @@ def _wrap_keyword_or_entity(u_open: str, u_close: str, u_zh: str, text_segment: 
             if rem.strip():
                 return m_sc.group(1) + f"{u_open}{rem.strip()}{u_close}"
 
-    # Only wrap whole clause if it is a genuinely long narrative tag (> 24 chars in source)
-    if len(u_zh) > 8 and not any(c in u_open for c in CTRL) and "<a href=" not in u_open:
+    # Fallback: if not control token and not <a href=>
+    if not any(c in u_open for c in CTRL) and "<a href=" not in u_open:
         return f"{u_open}{text_segment.strip()}{u_close}"
 
-    return f"{u_open}{u_zh}{u_close} {text_segment}"
+    # Last resort for control tokens: wrap the first word or token, NEVER insert raw Chinese u_zh
+    words = text_segment.strip().split()
+    if words:
+        first_word = words[0]
+        rem = text_segment.strip()[len(first_word):]
+        return f"{u_open}{first_word}{u_close}{rem}"
+
+    return f"{u_open}{u_close} {text_segment}"
 
 
 def reinject_skeleton_from_source(
