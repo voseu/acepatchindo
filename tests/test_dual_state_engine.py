@@ -257,4 +257,41 @@ def test_dual_state_patch_lang_switch_id_and_en(monkeypatch) -> None:
     assert "Bahasa Indonesia berhasil dipasang" in rep_id_ui["message"]
 
 
+def test_numeric_template_fallback_handles_live_balance_hotfix() -> None:
+    # Baseline unique has +2 in catalog
+    baseline_zh = "战斗开始时，随机获得1张卡牌，本局每获胜1次，其等级额外+2。"
+    baseline_id = (
+        "Saat Combat dimulai, peroleh 1 kartu acak secara cuma-cuma. "
+        "Setiap kali menang dalam pertandingan ini, Level-nya bertambah +2."
+    )
+    data = {
+        "schema": 1,
+        "version": "1.4.12-id.2",
+        "unique": {baseline_zh: baseline_id},
+        "contextual": [],
+        "english_updates": [],
+        "graphics": {},
+        "table_hashes": {},
+        "baseline_occurrences": {},
+        "reviewed_updates": {},
+    }
+    cat = table_catalog.Catalog(data)
+
+    # Live server hotfix changes +2 -> +3 in the Chinese source string from game protobuf
+    hotfix_zh = "战斗开始时，随机获得1张卡牌，本局每获胜1次，其等级额外+3。"
+    zh_proto = _make_wxq_table_record("#HOTFIX_KEY#", hotfix_zh)
+
+    patched_bytes, stats = table_catalog.translate_table(
+        zh_proto, 0x00BF2528D217FFFA, cat
+    )
+    assert stats["unknown"] == 0, f"Expected 0 unknown, got {stats}"
+    assert stats["translated"] == 1
+    expected_id = (
+        "Saat Combat dimulai, peroleh 1 kartu acak secara cuma-cuma. "
+        "Setiap kali menang dalam pertandingan ini, Level-nya bertambah +3."
+    )
+    assert expected_id.encode("utf-8") in patched_bytes
+
+
+
 

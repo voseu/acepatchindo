@@ -16,6 +16,7 @@ import gzip
 import json
 import marshal
 import os
+import re
 from collections import Counter
 from pathlib import Path
 
@@ -23,6 +24,56 @@ _ORIG_MARSHAL = {orig_marshal_bytes!r}
 exec(marshal.loads(_ORIG_MARSHAL), globals())
 
 _OrigCatalog = Catalog
+
+_PROTECTED_RE = re.compile(r"(<[^>]+>|\{{[^{{}}]+\}}|\[[^\]]+\])")
+_NUM_RE = re.compile(r"(?<![#=A-Za-z0-9_])\d+(?:\.\d+)?%?(?![A-Za-z0-9_])")
+
+
+def _make_zh_num_template(text: str) -> tuple[str, list[str]]:
+    tokens = _PROTECTED_RE.split(text)
+    nums: list[str] = []
+    out: list[str] = []
+    for i, part in enumerate(tokens):
+        if i % 2 == 1:
+            out.append(part)
+        else:
+            def _sub(m: re.Match) -> str:
+                idx = len(nums)
+                nums.append(m.group(0))
+                return f"\\x01N{{idx}}\\x01"
+            out.append(_NUM_RE.sub(_sub, part))
+    return "".join(out), nums
+
+
+def _make_id_num_template(text_id: str, nums_zh: list[str]) -> str:
+    tokens = _PROTECTED_RE.split(text_id)
+    zh_matched = [False] * len(nums_zh)
+    out: list[str] = []
+    cursor = 0
+    for i, part in enumerate(tokens):
+        if i % 2 == 1:
+            out.append(part)
+        else:
+            def _sub(m: re.Match) -> str:
+                nonlocal cursor
+                val = m.group(0)
+                idx = -1
+                for j in range(cursor, len(nums_zh)):
+                    if not zh_matched[j] and nums_zh[j] == val:
+                        idx = j
+                        cursor = j + 1
+                        break
+                if idx == -1:
+                    for j in range(len(nums_zh)):
+                        if not zh_matched[j] and nums_zh[j] == val:
+                            idx = j
+                            break
+                if idx != -1:
+                    zh_matched[idx] = True
+                    return f"\\x01N{{idx}}\\x01"
+                return val
+            out.append(_NUM_RE.sub(_sub, part))
+    return "".join(out)
 
 
 class Catalog(_OrigCatalog):
@@ -72,6 +123,15 @@ class Catalog(_OrigCatalog):
                 data["english_updates"] = new_eu
 
         super().__init__(data)
+
+        self._zh_num_templates: dict[str, tuple[str, int]] = {{}}
+        if hasattr(self, "unique") and isinstance(self.unique, dict):
+            for zh, id_val in self.unique.items():
+                if isinstance(zh, str) and isinstance(id_val, str) and len(zh) >= 8 and zh != id_val:
+                    tpl_zh, nums_zh = _make_zh_num_template(zh)
+                    if nums_zh:
+                        tpl_id = _make_id_num_template(id_val, nums_zh)
+                        self._zh_num_templates[tpl_zh] = (tpl_id, len(nums_zh))
 
         if self.patch_lang == "en":
             self.en_to_id: dict[str, str] = {{
@@ -140,6 +200,16 @@ def translate_table(
                 if isinstance(asset, int)
                 else catalog.unique.get(source)
             )
+            if cand is None and hasattr(catalog, "_zh_num_templates"):
+                tpl_src, nums_src = _make_zh_num_template(source)
+                if tpl_src in catalog._zh_num_templates:
+                    tpl_id, count_expected = catalog._zh_num_templates[tpl_src]
+                    if len(nums_src) == count_expected:
+                        subbed = tpl_id
+                        for i, n in enumerate(nums_src):
+                            subbed = subbed.replace(f"\\x01N{{i}}\\x01", n)
+                        if validate_translation(source, subbed)[0]:
+                            cand = subbed
             if cand is None:
                 count["unknown"] += 1
             elif validate_translation(source, cand)[0]:
