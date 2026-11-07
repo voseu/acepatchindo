@@ -73,6 +73,10 @@ WINDOWS_108_TARGET_DESC_ID: dict[str, str] = {
         "Pilih Chess Player Wu Feng dan kuasai segala jurus! Lewat Skill Chess Player, dapatkan acak 1 Kartu Secret Art "
         "milik lawan untuk menciptakan kombo tak terduga di setiap pertandingan."
     ),
+    "<color=#ffffff><color=#ffffff><b>唯一</b></color></color>\n攻击速度+30%。攻速上限改为5.0。战斗期间，每获得2点法力值，提升1%攻击速度。": (
+        "<color=#ffffff><color=#ffffff><b>Unique</b></color></color>\n"
+        "Attack Speed +30%. Batas Attack Speed diubah jadi 5.0. Selama Combat, setiap memperoleh 2 Mana, meningkatkan 1% Attack Speed."
+    ),
     "<color=#ffffff><b>唯一</b></color>。攻击速度+30%。<color=#ffffff>攻速上限改为5.0</color>。战斗期间，每获得2点法力值，提升1%攻击速度。": (
         "<color=#ffffff><b>Unique</b></color>. Attack Speed +30%. <color=#ffffff>Batas Attack Speed diubah jadi 5.0</color>. Selama Combat, setiap memperoleh 2 Mana, meningkatkan 1% Attack Speed."
     ),

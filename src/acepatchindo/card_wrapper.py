@@ -63,8 +63,25 @@ def ensure_placeholder_spacing(text: str) -> str:
     masked = GLUED_AFTER_NUM_BRACE_RE.sub(r"\1 \2", masked)
     masked = GLUED_WORD_TO_NUM_BRACE_RE.sub(r"\1 \2", masked)
     masked = GLUED_NUM_TO_NUM_BRACE_RE.sub(r"\1 \2", masked)
+
+    # Protect placeholder contents so digit-to-word regex does not mutate internal keys
+    protected_phs: list[str] = []
+
+    def _mask_ph(m: re.Match[str]) -> str:
+        idx = len(protected_phs)
+        protected_phs.append(m.group(0))
+        return f"\x00PH{idx}\x00"
+
+    masked = re.sub(r"\{[^{}]+\}", _mask_ph, masked)
+
     masked = GLUED_DIGIT_TO_WORD_RE.sub(r"\1 \2", masked)
     masked = GLUED_PLUS_MINUS_DIGIT_TO_WORD_RE.sub(r"\1 \2", masked)
+
+    masked = re.sub(
+        r"\x00PH(\d+)\x00",
+        lambda m: protected_phs[int(m.group(1))],
+        masked,
+    )
 
     # Clean double spaces
     masked = re.sub(r" {2,}", " ", masked)

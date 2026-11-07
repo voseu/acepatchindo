@@ -31,6 +31,15 @@ CANONICAL_MECHANIC_MAP: dict[str, str] = {
     r"\bTactics Card\b": "Kartu Efek",
     r"\bTactic Card\b": "Kartu Efek",
     r"\bkartu Tactic\b": "Kartu Efek",
+    r"\bPhysical\s+darah-sucking\b": "Physical Lifesteal",
+    r"\bphysical\s+darah-sucking\b": "Physical Lifesteal",
+    r"\bMantra\s+darah-sucking\b": "Magic Lifesteal",
+    r"\bmantra\s+darah-sucking\b": "Magic Lifesteal",
+    r"\bdarah-sucking\b": "Lifesteal",
+    r"\bblood-sucking\b": "Lifesteal",
+    r"\bblood-smoking\b": "Lifesteal",
+    r"\bdia adalah kebal ke control\b": "kebal efek CC",
+    r"\bkebal ke control\b": "kebal efek CC",
 }
 
 # 2. Canonical Hero Names

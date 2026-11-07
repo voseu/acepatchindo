@@ -14,6 +14,9 @@ __pycache__/
 .cline/
 skills-lock.json
 
+# Visual audit samples
+sample-hokes/
+
 # Generated catalog build checkpoints (reproducible via scripts/02 & 03)
 data/catalog_checkpoints/
 .stage_verify/
