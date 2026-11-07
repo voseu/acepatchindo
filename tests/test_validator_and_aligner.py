@@ -111,3 +111,81 @@ def test_translate_preserving_skeleton_handles_semicolon_segments() -> None:
         "ok",
     )
 
+
+def test_da_qiao_deploy_tag_does_not_swallow_entire_sentence() -> None:
+    source_zh = (
+        "每触发2次友方<a href=1><color=#ffffff>╨<b>登场</b></color></a>效果，"
+        "大乔法力上限永久减少5点，且自身等级+1。"
+    )
+    raw_id = (
+        "Setiap 2 kali efek Deploy sekutu terpicu, batas Mana Da Qiao "
+        "berkurang 5 secara permanen dan mendapat +1 Level."
+    )
+    aligned = reinject_skeleton_from_source(source_zh, raw_id)
+    ok, reason = validate_translation(source_zh, aligned)
+    assert ok, reason
+    assert "<a href=1><color=#ffffff>╨<b>Deploy</b></color></a>" in aligned
+    assert not aligned.endswith("</b></color></a>.")
+    assert not aligned.endswith("</a>.")
+
+    # Even with raw uncurated 'pada-entri' or missing alias, it should not swallow whole sentence
+    raw_id_calque = (
+        "Setiap 2 sekutu pada-entri efek terpicu, batas Mana Da Qiao "
+        "berkurang 5 secara permanen dan mendapat +1 Level."
+    )
+    aligned_calque = reinject_skeleton_from_source(source_zh, raw_id_calque)
+    ok_c, reason_c = validate_translation(source_zh, aligned_calque)
+    assert ok_c, reason_c
+    assert not aligned_calque.startswith("<a href=1><color=#ffffff>╨<b>Setiap 2 sekutu")
+
+
+
+def test_gan_and_mo_bold_tag_wraps_only_equipment_name() -> None:
+    source_zh = (
+        "干将莫邪使用普通装备时，随机获得普通装备"
+        "<color=#ffffff><b>干剑·莫邪</b></color>。"
+    )
+    raw_id = (
+        "Saat Gan & Mo memakai Normal Equipment, memperoleh acak "
+        "Normal Equipment Twin Blade · Male."
+    )
+    aligned = reinject_skeleton_from_source(source_zh, raw_id)
+    ok, reason = validate_translation(source_zh, aligned)
+    assert ok, reason
+    assert "<color=#ffffff><b>Twin Blade · Male</b></color>" in aligned
+    assert not aligned.startswith("<color=#ffffff><b>Saat")
+
+
+def test_smart_armor_control_token_placement_and_spacing() -> None:
+    source_zh = (
+        "随机获得1件【日落海专属装备】。我方英雄每穿戴1件【日落海专属装备】，其"
+        "<color=#FFE897>╬整备效果会额外触发1次</color>。"
+    )
+    raw_id = (
+        "Secara acak memperoleh 1 [Equipment Eksklusif Sunset Sea]. Setiap kali "
+        "Hero milikmu mengenakan 1 [Equipment Eksklusif Sunset Sea], efek Prepare-nya "
+        "akan terpicu 1 kali tambahan."
+    )
+    aligned = reinject_skeleton_from_source(source_zh, raw_id)
+    ok, reason = validate_translation(source_zh, aligned)
+    assert ok, reason
+    assert ",<color" not in aligned
+    assert ",╬" not in aligned
+    assert "╬" in aligned
+
+
+def test_money_makes_might_combat_tag_does_not_swallow_first_clause() -> None:
+    source_zh = (
+        "战斗开始时，若金币数≥50，<color=#FFE897>全体友方英雄获得20点物理攻击力</color>。"
+    )
+    raw_id = (
+        "Saat Combat dimulai, jika koin emas ≥50, semua Hero sekutu memperoleh "
+        "20 Physical Attack."
+    )
+    aligned = reinject_skeleton_from_source(source_zh, raw_id)
+    ok, reason = validate_translation(source_zh, aligned)
+    assert ok, reason
+    assert not aligned.startswith("<color=#FFE897>Saat Combat dimulai")
+
+
+

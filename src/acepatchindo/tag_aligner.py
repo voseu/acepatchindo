@@ -68,8 +68,8 @@ BRACKET_TERM_MAP: dict[str, str] = {
     "[混沌裂隙]": "[Chaos Rift]",
     "【混沌裂隙】": "[Chaos Rift]",
     "牺牲": "Sacrifice",
-    "筹备": "Preparation",
-    "登场": "On Play",
+    "筹备": "Prepare",
+    "登场": "Deploy",
     "光环": "Aura",
     "激发": "Inspire",
     "连携": "Synergy",
@@ -79,10 +79,10 @@ BRACKET_TERM_MAP: dict[str, str] = {
     "刷新": "Refresh",
     "临时等级": "Temporary Level",
     "真实等级": "True Level",
-    "阿科米亚核心": "Akomia Core",
+    "阿科米亚核心": "Arcomia Core",
     "古币": "Ancient Coin",
     "精炼古币": "Refined Ancient Coin",
-    "开团": "Engage",
+    "开团": "Initiate",
     "退场": "Exit",
     "合成": "Synthesis",
     "夺取": "Steal",
@@ -102,20 +102,22 @@ BRACKET_TERM_MAP: dict[str, str] = {
     "影侍": "Shadow Servant",
     "常小娥": "Chang Xiao'e",
     "干将莫邪": "Gan & Mo",
+    "干剑·莫邪": "Twin Blade · Male",
 }
 
 BADGE_ALIAS_MAP: dict[str, list[str]] = {
     "闪现": ["Flash.", "Flash"],
-    "整备": ["Preparation:", "Preparation", "Prepare"],
-    "筹备": ["Preparation:", "Preparation", "Prepare"],
-    "登场": ["Deploy:", "Deploy", "On Play"],
-    "开团": ["Engage:", "Engage", "Initiate"],
+    "整备": ["Prepare:", "Prepare", "Preparation:", "Preparation"],
+    "筹备": ["Prepare:", "Prepare", "Preparation:", "Preparation"],
+    "登场": ["Deploy:", "Deploy", "pada-entri efek", "pada-entri", "Deployment", "On Play"],
+    "开团": ["Initiate:", "Initiate", "Engage:", "Engage", "Inisiasi"],
     "牺牲": ["Sacrifice:", "Sacrifice"],
-    "复生": ["Revive:", "Revive", "di-revive", "revived", "revive", "Bangkit", "di-Revive"],
-    "完美复生": ["Perfect Revive:", "Perfect Revive", "Perfect Resurrection"],
+    "复生": ["Revive:", "Revive", "di-revive", "revived", "revive", "Bangkit", "di-Revive", "Resurrect"],
+    "完美复生": ["Perfect Revive:", "Perfect Revive", "Perfect Resurrection", "Perfect Resurrect"],
     "临时等级": ["Temporary Level", "Level Sementara"],
     "真实等级": ["True Level", "Level Nyata"],
-    "阿科米亚核心": ["Akomia Core", "Arcomia Core", "Core Akomia"],
+    "阿科米亚核心": ["Arcomia Core", "Akomia Core", "Core Akomia"],
+    "干剑·莫邪": ["Twin Blade · Male", "Twin Blade · Female", "Twin Blades", "Twin Blade"],
     "古币": ["Ancient Coin", "Koin Kuno"],
     "精炼古币": ["Refined Ancient Coin", "Koin Kuno Murni"],
     "光环": ["Aura"],
@@ -294,6 +296,33 @@ BADGE_ALIAS_MAP: dict[str, list[str]] = {
         "╉Totem di papan dihancurkan",
         "Totem di arena hancur",
     ],
+}
+
+ATOMIC_KEYWORD_ALIASES: dict[str, tuple[str, ...]] = {
+    "登场": ("Deploy", "pada-entri efek", "pada-entri", "Deployment", "On Play"),
+    "开团": ("Initiate", "Engage", "Inisiasi"),
+    "整备": ("Prepare", "Preparation", "Persiapan"),
+    "筹备": ("Prepare", "Preparation", "Persiapan"),
+    "复生": ("Revive", "Resurrect", "Bangkit"),
+    "完美复生": ("Perfect Revive", "Perfect Resurrect", "Perfect Resurrection"),
+    "阿科米亚核心": ("Arcomia Core", "Akomia Core"),
+    "干剑·莫邪": ("Twin Blade · Male", "Twin Blade · Female", "Twin Blades", "Twin Blade"),
+    "图腾": ("Totem",),
+}
+
+GLYPH_KEYWORD_MAP: dict[str, tuple[str, ...]] = {
+    "═": ("Temporary Level", "Level Sementara", "Temp Level"),
+    "╧": ("Perfect Revive", "Revive", "Resurrect", "Kebangkitan Sempurna", "Bangkit"),
+    "╥": ("Arcomia Core", "Akomia Core", "Inti Akomia"),
+    "╉": ("Prophet Totem", "Bond Totem", "Rebirth Totem", "Totem"),
+    "╬": ("Prepare", "Preparation", "Persiapan"),
+    "╆": ("Fleeting", "Instant", "Sekilas"),
+    "╋": ("Flash",),
+    "╪": ("Initiate", "Engage", "Inisiasi"),
+    "╫": ("Deploy", "On Play", "Saat Diterjunkan", "Sacrifice", "Pengorbanan"),
+    "╨": ("Deploy", "Sacrifice", "Pengorbanan", "Saat Diterjunkan", "pada-entri"),
+    "╈": ("Awaken", "Bangkit"),
+    "╦": ("ancient coin", "Ancient Coin", "Merge", "Synthesis", "Combine", "Menggabungkan", "Gabung"),
 }
 
 LEADING_TAGGED_PREFIX_RE = re.compile(
@@ -836,11 +865,94 @@ def normalize_tag_boundary_spacing(source: str, text: str) -> str:
         r"\1 \2",
         spaced,
     )
+    # Clean space after comma if followed by tag or control token
+    spaced = re.sub(r",(?=[<[\u2540-\u257f]])", ", ", spaced)
     # Collapse any accidental double spaces created
     spaced = re.sub(r"[ ]{2,}", " ", spaced)
 
     ok, _ = validate_translation(source, spaced)
     return spaced if ok else text
+
+
+def _wrap_keyword_or_entity(u_open: str, u_close: str, u_zh: str, text_segment: str) -> str:
+    """Safely wrap only the keyword/proper noun entity inside text_segment rather than swallowing the whole clause."""
+    raw = text_segment.strip()
+    if not raw:
+        return text_segment
+
+    # Check candidates for u_zh
+    candidates: list[str] = []
+    if u_zh in BADGE_ALIAS_MAP:
+        candidates.extend([a.rstrip(":") for a in BADGE_ALIAS_MAP[u_zh]])
+    if u_zh in ATOMIC_KEYWORD_ALIASES:
+        candidates.extend(ATOMIC_KEYWORD_ALIASES[u_zh])
+    if u_zh in BRACKET_TERM_MAP:
+        candidates.append(BRACKET_TERM_MAP[u_zh])
+    for ch in re.findall(r"[\u2540-\u257f]", u_open + u_zh):
+        if ch in GLYPH_KEYWORD_MAP:
+            candidates.extend(GLYPH_KEYWORD_MAP[ch])
+
+    # Search for known candidate
+    candidates.sort(key=len, reverse=True)
+    for cand in candidates:
+        if not cand.strip():
+            continue
+        m = re.search(rf"\b{re.escape(cand.strip())}\b", text_segment, flags=re.I)
+        if m:
+            before = text_segment[: m.start()]
+            if before.rfind("<") <= before.rfind(">"):
+                return text_segment[: m.start()] + f"{u_open}{m.group(0)}{u_close}" + text_segment[m.end() :]
+
+    # If proper noun entity tag (<color=...><b> or <b>)
+    if "<b>" in u_open:
+        # Match English proper noun at the end of the clause
+        m_end = re.search(r"([A-Z][A-Za-z0-9'·•\- ]+[A-Za-z0-9])(?=[\.,;!\?]?\s*$)", text_segment)
+        if m_end:
+            before = text_segment[: m_end.start(1)]
+            if before.rfind("<") <= before.rfind(">"):
+                return text_segment[: m_end.start(1)] + f"{u_open}{m_end.group(1)}{u_close}" + text_segment[m_end.end(1) :]
+        # Or any capitalized title/entity phrase in clause
+        m_cap = re.search(r"\b([A-Z][a-z0-9]+(?:\s+[·•\-\w]+)*)\b", text_segment)
+        if m_cap:
+            before = text_segment[: m_cap.start(1)]
+            if before.rfind("<") <= before.rfind(">"):
+                return text_segment[: m_cap.start(1)] + f"{u_open}{m_cap.group(1)}{u_close}" + text_segment[m_cap.end(1) :]
+
+    # If control token or mechanic link (<a href=...>)
+    CTRL = set("╥╆╪╬╉═╧╊╅╈╦╇╋")
+    if any(c in u_open for c in CTRL) or "<a href=" in u_open:
+        m_mech = re.search(
+            r"\b(Deploy|Initiate|Prepare|Revive|Perfect Revive|Flash|Totem|Temporary Level|Sacrifice|Steal|Arcomia Core|pada-entri)\b",
+            text_segment,
+            flags=re.I,
+        )
+        if m_mech:
+            before = text_segment[: m_mech.start(1)]
+            if before.rfind("<") <= before.rfind(">"):
+                return text_segment[: m_mech.start(1)] + f"{u_open}{m_mech.group(1)}{u_close}" + text_segment[m_mech.end(1) :]
+        canonical = "Deploy"
+        if u_zh in BADGE_ALIAS_MAP and BADGE_ALIAS_MAP[u_zh]:
+            canonical = BADGE_ALIAS_MAP[u_zh][0].rstrip(":")
+        elif u_zh in ATOMIC_KEYWORD_ALIASES and ATOMIC_KEYWORD_ALIASES[u_zh]:
+            canonical = ATOMIC_KEYWORD_ALIASES[u_zh][0]
+        if "efek" in text_segment.lower():
+            m_efek = re.search(r"\b(efek)\b", text_segment, flags=re.I)
+            if m_efek:
+                return text_segment[: m_efek.start(1)] + f"{u_open}{canonical}{u_close} " + text_segment[m_efek.start(1) :]
+
+    # If clause starts with "Saat Combat dimulai" and tag is NOT for combat start
+    if text_segment.strip().startswith("Saat Combat dimulai") and "战斗开始" not in u_zh:
+        m_sc = re.search(r"^(Saat Combat dimulai,?\s*)", text_segment)
+        if m_sc:
+            rem = text_segment[m_sc.end():]
+            if rem.strip():
+                return m_sc.group(1) + f"{u_open}{rem.strip()}{u_close}"
+
+    # Only wrap whole clause if it is a genuinely long narrative tag (> 24 chars in source)
+    if len(u_zh) > 8 and not any(c in u_open for c in CTRL) and "<a href=" not in u_open:
+        return f"{u_open}{text_segment.strip()}{u_close}"
+
+    return f"{u_open}{u_zh}{u_close} {text_segment}"
 
 
 def reinject_skeleton_from_source(
@@ -1032,6 +1144,17 @@ def reinject_skeleton_from_source(
             if colon_clean in BADGE_ALIAS_MAP:
                 for b_alias in BADGE_ALIAS_MAP[colon_clean]:
                     aliases.extend([f"{b_alias}:", f"{b_alias}.", b_alias])
+            if zh_inner in ATOMIC_KEYWORD_ALIASES:
+                aliases.extend(ATOMIC_KEYWORD_ALIASES[zh_inner])
+            if bracket_clean in ATOMIC_KEYWORD_ALIASES:
+                for a_alias in ATOMIC_KEYWORD_ALIASES[bracket_clean]:
+                    if has_brackets:
+                        aliases.append(f"[{a_alias}]")
+                        aliases.append(f"【{a_alias}】")
+                    aliases.append(a_alias)
+            if colon_clean in ATOMIC_KEYWORD_ALIASES:
+                for a_alias in ATOMIC_KEYWORD_ALIASES[colon_clean]:
+                    aliases.extend([f"{a_alias}:", f"{a_alias}.", a_alias])
             if idx < len(en_spans):
                 en_inner = en_spans[idx].group(2).strip()
                 if en_inner and en_inner not in aliases:
@@ -1214,12 +1337,18 @@ def reinject_skeleton_from_source(
                         actual_end = content_clause_indices[
                             min(mapped_end, len(content_clause_indices) - 1)
                         ]
-                        id_clauses[actual_start] = (
-                            f"{spans[0].group(1)}{id_clauses[actual_start].lstrip()}"
-                        )
-                        id_clauses[actual_end] = (
-                            f"{id_clauses[actual_end].rstrip()}{spans[0].group(3)}"
-                        )
+                        CTRL = set("╥╆╪╬╉═╧╊╅╈╦╇╋")
+                        if len(span_zh) <= 8 or any(c in spans[0].group(1) for c in CTRL) or "<a href=" in spans[0].group(1) or actual_start == actual_end:
+                            id_clauses[actual_start] = _wrap_keyword_or_entity(
+                                spans[0].group(1), spans[0].group(3), span_zh, id_clauses[actual_start]
+                            )
+                        else:
+                            id_clauses[actual_start] = (
+                                f"{spans[0].group(1)}{id_clauses[actual_start].lstrip()}"
+                            )
+                            id_clauses[actual_end] = (
+                                f"{id_clauses[actual_end].rstrip()}{spans[0].group(3)}"
+                            )
                         curr = "".join(id_clauses)
                         all_matched = True
         elif not all_matched:
@@ -1266,8 +1395,8 @@ def reinject_skeleton_from_source(
                         if any(c in u_open for c in CTRL) and actual_idx == 0 and not any(c in source_zh[:6] for c in CTRL):
                             if len(untagged_indices) > 1:
                                 actual_idx = untagged_indices[1]
-                        id_clauses[actual_idx] = (
-                            f"{u_open}{id_clauses[actual_idx].strip()}{u_close}"
+                        id_clauses[actual_idx] = _wrap_keyword_or_entity(
+                            u_open, u_close, u_zh, id_clauses[actual_idx]
                         )
                         curr = "".join(id_clauses)
 
@@ -1277,15 +1406,15 @@ def reinject_skeleton_from_source(
     # 3. Restore untagged control tokens (e.g. ═ before Temporary Level or ╫ between stats)
     GLYPH_KEYWORD_MAP: dict[str, tuple[str, ...]] = {
         "═": ("Temporary Level", "Level Sementara", "Temp Level"),
-        "╧": ("Perfect Revive", "Kebangkitan Sempurna", "Revive", "Bangkit"),
-        "╥": ("Akomia Core", "Inti Akomia"),
+        "╧": ("Perfect Revive", "Revive", "Resurrect", "Kebangkitan Sempurna", "Bangkit"),
+        "╥": ("Arcomia Core", "Akomia Core", "Inti Akomia"),
         "╉": ("Prophet Totem", "Bond Totem", "Rebirth Totem", "Totem"),
-        "╬": ("Preparation", "Persiapan"),
+        "╬": ("Prepare", "Preparation", "Persiapan"),
         "╆": ("Fleeting", "Instant", "Sekilas"),
         "╋": ("Flash",),
-        "╪": ("Engage", "Inisiasi"),
-        "╫": ("On Play", "Deploy", "Saat Diterjunkan", "Sacrifice", "Pengorbanan"),
-        "╨": ("Sacrifice", "Pengorbanan", "Deploy", "Saat Diterjunkan"),
+        "╪": ("Initiate", "Engage", "Inisiasi"),
+        "╫": ("Deploy", "On Play", "Saat Diterjunkan", "Sacrifice", "Pengorbanan"),
+        "╨": ("Deploy", "Sacrifice", "Pengorbanan", "Saat Diterjunkan", "pada-entri"),
         "╈": ("Awaken", "Bangkit"),
         "╦": ("ancient coin", "Ancient Coin", "Merge", "Synthesis", "Combine", "Menggabungkan", "Gabung"),
     }
