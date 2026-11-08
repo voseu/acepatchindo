@@ -232,7 +232,8 @@ def polish_indonesian_card_text(source_zh: str, text_id: str, baseline_en: str =
     res = re.sub(r"1\s+<b>([^<]+)</b>\s+Kartu Secret Skill\b", r"1 Kartu Secret Skill <b>\1</b>", res)
 
     # Contestant & proper noun mangling elimination
-    res = re.sub(r"\bharum\b", "Xiang", res)
+    if "香香" in source_zh:
+        res = re.sub(r"\bharum\b", "Xiang", res)
     res = re.sub(r"\bYing Hukum\b", "Ying Lü", res)
     res = re.sub(r"\bQin Lu\b", "Ying Lü", res)
     res = re.sub(r"\bPutih Lagu\b", "Bai Ge", res)
@@ -241,9 +242,51 @@ def polish_indonesian_card_text(source_zh: str, text_id: str, baseline_en: str =
     res = re.sub(r"\bZhuang Xiaoyu\b", "Little Zhuang Fish", res)
     res = re.sub(r"\bChang Xiao'e\b", "Little Chang'e", res)
     res = re.sub(r"\bAsylum Anak rusa\b", "Deer's Protection", res)
-    res = re.sub(r"\b<b>Menyapu</b>", "<b>Strum</b>", res)
-    res = re.sub(r"\bmelalui Menyapu\b", "melalui Strum", res)
-    res = re.sub(r"\bMenyapu\b", "Strum", res)
+    if "扫拂" in source_zh:
+        res = re.sub(r"\b<b>Menyapu</b>", "<b>Strum</b>", res)
+        res = re.sub(r"\bmelalui Menyapu\b", "melalui Strum", res)
+        res = re.sub(r"\bMenyapu\b", "Strum", res)
+    if "横扫" in source_zh:
+        res = re.sub(r"\bStrum\b", "Tebasan", res)
+        res = re.sub(r"\bMenyapu\s+musuh\s+di\s+depan\b", "Menebas musuh di depan", res)
+
+    # Control token & canonical mechanic normalization
+    res = re.sub(r"(╥\s*)(<b>)?(?:Almia|Accomia|Acomia|Arcomia)\s*Core", r"\1\g<2>Arcomia Core", res, flags=re.I)
+    res = re.sub(r"\b(?:Almia|Accomia|Acomia)\s*Core\b", "Arcomia Core", res, flags=re.I)
+    res = re.sub(r"ditetapkan\s+Core\s+Level\s+dari\s+Accomia", "Level Arcomia Core", res, flags=re.I)
+    res = re.sub(r"╥\s+(?:(<b>))?Arcomia\s*Core", lambda m: "╥<b>Arcomia Core" if m.group(1) else "╥Arcomia Core", res)
+
+    res = re.sub(r"(╪\s*)(<b>)?(?:Bentrokan|Clash|Confrontation|Memulai|ke\s+mulai|Initiate)\b", r"\1\g<2>Initiate", res, flags=re.I)
+    if "交锋" in source_zh:
+        res = re.sub(r"(<b>)?\bBentrokan\b(</b>)?", r"\g<1>Initiate\g<2>", res)
+
+    res = re.sub(r"(╬\s*)(<b>)?(?:Siap|Ready|Preparation|Prepare)\b", r"\1\g<2>Prepare", res, flags=re.I)
+
+    res = re.sub(r"(╧\s*)(<b>)?(?:Sempurna\s+pemulihan\.?|Perfect\s+recovery\.?|Perfect\s+Revive)\b", r"\1\g<2>Perfect Revive", res, flags=re.I)
+    res = re.sub(r"(╧\s*)(<b>)?(?:bangkit\s+kembali|Recovery|Resurrect|Resurrection|Revive)\b", r"\1\g<2>Revive", res, flags=re.I)
+
+    res = re.sub(r"(╆\s*)(<b>)?(?:Instant|Fleeting)\b", r"\1\g<2>Fleeting", res, flags=re.I)
+
+    res = re.sub(r"(╈\s*)(<b>)?(?:Exit|Keluar|Retreat|Retire)\b", r"\1\g<2>Retire", res, flags=re.I)
+
+    res = re.sub(r"(╦\s*)(<b>)?(?:Menggabungkan|Merge|Combine)\b", r"\1\g<2>Combine", res, flags=re.I)
+
+    if "夺取" in source_zh:
+        res = re.sub(r"(╊\s*)(<b>)?(?:Merebut|Capture|Plunder|Seizure|Snatch|Steal)\b", r"\1\g<2>Steal", res, flags=re.I)
+        res = re.sub(r"\b(?:Merebut|Capture|Plunder|Seizure|Snatch)\b", "Steal", res, flags=re.I)
+    if "摄灵" in source_zh:
+        res = re.sub(r"(╊\s*)(<b>)?(?:Jiwa\s+Merebut|Soul\s+Snatch)\b", r"\1\g<2>Soul Snatch", res, flags=re.I)
+
+    res = re.sub(r"\bProphet\s+Totem\b", "Seer Totem", res, flags=re.I)
+    res = re.sub(r"\b(?:Pernikahan|Marriage|Karma)\s+Totem\b", "Bond Totem", res, flags=re.I)
+    res = re.sub(r"\b(?:Rebirth|Reincarnation)\s+Totem\b", "Afterlife Totem", res, flags=re.I)
+
+    res = re.sub(
+        r"\b(Totem|Steal|Flash|Temporary Level|Arcomia Core|Deploy|Initiate|Sacrifice|Prepare|Low-Tier|Starting Lineup|Ancient Coin|Summon|Combine|Multi-Faction|Contract|Tactics Card|Shield|Effect Card|Factionless|Grassroots|General)\s+Seri\b",
+        r"\1 Series",
+        res,
+        flags=re.I,
+    )
 
     # Demon God cleanup
     res = re.sub(r"\bIblis\s+Max\s+HP\s+Dewa\b", "Max HP Demon God", res, flags=re.I)
@@ -274,6 +317,7 @@ def polish_indonesian_card_text(source_zh: str, text_id: str, baseline_en: str =
     res = re.sub(r"\bGlacial\s+Badai\b", "Glacial Buckler", res, flags=re.I)
     res = re.sub(r"\bAlam\s+baka\s+Totem\b", "Afterlife Totem", res, flags=re.I)
     res = re.sub(r"\b(Totem|General|Arcomia Core)\s+Seri\b", r"\1 Series", res, flags=re.I)
+    res = re.sub(r"\[(?:Beracun Ballad - Panjang Lagu|Racun Memulihkan: Lagu dari Panjang)\]", "[Toxic Heal: Song of Longge]", res, flags=re.I)
 
     # Bracketed wearers: [Sunset Samudra Pemakai] -> [Pemakai Sunset Sea]
     res = re.sub(r"Sunset\s+Samudra", "Sunset Sea", res, flags=re.I)
@@ -284,7 +328,9 @@ def polish_indonesian_card_text(source_zh: str, text_id: str, baseline_en: str =
     res = re.sub(r"\[Three Kingdoms\s+(?:Pemakai|Wearer)\]", "[Pemakai Three Kingdoms]", res, flags=re.I)
     res = re.sub(r"\[(?:Factionless|Tanpa Faction)\s+(?:Pemakai|Wearer)\]", "[Pemakai Tanpa Faction]", res, flags=re.I)
     res = re.sub(r"\[([^\]]+?)\s+(?:Pemakai|Wearer)\]", r"[Pemakai \1]", res, flags=re.I)
+    res = re.sub(r"\[Jika\s+(?:pemakai|wearer)\s+adalah\s+([^\]]+?)\]", r"[Pemakai \1]", res, flags=re.I)
     res = re.sub(r"\[(?:Pemakai|Wearer)\s+adalah\s+([^\]]+?)\]", r"[Pemakai \1]", res, flags=re.I)
+    res = re.sub(r",(?=[<\[A-Za-z])", ", ", res)
 
     # Hero and voucher calques
     res = re.sub(r"\bsalinan\s+dari\s+Kartu\s+itu\s+Hero\b", "salinan Kartu Hero tersebut", res, flags=re.I)
@@ -387,11 +433,36 @@ def polish_indonesian_card_text(source_zh: str, text_id: str, baseline_en: str =
     res = re.sub(r"\bSaat\s+(?:sebuah\s+)?[Mm]usuh\s+langkah\s+pada\s+itu\b", "Saat diinjak musuh", res, flags=re.I)
     res = re.sub(r"\bsaat\s+langkah\s+pada\b", "saat diinjak", res, flags=re.I)
 
+    # 13. Off-field hero tag protection
+    res = re.sub(r"sebuah\s+di\s+luar\s+arena\s+(<[^>]+>[^<]+</[^>]+>)\s+Hero\b", r"Hero \1 cadangan", res, flags=re.I)
+    res = re.sub(r"sebuah\s+di\s+luar\s+arena\s+Hero\b", "Hero cadangan", res, flags=re.I)
+
+    # 14. Medan tempur pronoun split
+    res = re.sub(r"(?:pada sisi dari\s+|di\s+)?medan\s+milikmu\s+tempur\b", "di arena milikmu", res, flags=re.I)
+    res = re.sub(r"\bmedan\s+tempur\b", "arena", res, flags=re.I)
+    res = re.sub(r"\bmedan\s+(\w+)\s+tempur\b", r"arena \1", res, flags=re.I)
+
+    # 15. Jing Mirror Image
+    if "镜像" in source_zh:
+        res = re.sub(r"<color=#ffffff><b>cermin</b></color>", "<color=#ffffff><b>Mirror Image</b></color>", res, flags=re.I)
+        res = re.sub(r"<b>cermin</b>", "<b>Mirror Image</b>", res, flags=re.I)
+        res = re.sub(r"<color=#FFE897>cermin</color>", "<color=#FFE897>Mirror Image</color>", res, flags=re.I)
+        res = re.sub(r"<b>cermin</b>\s*kartu\b", "kartu <b>Mirror Image</b>", res, flags=re.I)
+        res = re.sub(r"\bcermin\s+Kartu\b", "Kartu Mirror Image", res, flags=re.I)
+        res = re.sub(r"\bcermin\s+salinan\b", "salinan Mirror Image", res, flags=re.I)
+
+    # 16. Yao Mei deer level phrasing
+    res = re.sub(r"rusa\s+Level\s+adalah\s+\+30", "Level Rusa +30", res, flags=re.I)
+
     # 13. Banyak dari Teman
     res = re.sub(r"\b(?:Lots of Friends|Plenty of Friends|Banyak dari Teman)\b", "Many Friends", res, flags=re.I)
 
     # Sub-card Copier: itu Kartu Hero -> Kartu Hero tersebut
     res = re.sub(r"\bitu\s+Kartu\s+Hero\b", "Kartu Hero tersebut", res, flags=re.I)
+
+    # Ensure tag boundary spacing
+    res = re.sub(r"([A-Za-z0-9%])(<(?![/])(?:color|b|i|a|size)\b[^>]*>)", r"\1 \2", res)
+    res = re.sub(r"(</(?:color|b|i|a|size)>)([A-Za-z0-9])", r"\1 \2", res)
 
     # Clean double spaces
     res = re.sub(r" {2,}", " ", res)

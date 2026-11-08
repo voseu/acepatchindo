@@ -576,6 +576,32 @@ GENERIC_SKILL_EXCLUSIONS: set[str] = {
 }
 
 
+ZH_SERIES_HEADER_MAP: dict[str, str] = {
+    "╉图腾系列": "╉Totem Series",
+    "╊夺取系列": "╊Steal Series",
+    "╋闪现系列": "╋Flash Series",
+    "═临时等级系列": "═Temporary Level Series",
+    "╥阿科米亚核心系列": "╥Arcomia Core Series",
+    "╨登场系列": "╨Deploy Series",
+    "╪开团系列": "╪Initiate Series",
+    "╫牺牲系列": "╫Sacrifice Series",
+    "╬整备系列": "╬Prepare Series",
+    "低阶系列": "Low-Tier Series",
+    "初始阵容系列": "Starting Lineup Series",
+    "古币系列": "Ancient Coin Series",
+    "召唤系列": "Summon Series",
+    "合成系列": "Combine Series",
+    "多阵营系列": "Multi-Faction Series",
+    "契约系列": "Contract Series",
+    "战术牌系列": "Tactics Card Series",
+    "护盾系列": "Shield Series",
+    "效果牌系列": "Effect Card Series",
+    "无阵营系列": "Factionless Series",
+    "草根系列": "Grassroots Series",
+    "通用系列": "General Series",
+}
+
+
 def _normalize_en_key(text: str) -> str:
     cleaned = TAG_RE.sub("", text)
     cleaned = CONTROL_TOKEN_RE.sub("", cleaned)
@@ -1098,8 +1124,6 @@ class ThreeTierGlossary:
                     ):
                         matched_ab = ab
                         break
-                if not matched_ab and len(rels) == len(zh_abs) and rel_idx < len(zh_abs):
-                    matched_ab = zh_abs[rel_idx]
 
                 if matched_ab:
                     ab_desc = (matched_ab.get("desc") or "").strip()
@@ -1132,20 +1156,41 @@ class ThreeTierGlossary:
         self.tier1_en_card_to_id_desc["One Leaf, Two Lives"] = id_one_leaf
 
         # Yao Mei Magic Deer variants
+        self._register_t1_pair(
+            "小鹿等级+30，并获得1件<color=#ffffff><b>小鹿的庇护</b></color>。",
+            "Level Rusa +30, dan peroleh 1 <color=#ffffff><b>Deer's Protection</b></color>.",
+        )
+        self._register_t1_pair(
+            "小鹿等级+30，获得一件<color=#FFE897>小鹿的庇护</color>。",
+            "Level Rusa +30, dan peroleh 1 <color=#FFE897>Deer's Protection</color>.",
+        )
+        self._register_t1_pair(
+            "小鹿等级+30，获得1件小鹿的庇护。",
+            "Level Rusa +30, dan peroleh 1 Deer's Protection.",
+        )
+        self._register_t1_pair(
+            "小鹿可以穿戴普通装备，且立即穿戴1件<b>极寒风暴</b>，等级+10。",
+            "Rusa dapat memakai Normal Equipment, dan langsung memakai 1 <b>Glacial Buckler</b>, Level +10.",
+        )
+        self._register_t1_pair(
+            "小鹿可以穿戴装备，且立即穿戴1件<b>极寒风暴</b>，等级+10。",
+            "Rusa dapat memakai Equipment, dan langsung memakai 1 <b>Glacial Buckler</b>, Level +10.",
+        )
+        self._register_t1_pair(
+            "小鹿可以穿戴装备，且立即穿戴1件<color=#FFE897>极寒风暴</color>。",
+            "Rusa dapat memakai Equipment, dan langsung memakai 1 <color=#FFE897>Glacial Buckler</color>.",
+        )
+        for en_v in [
+            "Deer Level +30, and gain 1 Deer's Protection.",
+            "Fawn Level +30, and gain 1 Deer's Protection.",
+        ]:
+            self.tier1_en_desc_to_id_desc[_normalize_en_key(en_v)] = "Level Rusa +30, dan peroleh 1 Deer's Protection."
+        self.tier1_en_card_to_id_desc["Giant Plushie"] = "Level Rusa +30, dan peroleh 1 Deer's Protection."
+        self.tier1_en_card_to_id_desc["Huge Plushie"] = "Level Rusa +30, dan peroleh 1 Deer's Protection."
+        self.tier1_en_card_to_id_desc["Magic Deer · Heavy Armor"] = "Rusa dapat memakai Equipment, dan langsung memakai 1 Glacial Buckler."
+        self.tier1_en_card_to_id_desc["Magic Deer: Heavy Armor"] = "Rusa dapat memakai Equipment, dan langsung memakai 1 Glacial Buckler."
+
         yao_deer_map = [
-            (
-                [
-                    "小鹿等级+30，并获得1件<color=#ffffff><b>小鹿的庇护</b></color>。",
-                    "小鹿等级+30，获得一件<color=#FFE897>小鹿的庇护</color>。",
-                    "小鹿等级+30，获得1件小鹿的庇护。",
-                ],
-                [
-                    "Deer Level +30, and gain 1 Deer's Protection.",
-                    "Fawn Level +30, and gain 1 Deer's Protection.",
-                ],
-                "Level Rusa +30, dan dapatkan 1 <color=#ffffff><b>Deer's Protection</b></color>.",
-                ["Giant Plushie", "Huge Plushie"],
-            ),
             (
                 [
                     "小鹿阵亡时，会将自身等级以<a href=3130011>═<b>临时等级</b></a>均分给你的英雄。",
@@ -1182,19 +1227,6 @@ class ThreeTierGlossary:
                 "Saat Combat dimulai, rusa akan membuat 1 salinan dirinya di dekatnya. Jika sudah menang 5 kali dalam pertandingan ini, Level rusa +12 (jumlah menang saat ini: {Yao_Count:0}).",
                 ["Magic Deer · Twin", "Magic Deer: Twin"],
             ),
-            (
-                [
-                    "小鹿可以穿戴普通装备，且立即穿戴1件<b>极寒风暴</b>，等级+10。",
-                    "小鹿可以穿戴装备，且立即穿戴1件<b>极寒风暴</b>，等级+10。",
-                    "小鹿可以穿戴装备，且立即穿戴1件<color=#FFE897>极寒风暴</color>。",
-                ],
-                [
-                    "Fawn can equip standard gear and immediately equips 1 Frozen Heart, Level +10.",
-                    "Fawn can equip items, immediately equips 1 Frozen Heart, and increases Level by 10.",
-                ],
-                "Rusa dapat mengenakan Normal Equipment, dan langsung mengenakan 1 Extreme Frost Storm, Level +10.",
-                ["Magic Deer · Heavy Armor", "Magic Deer: Heavy Armor"],
-            ),
         ]
         for zh_list, en_list, id_desc, card_names in yao_deer_map:
             for zh_v in zh_list:
@@ -1213,6 +1245,132 @@ class ThreeTierGlossary:
             "释放3道剑气，斩击手牌中随机3张非觉醒英雄牌，将每张牌斩为2张转瞬版复制。",
             "Melepaskan 3 tebasan energi pedang, menebas 3 Kartu Hero non-Awaken secara acak di tangan, membelah setiap kartu menjadi 2 salinan Fleeting.",
         )
+
+        # Curated Tier 1 replacements for Opus-MT corrupted / control token cards
+        curated_t1_pairs = [
+            (
+                "指定<color=#99DEB0>1名</color>英雄（每名英雄限1次）。每场战斗开始时，该英雄获得<a href=17><color=#99DEB0>╧完美复生</color></a>。",
+                "Pilih <color=#99DEB0>1</color> Hero (maks. 1 kali per Hero). Saat setiap Combat dimulai, Hero tersebut memperoleh <a href=17><color=#99DEB0>╧Perfect Revive</color></a>.",
+            ),
+            (
+                "你在战斗中╧复生的英雄，会无敌<color=#99DEB0>3秒</color>，并且获得<color=#99DEB0>300%</color>攻击速度和<color=#99DEB0>100%</color>暴击率（不可叠加）。",
+                "Hero milikmu yang ╧Revive saat Combat menjadi Kebal selama <color=#99DEB0>3 detik</color>, serta memperoleh <color=#99DEB0>+300%</color> Attack Speed dan <color=#99DEB0>+100%</color> Crit Rate (tidak dapat ditumpuk).",
+            ),
+            (
+                "回合开始时，获得0{Energy}。每在当前棋手等级停留1回合，额外获得1{Energy}，至多4{Energy}。",
+                "Saat Round dimulai, peroleh 0 {Energy}. Setiap bertahan 1 Round pada Level Contestant saat ini, peroleh +1 {Energy} tambahan (maks. 4 {Energy}).",
+            ),
+            (
+                "己方英雄触发<color=#99DEB0>╬整备</color>时，所有英雄获得场上<color=#99DEB0>╬整备</color>英雄数量x<color=#99DEB0>1.5</color>的等级。",
+                "Saat Hero sekutu memicu <color=#99DEB0>╬Prepare</color>, semua Hero memperoleh Level sebesar jumlah Hero <color=#99DEB0>╬Prepare</color> di arena x <color=#99DEB0>1.5</color>.",
+            ),
+            (
+                "你的英雄每次触发<color=#99DEB0>╬整备</color>时，己方英雄<color=#99DEB0>+1.5%</color>最大生命值。",
+                "Setiap kali Hero milikmu memicu <color=#99DEB0>╬Prepare</color>, Hero sekutu memperoleh <color=#99DEB0>+1.5%</color> Max HP.",
+            ),
+            (
+                "战斗开始时，己方英雄每次释放技能，所有英雄获得<color=#99DEB0>1%</color>物理吸血和<color=#99DEB0>1%</color>法术吸血（上限<color=#99DEB0>30%</color>）。",
+                "Saat Combat dimulai, setiap kali Hero sekutu mengeluarkan Skill, semua Hero memperoleh <color=#99DEB0>1%</color> Physical Lifesteal dan <color=#99DEB0>1%</color> Magical Lifesteal (maks. <color=#99DEB0>30%</color>).",
+            ),
+            (
+                "立即获得<color=#99DEB0>3张╬整备</color>英雄牌。你的英雄触发<color=#99DEB0>╬整备</color>时，获得<color=#99DEB0>1张</color>╬整备英雄牌（每回合最多<color=#99DEB0>3张</color>）。",
+                "Segera peroleh <color=#99DEB0>3 Kartu Hero ╬Prepare</color>. Saat Hero milikmu memicu <color=#99DEB0>╬Prepare</color>, peroleh <color=#99DEB0>1</color> Kartu Hero ╬Prepare (maks. <color=#99DEB0>3</color> per Round).",
+            ),
+            (
+                "立即获得<color=#99DEB0>4张牺牲</color>英雄牌。你的英雄触发<color=#99DEB0>牺牲</color>时，获得<color=#99DEB0>1张</color>牺牲英雄牌（每回合最多<color=#99DEB0>4张</color>）。",
+                "Segera peroleh <color=#99DEB0>4 Kartu Hero Sacrifice</color>. Saat Hero milikmu memicu <color=#99DEB0>Sacrifice</color>, peroleh <color=#99DEB0>1</color> Kartu Hero Sacrifice (maks. <color=#99DEB0>4</color> per Round).",
+            ),
+            (
+                "召唤单位时（召唤物，图腾），它额外获得<color=#99DEB0>100</color>+其召唤者等级x<color=#99DEB0>80%</color>的═临时等级。每回合前<color=#99DEB0>15</color>个召唤单位获得╧完美复生。",
+                "Saat memanggil unit (Summon atau Totem), unit tersebut memperoleh <color=#99DEB0>100</color> + <color=#99DEB0>80%</color> Level pemanggilnya sebagai ═Temporary Level. <color=#99DEB0>15</color> unit panggilan pertama tiap Round memperoleh ╧Perfect Revive.",
+            ),
+            (
+                "限定远程。攻击速度<color=#99DEB0>+60%</color>、暴击率<color=#99DEB0>+30%</color>，攻击速度上限突破至<color=#99DEB0>6.0</color>。\n普通攻击额外分裂<color=#99DEB0>2</color>道，每道造成<color=#99DEB0>60%</color>物理伤害。",
+                "Khusus Ranged. Attack Speed <color=#99DEB0>+60%</color>, Crit Rate <color=#99DEB0>+30%</color>, dan batas Attack Speed meningkat menjadi <color=#99DEB0>6.0</color>.\nBasic Attack terbelah menjadi <color=#99DEB0>2</color> proyektil tambahan yang masing-masing memberikan <color=#99DEB0>60%</color> Physical Damage.",
+            ),
+            (
+                "若你战斗失败2次，获得9{LordExp}。",
+                "Jika kamu kalah Combat 2 kali, peroleh 9 {LordExp}.",
+            ),
+            (
+                "若你战斗胜利2次，获得10{Energy}。",
+                "Jika kamu menang Combat 2 kali, peroleh 10 {Energy}.",
+            ),
+            (
+                "<color=#ffffffbf>被动：</color>可在水域内化身人鱼形态，强化普攻。\n<color=#ffffffbf>主动：</color>创造一片水域，<color=#9ff5d0>恢复友军生命值</color>和<color=#86ccfd>法力值</color>。",
+                "<color=#ffffffbf>Pasif:</color> Berubah menjadi wujud putri duyung di area air dan memperkuat Basic Attack.\n<color=#ffffffbf>Aktif:</color> Menciptakan area air yang <color=#9ff5d0>memulihkan HP</color> dan <color=#86ccfd>Mana</color> sekutu.",
+            ),
+            (
+                "累积弹奏5次琵琶，获得1张秘技牌<color=#FFE897>惊鸿调</color>，每回合限1次。\n<color=#FFE897>惊鸿调</color>：使用记录的前5次的指法来弹奏琵琶，并触发对应的效果。",
+                "Mainkan Pipa 5 kali untuk memperoleh 1 Kartu Secret Skill <color=#FFE897>Graceful Melody</color> (maks. 1 kali per Round).\n<color=#FFE897>Graceful Melody</color>: Mainkan Pipa menggunakan 5 teknik petikan terakhir yang tercatat dan picu efeknya masing-masing.",
+            ),
+            (
+                "累积弹奏6次琵琶，获得1张秘技牌<color=#FFE897>惊鸿调</color>，限2张。\n<color=#FFE897>惊鸿调</color>：使用记录的前6次的指法来弹奏琵琶，并触发对应的效果。",
+                "Mainkan Pipa 6 kali untuk memperoleh 1 Kartu Secret Skill <color=#FFE897>Graceful Melody</color> (maks. 2 kartu).\n<color=#FFE897>Graceful Melody</color>: Mainkan Pipa menggunakan 6 teknik petikan terakhir yang tercatat dan picu efeknya masing-masing.",
+            ),
+            (
+                "累积弹奏5次琵琶，获得1张秘技牌<b>惊鸿调</b>，每回合限1次。",
+                "Mainkan Pipa 5 kali untuk memperoleh 1 Kartu Secret Skill <b>Graceful Melody</b> (maks. 1 kali per Round).",
+            ),
+            (
+                "累积弹奏6次琵琶，获得1张秘技牌<b>惊鸿调</b>，限2张。",
+                "Mainkan Pipa 6 kali untuk memperoleh 1 Kartu Secret Skill <b>Graceful Melody</b> (maks. 2 kartu).",
+            ),
+            (
+                "╥阿科米亚核心不再分配等级，变为:<color=#FFE897>将阿尔米亚核心等级*10的生命值分配给【海都】英雄，装备多的优先</color>。",
+                "╥Arcomia Core tidak lagi membagikan Level, melainkan:<color=#FFE897> membagikan HP sebesar 10x Level Arcomia Core ke Hero [Sunset Sea], diprioritaskan bagi yang memakai Equipment terbanyak</color>.",
+            ),
+            (
+                "╥阿科米亚核心等级分配时，<color=#FFE897>优先分配给穿戴最多装备的海都英雄</color>。",
+                "Saat Level ╥Arcomia Core dibagikan, <color=#FFE897>prioritaskan Hero [Sunset Sea]</color> yang memakai Equipment terbanyak.",
+            ),
+            (
+                "每次<color=#FFE897>手动刷新</color>商店时，╥阿科米亚核心等级+2。",
+                "Setiap kali <color=#FFE897>Refresh manual</color> Shop, Level ╥Arcomia Core +2.",
+            ),
+            (
+                "打出：╥阿科米亚核心等级+2。",
+                "Saat dimainkan: Level ╥Arcomia Core +2.",
+            ),
+            (
+                "<b>唯一</b>\n任意英雄╦合成时，自身等级+1。无法拆卸。",
+                "<b>Unik</b>\nSaat Hero mana pun ╦Combine, Level pemakai +1. Tidak dapat dilepas.",
+            ),
+            (
+                "<color=#ffffff><b>唯一</b></color>。任意英雄<color=#ffffff>╦<b>合成</b></color>时，自身等级+1。无法拆卸。",
+                "<color=#ffffff><b>Unik</b></color>. Saat Hero mana pun <color=#ffffff>╦<b>Combine</b></color>, Level pemakai +1. Tidak dapat dilepas.",
+            ),
+            (
+                "你的英雄每次触发<a href=11><color=#99DEB0>╬整备</color></a>时，己方英雄<color=#99DEB0>+1%</color>最大生命值。",
+                "Setiap kali Hero milikmu memicu <a href=11><color=#99DEB0>╬Prepare</color></a>, Hero sekutu memperoleh <color=#99DEB0>+1%</color> Max HP.",
+            ),
+            (
+                "<color=#FFE897>╊夺取效果</color>变为摄取12级。",
+                "Efek <color=#FFE897>╊Steal</color> meningkat menjadi mencuri 12 Level.",
+            ),
+            (
+                "指定1名英雄获取词条能力，<color=#FFE897>╊夺取：10%物理攻击力</color>。",
+                "Pilih 1 Hero untuk memperoleh Trait Ability: <color=#FFE897>╊Steal: 10% Physical Attack</color>.",
+            ),
+            (
+                "指定1名英雄获取词条能力，<color=#FFE897>╊夺取：20等级</color>。",
+                "Pilih 1 Hero untuk memperoleh Trait Ability: <color=#FFE897>╊Steal: 20 Level</color>.",
+            ),
+            (
+                "指定1名英雄获取词条能力，<color=#FFE897>╊摄灵：20等级</color>。",
+                "Pilih 1 Hero untuk memperoleh Trait Ability: <color=#FFE897>╊Soul Snatch: 20 Level</color>.",
+            ),
+            (
+                "<b>唯一</b>\n穿戴者获得╊摄灵效果。无法拆卸。",
+                "<b>Unik</b>\nPemakai mendapatkan efek ╊Soul Snatch. Tidak dapat dilepas.",
+            ),
+            (
+                "获得3张<color=#FFE897>╪交锋</color>效果英雄牌。",
+                "Peroleh 3 Kartu Hero dengan Efek <color=#FFE897>╪Initiate</color>.",
+            ),
+        ]
+        for zh_c, id_c in curated_t1_pairs:
+            self._register_t1_pair(zh_c, id_c)
 
     def translate_en_to_id(self, en_text: str, source_zh: str = "") -> str:
         """Convert English HoK Ace text into natural Indonesian while preserving tags, proper nouns, and tokens."""
@@ -1597,9 +1755,12 @@ class ThreeTierGlossary:
 
         candidate = polish_indonesian_card_text(source_zh, candidate, baseline_en)
         candidate = ensure_placeholder_spacing(normalize_brackets(candidate))
+        if ";" not in source_zh and ";" in candidate:
+            candidate = re.sub(r";\s*(?=[A-Z]|Pilih|Dapatkan|Memperoleh)", ". ", candidate)
+            candidate = sanitize_target_text(source_zh, candidate)
         bounded = self._fit_length_bound(source_zh, candidate)
-        if ";" not in bounded and len(bounded) > 20:
-            wrapped = wrap_card_description(bounded)
+        if (";" in source_zh or ";" not in bounded) and len(bounded) > 20:
+            wrapped = wrap_card_description(bounded, max_width=26, source_zh=source_zh)
             if validate_translation(source_zh, wrapped)[0]:
                 return wrapped
         return bounded
@@ -1631,6 +1792,21 @@ class ThreeTierGlossary:
             ok, _ = validate_translation(source_zh, cand)
             if ok:
                 return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
+
+        # 1b. Composite Talent Series header+body splitter
+        m_ser = re.match(
+            r"^((?:<a\s+href=[^>]+>)?<color=#99DEB0>)([^<]*系列)(</color>(?:</a>)?)\n(.+)$",
+            source_zh,
+            flags=re.S,
+        )
+        if m_ser:
+            canon_header = ZH_SERIES_HEADER_MAP.get(m_ser.group(2), m_ser.group(2).replace("系列", " Series"))
+            body_zh = m_ser.group(4)
+            body_en = baseline_en.split("\n", 1)[1] if (baseline_en and "\n" in baseline_en) else baseline_en
+            body_id, body_tier = self.translate_entry(body_zh, baseline_en=body_en)
+            full_cand = f"{m_ser.group(1)}{canon_header}{m_ser.group(3)}\n{body_id}"
+            if validate_translation(source_zh, full_cand)[0]:
+                return (self._finalize_output(source_zh, full_cand, baseline_en or ""), body_tier)
 
         # 2. Tier 1 normalized (tag-stripped) match + skeleton re-injection
         norm_zh = normalize_plain_zh(source_zh)
@@ -1706,17 +1882,6 @@ class ThreeTierGlossary:
                 )
                 if validate_translation(source_zh, cand)[0]:
                     return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
-
-        # 2d. Exact-tag baseline_en match: If baseline_en carries exact tags, translate preserving skeleton
-        if baseline_en:
-            b_tags = TAG_RE.findall(baseline_en)
-            src_tags = TAG_RE.findall(source_zh)
-            if b_tags and b_tags == src_tags:
-                cand_en = translate_preserving_skeleton(baseline_en, self.translate_en_to_id)
-                cand_en = sanitize_target_text(source_zh, cand_en)
-                cand_en = normalize_tag_boundary_spacing(source_zh, cand_en)
-                if validate_translation(source_zh, cand_en)[0]:
-                    return (self._finalize_output(source_zh, cand_en, baseline_en), "tier2")
 
         # 2e. Contestant Name-Stripped Tier 1 Lookup
         CONTESTANT_NAMES_ZH = (
@@ -1833,7 +1998,7 @@ class ThreeTierGlossary:
                 items_str = f"{', '.join(resolved_items[:-1])}, atau {resolved_items[-1]}"
             else:
                 items_str = resolved_items[0] if resolved_items else ""
-            chest_id = f"Dipakai oleh Hero target; pilih {count} dari {items_str}."
+            chest_id = f"Dipakai oleh Hero target. Pilih {count} dari {items_str}."
             if validate_translation(source_zh, chest_id)[0]:
                 return (self._finalize_output(source_zh, chest_id, baseline_en or ""), "tier2")
 
@@ -1882,6 +2047,23 @@ class ThreeTierGlossary:
                 v_id = f"Pilih {count} Hero, lalu peroleh {copies} salinan Kartu Hero tersebut."
                 if validate_translation(source_zh, v_id)[0]:
                     return (self._finalize_output(source_zh, v_id, baseline_en or ""), "tier2")
+
+        # 2d. Exact-tag baseline_en match: If baseline_en carries exact tags, translate preserving skeleton
+        # Guarded against upstream Opus-MT corruption
+        if baseline_en:
+            if not re.search(
+                r"♪|♫|Synchronis|\(Text\)|\bRiot rate\b|\d+\s*(?:Zhang|Chang)\b|Forensic|small part of the world|non-resistible|breached\.",
+                baseline_en,
+                flags=re.I,
+            ):
+                b_tags = TAG_RE.findall(baseline_en)
+                src_tags = TAG_RE.findall(source_zh)
+                if b_tags and b_tags == src_tags:
+                    cand_en = translate_preserving_skeleton(baseline_en, self.translate_en_to_id)
+                    cand_en = sanitize_target_text(source_zh, cand_en)
+                    cand_en = normalize_tag_boundary_spacing(source_zh, cand_en)
+                    if validate_translation(source_zh, cand_en)[0]:
+                        return (self._finalize_output(source_zh, cand_en, baseline_en), "tier2")
 
         # 3. Tier 2 exact or plain entity/detail match -> EN -> ID
         t2_en = self.tier2_zh_to_en.get(source_zh) or (

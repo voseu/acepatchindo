@@ -393,20 +393,23 @@ def adapt_tier1_placeholders_to_source(source_zh: str, t1_id: str) -> str:
     out = t1_id
 
     # 1. Map icon placeholders if in source_zh
-    if "{LordExp}" in source_zh:
+    if "{LordExp}" in source_zh and out.count("{LordExp}") < source_zh.count("{LordExp}"):
         pattern_exp = (
-            r"\b(?:(?:Contestant|Chess Player|Player|Pemain|Lord)\s+)?(?:EXP|Pengalaman|Experience)\b|"
-            r"\b(?:EXP|Pengalaman|Experience)(?:\s+(?:Contestant|Chess Player|Player|Pemain|Lord))?\b"
+            r"(?<!\{)\b(?:(?:Contestant|Chess Player|Player|Pemain|Lord)\s+)?(?:EXP|Pengalaman|Experience)\b(?!\})"
+            r"|(?<!\{)\b(?:EXP|Pengalaman|Experience)(?:\s+(?:Contestant|Chess Player|Player|Pemain|Lord))?\b(?!\})"
         )
-        out = re.sub(pattern_exp, "{LordExp}", out, flags=re.I)
-    if "{LordHp}" in source_zh:
+        needed = source_zh.count("{LordExp}") - out.count("{LordExp}")
+        out = re.sub(pattern_exp, "{LordExp}", out, count=needed, flags=re.I)
+    if "{LordHp}" in source_zh and out.count("{LordHp}") < source_zh.count("{LordHp}"):
         pattern_hp = (
-            r"\b(?:(?:Contestant|Chess Player|Player|Pemain|Lord)\s+)?(?:HP|Darah|Health)\b|"
-            r"\b(?:HP|Darah|Health)(?:\s+(?:Contestant|Chess Player|Player|Pemain|Lord))?\b"
+            r"(?<!\{)\b(?:(?:Contestant|Chess Player|Player|Pemain|Lord)\s+)?(?:HP|Darah|Health)\b(?!\})"
+            r"|(?<!\{)\b(?:HP|Darah|Health)(?:\s+(?:Contestant|Chess Player|Player|Pemain|Lord))?\b(?!\})"
         )
-        out = re.sub(pattern_hp, "{LordHp}", out, flags=re.I)
-    if "{Energy}" in source_zh:
-        out = re.sub(r"\b(?:Energi|Energy)\b", "{Energy}", out, flags=re.I)
+        needed = source_zh.count("{LordHp}") - out.count("{LordHp}")
+        out = re.sub(pattern_hp, "{LordHp}", out, count=needed, flags=re.I)
+    if "{Energy}" in source_zh and out.count("{Energy}") < source_zh.count("{Energy}"):
+        needed = source_zh.count("{Energy}") - out.count("{Energy}")
+        out = re.sub(r"(?<!\{)\b(?:Energi|Energy)\b(?!\})", "{Energy}", out, count=needed, flags=re.I)
 
     # 2a. Dynamic placeholder ranges: {N|v1}-{M|v2}
     for m in re.finditer(r"(\{(\d+)\|([^{}]+)\}\s*-\s*\{(\d+)\|([^{}]+)\})", source_zh):

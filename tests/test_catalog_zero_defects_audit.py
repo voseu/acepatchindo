@@ -12,6 +12,7 @@ from acepatchindo.validator import validate_translation
 
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG_PATH = ROOT / "data" / "catalog_checkpoints" / "catalog.json.gz"
+ORIG_CATALOG_PATH = ROOT / "Honor of Kings Ace English Patcher 1.4.12.exe_extracted" / "catalog" / "catalog.json.gz"
 INDEX_PATH = ROOT / "data" / "references" / "hybrid_vfs_index.json"
 
 
@@ -317,3 +318,105 @@ def test_09_zero_contestant_and_series_mangling(catalog_data, index_data):
     for label, pat in mangling_checks:
         for val in target_values:
             assert not pat.search(val), f"Target string mangling {label!r} detected in: {val!r}"
+
+
+def test_10_zero_opus_mt_control_token_and_wrap_regressions():
+    """Verify that no active target string carries Opus-MT hallucinations, leaked tokens, or line length regressions."""
+    from acepatchindo.hybrid_classifier import get_hybrid_classifier
+    from acepatchindo.card_wrapper import _visible_length
+
+    with gzip.open(CATALOG_PATH, "rt", encoding="utf-8") as f:
+        catalog = json.load(f)
+
+    with gzip.open(ORIG_CATALOG_PATH, "rt", encoding="utf-8") as f:
+        orig_cat = json.load(f)
+
+    classifier = get_hybrid_classifier()
+    unique = catalog["unique"]
+    orig_unique = orig_cat["unique"]
+
+    active_targets = []
+    for zh, val in unique.items():
+        en = orig_unique.get(zh, "")
+        if classifier.is_target_unique(zh, en):
+            active_targets.append((zh, val))
+
+    assert len(active_targets) >= 5_000, f"Expected >= 5000 active targets, got {len(active_targets)}"
+
+    opus_mt_patterns = [
+        ("musical_note_d", re.compile(r"♪")),
+        ("musical_note_2d", re.compile(r"♫")),
+        ("synchronis", re.compile(r"\bSynchronis", re.I)),
+        ("teks", re.compile(r"\(Teks\)", re.I)),
+        ("riot_rasio", re.compile(r"\bRiot\s+rasio\b", re.I)),
+        ("forensic", re.compile(r"\bForensic\b", re.I)),
+        ("zhang", re.compile(r"\b\d+\s*Zhang\b", re.I)),
+        ("chang", re.compile(r"\b\d+\s*Chang\b", re.I)),
+        ("dunia_kecil", re.compile(r"sangat\s+kecil\s+bagian\s+dari\s+dunia", re.I)),
+        ("hell_menjadi", re.compile(r"He'll\s+menjadi", re.I)),
+    ]
+
+    control_token_leaks = [
+        ("almia_core", re.compile(r"\bAlmia\s+Core\b", re.I)),
+        ("accomia_core", re.compile(r"\bAccomia\s+Core\b", re.I)),
+        ("acomia_core", re.compile(r"\bAcomia\s+Core\b", re.I)),
+        ("initiate_bentrokan", re.compile(r"╪\s*Bentrokan")),
+        ("initiate_memulai", re.compile(r"╪\s*Memulai")),
+        ("prepare_siap", re.compile(r"╬\s*Siap")),
+        ("revive_sempurna", re.compile(r"╧\s*Sempurna")),
+        ("fleeting_instant", re.compile(r"╆\s*Instant")),
+        ("retire_exit", re.compile(r"╈\s*Exit")),
+        ("retire_keluar", re.compile(r"╈\s*Keluar")),
+        ("combine_menggabungkan", re.compile(r"╦\s*Menggabungkan")),
+        ("combine_merge", re.compile(r"╦\s*Merge")),
+        ("soul_snatch_jiwa_merebut", re.compile(r"╊\s*Jiwa\s+Merebut")),
+        ("steal_merebut", re.compile(r"╊\s*Merebut")),
+        ("steal_capture", re.compile(r"╊\s*Capture")),
+        ("steal_plunder", re.compile(r"╊\s*Plunder")),
+        ("steal_seizure", re.compile(r"╊\s*Seizure")),
+        ("bond_totem_pernikahan", re.compile(r"╉\s*Pernikahan\s+Totem")),
+        ("afterlife_totem_rebirth", re.compile(r"╉\s*Rebirth\s+Totem")),
+        ("seer_totem_prophet", re.compile(r"╉\s*Prophet\s+Totem")),
+    ]
+
+    phrase_leaks = [
+        ("medan_milikmu_tempur", re.compile(r"medan\s+\w+\s+tempur", re.I)),
+        ("sebuah_di_luar_arena", re.compile(r"sebuah\s+di\s+luar\s+arena", re.I)),
+        ("cermin_kartu", re.compile(r"<b>cermin</b>\s*kartu", re.I)),
+        ("yao_rusa_level", re.compile(r"rusa\s+Level\s+adalah\s+\+30", re.I)),
+    ]
+
+    for zh, val in active_targets:
+        # 1. Opus-MT hallucinations
+        for label, pat in opus_mt_patterns:
+            assert not pat.search(val), f"Opus-MT hallucination {label!r} in {val!r} (ZH: {zh!r})"
+
+        # 2. Inappropriate Strum
+        if "扫拂" not in zh and "轮指" not in zh:
+            assert "Strum" not in val, f"Invalid Strum without 扫拂/轮指 in {val!r} (ZH: {zh!r})"
+
+        # 3. Control token leaks
+        for label, pat in control_token_leaks:
+            assert not pat.search(val), f"Control token leak {label!r} in {val!r} (ZH: {zh!r})"
+
+        # 4. Leaked Series title (should be Series, not Seri)
+        if "系列" in zh:
+            assert not re.search(
+                r"\b(Totem|Steal|Flash|Temporary Level|Arcomia Core|Deploy|Initiate|Sacrifice|Prepare|Low-Tier|Starting Lineup|Ancient Coin|Summon|Combine|Multi-Faction|Contract|Tactics Card|Shield|Effect Card|Factionless|Grassroots|General)\s+Seri\b",
+                val,
+                re.I,
+            ), f"Leaked 'Seri' title in {val!r} (ZH: {zh!r})"
+
+        # 5. Word wrap check: if no ';' in zh, each line visible length <= 34 (unless single unbroken token > 34)
+        if ";" not in zh:
+            for line in val.split("\n"):
+                vis_len = _visible_length(line)
+                if vis_len > 34:
+                    line_masked = re.sub(r"\[[^\]]+\]", lambda m: m.group(0).replace(" ", "_"), line)
+                    words = [w for w in line_masked.split(" ") if w]
+                    has_long_word = any(_visible_length(w) > 34 for w in words)
+                    assert has_long_word, f"Line exceeds 34 visible chars ({vis_len}): {line!r} in {val!r} (ZH: {zh!r})"
+
+        # 6. Phrase leaks
+        for label, pat in phrase_leaks:
+            assert not pat.search(val), f"Phrase leak {label!r} in {val!r} (ZH: {zh!r})"

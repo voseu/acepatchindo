@@ -30,12 +30,13 @@ GLUED_PLUS_MINUS_DIGIT_TO_WORD_RE = re.compile(
 
 
 def normalize_brackets(text: str) -> str:
-    """Convert Chinese fullwidth brackets 【...】 to clean ASCII [...] with spacing."""
+    """Convert Chinese fullwidth brackets 【...】 to clean ASCII [...] and （...） to (...) with spacing."""
     if not text:
         return text
-    text = text.replace("【", "[").replace("】", "]")
+    text = text.replace("【", "[").replace("】", "]").replace("（", "(").replace("）", ")")
     text = re.sub(r"([A-Za-z0-9])(\[[A-Za-z])", r"\1 \2", text)
     text = re.sub(r"(\])([A-Za-z0-9])", r"\1 \2", text)
+    text = re.sub(r"(?<=[>\]\w])\(", " (", text)
     return text
 
 
@@ -138,11 +139,12 @@ def _wrap_single_paragraph(paragraph: str, max_width: int) -> str:
     )
     para = ATOMIC_TAG_RE.sub(_protect_atomic, paragraph)
 
-    # Protect spaces inside all brackets [...] so they never split across lines
+    # Protect spaces inside all brackets [...] and placeholders {...} so they never split across lines
     def _mask_bracket_spaces(m: re.Match[str]) -> str:
         return m.group(0).replace(" ", "\x00SPACE\x00")
 
     para = re.sub(r"\[[^\]]+\]", _mask_bracket_spaces, para)
+    para = re.sub(r"\{[^{}]+\}", _mask_bracket_spaces, para)
 
     # Tokenize by whitespace while keeping XML tags attached to their adjacent word tokens
     protected: list[str] = []
@@ -187,11 +189,15 @@ def _wrap_single_paragraph(paragraph: str, max_width: int) -> str:
     return "\n".join(lines)
 
 
-def wrap_card_description(text: str, max_width: int = 26) -> str:
+def wrap_card_description(text: str, max_width: int = 26, source_zh: str = "") -> str:
     """Wrap card description lines at word boundaries so CJK renderer never splits words mid-syllable."""
-    if not text or ";" in text:
-        # Never wrap semicolon-delimited multi-part strings
+    if not text:
         return text
+    if ";" in source_zh or (not source_zh and ";" in text):
+        # Never wrap authentic multi-column semicolon-delimited table strings
+        return text
+    if ";" not in source_zh and ";" in text:
+        text = text.replace("; ", ", ").replace(";", ",")
     while re.search(r"(\[[^\]\n]*)\n([^\]\n]*\])", text):
         text = re.sub(r"(\[[^\]\n]*)\n([^\]\n]*\])", r"\1 \2", text)
     text = normalize_brackets(ensure_placeholder_spacing(text))

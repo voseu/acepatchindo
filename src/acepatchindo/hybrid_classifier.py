@@ -107,6 +107,9 @@ class HybridClassifier:
             return False
         if P_UNIT_FLAVOR_RE.search(zh_clean):
             return False
+        # Standalone Series category headers veto: Keep official English category names
+        if re.fullmatch(r"[\u2540-\u257f]?[^，。；：\n]{1,10}系列", zh_clean):
+            return False
 
         p_zh = normalize_plain_zh(zh_clean)
 
