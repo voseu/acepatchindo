@@ -145,6 +145,8 @@ def _wrap_single_paragraph(paragraph: str, max_width: int) -> str:
 
     para = re.sub(r"\[[^\]]+\]", _mask_bracket_spaces, para)
     para = re.sub(r"\{[^{}]+\}", _mask_bracket_spaces, para)
+    # Bind standalone arithmetic '+' or '-' to the following token so signs never hang at line ends
+    para = re.sub(r"\s+([+-])\s+", lambda m: f" {m.group(1)}\x00SPACE\x00", para)
 
     # Tokenize by whitespace while keeping XML tags attached to their adjacent word tokens
     protected: list[str] = []

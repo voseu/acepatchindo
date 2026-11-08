@@ -121,6 +121,15 @@ class HybridClassifier:
         ):
             return True
 
+        # Check composite series cards: if body is target, card is target
+        m_ser = re.match(
+            r"^((?:<a\s+href=[^>]+>)?<color=#99DEB0>)([^<]*系列)(</color>(?:</a>)?)\n(.+)$",
+            zh_clean,
+            flags=re.S,
+        )
+        if m_ser and self.is_target_unique(m_ser.group(4), en_base):
+            return True
+
         skel_zh = normalize_formula_skeleton_zh(zh_clean)
         if (
             len(p_zh) >= 6

@@ -185,8 +185,8 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
             if PROSE_CALQUE_RE.search(stripped):
                 target_stopword_hits += 1
 
-    assert 4000 <= target_count <= 5600, (
-        f"Expected between 4,000 and 5,600 target gameplay descriptions in unique, got {target_count}"
+    assert 4000 <= target_count <= 6000, (
+        f"Expected between 4,000 and 6,000 target gameplay descriptions in unique, got {target_count}"
     )
     assert target_stopword_hits < 50, (
         f"Expected < 50 prose calque hits in target descriptions, got {target_stopword_hits}"

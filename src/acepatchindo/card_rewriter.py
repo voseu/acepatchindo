@@ -256,30 +256,62 @@ def polish_indonesian_card_text(source_zh: str, text_id: str, baseline_en: str =
     res = re.sub(r"ditetapkan\s+Core\s+Level\s+dari\s+Accomia", "Level Arcomia Core", res, flags=re.I)
     res = re.sub(r"╥\s+(?:(<b>))?Arcomia\s*Core", lambda m: "╥<b>Arcomia Core" if m.group(1) else "╥Arcomia Core", res)
 
-    res = re.sub(r"(╪\s*)(<b>)?(?:Bentrokan|Clash|Confrontation|Memulai|ke\s+mulai|Initiate)\b", r"\1\g<2>Initiate", res, flags=re.I)
+    res = re.sub(
+        r"(╪\s*)(<b>)?(?:Bentrokan|Clash|Confrontation|Memulai|ke\s+mulai|Initiate|dan\s+(?:dimulai|mulai)\s+sebuah\s+(?:tim|grup)|Initiate\s+sebuah\s+(?:tim|grup)|sebuah\s+(?:tim|grup))\b",
+        r"\1\g<2>Initiate",
+        res,
+        flags=re.I,
+    )
     if "交锋" in source_zh:
         res = re.sub(r"(<b>)?\bBentrokan\b(</b>)?", r"\g<1>Initiate\g<2>", res)
 
+    res = re.sub(r"(╨\s*)(<b>)?(?:dan\s+Deploy|Deploy)\b", r"\1\g<2>Deploy", res, flags=re.I)
     res = re.sub(r"(╬\s*)(<b>)?(?:Siap|Ready|Preparation|Prepare)\b", r"\1\g<2>Prepare", res, flags=re.I)
 
-    res = re.sub(r"(╧\s*)(<b>)?(?:Sempurna\s+pemulihan\.?|Perfect\s+recovery\.?|Perfect\s+Revive)\b", r"\1\g<2>Perfect Revive", res, flags=re.I)
-    res = re.sub(r"(╧\s*)(<b>)?(?:bangkit\s+kembali|Recovery|Resurrect|Resurrection|Revive)\b", r"\1\g<2>Revive", res, flags=re.I)
+    res = re.sub(
+        r"(╧\s*)(<b>)?(?:Sempurna\s+pemulihan\.?|Perfect\s+recovery\.?|Perfect\s+Revive|secara\s+sempurna\s+bangkit\s+kembali)\b",
+        r"\1\g<2>Perfect Revive",
+        res,
+        flags=re.I,
+    )
+    res = re.sub(
+        r"(╧\s*)(<b>)?(?:bangkit\s+kembali|Recovery|Resurrect|Resurrection|Revive|Di-revive)\b",
+        r"\1\g<2>Revive",
+        res,
+        flags=re.I,
+    )
 
     res = re.sub(r"(╆\s*)(<b>)?(?:Instant|Fleeting)\b", r"\1\g<2>Fleeting", res, flags=re.I)
-
     res = re.sub(r"(╈\s*)(<b>)?(?:Exit|Keluar|Retreat|Retire)\b", r"\1\g<2>Retire", res, flags=re.I)
+    res = re.sub(r"(╦\s*)(<b>)?(?:Menggabungkan|Merge|Combine|penggabungan)\b", r"\1\g<2>Combine", res, flags=re.I)
 
-    res = re.sub(r"(╦\s*)(<b>)?(?:Menggabungkan|Merge|Combine)\b", r"\1\g<2>Combine", res, flags=re.I)
-
+    res = re.sub(r"(╊\s*)(<b>)?(?:Jiwa\s+Merebut|Soul\s+Snatch|Roh\s+Extraction|Soul\s+Extraction)\b", r"\1\g<2>Soul Snatch", res, flags=re.I)
+    res = re.sub(r"(╊\s*)(<b>)?(?:Merebut|Capture|Plunder|Seizure|Snatch|Steal|dan\s+Steal|capturing\s+entri)\b", r"\1\g<2>Steal", res, flags=re.I)
     if "夺取" in source_zh:
-        res = re.sub(r"(╊\s*)(<b>)?(?:Merebut|Capture|Plunder|Seizure|Snatch|Steal)\b", r"\1\g<2>Steal", res, flags=re.I)
         res = re.sub(r"\b(?:Merebut|Capture|Plunder|Seizure|Snatch)\b", "Steal", res, flags=re.I)
-    if "摄灵" in source_zh:
-        res = re.sub(r"(╊\s*)(<b>)?(?:Jiwa\s+Merebut|Soul\s+Snatch)\b", r"\1\g<2>Soul Snatch", res, flags=re.I)
+    res = re.sub(r"\bRoh\s+Extraction\b", "Soul Snatch", res, flags=re.I)
+    res = re.sub(r"\bke\s+Steal\b", "Steal", res, flags=re.I)
+
+    res = re.sub(r"╫\s*sacrificed\s+Hero\b", "Hero ╫Sacrifice", res, flags=re.I)
+    res = re.sub(r"<color=#99DEB0>dan sacrifices</color>", "<color=#99DEB0>Sacrifice</color>", res, flags=re.I)
+
+    # Devour
+    res = re.sub(r"╆\s*Melahap\b", "╆Devour", res, flags=re.I)
+    res = re.sub(r"╬\s*Super\s+Melahap\b", "╬Super Devour", res, flags=re.I)
+    res = re.sub(r"╬\s*Melahap\b", "╬Devour", res, flags=re.I)
 
     res = re.sub(r"\bProphet\s+Totem\b", "Seer Totem", res, flags=re.I)
     res = re.sub(r"\b(?:Pernikahan|Marriage|Karma)\s+Totem\b", "Bond Totem", res, flags=re.I)
     res = re.sub(r"\b(?:Rebirth|Reincarnation)\s+Totem\b", "Afterlife Totem", res, flags=re.I)
+    if "因缘图腾" in source_zh or "姻缘图腾" in source_zh:
+        res = re.sub(r"\b(?:Destiny|Ikatan)\s+Totem\b", "Bond Totem", res, flags=re.I)
+        res = re.sub(r"\b╉(?:Destiny|Ikatan)\s+Totem\b", "╉Bond Totem", res, flags=re.I)
+    if "命运图腾" in source_zh:
+        res = re.sub(r"\bDestiny\s+Totem\b", "Fate Totem", res, flags=re.I)
+        res = re.sub(r"\b╉Destiny\s+Totem\b", "╉Fate Totem", res, flags=re.I)
+        res = re.sub(r"<color=#FFE897>╉Fate\s+╉Totem</color>", "<color=#FFE897>╉Fate Totem</color>", res)
+
+    res = re.sub(r"\b═\s+Level\b", "═Temporary Level", res)
 
     res = re.sub(
         r"\b(Totem|Steal|Flash|Temporary Level|Arcomia Core|Deploy|Initiate|Sacrifice|Prepare|Low-Tier|Starting Lineup|Ancient Coin|Summon|Combine|Multi-Faction|Contract|Tactics Card|Shield|Effect Card|Factionless|Grassroots|General)\s+Seri\b",
@@ -459,6 +491,38 @@ def polish_indonesian_card_text(source_zh: str, text_id: str, baseline_en: str =
 
     # Sub-card Copier: itu Kartu Hero -> Kartu Hero tersebut
     res = re.sub(r"\bitu\s+Kartu\s+Hero\b", "Kartu Hero tersebut", res, flags=re.I)
+
+    # Word order fixes: Verb + milikmu
+    res = re.sub(r"\b(?:semua\s+)?Riverlands\s+Hero\s+(?:mendapatkan|memperoleh)\s+milikmu\b", "semua Hero [Riverlands] milikmu memperoleh", res, flags=re.I)
+    res = re.sub(r"\bTank\s+Hero\s+(?:mendapatkan|memperoleh)\s+milikmu\b", "Hero Tank milikmu memperoleh", res, flags=re.I)
+    res = re.sub(r"\bbeku\s+Hero\s+(?:mendapatkan|memperoleh)\s+milikmu\b", "Hero milikmu yang terkena Freeze memperoleh", res, flags=re.I)
+    res = re.sub(r"\b(semua\s+)?Hero\s+(memicu|mendapatkan|menggunakan|memperoleh|melepaskan|menyerang|memanggil)\s+milikmu\b", r"\1Hero milikmu \2", res, flags=re.I)
+    res = re.sub(r"\b(semua\s+)?unit\s+(memicu|mendapatkan|menggunakan|memperoleh|melepaskan|menyerang|memanggil)\s+milikmu\b", r"\1unit milikmu \2", res, flags=re.I)
+    res = re.sub(r"\bHero\s+secara\s+permanen\s+milikmu\s+mendapatkan\b", "Hero milikmu memperoleh secara permanen", res, flags=re.I)
+    res = re.sub(r"\bHero\s+milikmu\s+akan\s+secara\s+permanen\s+mendapatkan\b", "Hero milikmu memperoleh secara permanen", res, flags=re.I)
+    res = re.sub(r"\bHero\s+milikmu\s+mendapatkan\b", "Hero milikmu memperoleh", res, flags=re.I)
+    res = re.sub(r"\bHero\s+milikmu\s+Memicu\b", "Hero milikmu memicu", res, flags=re.I)
+    res = re.sub(r"\bdan\s+mendapatkan\s+milikmu\b", "dan memperoleh", res, flags=re.I)
+    res = re.sub(r"\bmendapatkan\s+milikmu\b", "memperoleh", res, flags=re.I)
+    res = re.sub(r"\bSetiap waktu\b", "Setiap kali", res, flags=re.I)
+    res = re.sub(r"\bDi awal dari (?:Round|giliran)\b", "Saat Round dimulai", res, flags=re.I)
+    res = re.sub(r"\bDi awal dari Combat\b", "Saat Combat dimulai", res, flags=re.I)
+    res = re.sub(r"\bDi akhir dari Combat\b", "Saat Combat berakhir", res, flags=re.I)
+
+    # Equipment & Treasure headers
+    if "唯一" in source_zh:
+        res = re.sub(r"<b>\s*(?:hanya|Unique)\s*</b>", "<b>Unik</b>", res, flags=re.I)
+        res = re.sub(r"<color=#ffffff>\s*(?:hanya|Unique)\s*</color>", "<color=#ffffff>Unik</color>", res, flags=re.I)
+        res = re.sub(r"<color=#ffffff><b>\s*(?:hanya|Unique)\s*</b></color>", "<color=#ffffff><b>Unik</b></color>", res, flags=re.I)
+        res = re.sub(r"\bhanya\b", "Unik", res, flags=re.I)
+
+    res = re.sub(r"\btidak\s+dapat\s+disassembled\b", "tidak dapat dilepas", res, flags=re.I)
+    res = re.sub(r"\bTidak\s+dapat\s+disassembled\b", "Tidak dapat dilepas", res)
+    res = re.sub(r"\bCannot\s+be\s+disassembled\b", "Tidak dapat dilepas", res, flags=re.I)
+    res = re.sub(r"\bHarta\s+[Kk]artu\b", "Kartu Treasure", res)
+    res = re.sub(r"\bHarta\s+kartu\b", "Kartu Treasure", res, flags=re.I)
+    res = re.sub(r"Pilih 1 <color=#FFDD68FF>Oranye Hero \+\s*Level 3</color>\.", "Pilih 1 <color=#FFDD68FF>Hero Oranye +3 Level</color>.", res)
+    res = re.sub(r"\bOranye\s+Hero\s*\+\s*Level\s*3\b", "Hero Oranye +3 Level", res, flags=re.I)
 
     # Ensure tag boundary spacing
     res = re.sub(r"([A-Za-z0-9%])(<(?![/])(?:color|b|i|a|size)\b[^>]*>)", r"\1 \2", res)

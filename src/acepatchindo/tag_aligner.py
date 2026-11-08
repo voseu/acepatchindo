@@ -583,6 +583,14 @@ def reinject_formula_and_skeleton(
         else:
             footer_id = f"{leading_nl}<color={c_val}>Ketuk panel deskripsi Skill untuk melihat penjelasan detail <b>{term_id}</b></color>"
 
+    # Strip excess control tokens from desc_id that are not present in body_source_zh
+    zh_ctrls = Counter(CONTROL_TOKEN_RE.findall(body_source_zh))
+    out_ctrls = Counter(CONTROL_TOKEN_RE.findall(out))
+    for ch, count in out_ctrls.items():
+        excess = count - zh_ctrls.get(ch, 0)
+        if excess > 0:
+            out = out.replace(ch, "", excess)
+
     # Fold 3-line desc_id to 2 lines when source_zh is 2-line Yang Yuhuan variant
     if (
         source_zh.lstrip().startswith(("<color=#ffffffbf>清平：</color>", "清平："))
@@ -1019,6 +1027,18 @@ HIGHLIGHT_TAG_ALIAS_MAP: dict[str, tuple[str, ...]] = {
     "法术攻击力+20": ("Magic Attack +20",),
     "法术攻击力+30": ("Magic Attack +30",),
     "物理攻击力+10": ("Physical Attack +10",),
+    "双剑·雄": ("Twin Blades: Male", "Twin Blade · Male", "Dual Swords: Male", "Twin Blade: Male"),
+    "双剑·雌": ("Twin Blades: Female", "Twin Blade · Female", "Dual Swords: Female", "Twin Blade: Female"),
+    "险中求富": ("Seeking wealth in danger", "Seeking Wealth in Danger", "Mencari Keberuntungan di Bahaya"),
+    "站这别动": ("Stay Put", "Stay Right There", "Berdiri di Sini Jangan Bergerak"),
+    "怒莲之刺": ("Thorn of the Angry Lotus", "Wrathlotus Thorn"),
+    "4张": ("4", "4 Kartu"),
+    "商店购买": ("Pembelian di Shop", "Membeli di Shop"),
+    "出售英雄牌": ("menjual Kartu Hero", "Menjual Kartu Hero", "menjual Kartu"),
+    "已觉醒英雄": ("Hero milikmu yang sudah Awaken", "Hero yang sudah Awaken", "Hero milikmu yang sudah Awakening", "Hero yang sudah Awakening"),
+    "3阶英雄牌": ("Kartu Hero Tier 3", "Hero Tier 3"),
+    "法力值清空": ("menguras habis Mana", "Mana dikosongkan", "mengosongkan Mana"),
+    "受到的伤害": ("menerima Damage", "Damage yang diterima"),
 }
 
 
@@ -1120,6 +1140,10 @@ def _wrap_keyword_or_entity(u_open: str, u_close: str, u_zh: str, text_segment: 
 
     # Fallback: if not control token and not <a href=>
     if not any(c in u_open for c in CTRL) and "<a href=" not in u_open:
+        if len(u_zh.strip()) <= 6 and len(raw) >= 45:
+            m_first = re.search(r"\b([A-Z][A-Za-z0-9'·•\-]+|\d+%?)\b", raw)
+            if m_first:
+                return raw[: m_first.start()] + f"{u_open}{m_first.group(0)}{u_close}" + raw[m_first.end() :]
         return f"{u_open}{text_segment.strip()}{u_close}"
 
     # Last resort for control tokens: wrap the first word or token, NEVER insert raw Chinese u_zh
@@ -1373,6 +1397,14 @@ def reinject_skeleton_from_source(
                     before = curr[:f_idx]
                     if before.rfind("<") > before.rfind(">"):
                         continue
+                    CTRL = set("╥╆╪╬╉═╧╊╅╈╦╇╋")
+                    before_adj = before
+                    for ch in CTRL:
+                        if ch in open_part and re.search(rf"{re.escape(ch)}\s*$", before):
+                            before_adj = re.sub(rf"{re.escape(ch)}\s*$", "", before)
+                            break
+                        if ch in open_part and alias.startswith(ch):
+                            alias = alias[len(ch):].lstrip()
                     if alias.endswith((".", ":", "\n")):
                         kw = alias[:-1]
                         punct = alias[-1]
@@ -1384,8 +1416,8 @@ def reinject_skeleton_from_source(
                             tagged = f"{open_part}{kw}{close_part}{punct}"
                     else:
                         tagged = f"{open_part}{alias}{close_part}"
-                    curr = curr[:f_idx] + tagged + curr[f_idx + len(alias) :]
-                    cursor = f_idx + len(tagged)
+                    curr = before_adj + tagged + curr[f_idx + len(alias) :]
+                    cursor = len(before_adj) + len(tagged)
                     matched_this = True
                     matched_indices.add(idx)
                     break

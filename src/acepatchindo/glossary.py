@@ -1368,6 +1368,221 @@ class ThreeTierGlossary:
                 "获得3张<color=#FFE897>╪交锋</color>效果英雄牌。",
                 "Peroleh 3 Kartu Hero dengan Efek <color=#FFE897>╪Initiate</color>.",
             ),
+            # Da Qiao variant
+            (
+                "你的英雄每触发2次<a href=1><color=#ffffff>╨<b>登场</b></color></a>效果，大乔的法力值上限永久-5且等级+1。",
+                "Setiap 2 kali Hero milikmu memicu efek <a href=1><color=#ffffff>╨<b>Deploy</b></color></a>, Max Mana Da Qiao berkurang 5 secara permanen dan mendapat +1 Level.",
+            ),
+            # Tugas 2 Control Token cards
+            (
+                "<b>唯一</b>\n穿戴者获得╊夺取效果。无法拆卸。",
+                "<b>Unik</b>\nPemakai memperoleh efek ╊Steal. Tidak dapat dilepas.",
+            ),
+            (
+                "战斗中全部友军阵亡时，盘古重生，并额外获得回合数x10的═临时等级。",
+                "Saat semua unit sekutu gugur dalam Combat, Pangu bangkit kembali dan memperoleh ═Temporary Level sebesar 10x jumlah Round.",
+            ),
+            (
+                "战斗开始时，你的英雄获得<color=#99DEB0>35</color>═临时等级。战斗结束时，存活英雄的此等级转化为永久等级。",
+                "Saat Combat dimulai, Hero milikmu memperoleh <color=#99DEB0>35</color> ═Temporary Level. Saat Combat berakhir, Hero yang bertahan hidup mengubah Level ini menjadi Level permanen.",
+            ),
+            (
+                "战斗开始时，将<color=#99DEB0>1200</color>═临时等级随机分配给你的英雄。",
+                "Saat Combat dimulai, bagikan <color=#99DEB0>1200</color> ═Temporary Level secara acak kepada Hero milikmu.",
+            ),
+            (
+                "战斗开始及之后每3秒获得场上友军穿戴不屈意志数量x2的<a><color=#FFE897>═临时等级</color></a>。阵亡时，将自身等级的30%平均分配给穿戴不屈意志的友军。",
+                "Saat Combat dimulai dan setiap 3 detik setelahnya, peroleh <a><color=#FFE897>═Temporary Level</color></a> sebesar 2x jumlah sekutu di arena yang memakai Indomitable Will. Saat gugur, bagikan 30% Level miliknya secara merata ke sekutu yang memakai Indomitable Will.",
+            ),
+            (
+                "混沌裂隙英雄获得2次╧完美复生。",
+                "Hero Chaos Rift memperoleh 2 kali ╧Perfect Revive.",
+            ),
+            (
+                "立即获得<color=#99DEB0>1张闪现援兵</color>。回合开始时，获得<color=#99DEB0>1张闪现援兵</color>：卡牌<color=#99DEB0>5选2</color>（具有╋闪现词条的英雄牌）。",
+                "Segera peroleh <color=#99DEB0>1 Flash Reinforcement</color>. Saat Round dimulai, peroleh <color=#99DEB0>1 Flash Reinforcement</color>: pilih <color=#99DEB0>2 dari 5</color> Kartu Hero dengan trait ╋Flash.",
+            ),
+            (
+                "英雄╦合成时等级额外+3。",
+                "Saat Hero ╦Combine, peroleh +3 Level tambahan.",
+            ),
+            (
+                "每进行4次英雄<a href=13><color=#ffffff>╦<b>合成</b></color></a>，白歌获得1张<color=#ffffff><b>即兴创作</b></color>。",
+                "Setiap 4 kali Hero <a href=13><color=#ffffff>╦<b>Combine</b></color></a>, Bai Ge memperoleh 1 <color=#ffffff><b>Improvised Creation</b></color>.",
+            ),
+            (
+                "立即获得<color=#99DEB0>2张╪开团</color>英雄牌。己方单位触发<color=#99DEB0>╪开团</color>时，获得<color=#99DEB0>1张╪开团</color>英雄牌（每回合最多<color=#99DEB0>3张</color>）。",
+                "Segera peroleh <color=#99DEB0>2 Kartu Hero ╪Initiate</color>. Saat unit sekutu memicu <color=#99DEB0>╪Initiate</color>, peroleh <color=#99DEB0>1 Kartu Hero ╪Initiate</color> (maks. <color=#99DEB0>3 kartu</color> per Round).",
+            ),
+            (
+                "打出后，本回合上场的英雄牌，会额外附带1个无效果的╨登场词条。",
+                "Setelah dimainkan, Kartu Hero yang dimainkan Round ini mendapat 1 trait ╨Deploy tambahan tanpa efek.",
+            ),
+            (
+                "获得1张╊夺取：指定1名英雄获取词条能力，╊夺取。",
+                "Peroleh 1 Kartu ╊Steal: pilih 1 Hero untuk mendapatkan kemampuan trait ╊Steal.",
+            ),
+            (
+                "随机获得<color=#99DEB0>1张</color>具有╊夺取词条的英雄牌。",
+                "Peroleh secara acak <color=#99DEB0>1</color> Kartu Hero dengan trait ╊Steal.",
+            ),
+            (
+                "你的英雄触发<color=#99DEB0>夺取</color>时，所有英雄等级<color=#99DEB0>+6</color>。",
+                "Saat Hero milikmu memicu <color=#99DEB0>Steal</color>, semua Hero memperoleh <color=#99DEB0>+6 Level</color>.",
+            ),
+            (
+                "立即获得<color=#99DEB0>1张夺取援兵</color>。回合开始时，获得<color=#99DEB0>2张夺取援兵</color>：随机获得<color=#99DEB0>1张</color>具有╊夺取词条的英雄牌。",
+                "Segera peroleh <color=#99DEB0>1 Steal Reinforcement</color>. Saat Round dimulai, peroleh <color=#99DEB0>2 Steal Reinforcement</color>: peroleh secara acak <color=#99DEB0>1</color> Kartu Hero dengan trait ╊Steal.",
+            ),
+            (
+                "己方英雄触发牺牲时，场上随机<color=#99DEB0>1名</color>╫牺牲英雄获得该英雄总等级x<color=#99DEB0>35%</color>的等级。",
+                "Saat Hero sekutu memicu Sacrifice, <color=#99DEB0>1</color> Hero ╫Sacrifice acak di arena memperoleh Level sebesar <color=#99DEB0>35%</color> dari total Level Hero tersebut.",
+            ),
+            (
+                "战斗中，你<color=#99DEB0>第4次触发英雄的╫牺牲效果</color>时，所有已阵亡的╫牺牲英雄将会╧完美复生并获得<color=#99DEB0>200</color>临时等级。",
+                "Saat Combat, saat kamu <color=#99DEB0>memicu efek ╫Sacrifice Hero untuk ke-4 kalinya</color>, semua Hero ╫Sacrifice yang telah gugur akan ╧Perfect Revive dan memperoleh <color=#99DEB0>200</color> Temporary Level.",
+            ),
+            (
+                "战斗中，你<color=#FFE897>第4次触发英雄的╫牺牲效果</color>时，所有已阵亡的╫牺牲英雄将会╧完美复生。",
+                "Saat Combat, saat kamu <color=#FFE897>memicu efek ╫Sacrifice Hero untuk ke-4 kalinya</color>, semua Hero ╫Sacrifice yang telah gugur akan ╧Perfect Revive.",
+            ),
+            (
+                "<color=#FFE897>╋闪现英雄击败敌方单位</color>时，会立刻╋闪现至最近的敌人处，并无敌0.5秒。",
+                "Saat <color=#FFE897>Hero ╋Flash mengalahkan unit musuh</color>, ia langsung ╋Flash ke musuh terdekat dan menjadi Kebal selama 0.5 detik.",
+            ),
+            (
+                "转移时在原地创造1个具有30%最大生命值，╈<b>退场</b>时会眩晕周围敌人的分身，分身无法攻击且召唤时嘲讽周围敌人2秒。",
+                "Saat berpindah tempat, membuat 1 sosok tiruan di posisi asal dengan 30% Max HP yang memberikan Stun ke musuh di sekitarnya saat ╈<b>Retire</b>. Sosok ini tidak dapat menyerang dan memberikan Taunt ke musuh di sekitarnya selama 2 detik saat dipanggil.",
+            ),
+            (
+                "<color=#98CBFF>╈退场</color>关键词在<color=#98CBFF>棋盘上的</color>英雄被卖出时触发，局内是多触发退场效果，还是保持阵容战力，全看你的抉择",
+                "Keyword <color=#98CBFF>╈Retire</color> terpicu saat Hero <color=#98CBFF>di arena</color> dijual; dalam pertandingan, pilih antara memicu efek Retire atau mempertahankan kekuatan tempur Hero.",
+            ),
+            (
+                "战斗开始时，若你<color=#FFE897>至少有2名【大河】英雄</color>，随机在其周围1格召唤<color=#FFE897>╉命运图腾</color>：消灭击败该╉图腾的敌人。",
+                "Saat Combat dimulai, jika kamu <color=#FFE897>memiliki minimal 2 Hero [Riverlands]</color>, panggil secara acak <color=#FFE897>╉Fate Totem</color> di sekitarnya (radius 1 petak): musuh yang mengalahkan ╉Totem ini akan musnah.",
+            ),
+            (
+                "战斗开始时，若你<color=#FFE897>至少有2名【大河】英雄</color>，随机在其周围1格召唤<color=#FFE897>╉命运图腾</color>：消灭击败该图腾的敌人。",
+                "Saat Combat dimulai, jika kamu <color=#FFE897>memiliki minimal 2 Hero [Riverlands]</color>, panggil secara acak <color=#FFE897>╉Fate Totem</color> di sekitarnya (radius 1 petak): musuh yang mengalahkan Totem ini akan musnah.",
+            ),
+            (
+                "战斗开始时，己方每阵亡<color=#99DEB0>2名</color>英雄，随机在己方战场内召唤<a href=321><color=#99DEB0>╉命运图腾</color></a>：消灭击败该<a href=321><color=#99DEB0>╉图腾</color></a>的敌人。每场最多<color=#99DEB0>2</color>次。",
+                "Saat Combat dimulai, setiap <color=#99DEB0>2</color> Hero sekutu gugur, panggil secara acak <a href=321><color=#99DEB0>╉Fate Totem</color></a> di arena sekutu: mengeliminasi musuh yang mengalahkan <a href=321><color=#99DEB0>╉Totem</color></a> tersebut (maks. <color=#99DEB0>2</color> kali per pertandingan).",
+            ),
+            (
+                "战斗开始时，己方每阵亡<color=#99DEB0>2名</color>英雄，随机在己方战场内召唤<color=#99DEB0>命运图腾</color>：消灭击败该图腾的敌人。每场最多<color=#99DEB0>2</color>次。",
+                "Saat Combat dimulai, setiap <color=#99DEB0>2</color> Hero sekutu gugur, panggil secara acak <color=#99DEB0>Fate Totem</color> di arena sekutu: mengeliminasi musuh yang mengalahkan Totem tersebut (maks. <color=#99DEB0>2</color> kali per pertandingan).",
+            ),
+            (
+                "你的所有╉图腾会失效，使附近1格的1名英雄获得相应效果。\n╉先知图腾：友方单位阵亡时，获得其10%的═临时等级。\n╉往生图腾：每5秒嘲讽周围1格敌人，自身物理及法术防御+20，持续2秒。\n╉姻缘图腾：普攻5次或释放技能时自身永久+1级。",
+                "Semua ╉Totem milikmu dinonaktifkan dan memberikan efek ke 1 Hero di sekitarnya dalam 1 petak.\n╉Seer Totem: Saat unit sekutu gugur, peroleh 10% dari ═Temporary Level miliknya.\n╉Afterlife Totem: Setiap 5 detik, memberikan Taunt ke musuh di sekitarnya dalam 1 petak, serta memperoleh +20 Physical dan Magic Defense selama 2 detik.\n╉Bond Totem: Memperoleh +1 Level permanen setelah 5 Basic Attack atau mengeluarkan Skill.",
+            ),
+            (
+                "战斗开始时，飞行器连接的英雄会随机获得自身10%-40%等级数的═临时等级。",
+                "Saat Combat dimulai, Hero yang terhubung dengan Pesawat akan memperoleh ═Temporary Level secara acak sebesar 10%-40% dari Level miliknya.",
+            ),
+            (
+                "<color=#FFE897>╊摄灵效果英雄击败敌方英雄</color>时，将其灵魂复活（无卡牌效果），满法力值作战，持续5秒。",
+                "Saat <color=#FFE897>Hero berefek ╊Soul Snatch mengalahkan Hero musuh</color>, jiwa musuh dibangkitkan (tanpa efek kartu) untuk bertarung dengan Mana penuh selama 5 detik.",
+            ),
+            (
+                "你的<color=#FFE897>╊摄灵效果英雄击败敌方英雄</color>时，将永久夺取对方3级。",
+                "Saat <color=#FFE897>Hero berefek ╊Soul Snatch milikmu mengalahkan Hero musuh</color>, curi 3 Level lawan secara permanen.",
+            ),
+            (
+                "指定1名英雄获取词条能力，<color=#FFE897>╊摄灵：10%物理攻击力</color>。",
+                "Pilih 1 Hero untuk mendapatkan kemampuan trait <color=#FFE897>╊Soul Snatch: +10% Physical Attack</color>.",
+            ),
+            (
+                "<color=#ffffff><b>唯一</b></color>。穿戴者获得<color=#ffffff>╊<b>摄灵</b></color>。无法拆卸。",
+                "<color=#ffffff><b>Unik</b></color>. Pemakai memperoleh <color=#ffffff>╊<b>Soul Snatch</b></color>. Tidak dapat dilepas.",
+            ),
+            # Tugas 3 Tag-Swallowing cards
+            (
+                "干将莫邪在场时，获得普通装备<color=#ffffff><b>双剑·雄</b></color>及<color=#ffffff><b>双剑·雌</b></color>。",
+                "Saat Gan & Mo berada di arena, peroleh Normal Equipment <color=#ffffff><b>Twin Blades: Male</b></color> dan <color=#ffffff><b>Twin Blades: Female</b></color>.",
+            ),
+            (
+                "获得1张基础装备牌及1张<color=#ffffff><b>险中求富</b></color>并开始记录胜场。",
+                "Peroleh 1 Kartu Basic Equipment dan 1 <color=#ffffff><b>Seeking wealth in danger</b></color>, lalu mulai mencatat jumlah kemenangan.",
+            ),
+            (
+                "获得1张天赋牌<color=#FFE897>站这别动</color>：指定1个阵位，每过<color=#FFE897>2回合</color>，获得1张此格上的英雄牌。",
+                "Peroleh 1 Kartu Talent <color=#FFE897>Stay Put</color>: pilih 1 petak arena; setiap <color=#FFE897>2 Round</color>, peroleh 1 Kartu Hero yang berada di petak tersebut.",
+            ),
+            (
+                "<color=#ffffff><b>唯一</b></color>。提升10点物理及法术防御力，替穿戴<color=#ffffff>怒莲之刺</color>的英雄承担伤害。",
+                "<color=#ffffff><b>Unik</b></color>. Physical dan Magic Defense +10. Menanggung Damage menggantikan Hero yang memakai <color=#ffffff>Thorn of the Angry Lotus</color>.",
+            ),
+            (
+                "回合开始时，随机获得<color=#99DEB0>4张</color>你人数最多阵营的英雄牌。",
+                "Saat Round dimulai, peroleh <color=#99DEB0>4</color> Kartu Hero acak dari Faction dengan jumlah Hero terbanyak milikmu.",
+            ),
+            (
+                "<color=#FFE897>商店购买</color>额外花费1能量，<color=#FFE897>出售英雄牌</color>额外获得1能量。",
+                "<color=#FFE897>Pembelian di Shop</color> membutuhkan +1 Energy tambahan, sedangkan <color=#FFE897>menjual Kartu Hero</color> memberikan +1 Energy tambahan.",
+            ),
+            (
+                "战斗开始时，<color=#FFE897>已觉醒英雄</color>获得40点物理攻击力和40点法术攻击力。",
+                "Saat Combat dimulai, <color=#FFE897>Hero yang sudah Awaken</color> memperoleh +40 Physical Attack dan +40 Magic Attack.",
+            ),
+            (
+                "战斗开始时，你的<color=#FFE897>已觉醒英雄</color>获得50点物理攻击力和50点法术攻击力。若所有己方英雄已觉醒，则再获得20%物理及法术吸血。",
+                "Saat Combat dimulai, <color=#FFE897>Hero milikmu yang sudah Awaken</color> memperoleh +50 Physical Attack dan +50 Magic Attack. Jika semua Hero sekutu sudah Awaken, peroleh tambahan +20% Physical dan Magical Lifesteal.",
+            ),
+            (
+                "打出<color=#FFE897>3阶英雄牌</color>，额外+6级。",
+                "Saat memainkan <color=#FFE897>Kartu Hero Tier 3</color>, peroleh +6 Level tambahan.",
+            ),
+            (
+                "持续时间提升至3秒，并将敌人<color=#86ccfd>法力值清空</color>",
+                "Durasi meningkat menjadi 3 detik dan <color=#86ccfd>menguras habis Mana</color> musuh",
+            ),
+            (
+                "棋手每次<color=#FFE897>受到的伤害</color>减少2点。",
+                "Setiap kali Contestant <color=#FFE897>menerima Damage</color>, kurangi sebesar 2.",
+            ),
+            (
+                "<color=#99DEB0>召唤╉图腾</color>，己方所有【大河】英雄获得相当于<a><color=#99DEB0>╉<b>图腾</b></color></a>等级<color=#99DEB0>50%</color>的<a>═临时等级</a>。",
+                "<color=#99DEB0>Panggil ╉Totem</color>. Semua Hero [Riverlands] sekutu memperoleh Level sebesar <a><color=#99DEB0>╉<b>Totem</b></color></a> x <color=#99DEB0>50%</color> sebagai <a>═Temporary Level</a>.",
+            ),
+            (
+                "等级最高的<color=#99DEB0>2名</color>己方英雄首次阵亡后，会随机以<color=#99DEB0>1%</color>、<color=#99DEB0>10%</color>、<color=#99DEB0>20%</color>、<color=#99DEB0>30%</color>的生命值<a href=16><color=#99DEB0>╧复生</color></a>。",
+                "Saat <color=#99DEB0>2</color> Hero sekutu dengan Level tertinggi gugur untuk pertama kalinya, mereka akan secara acak memiliki <color=#99DEB0>1%</color>, <color=#99DEB0>10%</color>, <color=#99DEB0>20%</color>, atau <color=#99DEB0>30%</color> HP saat <a href=16><color=#99DEB0>╧Revive</color></a>.",
+            ),
+            (
+                "<color=#99DEB0>通用系列</color>\n等级最高的<color=#99DEB0>2名</color>己方英雄首次阵亡后，会随机以<color=#99DEB0>1%</color>、<color=#99DEB0>10%</color>、<color=#99DEB0>20%</color>、<color=#99DEB0>30%</color>的生命值<a href=16><color=#99DEB0>╧复生</color></a>。",
+                "<color=#99DEB0>General Series</color>\nSaat <color=#99DEB0>2</color> Hero sekutu dengan Level tertinggi gugur untuk pertama kalinya, mereka akan secara acak memiliki <color=#99DEB0>1%</color>, <color=#99DEB0>10%</color>, <color=#99DEB0>20%</color>, atau <color=#99DEB0>30%</color> HP saat <a href=16><color=#99DEB0>╧Revive</color></a>.",
+            ),
+            (
+                "摄灵效果英雄击败敌方英雄时，将其灵魂复活（无卡牌效果），满法力值作战，持续<color=#00FF00>8</color>秒。",
+                "Saat Hero berefek Soul Snatch mengalahkan Hero musuh, jiwa musuh dibangkitkan (tanpa efek kartu) untuk bertarung dengan Mana penuh selama <color=#00FF00>8</color> detik.",
+            ),
+            (
+                "你在战斗中<a href=16><color=#99DEB0>╧复生</color></a>的英雄，会无敌<color=#99DEB0>3秒</color>，并且获得<color=#99DEB0>300%</color>攻击速度和<color=#99DEB0>100%</color>暴击率（不可叠加）。",
+                "Hero milikmu yang <a href=16><color=#99DEB0>╧Revive</color></a> saat Combat menjadi Kebal selama <color=#99DEB0>3 detik</color>, serta memperoleh <color=#99DEB0>+300%</color> Attack Speed dan <color=#99DEB0>+100%</color> Crit Rate (tidak dapat ditumpuk).",
+            ),
+            (
+                "<a href=10><color=#99DEB0>╫牺牲系列</color></a>\n你在战斗中<a href=16><color=#99DEB0>╧复生</color></a>的英雄，会无敌<color=#99DEB0>3秒</color>，并且获得<color=#99DEB0>300%</color>攻击速度和<color=#99DEB0>100%</color>暴击率（不可叠加）。",
+                "<a href=10><color=#99DEB0>╫Sacrifice Series</color></a>\nHero milikmu yang <a href=16><color=#99DEB0>╧Revive</color></a> saat Combat menjadi Kebal selama <color=#99DEB0>3 detik</color>, serta memperoleh <color=#99DEB0>+300%</color> Attack Speed dan <color=#99DEB0>+100%</color> Crit Rate (tidak dapat ditumpuk).",
+            ),
+            (
+                "己方英雄触发<a href=11><color=#99DEB0>╬整备</color></a>时，所有英雄获得场上<a href=11><color=#99DEB0>╬整备</color></a>英雄数量x<color=#99DEB0>1.5</color>的等级。",
+                "Saat Hero sekutu memicu <a href=11><color=#99DEB0>╬Prepare</color></a>, semua Hero memperoleh Level sebesar jumlah Hero <a href=11><color=#99DEB0>╬Prepare</color></a> di arena x <color=#99DEB0>1.5</color>.",
+            ),
+            (
+                "<a href=11><color=#99DEB0>╬整备系列</color></a>\n己方英雄触发<a href=11><color=#99DEB0>╬整备</color></a>时，所有英雄获得场上<a href=11><color=#99DEB0>╬整备</color></a>英雄数量x<color=#99DEB0>1.5</color>的等级。",
+                "<a href=11><color=#99DEB0>╬Prepare Series</color></a>\nSaat Hero sekutu memicu <a href=11><color=#99DEB0>╬Prepare</color></a>, semua Hero memperoleh Level sebesar jumlah Hero <a href=11><color=#99DEB0>╬Prepare</color></a> di arena x <color=#99DEB0>1.5</color>.",
+            ),
+            (
+                "战斗开始时，若己方有<color=#99DEB0>至少2个</color>阵营，所有英雄获得<color=#99DEB0>20</color>×阵营数的等级。",
+                "Saat Combat dimulai, jika sekutu memiliki <color=#99DEB0>minimal 2</color> Faction, semua Hero memperoleh Level sebesar <color=#99DEB0>20</color> x jumlah Faction.",
+            ),
+            (
+                "<color=#99DEB0>多阵营系列</color>\n战斗开始时，若己方有<color=#99DEB0>至少2个</color>阵营，所有英雄获得<color=#99DEB0>20</color>×阵营数的等级。",
+                "<color=#99DEB0>Multi-Faction Series</color>\nSaat Combat dimulai, jika sekutu memiliki <color=#99DEB0>minimal 2</color> Faction, semua Hero memperoleh Level sebesar <color=#99DEB0>20</color> x jumlah Faction.",
+            ),
         ]
         for zh_c, id_c in curated_t1_pairs:
             self._register_t1_pair(zh_c, id_c)

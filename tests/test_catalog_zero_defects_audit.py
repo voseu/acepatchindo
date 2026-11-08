@@ -420,3 +420,70 @@ def test_10_zero_opus_mt_control_token_and_wrap_regressions():
         # 6. Phrase leaks
         for label, pat in phrase_leaks:
             assert not pat.search(val), f"Phrase leak {label!r} in {val!r} (ZH: {zh!r})"
+
+
+def test_11_universal_structural_invariants():
+    """Verify universal structural invariants across all active target gameplay entries:
+    1. Zero detached control tokens or mangled keywords.
+    2. Zero reversed pronoun word orders (Verb + milikmu).
+    3. Zero whole-clause tag swallowing when source tags are short (<= 5 chars).
+    4. Zero equipment header defects ('<b>hanya</b>', 'disassembled', 'Harta kartu', hanging signs).
+    """
+    from acepatchindo.hybrid_classifier import get_hybrid_classifier
+    from acepatchindo.validator import TAG_RE
+
+    with gzip.open(CATALOG_PATH, "rt", encoding="utf-8") as f:
+        catalog = json.load(f)
+
+    with gzip.open(ORIG_CATALOG_PATH, "rt", encoding="utf-8") as f:
+        orig_cat = json.load(f)
+
+    classifier = get_hybrid_classifier()
+    unique = catalog["unique"]
+    orig_unique = orig_cat["unique"]
+
+    active_targets = []
+    for zh, val in unique.items():
+        en = orig_unique.get(zh, "")
+        if classifier.is_target_unique(zh, en):
+            active_targets.append((zh, val))
+
+    assert len(active_targets) >= 5_000
+
+    detached_pat = re.compile(r"[\u2540-\u257f]\s*(?:$|[\.,;!\?\)])")
+    forbidden_after_ctrl = re.compile(
+        r"[\u2540-\u257f]\s*(?:<[^>]+>\s*)*(?:sebuah\s+(?:tim|grup)|Roh\s+Extraction|capturing\s+entri|sacrificed\s+Hero|Ikatan\s+Totem|Destiny\s+Totem|Melahap)\b",
+        re.I,
+    )
+    verb_milikmu = re.compile(r"\b(?:memicu|mendapatkan|menggunakan|memperoleh|melepaskan|menyerang|memanggil)\s+milikmu\b", re.I)
+
+    for zh, val in active_targets:
+        plain_val = TAG_RE.sub("", val)
+
+        # 1. Zero detached control tokens
+        assert not detached_pat.search(plain_val), f"Detached control token in {val!r} (ZH: {zh!r})"
+        assert not forbidden_after_ctrl.search(val), f"Forbidden phrase after control token in {val!r} (ZH: {zh!r})"
+
+        # 2. Zero reversed pronoun word order
+        assert not verb_milikmu.search(val), f"Reversed 'Verb + milikmu' in {val!r} (ZH: {zh!r})"
+
+        # 3. Tag-swallowing check
+        inner_zhs = re.findall(r"<[^>]+>([^<]+)</[^>]+>", zh)
+        if inner_zhs and all(len(z.strip()) <= 5 for z in inner_zhs):
+            inner_ids = re.findall(r"<[^>]+>([^<]+)</[^>]+>", val)
+            for i_id in inner_ids:
+                assert len(i_id.strip()) < 45, f"Tag swallowed >= 45 chars ({len(i_id.strip())}) in {val!r} (ZH: {zh!r})"
+
+        # 4. Equipment & Treasure
+        if "唯一" in zh:
+            assert not re.search(r"<b>\s*hanya\s*</b>", val, re.I), f"Found '<b>hanya</b>' in {val!r} (ZH: {zh!r})"
+        assert not re.search(r"\bdisassembled\b", val, re.I), f"Found 'disassembled' in {val!r} (ZH: {zh!r})"
+        assert not re.search(r"\bHarta\s+kartu\b", val, re.I), f"Found 'Harta kartu' in {val!r} (ZH: {zh!r})"
+
+        # 5. Hanging signs on non-formula lines
+        if not zh.strip().endswith("+") and not zh.strip().endswith("-"):
+            for line in val.split("\n"):
+                line_s = line.strip()
+                if not re.search(r"\[[0-9a-zA-Z_./*+%-]+\]", line_s):
+                    assert not line_s.endswith("+"), f"Hanging '+' at line end in {val!r} (ZH: {zh!r})"
+                    assert not (line_s.endswith("-") and not line_s.endswith(" -")), f"Hanging '-' at line end in {val!r} (ZH: {zh!r})"
