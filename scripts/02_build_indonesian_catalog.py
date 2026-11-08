@@ -166,6 +166,12 @@ def main() -> None:
 
     # 2b. Guarantee all target gameplay descriptions from WINDOWS_108_TARGET_DESC_ID that exist in unique are updated
     for zh_src, id_desc in WINDOWS_108_TARGET_DESC_ID.items():
+        ok_raw_l, r_raw_l = validate_translation(zh_src, id_desc)
+        ok_raw_r, r_raw_r = runtime_rules.validate_translation(zh_src, id_desc)
+        if not ok_raw_l or not ok_raw_r:
+            raise ValueError(
+                f"Raw WINDOWS_108_TARGET_DESC_ID entry failed validation ({r_raw_l}/{r_raw_r}): {zh_src!r} -> {id_desc!r}"
+            )
         if zh_src in new_unique:
             finalized_val = glossary._finalize_output(zh_src, id_desc)
             ok_l, reason_l = validate_translation(zh_src, finalized_val)

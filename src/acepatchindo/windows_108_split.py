@@ -70,7 +70,7 @@ WINDOWS_108_TARGET_DESC_ID: dict[str, str] = {
         "<color=#dfa15e>Physical Defense</color> dan <color=#d487e4>Magic Defense</color> target untuk sekutu (maks 30 stack hingga akhir Round)."
     ),
     "选择棋手武凤，一起化万法为己用！通过棋手技能随机获得一张他人的秘技牌，每局都能打出意料之外的组合。": (
-        "Pilih Chess Player Wu Feng dan kuasai segala jurus! Lewat Skill Chess Player, dapatkan acak 1 Kartu Secret Art "
+        "Pilih Contestant Wu Feng dan kuasai segala jurus! Lewat Skill Contestant, dapatkan acak 1 Kartu Secret Art "
         "milik lawan untuk menciptakan kombo tak terduga di setiap pertandingan."
     ),
     "任意途径获得的<a href=3130011><color=#99DEB0>═临时等级</color></a>增加<color=#99DEB0>80%</color>，且获得临时等级的<color=#99DEB0>30%</color>立即可转化为永久等级。": (
@@ -187,7 +187,7 @@ WINDOWS_108_TARGET_DESC_ID: dict[str, str] = {
         "Keyword <color=#98CBFF>╨Deploy</color> langsung memicu efek terkait saat kartu dimainkan."
     ),
     "<color=#98CBFF>╈退场</color>关键词在<color=#98CBFF>棋盘上的</color>英雄被卖出时触发，实战中需要在效果触发和英雄战力之间做决断。": (
-        "Keyword <color=#98CBFF>╈Retire</color> terpicu saat Hero di arena dijual, dalam pertarungan perlu memilih antara memicu efek atau mempertahankan kekuatan tempur Hero."
+        "Keyword <color=#98CBFF>╈Retire</color> terpicu saat Hero <color=#98CBFF>di arena</color> dijual, dalam pertandingan perlu memilih antara memicu efek Retire atau mempertahankan kekuatan tempur Hero."
     ),
     "首先要明确的是<color=#98CBFF>═临时等级</color>在战斗结束之后便会消失，所以接下来我们将会了解几个关于<color=#98CBFF>═临时等级</color>关键词效果的应用场景。": (
         "Pertama, perlu dicatat bahwa <color=#98CBFF>═Temporary Level</color> akan hilang setelah pertempuran selesai. Selanjutnya kita akan mempelajari skenario penggunaan keyword <color=#98CBFF>═Temporary Level</color>."

@@ -1589,7 +1589,33 @@ class ThreeTierGlossary:
             ),
             (
                 "<color=#98CBFF>╈退场</color>关键词在<color=#98CBFF>棋盘上的</color>英雄被卖出时触发，实战中需要在效果触发和英雄战力之间做决断。",
-                "Keyword <color=#98CBFF>╈Retire</color> terpicu saat Hero <color=#98CBFF>di arena</color> dijual; dalam pertandingan, pilih antara memicu efek Retire atau mempertahankan kekuatan tempur Hero.",
+                "Keyword <color=#98CBFF>╈Retire</color> terpicu saat Hero <color=#98CBFF>di arena</color> dijual, dalam pertandingan perlu memilih antara memicu efek Retire atau mempertahankan kekuatan tempur Hero.",
+            ),
+            ("抽2张牌。", "Ambil 2 kartu."),
+            ("抽3张牌。", "Ambil 3 kartu."),
+            ("抽<color=#99DEB0>2张</color>牌。", "Ambil <color=#99DEB0>2</color> kartu."),
+            ("抽取1张3阶及以下的英雄牌。", "Ambil 1 Kartu Hero Tier 3 ke bawah."),
+            ("指定1名英雄获取词条能力，<color=#FFE897>╨登场：抽1张牌</color>。", "Pilih 1 Hero untuk memperoleh kemampuan Trait: <color=#FFE897>╨Deploy: Ambil 1 kartu</color>."),
+            ("每3次普攻抽出蓝牌", "Ambil 1 Kartu Biru setiap 3 Basic Attack"),
+            (
+                "你的英雄触发<a href=200><color=#99DEB0>╊夺取</color></a>时，所有英雄等级<color=#99DEB0>+6</color>。",
+                "Saat Hero milikmu memicu <a href=200><color=#99DEB0>╊Steal</color></a>, semua Hero memperoleh <color=#99DEB0>+6</color> Level.",
+            ),
+            (
+                "<a href=200><color=#99DEB0>╊夺取系列</color></a>\n你的英雄触发<a href=200><color=#99DEB0>╊夺取</color></a>时，所有英雄等级<color=#99DEB0>+6</color>。",
+                "<a href=200><color=#99DEB0>╊Steal Series</color></a>\nSaat Hero milikmu memicu <a href=200><color=#99DEB0>╊Steal</color></a>, semua Hero memperoleh <color=#99DEB0>+6</color> Level.",
+            ),
+            (
+                "<color=#FFE897>╊夺取效果英雄击败敌方英雄</color>时，将其灵魂复活（无卡牌效果），满法力值作战，持续5秒。",
+                "Saat <color=#FFE897>Hero berefek ╊Steal milikmu mengalahkan Hero musuh</color>, bangkitkan jiwanya (tanpa efek Kartu) untuk bertarung dengan Mana penuh selama 5 detik.",
+            ),
+            (
+                "指定1名英雄获取词条能力，<color=#FFE897>╊夺取：20等级</color>。",
+                "Tentukan 1 Hero untuk memperoleh kemampuan Trait: <color=#FFE897>╊Steal: 20 Level</color>.",
+            ),
+            (
+                "获得1张随机的╆转瞬英雄牌。",
+                "Mendapatkan 1 ╆Fleeting Kartu Hero acak.",
             ),
         ]
         for zh_c, id_c in curated_t1_pairs:

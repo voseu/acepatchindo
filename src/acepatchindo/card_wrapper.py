@@ -60,11 +60,11 @@ def ensure_placeholder_spacing(text: str) -> str:
     masked = re.sub(r"\bgagal2Refresh\b", "gagal, +2 Refresh", masked)
 
     # Spacing around control tokens and glued English words/digits
-    masked = re.sub(r"([0-9A-Za-z\u00C0-\u024F\]\)])([\u2540-\u257f])", r"\1 \2", masked)
+    masked = re.sub(r"([0-9A-Za-z\u00C0-\u024F\+\]\)])\s*([\u2500-\u257f])", r"\1 \2", masked)
+    masked = re.sub(r"([\u2500-\u257f])\s+", r"\1", masked)
     masked = re.sub(r"═diperoleh\b", "═Temporary Level yang diperoleh", masked)
+    masked = re.sub(r"╆\s*Kartu\s+Hero\s+acak\s+Fleeting\b", "╆Fleeting Kartu Hero acak", masked)
     masked = re.sub(r"╆\s*Kartu\s+Hero\s+Fleeting\b", "╆Fleeting Kartu Hero", masked)
-    masked = re.sub(r"([\u2540-\u257f])Kartu\b", r"\1 Kartu", masked)
-    masked = re.sub(r"([\u2540-\u257f])([a-z])", r"\1 \2", masked)
     masked = re.sub(r"\b(get|and|Restore|gain|deal|for)(\d+)\b", r"\1 \2", masked, flags=re.I)
 
     masked = GLUED_BEFORE_ICON_BRACE_RE.sub(r"\1 \2", masked)
@@ -205,5 +205,6 @@ def wrap_card_description(text: str, max_width: int = 26, source_zh: str = "") -
     text = normalize_brackets(ensure_placeholder_spacing(text))
     paragraphs = text.split("\n")
     wrapped_paragraphs = [_wrap_single_paragraph(p, max_width=max_width) for p in paragraphs]
-    return "\n".join(wrapped_paragraphs)
+    res = "\n".join(wrapped_paragraphs)
+    return re.sub(r"([\u2500-\u257f])\s+(?=(?:<[^>]+>)*[A-Za-z])", r"\1", res)
 

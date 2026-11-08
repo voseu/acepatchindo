@@ -48,10 +48,10 @@ CANONICAL_MECHANIC_MAP: dict[str, str] = {
     r"\bekstra serangan\b": "serangan tambahan",
     r"^Memulai:": "Initiate:",
     r"\bMemulai:": "Initiate:",
-    r"\bKartu Tactic\b": "Kartu Efek",
-    r"\bTactics Card\b": "Kartu Efek",
-    r"\bTactic Card\b": "Kartu Efek",
-    r"\bkartu Tactic\b": "Kartu Efek",
+    r"\bKartu Tactic(?!\s+Series)\b": "Kartu Efek",
+    r"\bTactics Card(?!\s+Series)\b": "Kartu Efek",
+    r"\bTactic Card(?!\s+Series)\b": "Kartu Efek",
+    r"\bkartu Tactic(?!\s+Series)\b": "Kartu Efek",
     r"\bPhysical\s+darah-sucking\b": "Physical Lifesteal",
     r"\bphysical\s+darah-sucking\b": "Physical Lifesteal",
     r"\bMantra\s+darah-sucking\b": "Magic Lifesteal",
@@ -281,14 +281,16 @@ def polish_indonesian_card_text(source_zh: str, text_id: str, baseline_en: str =
         flags=re.I,
     )
 
-    res = re.sub(r"(╆\s*)(<b>)?(?:Instant|Fleeting)\b", r"\1\g<2>Fleeting", res, flags=re.I)
-    res = re.sub(r"(╈\s*)(<b>)?(?:Exit|Keluar|Retreat|Retire)\b", r"\1\g<2>Retire", res, flags=re.I)
-    res = re.sub(r"(╦\s*)(<b>)?(?:Menggabungkan|Merge|Combine|penggabungan)\b", r"\1\g<2>Combine", res, flags=re.I)
+    res = re.sub(r"╆\s*(<b>)?(?:Instant|Fleeting)\b", r"╆\g<1>Fleeting", res, flags=re.I)
+    res = re.sub(r"╆\s*Kartu\s+Hero\s+acak\s+Fleeting\b", "╆Fleeting Kartu Hero acak", res, flags=re.I)
+    res = re.sub(r"╆\s*Kartu\s+Hero\s+Fleeting\b", "╆Fleeting Kartu Hero", res, flags=re.I)
+    res = re.sub(r"╈\s*(<b>)?(?:Exit|Keluar|Retreat|Retire)\b", r"╈\g<1>Retire", res, flags=re.I)
+    res = re.sub(r"╦\s*(<b>)?(?:Menggabungkan|Merge|Combine|penggabungan)\b", r"╦\g<1>Combine", res, flags=re.I)
 
-    res = re.sub(r"(╊\s*)(<b>)?(?:Jiwa\s+Merebut|Soul\s+Snatch|Roh\s+Extraction|Soul\s+Extraction)\b", r"\1\g<2>Soul Snatch", res, flags=re.I)
-    res = re.sub(r"(╊\s*)(<b>)?(?:Merebut|Capture|Plunder|Seizure|Snatch|Steal|dan\s+Steal|capturing\s+entri)\b", r"\1\g<2>Steal", res, flags=re.I)
+    res = re.sub(r"╊\s*(<b>)?(?:Jiwa\s+Merebut|Soul\s+Snatch|Roh\s+Extraction|Soul\s+Extraction)\b", r"╊\g<1>Soul Snatch", res, flags=re.I)
+    res = re.sub(r"╊\s*(<b>)?(?:Merebut|Capture|Plunder|Seizure|Snatch|Steal|dan\s+Steal|capturing\s+entri|merampas)\b", r"╊\g<1>Steal", res, flags=re.I)
     if "夺取" in source_zh:
-        res = re.sub(r"(?<!Soul\s)\b(?:Merebut|Capture|Plunder|Seizure|Snatch)\b", "Steal", res, flags=re.I)
+        res = re.sub(r"(?<!Soul\s)\b(?:Merebut|Capture|Plunder|Seizure|Snatch|merampas)\b", "Steal", res, flags=re.I)
     res = re.sub(r"\bRoh\s+Extraction\b", "Soul Snatch", res, flags=re.I)
     res = re.sub(r"\bke\s+Steal\b", "Steal", res, flags=re.I)
 
@@ -524,6 +526,136 @@ def polish_indonesian_card_text(source_zh: str, text_id: str, baseline_en: str =
     res = re.sub(r"Pilih 1 <color=#FFDD68FF>Oranye Hero \+\s*Level 3</color>\.", "Pilih 1 <color=#FFDD68FF>Hero Oranye +3 Level</color>.", res)
     res = re.sub(r"\bOranye\s+Hero\s*\+\s*Level\s*3\b", "Hero Oranye +3 Level", res, flags=re.I)
 
+    # --- TUGAS 2: Card draw vs match draw ---
+    if "抽" in source_zh:
+        res = re.sub(r"\b(?:Seri|menarik)\s+(\d+|[A-Za-z<]+)\s*kartu\b", r"Ambil \1 kartu", res, flags=re.I)
+        res = re.sub(r"\b(?:Seri|menarik)\s+sebuah\s+([A-Za-z0-9 ·•\-\[\]]+)\s+Kartu\b", r"Ambil 1 Kartu \1", res, flags=re.I)
+        res = re.sub(r"\b(?:Seri|menarik)\s+sebuah\b", "Ambil 1", res, flags=re.I)
+        res = re.sub(r"\b(?:Seri|menarik)\s+1\b", "Ambil 1", res, flags=re.I)
+        res = re.sub(r"\bmenarik\s+kartu\b", "mengambil kartu", res, flags=re.I)
+
+    if "平局" not in source_zh:
+        res = re.sub(r"\bSeri\s+(\d+|[A-Za-z<]+)\s*kartu\b", r"Ambil \1 kartu", res, flags=re.I)
+        res = re.sub(r"\bSeri\s+sebuah\b", "Ambil 1", res, flags=re.I)
+        res = re.sub(r"\bSeri\s+1\b", "Ambil 1", res, flags=re.I)
+        res = re.sub(r"\bSeri\b(?!\s*[/–-]|\s*Kalah|\s*Defeat)", "Ambil", res)
+
+    # --- TUGAS 3: Box-Drawing Glyphs Spacing & Series Headers ---
+    res = re.sub(r"(?<=[0-9A-Za-z+])(?<![\u2500-\u257f])([\u2500-\u257f])", r" \1", res)
+    res = re.sub(r"[ ]{2,}([\u2500-\u257f])", r" \1", res)
+    res = re.sub(r"╊\s*(?:merampas|Plunder)\b", "╊Steal", res, flags=re.I)
+    res = re.sub(r"╆\s*Kartu\s+Hero\s+acak\s+Fleeting\b", "╆Fleeting Kartu Hero acak", res, flags=re.I)
+    res = re.sub(r"╆\s*Kartu\s+Hero\s+Fleeting\b", "╆Fleeting Kartu Hero", res, flags=re.I)
+    res = re.sub(r"([\u2500-\u257f])\s+", r"\1", res)
+    res = re.sub(r"\s+(</(?:color|b|i|a|size)>)", r"\1", res)
+
+    res = re.sub(r"\b(?:Kartu\s+Efek|Kartu\s+Taktik)\s+Series\b", "Effect Card Series", res, flags=re.I)
+    res = re.sub(r"<color=#99DEB0>Kartu Efek Series</color>", "<color=#99DEB0>Effect Card Series</color>", res)
+
+    # --- TUGAS 4: Master Plan Terms & Anti-Calque ---
+    # 1. Istilah Terkunci
+    res = re.sub(r"\bChess\s+Player\b", "Contestant", res, flags=re.I)
+    res = re.sub(r"\bchess\s+HP\s+pemain\b", "HP Contestant", res, flags=re.I)
+    res = re.sub(r"\bpemain\s+Level\s+meningkatkan\b", "Level Contestant meningkat", res, flags=re.I)
+    res = re.sub(r"\bLevel\s+pemain\b", "Level Contestant", res, flags=re.I)
+    res = re.sub(r"\bHP\s+pemain\b", "HP Contestant", res, flags=re.I)
+    res = re.sub(r"\bEXP\s+pemain\b", "EXP Contestant", res, flags=re.I)
+    res = re.sub(r"\bEXP\s+Pemain\b", "EXP Contestant", res)
+    res = re.sub(r"\bHP\s+Pemain\b", "HP Contestant", res)
+    res = re.sub(r"\bdi\s+papan\b", "di arena", res, flags=re.I)
+    res = re.sub(r"\bke\s+papan\b", "ke arena", res, flags=re.I)
+    res = re.sub(r"\bkeluar\s+papan\b", "keluar arena", res, flags=re.I)
+
+    # 2. Artikel Harfiah & Polisemi
+    res = re.sub(r"\bsebuah\s+tambahan\b", "tambahan", res, flags=re.I)
+    res = re.sub(r"\bsebuah\s+[Ee]kstra\b", "ekstra", res)
+    res = re.sub(r"\bsebuah\s+permanen\b", "secara permanen", res, flags=re.I)
+    res = re.sub(r"\bmemenangkan\s+sebuah\s+Combat\b", "memenangkan Combat", res, flags=re.I)
+    res = re.sub(r"\bkalah(?:\s+dalam)?\s+sebuah\s+Combat\b", "kalah Combat", res, flags=re.I)
+    res = re.sub(r"\bsebuah\s+Combat\b", "Combat", res, flags=re.I)
+
+    res = re.sub(r"\b(Target|target|melebur|Membekukan|membekukan|Pilih|pilih|memanggil|menyerang|mendapatkan|Menghancurkan|menghancurkan|Tunjuk|tunjuk)\s+sebuah\s+Hero\b", r"\1 1 Hero", res, flags=re.I)
+    res = re.sub(r"\bsebuah\s+sekutu\s+Hero\b", "1 Hero sekutu", res, flags=re.I)
+    res = re.sub(r"\bsebuah\s+Hero\s+sekutu\b", "1 Hero sekutu", res, flags=re.I)
+    res = re.sub(r"\bsebuah\s+Hero\b", "Hero", res, flags=re.I)
+    res = re.sub(r"\bsebuah\s+[Mm]usuh\b", "musuh", res)
+
+    res = re.sub(r"\b[Bb]ebas\s+Refresh\b", "Refresh gratis", res)
+    res = re.sub(r"\bFree\s+Refresh\b", "Refresh gratis", res, flags=re.I)
+    res = re.sub(r"\b(?:kalah|ke\s+kalah)\s+(\d+%?)\s*(?:dari\s+)?(Max\s+HP|HP|Health)\b", r"kehilangan \1 \2", res, flags=re.I)
+    res = re.sub(r"\b(?:kalah|ke\s+kalah)\s+(HP|Health)\b", "kehilangan HP", res, flags=re.I)
+
+    res = re.sub(r"\bsaat\s+(?:kamu\s+)?bermain(?:\s*,\s*|\s*\(|\s*$)", "saat dimainkan, ", res, flags=re.I)
+    res = re.sub(r"\bsaat\s+bermain\s+sama\s+Kartu\s+Hero\s+lagi\b", "saat memainkan Kartu Hero yang sama lagi", res, flags=re.I)
+    res = re.sub(r"\bsaat\s+(?:kamu\s+)?bermain\b", "saat memainkan", res, flags=re.I)
+    res = re.sub(r"\b(?:kamu\s+)?tempat\s+di\s+atas\s+(\d+)\b", r"masuk \1 besar", res, flags=re.I)
+    res = re.sub(r"\bplace\s+in\s+top\s+(\d+)\b", r"masuk \1 besar", res, flags=re.I)
+    res = re.sub(r"\bBintang\s+Warna\s+Harta\b", "Starlight Treasure", res, flags=re.I)
+    res = re.sub(r"\bMawar\s+Harta\b", "Rose Treasure", res, flags=re.I)
+    res = re.sub(r"\bKhusus\s+Tamu\s+(?:Chess\s+Player|Contestant)\b", "Contestant Undangan", res, flags=re.I)
+    res = re.sub(r"\bMimpi\s+Shop\b", "Dream Shop", res, flags=re.I)
+    res = re.sub(r"\bUltimate\s+Treasure\s+(?:adalah\s+di\s+bawah|benar\s+di\s+bawah)\b", "Ultimate Treasure Is Right Here", res, flags=re.I)
+    res = re.sub(r"\bKartu\s+Treasure\s+Efek\b", "Kartu Efek Treasure", res, flags=re.I)
+
+    # 3. Pronomina & Urutan Kata Benda
+    res = re.sub(r"\bHero\s+menggunakan\s+(?:sebuah\s+)?milikmu\s+Skill\b", "Hero milikmu melepaskan Skill", res, flags=re.I)
+    res = re.sub(r"\bHero\s+menerapkan\s+Crowd\s+milikmu\s+Control\s+efek\b", "Hero milikmu memberikan efek Crowd Control", res, flags=re.I)
+    res = re.sub(r"\bHero\s+mendapatkan\s+(?:sebuah\s+)?milikmu\s+Temporary\s+Level\b", "Hero milikmu memperoleh Temporary Level", res, flags=re.I)
+    res = re.sub(r"\bHero\s+mendapatkan\s+(?:sebuah\s+)?milikmu\s+permanen\s+(<[^>]+>[^<]+</[^>]+>|\+?\d+)\s+Level\b", r"Hero milikmu memperoleh \1 Level permanen", res, flags=re.I)
+    res = re.sub(r"\bsemua\s+milikmu\s+(\[[^\]]+\])\s+Hero\b", r"semua Hero \1 milikmu", res, flags=re.I)
+    res = re.sub(r"\bmilikmu\s+Skill\b", "Skill milikmu", res, flags=re.I)
+    res = re.sub(r"\bCrowd\s+milikmu\s+Control\b", "Crowd Control", res, flags=re.I)
+    res = re.sub(r"\bmilikmu\s+Temporary\s+Level\b", "Temporary Level milikmu", res, flags=re.I)
+    res = re.sub(r"\bmilikmu\s+Control\s+efek\b", "efek Control milikmu", res, flags=re.I)
+    res = re.sub(r"\bHero'\s+Level\b", "Level Hero", res, flags=re.I)
+
+    # [Faction] Hero -> Hero [Faction] & Lainnya [Faction] Hero -> Hero [Faction] lainnya
+    res = re.sub(r"\bLainnya\s+(\[(?:Central Plains|Riverlands|Three Kingdoms|Sunset Sea|Zhulu Plateau|High Heaven|Factionless)\])\s+Hero\b", r"Hero \1 lainnya", res, flags=re.I)
+    res = re.sub(r"(\[(?:Central Plains|Riverlands|Three Kingdoms|Sunset Sea|Zhulu Plateau|High Heaven|Factionless)\])\s+Hero\s+(mendapatkan|memperoleh|memicu|menggunakan|menyerang|gugur|di\s+arena)\b", r"Hero \1 \2", res, flags=re.I)
+
+    # <Nama> kartu -> Kartu <Nama>
+    res = re.sub(r"\bMarco\s+kartu\b", "Kartu Marco Polo", res, flags=re.I)
+    res = re.sub(r"\bShouyue\s+kartu\b", "Kartu Baili Shouyue", res, flags=re.I)
+    res = re.sub(r"\bConsort\s+Yu\s+kartu\b", "Kartu Consort Yu", res, flags=re.I)
+    res = re.sub(r"\bArli\s+kartu\b", "Kartu Arli", res, flags=re.I)
+    res = re.sub(r"\bAscension\s+kartu\b", "Kartu Ascension", res, flags=re.I)
+    res = re.sub(r"\bMaster\s+Artisan\s+kartu\b", "Kartu Master Artisan", res, flags=re.I)
+    res = re.sub(r"\bGaris\s+depan\s+Kartu\b", "Kartu Vanguard", res, flags=re.I)
+    res = re.sub(r"\bProperti\s+Tambahan\s+kartu\s+acak\b", "kartu bonus atribut acak", res, flags=re.I)
+    res = re.sub(r"\b1\s+╊Soul\s+Snatch\s+kartu\b", "1 Kartu ╊Soul Snatch", res, flags=re.I)
+    res = re.sub(r"\b╊Soul\s+Snatch\s+kartu\b", "Kartu ╊Soul Snatch", res, flags=re.I)
+    res = re.sub(r"\b(?:sekutu\s+)?Kartu\s+Li\s+Xin\s+Efek\b", "efek kartu Li Xin sekutu", res, flags=re.I)
+
+    # sendiri HP / sendiri Level / semua sendiri Hero
+    res = re.sub(r"\bsemua\s+sendiri\s+Hero\b", "semua Hero sekutu", res, flags=re.I)
+    res = re.sub(r"\b(?:diri\s+)?sendiri\s+((?:Max\s+)?(?:HP|Level))\b", r"\1 diri sendiri", res, flags=re.I)
+    res = re.sub(r"\bmenghancurkan\s+untuk\s+mereka-4\s+Equipment\b", "menghancurkan Equipment ke-4 miliknya", res, flags=re.I)
+
+    # Skill menggunakan & Trait Kemampuan
+    res = re.sub(r"\bdihitung\s+sebagai\s+1\s+Skill\s+menggunakan\b", "dihitung sebagai 1 pelepasan Skill", res, flags=re.I)
+    res = re.sub(r"\bdari\s+Basic\s+Attack\s+dan\s+Skill\s+menggunakan\b", "dari Basic Attack dan pelepasan Skill", res, flags=re.I)
+    res = re.sub(r"\b(\d+)\s+total\s+menggunakan\b", r"total \1 penggunaan", res, flags=re.I)
+    res = re.sub(r"\bTrait\s+[Kk]emampuan\b", "kemampuan Trait", res)
+    res = re.sub(r"\bPada\s+Keberangkatan:\b", "Saat keluar arena:", res, flags=re.I)
+    res = re.sub(r"\bDitargetkan\s+Hero\b", "Hero yang ditargetkan", res, flags=re.I)
+    res = re.sub(r"\bHero\s+itu\s+bertahan\s+hidup\b", "Hero yang bertahan hidup", res, flags=re.I)
+    res = re.sub(r"\bmereka\s+diperoleh\s+Round\s+ini\b", "yang diperoleh pada Round ini", res, flags=re.I)
+    res = re.sub(r"\bberuntun\s+menang\s+dari\s+setidaknya\s+(\d+)\b", r"minimal \1 Win Streak", res, flags=re.I)
+    res = re.sub(r"\bmeningkatkan\s+di\s+Level\s+sebesar\b", "meningkatkan Level sebesar", res, flags=re.I)
+
+    # Sisa kata Inggris
+    res = re.sub(r"\bRepeats\s+(\d+)\s+kali\b", r"Berulang \1 kali", res, flags=re.I)
+    res = re.sub(r"\bevolves\s+menjadi\b", "berevolusi menjadi", res, flags=re.I)
+    res = re.sub(r"\binjects\b", "menyuntikkan", res, flags=re.I)
+    res = re.sub(r"\bplundered\b", "dirampas", res, flags=re.I)
+    res = re.sub(r"\bplunder\b", "merampas", res, flags=re.I)
+    res = re.sub(r"\bequivalent\s+dari\b", "setara dengan", res, flags=re.I)
+    res = re.sub(r"\bmanifests\b", "muncul", res, flags=re.I)
+    res = re.sub(r"\badalah\s+Owned\b", "dimiliki", res, flags=re.I)
+    res = re.sub(r"\bSihir\s+Lifesteal\b", "Magic Lifesteal", res, flags=re.I)
+    res = re.sub(r"\b1\s+waktu\b", "1 kali", res, flags=re.I)
+    res = re.sub(r"\bmemicu\s+(?:efek\s+)?Retreat\b", "memicu efek Retire", res, flags=re.I)
+
     # Ensure tag boundary spacing
     res = re.sub(r"([A-Za-z0-9%])(<(?![/])(?:color|b|i|a|size)\b[^>]*>)", r"\1 \2", res)
     res = re.sub(r"(</(?:color|b|i|a|size)>)([A-Za-z0-9])", r"\1 \2", res)
@@ -653,8 +785,20 @@ def rewrite_en_card_to_id(source_zh: str, baseline_en: str) -> str:
     # 10. "little dodder" -> Xiao Tu
     text = re.sub(r"\blittle dodder\b", "Xiao Tu", text, flags=re.I)
 
-    # 11. "Draw" in match context -> Seri (never Menarik), without breaking Series
-    text = re.sub(r"(?<![A-Za-z])Draw(?![A-Za-z])(?!\s+Series)", "Seri", text)
+    # 11. "Draw" translations:
+    if "平局" in source_zh:
+        text = re.sub(r"(?<![A-Za-z])Draw(?![A-Za-z])(?!\s+Series)", "Seri", text)
+    else:
+        text = re.sub(r"\bDraw/Defeat\b", "Seri/Kalah", text, flags=re.I)
+        text = re.sub(r"\bDefeat/Draw\b", "Kalah/Seri", text, flags=re.I)
+        text = re.sub(r"\bDefeat\s+or\s+Draw\b", "Kalah atau Seri", text, flags=re.I)
+
+    if "抽" in source_zh:
+        text = re.sub(r"\bDraws?\s+(\d+)\s+cards?\b", r"Ambil \1 kartu", text, flags=re.I)
+        text = re.sub(r"\bDraws?\s+a\s+Blue\s+Card\b", "Ambil 1 Kartu Biru", text, flags=re.I)
+        text = re.sub(r"\bDraws?\s+(\d+)\s+([A-Za-z0-9 ·•\-\[\]]+)\b", r"Ambil \1 \2", text, flags=re.I)
+        text = re.sub(r"\bDraws?\s+a\s+([A-Za-z0-9 ·•\-\[\]]+)\b", r"Ambil 1 \1", text, flags=re.I)
+        text = re.sub(r"\bDraws?\b", "Ambil", text, flags=re.I)
 
     # 12. "Mystical Power" -> Mystical Power (never Mystical Kekuatan / Misterius Kekuatan)
     text = re.sub(r"\bMystical Kekuatan\b", "Mystical Power", text, flags=re.I)

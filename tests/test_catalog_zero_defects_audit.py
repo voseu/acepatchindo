@@ -487,3 +487,89 @@ def test_11_universal_structural_invariants():
                 if not re.search(r"\[[0-9a-zA-Z_./*+%-]+\]", line_s):
                     assert not line_s.endswith("+"), f"Hanging '+' at line end in {val!r} (ZH: {zh!r})"
                     assert not (line_s.endswith("-") and not line_s.endswith(" -")), f"Hanging '-' at line end in {val!r} (ZH: {zh!r})"
+
+
+def test_12_forensic_cleanliness_and_zero_regressions():
+    """Verify forensic cleanliness and zero regressions across all active target gameplay entries:
+    1. All 58 raw entries in WINDOWS_108_TARGET_DESC_ID pass validator & runtime_rules.
+    2. Zero detached box-drawing glyphs followed by space/newline + letters.
+    3. Zero 'Seri' when '平局' not in source_zh.
+    4. Zero 'Kartu Efek Series' (must be 'Effect Card Series').
+    5. Zero leaks: Chess Player, di papan, sebuah tambahan/Combat, bebas Refresh, kalah HP,
+       saat bermain, tempat di atas, Mimpi Shop, Trait Kemampuan, Lainnya [Faction],
+       <Name> kartu, Kartu Li Xin Efek, milikmu Skill/Control/Temporary/permanen, memicu Retreat.
+    """
+    from acepatchindo.hybrid_classifier import get_hybrid_classifier
+    from acepatchindo.validator import validate_translation
+    from acepatchindo.windows_108_split import WINDOWS_108_TARGET_DESC_ID
+    import wxq_patch.translation_rules as runtime_rules
+
+    # 1. All 58 raw entries pass validation
+    for zh, id_t in WINDOWS_108_TARGET_DESC_ID.items():
+        ok1, r1 = validate_translation(zh, id_t)
+        ok2, r2 = runtime_rules.validate_translation(zh, id_t)
+        assert ok1 and ok2, f"WINDOWS_108 raw failed ({r1}/{r2}): {zh!r} -> {id_t!r}"
+
+    with gzip.open(CATALOG_PATH, "rt", encoding="utf-8") as f:
+        catalog = json.load(f)
+
+    with gzip.open(ORIG_CATALOG_PATH, "rt", encoding="utf-8") as f:
+        orig_cat = json.load(f)
+
+    classifier = get_hybrid_classifier()
+    unique = catalog["unique"]
+    orig_unique = orig_cat["unique"]
+
+    active_targets = []
+    for zh, val in unique.items():
+        en = orig_unique.get(zh, "")
+        if classifier.is_target_unique(zh, en):
+            active_targets.append((zh, val))
+
+    assert len(active_targets) >= 5_000
+
+    space_after_ctrl = re.compile(r"[\u2500-\u257f]\s+(?:<[^>]+>)*[A-Za-z]")
+    chess_player_pat = re.compile(r"\bChess\s+Player\b", re.I)
+    di_papan_pat = re.compile(r"\bdi\s+papan\b", re.I)
+    sebuah_pat = re.compile(r"\bsebuah\s+(?:tambahan|Ekstra|Combat)\b", re.I)
+    bebas_refresh_pat = re.compile(r"\bbebas\s+Refresh\b", re.I)
+    kalah_hp_pat = re.compile(r"\bkalah\s+\d+%?\s*(?:dari\s+)?(?:Max\s+)?HP\b", re.I)
+    saat_bermain_pat = re.compile(r"\bsaat\s+bermain\b", re.I)
+    tempat_di_atas_pat = re.compile(r"\btempat\s+di\s+atas\b", re.I)
+    mimpi_shop_pat = re.compile(r"\bMimpi\s+Shop\b", re.I)
+    trait_kemampuan_pat = re.compile(r"\bTrait\s+[Kk]emampuan\b")
+    lainnya_faction_pat = re.compile(r"\bLainnya\s+\[")
+    name_kartu_pat = re.compile(r"\b(?:Marco|Shouyue|Consort Yu|Arli|Ascension|Master Artisan)\s+kartu\b", re.I)
+    lixin_kartu_pat = re.compile(r"\bKartu\s+Li\s+Xin\s+Efek\b", re.I)
+    milikmu_leak_pat = re.compile(r"\bmilikmu\s+(?:Skill|Control|Temporary|permanen)\b", re.I)
+    retreat_leak_pat = re.compile(r"memicu\s+(?:efek\s+)?Retreat\b", re.I)
+    sendiri_hp_pat = re.compile(r"\bsendiri\s+(?:Max\s+)?(?:HP|Level)\b", re.I)
+
+    for zh, val in active_targets:
+        # 2. Zero detached box-drawing glyphs followed by space/newline + letters
+        assert not space_after_ctrl.search(val), f"Space after box-drawing in {val!r} (ZH: {zh!r})"
+
+        # 3. Zero \bSeri\b when 平局 not in zh
+        if "平局" not in zh:
+            assert not re.search(r"\bSeri\b", val), f"Unexpected 'Seri' in {val!r} (ZH: {zh!r})"
+
+        # 4. Zero Kartu Efek Series
+        assert "<color=#99DEB0>Kartu Efek Series</color>" not in val, f"Kartu Efek Series leak in {val!r}"
+
+        # 5. Zero specific leaks
+        assert not chess_player_pat.search(val), f"Chess Player in {val!r}"
+        assert not di_papan_pat.search(val), f"di papan in {val!r}"
+        assert not sebuah_pat.search(val), f"sebuah tambahan/Combat in {val!r}"
+        assert not bebas_refresh_pat.search(val), f"bebas Refresh in {val!r}"
+        assert not kalah_hp_pat.search(val), f"kalah HP in {val!r}"
+        assert not saat_bermain_pat.search(val), f"saat bermain in {val!r}"
+        assert not tempat_di_atas_pat.search(val), f"tempat di atas in {val!r}"
+        assert not mimpi_shop_pat.search(val), f"Mimpi Shop in {val!r}"
+        assert not trait_kemampuan_pat.search(val), f"Trait Kemampuan in {val!r}"
+        assert not lainnya_faction_pat.search(val), f"Lainnya [Faction] in {val!r}"
+        assert not name_kartu_pat.search(val), f"<Name> kartu in {val!r}"
+        assert not lixin_kartu_pat.search(val), f"Kartu Li Xin Efek in {val!r}"
+        assert not milikmu_leak_pat.search(val), f"milikmu injection in {val!r}"
+        assert not retreat_leak_pat.search(val), f"memicu Retreat in {val!r}"
+        assert not sendiri_hp_pat.search(val), f"sendiri HP/Level in {val!r}"
+
