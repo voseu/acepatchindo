@@ -78,13 +78,20 @@ def test_celeslib_repack_integrity_and_worker_unpack() -> None:
     actual_digest = hashlib.sha256(worker).hexdigest().upper().encode("ascii")
     assert actual_digest == expected_digest, f"Digest mismatch: {actual_digest} != {expected_digest}"
 
-    # 4. SHA256SUMS.txt verification
+    # 4. SHA256SUMS.txt & README.md anti-stale verification
     assert SHA256SUMS_PATH.exists()
     sums_text = SHA256SUMS_PATH.read_text(encoding="utf-8")
     exe_hash = hashlib.sha256(raw).hexdigest()
     assert exe_hash in sums_text
     assert CELESLIB_EXE.name in sums_text
     assert COMPAT_EXE.name not in sums_text
+
+    readme_path = ROOT / "README.md"
+    assert readme_path.exists(), f"Missing README.md: {readme_path}"
+    readme_text = readme_path.read_text(encoding="utf-8")
+    assert exe_hash in readme_text, f"README.md does not contain current exe SHA-256 {exe_hash}"
+    worker_hash = actual_digest.decode("ascii").lower()
+    assert worker_hash in readme_text, f"README.md does not contain current worker SHA-256 {worker_hash}"
 
     # 5. Unpack embedded ace-worker.exe via pyinstxtractor under Python 3.12
     unpack_root = Path("/tmp/verify_celeslib_worker_unpack")

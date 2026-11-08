@@ -21,7 +21,15 @@ REPO = "voseu/acepatchindo"
 TAG = "v1.0.0-celeslib"
 TITLE = "Celeslib Honor of Kings: Ace Patcher v1.0.0 (Game Build 1.4.12)"
 
-RELEASE_NOTES = """## Celeslib Honor of Kings: Ace Patcher `v1.0.0` (Game Build `1.4.12`)
+
+def build_release_notes() -> str:
+    """Build dynamic release notes embedding current dist/SHA256SUMS.txt."""
+    sums_content = (
+        SUMS_ASSET.read_text(encoding="utf-8").strip()
+        if SUMS_ASSET.exists()
+        else ""
+    )
+    return f"""## Celeslib Honor of Kings: Ace Patcher `v1.0.0` (Game Build `1.4.12`)
 
 Aplikasi *patcher* lokalisasi resmi **Celeslib** untuk gim **Honor of Kings: Ace (`WXQ.exe`)** di PC dan Android (USB).
 
@@ -30,6 +38,8 @@ Aplikasi *patcher* lokalisasi resmi **Celeslib** untuk gim **Honor of Kings: Ace
 - **Mode Bahasa Patch (`ID Hybrid` / `EN Full`):**
   - **`ID Hybrid`:** Menerjemahkan seluruh deskripsi efek kartu hero, skill aktif/pasif, talent, dan efek gameplay ke **Bahasa Indonesia**, dengan tetap mempertahankan istilah nama hero/skill dan menu utama dalam Bahasa Inggris.
   - **`EN Full`:** Menerjemahkan seluruh teks gim ke **Bahasa Inggris** penuh.
+- **Overhaul Terjemahan Kartu & Layout CJK-Safe:**
+  - Mencakup **5.600+** deskripsi kartu Hero, Awakening, Skill, Effect Card, Equipment, Talent & Sub-Card, serta Contestant Skill dengan *smart word-wrap* anti-potong kata, penyelarasan tag warna/ikon presisi, glosarium mekanik kanonik terkunci (`Initiate`, `Deploy`, `Prepare`, `Revive`, `Arcomia Core`, `Fleeting`, `Retire`, `Combine`, `Steal`), dan *runtime numeric-template fallback* yang tahan terhadap *balance hotfix* server.
 - **Manajemen Patch PC:**
   - **`Auto-Detect` & `Pilih Folder`:** Mendeteksi lokasi instalasi gim secara otomatis atau memilih folder `WXQ` secara manual.
   - **`Pasang Patch`:** Memasang patch bahasa yang dipilih ke dalam gim.
@@ -45,10 +55,12 @@ Aplikasi *patcher* lokalisasi resmi **Celeslib** untuk gim **Honor of Kings: Ace
 ### Checksum SHA-256
 
 ```text
-bb52ffcde848e0988698512aa2e64f6617d6733fc4b2ce5f7ea9148d69cc0d9e  Celeslib-HoK-Ace-Patcher-v1.0.0.exe
-abbfffec6bab992b31c25e32dc8a33571fd5f279033185f84361af87632253f2  ace-worker.exe (embedded @ offset 0x11CC62..0x348AC18)
+{sums_content}
 ```
 """
+
+
+RELEASE_NOTES = build_release_notes()
 
 OBSOLETE_RELEASES = ["v1.4.12-id.1", "v1.4.12-id.2"]
 LEGACY_ASSET_NAMES = [
@@ -96,6 +108,7 @@ def publish_via_gh_cli() -> bool:
     if PREVIEW_EN.exists():
         assets.append(str(PREVIEW_EN))
 
+    notes = build_release_notes()
     if view.returncode == 0:
         subprocess.run(
             ["gh", "release", "upload", TAG, *assets, "--clobber", "--repo", REPO],
@@ -110,7 +123,7 @@ def publish_via_gh_cli() -> bool:
                 "--title",
                 TITLE,
                 "--notes",
-                RELEASE_NOTES,
+                notes,
                 "--repo",
                 REPO,
             ],
@@ -129,7 +142,7 @@ def publish_via_gh_cli() -> bool:
                 "--title",
                 TITLE,
                 "--notes",
-                RELEASE_NOTES,
+                notes,
             ],
             check=True,
         )
@@ -142,6 +155,7 @@ def publish_via_rest_api(token: str) -> None:
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
     }
+    notes = build_release_notes()
     with httpx.Client(timeout=300.0, headers=headers) as client:
         resp = client.get(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}")
         if resp.status_code == 404:
@@ -151,7 +165,7 @@ def publish_via_rest_api(token: str) -> None:
                     "tag_name": TAG,
                     "target_commitish": "main",
                     "name": TITLE,
-                    "body": RELEASE_NOTES,
+                    "body": notes,
                     "draft": False,
                     "prerelease": False,
                 },
@@ -163,7 +177,7 @@ def publish_via_rest_api(token: str) -> None:
                 f"https://api.github.com/repos/{REPO}/releases/{rel_id}",
                 json={
                     "name": TITLE,
-                    "body": RELEASE_NOTES,
+                    "body": notes,
                 },
             )
         resp.raise_for_status()

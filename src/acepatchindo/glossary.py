@@ -1583,6 +1583,14 @@ class ThreeTierGlossary:
                 "<color=#99DEB0>多阵营系列</color>\n战斗开始时，若己方有<color=#99DEB0>至少2个</color>阵营，所有英雄获得<color=#99DEB0>20</color>×阵营数的等级。",
                 "<color=#99DEB0>Multi-Faction Series</color>\nSaat Combat dimulai, jika sekutu memiliki <color=#99DEB0>minimal 2</color> Faction, semua Hero memperoleh Level sebesar <color=#99DEB0>20</color> x jumlah Faction.",
             ),
+            (
+                "回合开始时，<color=#FFE897>╥阿科米亚核心失去20级</color>，获得10能量。每回合最多触发1次。",
+                "Saat Round dimulai, <color=#FFE897>╥Arcomia Core kehilangan 20 Level</color> dan memperoleh 10 Energy (maks. 1 kali per Round).",
+            ),
+            (
+                "<color=#98CBFF>╈退场</color>关键词在<color=#98CBFF>棋盘上的</color>英雄被卖出时触发，实战中需要在效果触发和英雄战力之间做决断。",
+                "Keyword <color=#98CBFF>╈Retire</color> terpicu saat Hero <color=#98CBFF>di arena</color> dijual; dalam pertandingan, pilih antara memicu efek Retire atau mempertahankan kekuatan tempur Hero.",
+            ),
         ]
         for zh_c, id_c in curated_t1_pairs:
             self._register_t1_pair(zh_c, id_c)

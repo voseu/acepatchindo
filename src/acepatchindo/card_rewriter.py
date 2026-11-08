@@ -288,7 +288,7 @@ def polish_indonesian_card_text(source_zh: str, text_id: str, baseline_en: str =
     res = re.sub(r"(╊\s*)(<b>)?(?:Jiwa\s+Merebut|Soul\s+Snatch|Roh\s+Extraction|Soul\s+Extraction)\b", r"\1\g<2>Soul Snatch", res, flags=re.I)
     res = re.sub(r"(╊\s*)(<b>)?(?:Merebut|Capture|Plunder|Seizure|Snatch|Steal|dan\s+Steal|capturing\s+entri)\b", r"\1\g<2>Steal", res, flags=re.I)
     if "夺取" in source_zh:
-        res = re.sub(r"\b(?:Merebut|Capture|Plunder|Seizure|Snatch)\b", "Steal", res, flags=re.I)
+        res = re.sub(r"(?<!Soul\s)\b(?:Merebut|Capture|Plunder|Seizure|Snatch)\b", "Steal", res, flags=re.I)
     res = re.sub(r"\bRoh\s+Extraction\b", "Soul Snatch", res, flags=re.I)
     res = re.sub(r"\bke\s+Steal\b", "Steal", res, flags=re.I)
 
