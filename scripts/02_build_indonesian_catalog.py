@@ -25,6 +25,11 @@ sys.path.insert(0, str(ROOT / "extracted_source"))
 from wxq_patch import table_catalog  # noqa: E402
 from wxq_patch import translation_rules as runtime_rules  # noqa: E402
 
+from acepatchindo.card_rewriter import (  # noqa: E402
+    CANONICAL_FACTION_MAP,
+    CANONICAL_HERO_NAME_MAP,
+    CANONICAL_RELATED_CARD_MAP,
+)
 from acepatchindo.card_wrapper import ensure_placeholder_spacing  # noqa: E402
 from acepatchindo.glossary import ThreeTierGlossary  # noqa: E402
 from acepatchindo.hybrid_classifier import HybridClassifier  # noqa: E402
@@ -42,6 +47,40 @@ REFS_DIR = ROOT / "data" / "references"
 OUT_DIR = ROOT / "data" / "catalog_checkpoints"
 OUT_CATALOG_GZ = OUT_DIR / "catalog.json.gz"
 OUT_EN_TO_ID_JSON = OUT_DIR / "en_to_id_map.json"
+
+
+def sync_canonical_english_names(text: str) -> str:
+    """Synchronize non-target English strings with canonical proper names."""
+    if not text:
+        return text
+    res = text
+    for pattern, repl in CANONICAL_FACTION_MAP.items():
+        res = re.sub(pattern, repl, res)
+    for pattern, repl in CANONICAL_HERO_NAME_MAP.items():
+        res = re.sub(pattern, repl, res)
+    for pattern, repl in CANONICAL_RELATED_CARD_MAP.items():
+        res = re.sub(pattern, repl, res)
+    res = re.sub(r"\bfragrant\b", "Xiang", res, flags=re.I)
+    res = re.sub(r"\b(?:Ying Law|Ying Lu|Yinglü|Qin Lu)\b", "Ying Lü", res)
+    res = re.sub(r"\bWhite Song\b", "Bai Ge", res)
+    res = re.sub(r"\bXiao Xiao Little Daji\b", "Little Daji", res)
+    res = re.sub(r"\bSun Xiaobin\b", "Little Sun Bin", res)
+    res = re.sub(r"\bZhuang Xiaoyu\b", "Little Zhuang Fish", res)
+    res = re.sub(r"\bChang Xiao'e\b", "Little Chang'e", res)
+    res = re.sub(r"Famous Blade [•·] Life-Stealer", "Destiny", res)
+    res = re.sub(r"\bFamous Blade - Siming\b", "Destiny", res)
+    res = re.sub(r"\bFamous Sword Siming\b", "Destiny", res)
+    res = re.sub(r"\bFamous Sword - Siming\b", "Destiny", res)
+    res = re.sub(r"\bFamous Sword\b", "Destiny", res)
+    res = re.sub(r"\bFamous Blade\b", "Destiny", res)
+    res = re.sub(r"\bCentral Plain(?![sS])\b", "Central Plains", res)
+    res = re.sub(r"\[Sunset\](?!\s*Sea)", "[Sunset Sea]", res)
+    res = re.sub(r"\[Zhulu\](?!\s*Plateau)", "[Zhulu Plateau]", res)
+    res = re.sub(r"\[Zhuolu\]|\[Zhu Lu\]", "[Zhulu Plateau]", res)
+    res = re.sub(r"\bGlitch Bots\b", "Glitch Robot", res)
+    res = re.sub(r"\b(?:Lots of Friends|Plenty of Friends)\b", "Many Friends", res)
+    res = ensure_placeholder_spacing(res)
+    return res
 
 
 def _align_en_to_id(en_val: str, id_val: str) -> str | None:
@@ -96,13 +135,7 @@ def main() -> None:
                     en_to_id_map[en_base] = aligned
         else:
             # Standalone names, equipment, effect cards, UI, tips, achievements stay English
-            clean_en = en_base
-            clean_en = re.sub(r"\bCentral Plain(?![sS])\b", "Central Plains", clean_en)
-            clean_en = re.sub(r"\bGlitch Bots\b", "Glitch Robot", clean_en)
-            clean_en = re.sub(r"\[Zhuolu\]|\[Zhu Lu\]", "[Zhulu Plateau]", clean_en)
-            clean_en = re.sub(r"\bMo Xie|General Moye|Ganjiang Moye\b", "Gan & Mo", clean_en)
-            clean_en = ensure_placeholder_spacing(clean_en)
-            new_unique[zh_src] = clean_en
+            new_unique[zh_src] = sync_canonical_english_names(en_base)
             tier_counts["nontarget_en"] += 1
 
     # 2. Add the 108 missing Chinese strings discovered on the user's Windows game
@@ -205,13 +238,7 @@ def main() -> None:
                     en_to_id_map[en_target] = id_val
         else:
             # Non-target stays clean English
-            clean_en = en_target
-            clean_en = re.sub(r"\bCentral Plain(?![sS])\b", "Central Plains", clean_en)
-            clean_en = re.sub(r"\bGlitch Bots\b", "Glitch Robot", clean_en)
-            clean_en = re.sub(r"\[Zhuolu\]|\[Zhu Lu\]", "[Zhulu Plateau]", clean_en)
-            clean_en = re.sub(r"\bMo Xie|General Moye|Ganjiang Moye\b", "Gan & Mo", clean_en)
-            clean_en = ensure_placeholder_spacing(clean_en)
-            row[3] = clean_en
+            row[3] = sync_canonical_english_names(en_target)
             eu_nontarget_count += 1
 
     data["unique"] = new_unique

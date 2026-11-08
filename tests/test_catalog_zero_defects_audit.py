@@ -255,3 +255,65 @@ def test_08_zero_machine_calque_families(catalog_data):
     for label, pat in calque_checks:
         for val in all_values:
             assert not pat.search(val), f"Machine calque {label!r} detected in: {val!r}"
+
+
+def test_09_zero_contestant_and_series_mangling(catalog_data, index_data):
+    """Assertion 9: Zero contestant, secret skill, and equipment/series mangling across all target strings."""
+    vfs_target_zh = set(index_data.get("vfs_target_zh", []))
+    target_values: list[str] = [
+        val for zh, val in catalog_data["unique"].items() if zh in vfs_target_zh
+    ]
+    for row in catalog_data["english_updates"]:
+        opt_zh = row[4] if len(row) >= 5 else ""
+        if opt_zh in vfs_target_zh:
+            target_values.append(row[3])
+
+    mangling_checks = [
+        # Contestant name mangling
+        ("harum", re.compile(r"\bharum\b")),
+        ("Ying Hukum", re.compile(r"\bYing Hukum\b")),
+        ("Qin Lu", re.compile(r"\bQin Lu\b")),
+        ("Putih Lagu", re.compile(r"\bPutih Lagu\b")),
+        ("<b>Menyapu</b>", re.compile(r"<b>Menyapu</b>")),
+        ("melalui Menyapu", re.compile(r"\bmelalui Menyapu\b")),
+        ("Xiao Xiao Little Daji", re.compile(r"\bXiao Xiao Little Daji\b")),
+        ("Sun Xiaobin", re.compile(r"\bSun Xiaobin\b")),
+        ("Zhuang Xiaoyu", re.compile(r"\bZhuang Xiaoyu\b")),
+        ("Chang Xiao'e", re.compile(r"\bChang Xiao'e\b")),
+        ("Asylum Anak rusa", re.compile(r"\bAsylum Anak rusa\b")),
+        ("Iblis (Dewa/HP/Max/Energi/Menerjang/pertama)", re.compile(r"\bIblis (?:Dewa|HP|Max|Energi|Menerjang|pertama)\b")),
+        ("wilayah pada", re.compile(r"\bwilayah pada\b")),
+        # Secret Skill duplication/drift
+        ("Kartu Secret (Skill|Art) Kartu", re.compile(r"\bKartu Secret (?:Skill|Art) Kartu\b")),
+        ("Kartu Secret Art", re.compile(r"\bKartu Secret Art\b")),
+        # Equipment & Series mangling
+        ("Terkenal Pedang Siming", re.compile(r"\bTerkenal Pedang Siming\b")),
+        ("Merah Iblis", re.compile(r"\bMerah Iblis\b")),
+        ("Tongkat dari Kehampaan", re.compile(r"\bTongkat dari Kehampaan\b")),
+        ("Murka Savant", re.compile(r"\bMurka Savant\b")),
+        ("Buku dari Dewa-Eaters", re.compile(r"\bBuku dari Dewa-Eaters\b")),
+        ("Sabuk Raksasa", re.compile(r"\bSabuk Raksasa\b")),
+        ("Besar Rod", re.compile(r"\bBesar Rod\b")),
+        ("Berat Armor", re.compile(r"\bBerat Armor\b")),
+        ("Sunset Samudra", re.compile(r"\bSunset Samudra\b")),
+        ("(Totem|General|Arcomia Core) Seri", re.compile(r"\b(?:Totem|General|Arcomia Core) Seri\b")),
+        ("Alam baka Totem", re.compile(r"\bAlam baka Totem\b")),
+        # Tier 3 calques
+        ("Kartu itu Hero", re.compile(r"\bKartu itu Hero\b")),
+        ("itu adalah", re.compile(r"\bitu adalah\b")),
+        ("mati-di arena", re.compile(r"\bmati-di arena\b")),
+        ("mati-papan", re.compile(r"\bmati-papan\b")),
+        ("ke (secara acak|Gunakan|enact)", re.compile(r"\bke (?:secara acak|Gunakan|enact)\b")),
+        ("remainder dari", re.compile(r"\bremainder dari\b")),
+        ("(sebuah|N) Acak", re.compile(r"\b(?:sebuah|\d+)\s+Acak\b")),
+        ("(tertinggi|terendah)-Level", re.compile(r"\b(?:tertinggi|terendah)-Level\b")),
+        ("rubah menembakkan", re.compile(r"\brubah menembakkan\b")),
+        ("milikmu/", re.compile(r"\d+\s+milikmu/\d+")),
+        ("mereka%", re.compile(r"\d+\s+mereka%")),
+        ("menyerang miliknya musuh", re.compile(r"\bmenyerang miliknya musuh\b")),
+        ("pada menarik/mengalahkan", re.compile(r"\bpada menarik/mengalahkan\b")),
+    ]
+
+    for label, pat in mangling_checks:
+        for val in target_values:
+            assert not pat.search(val), f"Target string mangling {label!r} detected in: {val!r}"

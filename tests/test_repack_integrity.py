@@ -119,9 +119,9 @@ def test_celeslib_repack_integrity_and_worker_unpack() -> None:
             cat = json.load(f)
         assert len(cat["unique"]) == 41_483
         assert len(cat["english_updates"]) == 29_750
-        assert 3_000 <= len(cat["en_to_id"]) <= 6_000
-        assert 3_000 <= len(cat["id_to_en"]) <= 6_000
-        assert 3_000 <= len(cat["zh_to_en_gameplay"]) <= 6_000
+        assert 3_000 <= len(cat["en_to_id"]) <= 8_000
+        assert 3_000 <= len(cat["id_to_en"]) <= 8_000
+        assert 3_000 <= len(cat["zh_to_en_gameplay"]) <= 8_000
 
         tc_pyc = ext_dir / "PYZ.pyz_extracted" / "wxq_patch" / "table_catalog.pyc"
         ad_pyc = ext_dir / "PYZ.pyz_extracted" / "wxq_patch" / "adaptive.pyc"

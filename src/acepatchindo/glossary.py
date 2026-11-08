@@ -468,6 +468,55 @@ CANONICAL_PROTECTED_TERMS: tuple[str, ...] = (
     "Pluck",
     "Eternal Time Loop",
     "Time Loop",
+    "Demon God",
+    "Sky Piercer",
+    "Taotie Annihilation",
+    "Magic Deer",
+    "Deer's Protection",
+    "Giant's Belt",
+    "Large Rod",
+    "Overlord's Platemail",
+    "Guardian's Glory",
+    "Savant's Wrath",
+    "Void Staff",
+    "Insatiable Tome",
+    "Afterlife Totem",
+    "Seer Totem",
+    "Destiny Totem",
+    "Totem Series",
+    "General Series",
+    "Arcomia Core Series",
+    "War Song",
+    "Legion Evolution",
+    "Direct Source",
+    "Destiny",
+    "Glacial Buckler",
+    "Thorn Heavy Armor",
+    "Ominous Premonition",
+    "Dream-Forged Windchaser",
+    "Red Demon",
+    "Shadow Fang",
+    "Daybreak",
+    "Doomsday",
+    "Sword of Conquest",
+    "Underworld King",
+    "Mask of Agony",
+    "Siegebreaker",
+    "Pure Sky",
+    "Endless Greatsword",
+    "Sanction Sword",
+    "Eye of the Phoenix",
+    "Succubus Cloak",
+    "Crimson Lotus Armor",
+    "Moon God",
+    "Frost Assault",
+    "Tome of Wisdom",
+    "Sanguine Dominator",
+    "Grimoire of Life",
+    "Mana Chalice",
+    "Cocoon-Breaking Garment",
+    "Spirit-Gathering Crystal",
+    "Blade of Magic Law",
 )
 
 STOPWORD_GUARD_RE = re.compile(
@@ -542,6 +591,7 @@ class ThreeTierGlossary:
     tier1_en_desc_to_id_desc: dict[str, str] = field(default_factory=dict)
     tier2_zh_to_en: dict[str, str] = field(default_factory=dict)
     tier2_plain_zh_to_en: dict[str, str] = field(default_factory=dict)
+    orig_unique: dict[str, str] = field(default_factory=dict)
     protected_en_terms: list[str] = field(default_factory=list)
     _protected_re: re.Pattern[str] | None = field(default=None, init=False, repr=False)
 
@@ -632,6 +682,7 @@ class ThreeTierGlossary:
         if instance.protected_en_terms:
             escaped = "|".join(re.escape(t) for t in instance.protected_en_terms)
             instance._protected_re = re.compile(rf"(?<![A-Za-z0-9_])(?:{escaped})(?![A-Za-z0-9_])")
+        instance.orig_unique = orig_unique
         return instance
 
     def _register_t1_pair(self, zh: str, id_val: str) -> None:
@@ -836,6 +887,20 @@ class ThreeTierGlossary:
                         elif ": " in r_name:
                             self.tier1_en_card_to_id_desc[r_name.replace(": ", " · ")] = r_desc
                             self.tier1_en_card_to_id_desc[r_name.replace(": ", " • ")] = r_desc
+
+        # Register Yao Mei tag-matched Tier 1 pairs
+        self._register_t1_pair(
+            "小鹿等级+30，获得一件<color=#FFE897>小鹿的庇护</color>。",
+            "Level Rusa +30, dan dapatkan 1 <color=#FFE897>Deer's Protection</color>.",
+        )
+        self._register_t1_pair(
+            "小鹿等级+30，并获得1件<color=#FFE897>小鹿的庇护</color>。",
+            "Level Rusa +30, dan dapatkan 1 <color=#FFE897>Deer's Protection</color>.",
+        )
+        self._register_t1_pair(
+            "小鹿等级+30，获得一件小鹿的庇护。",
+            "Level Rusa +30, dan dapatkan 1 Deer's Protection.",
+        )
 
     def _ingest_tier2(
         self,
@@ -1652,6 +1717,171 @@ class ThreeTierGlossary:
                 cand_en = normalize_tag_boundary_spacing(source_zh, cand_en)
                 if validate_translation(source_zh, cand_en)[0]:
                     return (self._finalize_output(source_zh, cand_en, baseline_en), "tier2")
+
+        # 2e. Contestant Name-Stripped Tier 1 Lookup
+        CONTESTANT_NAMES_ZH = (
+            "香香", "嬴律", "孙小宾", "小妲己", "庄小鱼", "弈星",
+            "明先生", "玉环", "班叔", "瑶妹", "闹闹", "阿离",
+            "安琪拉", "武凤", "姜导", "常小娥", "昭君", "白歌",
+            "马可", "乔汐",
+        )
+        for alt in CONTESTANT_NAMES_ZH:
+            if alt in source_zh:
+                stripped = source_zh.replace(f"{alt}的", "").replace(alt, "")
+                norm_p = normalize_plain_zh(stripped)
+                if norm_p and len(norm_p) >= 6:
+                    variants = [
+                        norm_p,
+                        norm_p.replace("开战时", "战斗开始时"),
+                        norm_p.replace("开局时", "比赛开始时"),
+                        norm_p.replace("{Energy}", "点能量"),
+                        norm_p.replace("开战时", "战斗开始时").replace("{Energy}", "点能量"),
+                        norm_p.replace("开局时", "比赛开始时").replace("{Energy}", "点能量"),
+                    ]
+                    for v in variants:
+                        if v in self.tier1_plain_zh_to_id:
+                            raw_t1 = self.tier1_plain_zh_to_id[v]
+                            adapted_t1 = adapt_tier1_placeholders_to_source(source_zh, raw_t1)
+                            cand = self._fit_length_bound(
+                                source_zh,
+                                reinject_skeleton_from_source(
+                                    source_zh,
+                                    adapted_t1,
+                                    inner_translator=self._translate_raw_zh_to_id,
+                                    baseline_en=baseline_en,
+                                    en_translator=self.translate_en_to_id,
+                                ),
+                            )
+                            if validate_translation(source_zh, cand)[0]:
+                                return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
+
+                skel = normalize_formula_skeleton_zh(stripped)
+                if skel and len(skel) >= 6:
+                    skel_variants = [
+                        skel,
+                        skel.replace("开战时", "战斗开始时"),
+                        skel.replace("开局时", "比赛开始时"),
+                        skel.replace("{Energy}", "点能量"),
+                        skel.replace("开战时", "战斗开始时").replace("{Energy}", "点能量"),
+                        skel.replace("开局时", "比赛开始时").replace("{Energy}", "点能量"),
+                    ]
+                    for sv in skel_variants:
+                        if sv in self.tier1_formula_zh_to_id:
+                            cands = self.tier1_formula_zh_to_id[sv]
+                            t1_desc_cn, t1_desc_id = cands[0]
+                            cand = self._fit_length_bound(
+                                source_zh,
+                                reinject_formula_and_skeleton(
+                                    source_zh,
+                                    t1_desc_cn,
+                                    t1_desc_id,
+                                    inner_translator=self._translate_raw_zh_to_id,
+                                    baseline_en=baseline_en,
+                                    en_translator=self.translate_en_to_id,
+                                ),
+                            )
+                            if validate_translation(source_zh, cand)[0]:
+                                return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
+                break
+
+        # 2f. Equipment Selection Chests Deterministic Parser
+        m_chest = re.search(r"(?:指定英雄穿戴|穿戴给英雄)，可从(.+?)中选择(\d+)件。", source_zh)
+        if m_chest:
+            raw_items = m_chest.group(1).split("、")
+            count = m_chest.group(2)
+            CHEST_EQUIPMENT_MAP = {
+                "名刀·司命": "Destiny",
+                "极寒风暴": "Glacial Buckler",
+                "反伤重甲": "Thorn Heavy Armor",
+                "近卫荣耀": "Guardian's Glory",
+                "不祥征兆": "Ominous Premonition",
+                "霸者重装": "Overlord's Platemail",
+                "噬神之书": "Insatiable Tome",
+                "虚无法杖": "Void Staff",
+                "博学者之怒": "Savant's Wrath",
+                "铸梦·逐风": "Dream-Forged Windchaser",
+                "红魔": "Red Demon",
+                "影牙": "Shadow Fang",
+                "破晓": "Daybreak",
+                "末世": "Doomsday",
+                "征服之剑": "Sword of Conquest",
+                "冥王": "Underworld King",
+                "痛苦面具": "Mask of Agony",
+                "破军": "Siegebreaker",
+                "纯净苍穹": "Pure Sky",
+                "无尽巨剑": "Endless Greatsword",
+                "制裁之剑": "Sanction Sword",
+                "不死鸟之眼": "Eye of the Phoenix",
+                "魔女斗篷": "Succubus Cloak",
+                "红莲炎甲": "Crimson Lotus Armor",
+                "月神": "Moon God",
+                "寒霜侵袭": "Frost Assault",
+                "贤者之书": "Tome of Wisdom",
+                "炽热支配者": "Sanguine Dominator",
+                "生命魔典": "Grimoire of Life",
+                "法源之杯": "Mana Chalice",
+                "破茧之衣": "Cocoon-Breaking Garment",
+                "聚灵水晶": "Spirit-Gathering Crystal",
+                "魔律之刃": "Blade of Magic Law",
+            }
+            resolved_items = []
+            for it in raw_items:
+                it = it.strip()
+                name = CHEST_EQUIPMENT_MAP.get(it) or self.orig_unique.get(it) or it
+                resolved_items.append(name)
+            if len(resolved_items) > 1:
+                items_str = f"{', '.join(resolved_items[:-1])}, atau {resolved_items[-1]}"
+            else:
+                items_str = resolved_items[0] if resolved_items else ""
+            chest_id = f"Dipakai oleh Hero target; pilih {count} dari {items_str}."
+            if validate_translation(source_zh, chest_id)[0]:
+                return (self._finalize_output(source_zh, chest_id, baseline_en or ""), "tier2")
+
+        # 2g. Hero Choice Vouchers Deterministic Parser
+        m_v1 = re.search(r"(\d+)选(\d+)(?:【([^】]+)】|(无阵营)的?)(\d+)阶英雄，获得(\d+)张该英雄牌。", source_zh)
+        if m_v1:
+            pool = m_v1.group(1)
+            pick = m_v1.group(2)
+            faction_cn = m_v1.group(3)
+            factionless = m_v1.group(4)
+            tier = m_v1.group(5)
+            copies = m_v1.group(6)
+            ZH_FACTION_MAP = {
+                "三分之地": "Three Kingdoms",
+                "三分": "Three Kingdoms",
+                "大河流域": "Riverlands",
+                "大河": "Riverlands",
+                "日落海": "Sunset Sea",
+                "河洛": "Central Plains",
+                "玄雍": "Xuanyong",
+                "逐鹿": "Zhulu Plateau",
+                "长城守卫军": "Great Wall",
+                "长城": "Great Wall",
+                "稷下学院": "Jixia",
+                "稷下": "Jixia",
+                "尧天": "Yaotian",
+                "云梦泽": "Cloudream",
+                "云梦": "Cloudream",
+                "海都": "Sunset Sea",
+            }
+            if factionless:
+                voucher_id = f"Pilih {pick} dari {pool} Hero tanpa Faction Tier {tier}, lalu peroleh {copies} salinan Kartu Hero tersebut."
+            else:
+                f_en = ZH_FACTION_MAP.get(faction_cn) or faction_cn
+                voucher_id = f"Pilih {pick} dari {pool} Hero [{f_en}] Tier {tier}, lalu peroleh {copies} salinan Kartu Hero tersebut."
+            if validate_translation(source_zh, voucher_id)[0]:
+                return (self._finalize_output(source_zh, voucher_id, baseline_en or ""), "tier2")
+
+        m_v2 = re.search(r"^(.*?)指定(\d+)名英雄，获得(\d+)张该英雄牌。(.*)$", source_zh)
+        if m_v2:
+            pfx_zh = m_v2.group(1).strip()
+            count = m_v2.group(2)
+            copies = m_v2.group(3)
+            sfx_zh = m_v2.group(4).strip()
+            if not pfx_zh and not sfx_zh:
+                v_id = f"Pilih {count} Hero, lalu peroleh {copies} salinan Kartu Hero tersebut."
+                if validate_translation(source_zh, v_id)[0]:
+                    return (self._finalize_output(source_zh, v_id, baseline_en or ""), "tier2")
 
         # 3. Tier 2 exact or plain entity/detail match -> EN -> ID
         t2_en = self.tier2_zh_to_en.get(source_zh) or (
