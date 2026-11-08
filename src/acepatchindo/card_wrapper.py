@@ -58,6 +58,14 @@ def ensure_placeholder_spacing(text: str) -> str:
     masked = re.sub(r"\bfails2Renovation\b", "fails, 2 Renovation", masked)
     masked = re.sub(r"\bgagal2Refresh\b", "gagal, +2 Refresh", masked)
 
+    # Spacing around control tokens and glued English words/digits
+    masked = re.sub(r"([0-9A-Za-z\u00C0-\u024F\]\)])([\u2540-\u257f])", r"\1 \2", masked)
+    masked = re.sub(r"═diperoleh\b", "═Temporary Level yang diperoleh", masked)
+    masked = re.sub(r"╆\s*Kartu\s+Hero\s+Fleeting\b", "╆Fleeting Kartu Hero", masked)
+    masked = re.sub(r"([\u2540-\u257f])Kartu\b", r"\1 Kartu", masked)
+    masked = re.sub(r"([\u2540-\u257f])([a-z])", r"\1 \2", masked)
+    masked = re.sub(r"\b(get|and|Restore|gain|deal|for)(\d+)\b", r"\1 \2", masked, flags=re.I)
+
     masked = GLUED_BEFORE_ICON_BRACE_RE.sub(r"\1 \2", masked)
     masked = GLUED_AFTER_ICON_BRACE_RE.sub(r"\1 \2", masked)
     masked = GLUED_AFTER_NUM_BRACE_RE.sub(r"\1 \2", masked)
@@ -113,22 +121,28 @@ def _wrap_single_paragraph(paragraph: str, max_width: int) -> str:
     if not paragraph.strip() or _visible_length(paragraph) <= max_width:
         return paragraph
 
-    # Protect short atomic tags (visible length <= 18) so they never split internally
+    # Protect short atomic tags (visible length <= 22) so they never split internally
     atomic_tags: list[str] = []
 
     def _protect_atomic(m: re.Match[str]) -> str:
         tag_str = m.group(0)
-        if _visible_length(tag_str) <= 18:
+        if _visible_length(tag_str) <= 22:
             idx = len(atomic_tags)
             atomic_tags.append(tag_str)
             return f"\x00ATOMIC{idx}\x00"
         return tag_str
 
     ATOMIC_TAG_RE = re.compile(
-        r"(?:<a\s+href=[^>]+>.*?</a>|<color=[^>]+><b>.*?</b></color>|<b>.*?</b>)",
+        r"(?:<a\s+href=[^>]+>.*?</a>|<color=[^>]+><b>.*?</b></color>|<b>.*?</b>|\[[^\]]{1,22}\])",
         re.DOTALL,
     )
     para = ATOMIC_TAG_RE.sub(_protect_atomic, paragraph)
+
+    # Protect spaces inside all brackets [...] so they never split across lines
+    def _mask_bracket_spaces(m: re.Match[str]) -> str:
+        return m.group(0).replace(" ", "\x00SPACE\x00")
+
+    para = re.sub(r"\[[^\]]+\]", _mask_bracket_spaces, para)
 
     # Tokenize by whitespace while keeping XML tags attached to their adjacent word tokens
     protected: list[str] = []
@@ -149,6 +163,7 @@ def _wrap_single_paragraph(paragraph: str, max_width: int) -> str:
             continue
         rw = re.sub(r"\x00TAG(\d+)\x00", lambda m: protected[int(m.group(1))], w)
         rw = re.sub(r"\x00ATOMIC(\d+)\x00", lambda m: atomic_tags[int(m.group(1))], rw)
+        rw = rw.replace("\x00SPACE\x00", " ")
         restored_words.append(rw)
 
     lines: list[str] = []
@@ -177,6 +192,8 @@ def wrap_card_description(text: str, max_width: int = 26) -> str:
     if not text or ";" in text:
         # Never wrap semicolon-delimited multi-part strings
         return text
+    while re.search(r"(\[[^\]\n]*)\n([^\]\n]*\])", text):
+        text = re.sub(r"(\[[^\]\n]*)\n([^\]\n]*\])", r"\1 \2", text)
     text = normalize_brackets(ensure_placeholder_spacing(text))
     paragraphs = text.split("\n")
     wrapped_paragraphs = [_wrap_single_paragraph(p, max_width=max_width) for p in paragraphs]

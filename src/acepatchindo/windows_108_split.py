@@ -77,6 +77,36 @@ WINDOWS_108_TARGET_DESC_ID: dict[str, str] = {
         "Diperoleh dari jalur mana pun, <a href=3130011><color=#99DEB0>═Temporary Level</color></a> meningkat sebesar "
         "<color=#99DEB0>80%</color>, dan <color=#99DEB0>30%</color> dari Temporary Level yang diperoleh dapat segera diubah menjadi Level permanen."
     ),
+    "获得1张更强力的<color=#ffffff><b>永恒时之回环</b></color>，可以记录12张英雄牌或效果牌。": (
+        "Dapat 1 <color=#ffffff><b>Eternal Time Loop</b></color> yang lebih kuat, dapat merekam 12 Kartu Hero atau Kartu Efek."
+    ),
+    "<color=#ffffff><b>枫叶舞</b></color>英雄离场后，其真实等级的50%会保留给下一个<color=#ffffff><b>枫叶舞</b></color>英雄，限一次。": (
+        "Setelah Hero <color=#ffffff><b>Maple Leaf Dance</b></color> keluar dari arena, 50% True Level-nya diwariskan ke Hero "
+        "<color=#ffffff><b>Maple Leaf Dance</b></color> berikutnya (maks 1 kali)."
+    ),
+    "<color=#FFE897>枫叶舞</color>英雄离场后，其真实等级的50%会保留给下一个<color=#FFE897>枫叶舞</color>英雄，限一次。": (
+        "Setelah Hero <color=#FFE897>Maple Leaf Dance</color> keluar dari arena, 50% True Level-nya diwariskan ke Hero "
+        "<color=#FFE897>Maple Leaf Dance</color> berikutnya (maks 1 kali)."
+    ),
+    "有棋手被淘汰时，获得5{Energy}以及1张基础装备牌。决策颁布者额外特权：改为获得特殊装备牌且额外恢复5{LordHp}。": (
+        "Saat ada Contestant yang tereliminasi, dapat 5 {Energy} dan 1 Kartu Normal Equipment. "
+        "Hak istimewa tambahan Ying Lü: diubah menjadi Kartu Special Equipment dan pulihkan 5 {LordHp}."
+    ),
+    "有棋手被淘汰时，获得5{Energy}，5{LordHp}以及1张特殊装备牌。": (
+        "Saat ada Contestant yang tereliminasi, dapat 5 {Energy}, 5 {LordHp}, dan 1 Kartu Special Equipment."
+    ),
+    "上阵6名【三分之地】英雄，获得1张秘技牌<b>朋友多多</b>。": (
+        "Deploy 6 Hero [Three Kingdoms], dapatkan 1 Kartu Secret Skill <b>Many Friends</b>."
+    ),
+    "指定1名1-3阶英雄，获得该英雄牌。": (
+        "Pilih 1 Hero Tier 1-3, lalu peroleh Kartu Hero tersebut."
+    ),
+    "在战场召唤魔神，使用后续秘技卡可使魔神获得更多强化效果。": (
+        "Memanggil Demon God ke arena, menggunakan Kartu Secret Skill berikutnya memberi Demon God efek penguatan tambahan."
+    ),
+    "指定1名英雄，将其<color=#ffffff><b>冻结</b></color>。战斗结束后，该英雄随机变为高1阶的英雄，继承等级。": (
+        "Pilih 1 Hero dan <color=#ffffff><b>Freeze</b></color>. Setelah Combat usai, Hero tersebut berubah acak jadi Hero Tier +1 lebih tinggi dengan mewarisi Level-nya."
+    ),
     "<color=#ffffff><color=#ffffff><b>唯一</b></color></color>\n攻击速度+30%。攻速上限改为5.0。战斗期间，每获得2点法力值，提升1%攻击速度。": (
         "<color=#ffffff><color=#ffffff><b>Unique</b></color></color>\n"
         "Attack Speed +30%. Batas Attack Speed diubah jadi 5.0. Selama Combat, setiap memperoleh 2 Mana, meningkatkan 1% Attack Speed."

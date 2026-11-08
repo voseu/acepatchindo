@@ -126,6 +126,8 @@ def test_04_exact_inspection_of_previously_failed_cards(catalog_data):
     assert "Eternal Waktu Putaran" not in val_loop
     assert "rekor" not in val_loop
     assert "WXQCANON" not in val_loop
+    assert "sebuah lebih" not in val_loop, f"sebuah lebih detected in {val_loop!r}"
+    assert "capable" not in val_loop, f"capable detected in {val_loop!r}"
 
     # 4. Directed Transfer
     zh_transfer = "╥阿科米亚核心的等级会优先分配给<color=#FFE897>穿戴装备最多的【日落海】英雄</color>，最多分配200级。"
@@ -141,7 +143,28 @@ def test_04_exact_inspection_of_previously_failed_cards(catalog_data):
     assert "╬Prepare" in val_prep
     assert "A Card's" not in val_prep
 
-    # 6. Support Tactics, Divine Descent, and Glory of the Past in english_updates
+    # 6. Many Friends (上阵6名【三分之地】英雄，获得1张秘技牌<b>朋友多多</b>。)
+    zh_friends = "上阵6名【三分之地】英雄，获得1张秘技牌<b>朋友多多</b>。"
+    assert zh_friends in unique, f"Missing {zh_friends} in unique"
+    val_friends = unique[zh_friends]
+    assert "<b>Many Friends</b>" in val_friends, f"Missing <b>Many Friends</b>: {val_friends!r}"
+    assert "Secara acak mengambil 4" not in val_friends, f"Injected description in tag: {val_friends!r}"
+
+    # 7. Copier linked card (指定1名1-3阶英雄，获得该英雄牌。)
+    zh_copier = "指定1名1-3阶英雄，获得该英雄牌。"
+    assert zh_copier in unique, f"Missing {zh_copier} in unique"
+    val_copier = unique[zh_copier]
+    assert "itu Kartu Hero" not in val_copier, f"Calque 'itu Kartu Hero' found in {val_copier!r}"
+    assert "Kartu Hero tersebut" in val_copier or "Pilih 1 Hero" in val_copier
+
+    # 8. Crimson Leaf Edge (枫叶舞 50% Level retention)
+    zh_arli = "<color=#ffffff><b>枫叶舞</b></color>英雄离场后，其真实等级的50%会保留给下一个<color=#ffffff><b>枫叶舞</b></color>英雄，限一次。"
+    assert zh_arli in unique, f"Missing {zh_arli} in unique"
+    val_arli = unique[zh_arli]
+    assert not val_arli.startswith("After a"), f"Untranslated English start: {val_arli!r}"
+    assert "Maple Leaf Dance" in val_arli
+
+    # 9. Support Tactics, Divine Descent, and Glory of the Past in english_updates
     upd_map = {row[1]: row[3] for row in catalog_data["english_updates"]}
     assert "#23F7828C95FCE783#" in upd_map, "Missing Support Tactics #23F7828C95FCE783# in english_updates"
     assert "#FCC75C059E4BD0DD#" in upd_map, "Missing Divine Descent #FCC75C059E4BD0DD# in english_updates"
@@ -168,3 +191,67 @@ def test_05_100_percent_validate_translation_pass(catalog_data):
         ok, reason = validate_translation(src, dst)
         assert ok, f"english_updates validation failed ({reason}): {src!r} -> {dst!r}"
 
+
+def test_06_zero_tag_description_injections(catalog_data):
+    """Assertion 6: Zero multi-sentence card descriptions injected inside <b> or <color> tags."""
+    bad_tag_snippets = (
+        "Secara acak mengambil 4",
+        "Trap akan meledak 2 detik",
+        "Dapat menempatkan 1 Electromagnetic",
+        "Gunakan skill, arahkan ke 1 hero",
+        "Pilih 1 Strategic Decision",
+        "Ying Lü memilih 1 dari 4",
+        "2 Hero dengan Level terendah",
+        "Pilih 1 mekanisme di arena",
+    )
+    tag_content_re = re.compile(r"<(?:b|color=[^>]+)>(.*?)</(?:b|color)>", re.DOTALL)
+    all_values = list(catalog_data["unique"].values()) + [
+        row[3] for row in catalog_data["english_updates"]
+    ]
+
+    for val in all_values:
+        for m in tag_content_re.finditer(val):
+            content = m.group(1)
+            for snip in bad_tag_snippets:
+                assert snip not in content, f"Injected description {snip!r} inside tag in: {val!r}"
+
+
+def test_07_zero_bracket_line_splits(catalog_data):
+    """Assertion 7: Zero bracket line splits ([...\\n...]) across all strings."""
+    bracket_split_re = re.compile(r"\[[^\]]*\n[^\]]*\]")
+    all_values = list(catalog_data["unique"].values()) + [
+        row[3] for row in catalog_data["english_updates"]
+    ]
+
+    for val in all_values:
+        m = bracket_split_re.search(val)
+        assert not m, f"Bracket split across newline detected ({m.group(0)!r}) in: {val!r}"
+
+
+def test_08_zero_machine_calque_families(catalog_data):
+    """Assertion 8: Zero machine-calque families across 100% of unique and english_updates."""
+    calque_checks = [
+        ("adalah + verb", re.compile(r"\badalah\s+(?:meningkat|berkurang|penuh|rusak|aktif|masuk|digandakan|dihapus|dibatasi)\b", re.I)),
+        ("pilih X keluar dari Y", re.compile(r"\bpilih\s+\d+\s+keluar\s+dari\s+\d+\b", re.I)),
+        ("terdapat tidak", re.compile(r"\bterdapat\s+tidak\b", re.I)),
+        ("Melakukan tidak", re.compile(r"\bMelakukan\s+tidak\b", re.I)),
+        ("pembawa dapat menjadi / kamp", re.compile(r"\bpembawa\s+dapat\s+menjadi\b|\bkamp\b", re.I)),
+        ("keping dari", re.compile(r"\bkeping\s+dari\b", re.I)),
+        ("inverted time/demonstrative", re.compile(r"\b(?:berikutnya|saat\s+ini)\s+(?:Round|Kartu|Efek|unit|pertandingan|Combat|slot)\b", re.I)),
+        ("rahasia kartu/skill", re.compile(r"\brahasia\s+(?:kartu|teknik|skill)\b|\bRahasia\s+(?:Teknik|Skill)\s+[Kk]artu\b", re.I)),
+        ("musim semi", re.compile(r"\bmusim\s+semi\b", re.I)),
+        ("milikmu%", re.compile(r"\bmilikmu%", re.I)),
+        ("glued ctrl token", re.compile(r"[0-9A-Za-z][\u2540-\u257f]|[\u2540-\u257f](?:diperoleh|Kartu)")),
+        ("glued verb+digit", re.compile(r"\b(?:get|and|Restore|gain|deal)\d+\b", re.I)),
+        ("sebuah lebih / capable dari", re.compile(r"\bsebuah\s+lebih\b|\bcapable\s+dari\b", re.I)),
+        ("memindahkan menerjang / langkah pada", re.compile(r"\bmemindahkan\s+menerjang\b|\blangkah\s+pada\b", re.I)),
+        ("Banyak dari Teman", re.compile(r"\bBanyak\s+dari\s+Teman\b", re.I)),
+    ]
+
+    all_values = list(catalog_data["unique"].values()) + [
+        row[3] for row in catalog_data["english_updates"]
+    ]
+
+    for label, pat in calque_checks:
+        for val in all_values:
+            assert not pat.search(val), f"Machine calque {label!r} detected in: {val!r}"

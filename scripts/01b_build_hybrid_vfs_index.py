@@ -176,6 +176,16 @@ def build_index() -> dict:
     for t in t1.get("talent", []):
         if t.get("descCn"):
             _add_ref_desc(t["descCn"])
+            desc_cn = t["descCn"].strip()
+            linked_list = t.get("linked") or []
+            if len(linked_list) == 1 and desc_cn:
+                rhs = ""
+                if "：" in desc_cn:
+                    lhs, rhs = desc_cn.split("：", 1)
+                elif "。" in desc_cn:
+                    lhs, rhs = desc_cn.split("。", 1)
+                if len(normalize_plain_zh(rhs)) >= 5:
+                    _add_ref_desc(rhs.strip())
 
     for eq in t1.get("equip", []):
         if eq.get("descCn"):

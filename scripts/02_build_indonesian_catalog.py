@@ -25,6 +25,7 @@ sys.path.insert(0, str(ROOT / "extracted_source"))
 from wxq_patch import table_catalog  # noqa: E402
 from wxq_patch import translation_rules as runtime_rules  # noqa: E402
 
+from acepatchindo.card_wrapper import ensure_placeholder_spacing  # noqa: E402
 from acepatchindo.glossary import ThreeTierGlossary  # noqa: E402
 from acepatchindo.hybrid_classifier import HybridClassifier  # noqa: E402
 from acepatchindo.tag_aligner import restore_newlines_from_source  # noqa: E402
@@ -100,6 +101,7 @@ def main() -> None:
             clean_en = re.sub(r"\bGlitch Bots\b", "Glitch Robot", clean_en)
             clean_en = re.sub(r"\[Zhuolu\]|\[Zhu Lu\]", "[Zhulu Plateau]", clean_en)
             clean_en = re.sub(r"\bMo Xie|General Moye|Ganjiang Moye\b", "Gan & Mo", clean_en)
+            clean_en = ensure_placeholder_spacing(clean_en)
             new_unique[zh_src] = clean_en
             tier_counts["nontarget_en"] += 1
 
@@ -208,6 +210,7 @@ def main() -> None:
             clean_en = re.sub(r"\bGlitch Bots\b", "Glitch Robot", clean_en)
             clean_en = re.sub(r"\[Zhuolu\]|\[Zhu Lu\]", "[Zhulu Plateau]", clean_en)
             clean_en = re.sub(r"\bMo Xie|General Moye|Ganjiang Moye\b", "Gan & Mo", clean_en)
+            clean_en = ensure_placeholder_spacing(clean_en)
             row[3] = clean_en
             eu_nontarget_count += 1
 

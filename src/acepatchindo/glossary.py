@@ -446,6 +446,28 @@ CANONICAL_PROTECTED_TERMS: tuple[str, ...] = (
     "Mechanical Puppets",
     "Spinning Blade",
     "Spinning Blades",
+    "Thermal Trap",
+    "Electromagnetic Spring",
+    "Plasma Shield",
+    "Portable Mechanism",
+    "Mechanical Construction",
+    "Build Upgrade",
+    "Many Friends",
+    "Lots of Friends",
+    "Plenty of Friends",
+    "One Big Family",
+    "Maple Leaf Dance",
+    "Maple Dance",
+    "Graceful Dance",
+    "Strategic Decision",
+    "Supreme Decision",
+    "Privileged Decision",
+    "Privileged Decree",
+    "Strum",
+    "Vibrato",
+    "Pluck",
+    "Eternal Time Loop",
+    "Time Loop",
 )
 
 STOPWORD_GUARD_RE = re.compile(
@@ -716,6 +738,28 @@ class ThreeTierGlossary:
                         en_desc = orig_unique[desc_cn]
                         if en_desc and len(en_desc) >= 20:
                             self.tier1_en_desc_to_id_desc[_normalize_en_key(en_desc)] = desc_id
+
+                if category == "talent":
+                    linked_list = item.get("linked") or []
+                    if len(linked_list) == 1 and desc_cn:
+                        rhs = ""
+                        if "：" in desc_cn:
+                            lhs, rhs = desc_cn.split("：", 1)
+                        elif "。" in desc_cn:
+                            lhs, rhs = desc_cn.split("。", 1)
+                        if len(normalize_plain_zh(rhs)) >= 5:
+                            lk_desc = (linked_list[0].get("desc") or "").strip()
+                            m_pfx = re.match(r"^([^:]+):\s*(.+)$", lk_desc, flags=re.DOTALL)
+                            if m_pfx:
+                                body = m_pfx.group(2).strip()
+                                lk_desc_clean = body[0].upper() + body[1:] if body else ""
+                            else:
+                                lk_desc_clean = lk_desc
+                            self._register_t1_pair(rhs.strip(), lk_desc_clean)
+                            if rhs.strip() in orig_unique:
+                                en_rhs = orig_unique[rhs.strip()]
+                                if en_rhs and len(en_rhs) >= 15:
+                                    self.tier1_en_desc_to_id_desc[_normalize_en_key(en_rhs)] = lk_desc_clean
 
                 awaken = item.get("awaken")
                 if isinstance(awaken, dict):
@@ -1109,15 +1153,6 @@ class ThreeTierGlossary:
         """Convert English HoK Ace text into natural Indonesian while preserving tags, proper nouns, and tokens."""
         if not en_text or not en_text.strip():
             return en_text
-
-        clean_en = TAG_RE.sub("", en_text).strip()
-        if (
-            clean_en in self.tier1_en_card_to_id_desc
-            and not TAG_RE.findall(en_text)
-            and not PLACEHOLDER_RE.findall(en_text)
-        ):
-            cand = self.tier1_en_card_to_id_desc[clean_en]
-            return self._finalize_output(source_zh, cand, en_text)
 
         norm_en = _normalize_en_key(en_text)
         if (
@@ -1590,23 +1625,8 @@ class ThreeTierGlossary:
             if ok and not has_chunk_slice:
                 return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
 
-        # 2c. Tier 1 Lord card name / description match via baseline_en
+        # 2c. Tier 1 description match via baseline_en
         if baseline_en:
-            clean_en = TAG_RE.sub("", baseline_en).strip()
-            if clean_en in self.tier1_en_card_to_id_desc and len(source_zh) >= 8:
-                cand = self._fit_length_bound(
-                    source_zh,
-                    reinject_skeleton_from_source(
-                        source_zh,
-                        self.tier1_en_card_to_id_desc[clean_en],
-                        inner_translator=self._translate_raw_zh_to_id,
-                        baseline_en=baseline_en,
-                        en_translator=self.translate_en_to_id,
-                    ),
-                )
-                if validate_translation(source_zh, cand)[0]:
-                    return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
-
             norm_en = _normalize_en_key(baseline_en)
             if norm_en in self.tier1_en_desc_to_id_desc and len(source_zh) >= 8:
                 cand = self._fit_length_bound(

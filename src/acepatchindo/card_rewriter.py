@@ -182,6 +182,73 @@ def polish_indonesian_card_text(source_zh: str, text_id: str, baseline_en: str =
         res,
     )
 
+    # 1. adalah + verb/adjective
+    res = re.sub(r"\badalah\s+rusak\b", "hancur", res, flags=re.I)
+    res = re.sub(r"\badalah\s+masuk\s+menjadi\s+Combat\b", "diterjunkan ke pertempuran", res, flags=re.I)
+    res = re.sub(r"\badalah\s+(meningkat|berkurang|penuh|aktif|masuk|digandakan|dihapus|dibatasi)\b", r"\1", res, flags=re.I)
+
+    # 2. Inverted Demonstratives & Time Modifiers
+    res = re.sub(r"\bsetiap\s+berikutnya\s+Round\b", "setiap Round berikutnya", res, flags=re.I)
+    res = re.sub(r"\bberikutnya\s+(Round|Combat|Hero|Kartu|hari|serangan|tembakan|jari\s+teknik)\b", r"\1 berikutnya", res, flags=re.I)
+    res = re.sub(r"\bSaat\s+ini\s+Kartu\s+pool\b", "Card Pool saat ini", res, flags=re.I)
+    res = re.sub(r"\bsaat\s+ini\s+(Kartu|pertandingan|Round|Level|HP)\b", r"\1 saat ini", res, flags=re.I)
+    res = re.sub(r"\bini\s+(Round|Kartu|Efek|unit|pertandingan|Combat|slot|Shield)\b", r"\1 ini", res, flags=re.I)
+
+    # 3. keping dari
+    res = re.sub(r"\b(\d+)\s+keping\s+dari\s+", r"\1 ", res, flags=re.I)
+    res = re.sub(r"\bkeping\s+dari\s+", "", res, flags=re.I)
+
+    # 4. pembawa dapat menjadi sebuah Hero dari [...] kamp & kamp
+    res = re.sub(r"\bpembawa\s+dapat\s+menjadi\s+(?:sebuah\s+)?Hero\s+dari\s*(\[[^\]]+\])\s*kamp\.?", r"Pemakai dapat menjadi Hero Faction \1.", res, flags=re.I)
+    res = re.sub(r"\bpembawa\s+dapat\s+menjadi\b", "Pemakai dapat menjadi", res, flags=re.I)
+    res = re.sub(r"\bkamp\b", "Faction", res, flags=re.I)
+
+    # 5. pilih X keluar dari Y & Tier
+    res = re.sub(r"\bpilih\s+(\d+)\s+keluar\s+dari\s+(\d+)\b", r"pilih \1 dari \2", res, flags=re.I)
+    res = re.sub(r"\btinggi-Tier\b", "Tier tinggi", res, flags=re.I)
+    res = re.sub(r"\bterendah-Level\b", "Level terendah", res, flags=re.I)
+
+    # 6. rahasia kartu / rahasia teknik kartu / Rahasia Skill kartu
+    res = re.sub(r"\b(?:rahasia\s+(?:kartu|teknik\s+kartu|teknik|skill)|Rahasia\s+(?:Teknik|Skill)\s+[Kk]artu)\b", "Kartu Secret Skill", res, flags=re.I)
+    res = re.sub(r"1\s+(<[^>]+>[^<]+</[^>]+>)\s+Kartu Secret Skill\b", r"1 Kartu Secret Skill \1", res)
+    res = re.sub(r"1\s+<b>([^<]+)</b>\s+Kartu Secret Skill\b", r"1 Kartu Secret Skill <b>\1</b>", res)
+
+    # 7. Melakukan tidak & terdapat tidak
+    res = re.sub(r"\bMelakukan\s+tidak\s+stack\b", "Tidak dapat ditumpuk", res, flags=re.I)
+    res = re.sub(r"\bMelakukan\s+tidak\b", "Tidak", res, flags=re.I)
+    res = re.sub(r"\bjika\s+terdapat\s+tidak\s+([A-Za-z\[\] ]+?)\s+di\s+(?:Saat\s+ini\s+Kartu|Card)\s+pool\b", r"jika tidak ada \1 di Card Pool saat ini", res, flags=re.I)
+    res = re.sub(r"\bterdapat\s+tidak\b", "tidak ada", res, flags=re.I)
+
+    # 8. musim semi -> Spring
+    res = re.sub(r"\bsebuah\s+musim\s+semi\b", "1 Spring", res, flags=re.I)
+    res = re.sub(r"\bmusim\s+semi\b", "Spring", res, flags=re.I)
+
+    # 9. milikmu% & Qin tambahan Lu hak istimewa
+    res = re.sub(r"\bHero\s+mendapatkan\s+(\d+)\s+milikmu%\s*", r"Hero milikmu mendapat +\1% ", res, flags=re.I)
+    res = re.sub(r"\bHero\s+mendapatkan\s+sebuah\s+milikmu\s+Ekstra\s+(\d+%?)\s*", r"Hero milikmu mendapat tambahan +\1 ", res, flags=re.I)
+    res = re.sub(r"\b(?:Qin\s+tambahan\s+Lu\s+hak\s+istimewa|Edict\s+Enactor\s+Hak\s+istimewa)\b", "Hak istimewa tambahan Ying Lü", res, flags=re.I)
+    res = re.sub(r"\bmilikmu%", "%", res, flags=re.I)
+
+    # 11. Eternal Time Loop calque elimination
+    res = re.sub(r"\bsebuah\s+lebih\s+tinggi\s+Tier\b", "Tier yang lebih tinggi", res, flags=re.I)
+    res = re.sub(r"\bsebuah\s+lebih\s+tinggi\b", "lebih tinggi", res, flags=re.I)
+    res = re.sub(r"\bsebuah\s+lebih\s+banyak\s+kuat\b", "yang lebih kuat", res, flags=re.I)
+    res = re.sub(r"\bsebuah\s+lebih\s+kuat\b", "yang lebih kuat", res, flags=re.I)
+    res = re.sub(r"\bsebuah\s+lebih\b", "lebih", res, flags=re.I)
+    res = re.sub(r"\bcapable\s+dari\s+rekaman\b", "dapat merekam", res, flags=re.I)
+    res = re.sub(r"\bcapable\s+dari\b", "dapat", res, flags=re.I)
+
+    # 12. memindahkan menerjang / langkah pada
+    res = re.sub(r"\bmemindahkan\s+menerjang\b", "kesempatan berpindah", res, flags=re.I)
+    res = re.sub(r"\bSaat\s+(?:sebuah\s+)?[Mm]usuh\s+langkah\s+pada\s+itu\b", "Saat diinjak musuh", res, flags=re.I)
+    res = re.sub(r"\bsaat\s+langkah\s+pada\b", "saat diinjak", res, flags=re.I)
+
+    # 13. Banyak dari Teman
+    res = re.sub(r"\b(?:Lots of Friends|Plenty of Friends|Banyak dari Teman)\b", "Many Friends", res, flags=re.I)
+
+    # Sub-card Copier: itu Kartu Hero -> Kartu Hero tersebut
+    res = re.sub(r"\bitu\s+Kartu\s+Hero\b", "Kartu Hero tersebut", res, flags=re.I)
+
     # Clean double spaces
     res = re.sub(r" {2,}", " ", res)
     return res
@@ -253,6 +320,12 @@ def rewrite_en_card_to_id(source_zh: str, baseline_en: str) -> str:
     text = re.sub(r"\bMisterius Kekuatan\b", "Mystical Power", text, flags=re.I)
 
     # 13. Common structured card verbs:
+    text = re.sub(r"\b(\d+)\s+pieces?\s+of\s+", r"\1 ", text, flags=re.I)
+    text = re.sub(r"\bThe bearer can become a Hero of the\s*(\[[^\]]+\])\s*camp\.?", r"Pemakai dapat menjadi Hero Faction \1.", text, flags=re.I)
+    text = re.sub(r"\bchoose\s+(\d+)\s+out\s+of\s+(\d+)\b", r"pilih \1 dari \2", text, flags=re.I)
+    text = re.sub(r"\bDoes not stack\b", "Tidak dapat ditumpuk", text, flags=re.I)
+    text = re.sub(r"\bif there is no\s+([A-Za-z\[\] ]+?)\s+in the Current Card pool\b", r"jika tidak ada \1 di Card Pool saat ini", text, flags=re.I)
+    text = re.sub(r"\b(?:Lots of Friends|Plenty of Friends)\b", "Many Friends", text, flags=re.I)
     text = re.sub(r"\bGain\s+(\d+)\s+([A-Za-z0-9 ·•\-\[\]]+)\.", r"Memperoleh \1 \2.", text)
     text = re.sub(r"\bGain\s+(\d+)\s+([A-Za-z0-9 ·•\-\[\]]+)", r"Memperoleh \1 \2", text)
     text = re.sub(r"\bRestore\s+(\d+)\{LordHp\}\.", r"Memulihkan \1 {LordHp}.", text)

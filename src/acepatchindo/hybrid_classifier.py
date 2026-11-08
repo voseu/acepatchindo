@@ -80,6 +80,9 @@ class HybridClassifier:
         self.hero_suffixes: frozenset[str] = frozenset(data.get("hero_suffixes", []))
         self.vfs_target_keys: frozenset[str] = frozenset(data.get("vfs_target_keys", []))
         self.vfs_target_zh: frozenset[str] = frozenset(data.get("vfs_target_zh", []))
+        self.vfs_target_plain: frozenset[str] = frozenset(
+            normalize_plain_zh(s) for s in self.vfs_target_zh if len(normalize_plain_zh(s)) >= 6
+        )
         self.vfs_veto_keys: frozenset[str] = frozenset(data.get("vfs_veto_keys", []))
         self.vfs_veto_zh: frozenset[str] = frozenset(data.get("vfs_veto_zh", []))
         self.vfs_veto_sfx: frozenset[str] = frozenset(data.get("vfs_veto_sfx", []))
@@ -132,7 +135,7 @@ class HybridClassifier:
             return False
 
         # 5. Target VFS strings
-        if zh_clean in self.vfs_target_zh:
+        if zh_clean in self.vfs_target_zh or (len(p_zh) >= 6 and p_zh in self.vfs_target_plain):
             return True
 
         return False
