@@ -118,6 +118,14 @@ def find_windows_originals() -> Path:
     raise FileNotFoundError("Could not find active originals directory on Windows partition")
 
 
+CATEGORY_LABELS: frozenset[str] = frozenset(
+    {
+        "效果", "装备", "技能", "棋手", "棋手·秘技", "任务", "天赋", "英雄",
+        "大河流域", "日落海", "三分之地", "逐鹿", "倒悬天", "起源之地", "极北", "云梦泽", "勇士之地",
+    }
+)
+
+
 def build_index() -> dict:
     windows_originals = find_windows_originals()
     cat_dir = ROOT / "Honor of Kings Ace English Patcher 1.4.12.exe_extracted" / "catalog"
@@ -194,7 +202,7 @@ def build_index() -> dict:
                 _add_ref_desc(rel["desc"])
 
     for item in t2d:
-        if item.get("type") in ("Hero", "Summon", "Talent", "Chess player", "Equipment", "Effect card"):
+        if item.get("type") in ("Hero", "Summon", "Talent", "Chess player", "Equipment", "Effect card", "Mechanic"):
             zh = item.get("zh", {})
             for ab in zh.get("abilities", []):
                 d = ab.get("desc", "").strip()
@@ -205,6 +213,16 @@ def build_index() -> dict:
                     s_str = s.strip()
                     if s_str and len(normalize_plain_zh(s_str)) >= 6:
                         _add_ref_desc(s_str)
+
+    kw = t1.get("keywords")
+    if isinstance(kw, dict):
+        for k_name, v in kw.items():
+            if isinstance(v, str) and _CJK_RE.search(v):
+                _add_ref_desc(v)
+    elif isinstance(kw, list):
+        for item in kw:
+            if isinstance(item, dict) and item.get("descCn"):
+                _add_ref_desc(item["descCn"])
 
     for s in WINDOWS_108_TARGET_DESC_ID:
         _add_ref_desc(s)
@@ -391,18 +409,30 @@ def build_index() -> dict:
         # Basic veto conditions
         is_vetoed = False
         if tag == "60D2":
-            # All #60D2 records themselves stay English
-            vfs_veto_keys.add(k)
-            vfs_veto_zh.add(zh_str)
-            # If this #60D2 record is a gameplay description in reference, mark suffix as target
-            # so the paired card tables (#FCC7, #23F7, etc.) become targets!
-            if is_ref:
+            if (
+                len(plain_zh) >= 8
+                and any(p in zh_str for p in ("，", "。", "：", ":", "\n", "+", "-"))
+                and not P_UNIT_FLAVOR_RE.search(plain_zh)
+                and plain_zh not in veto_names_zh
+            ):
+                # Gameplay card description inside #60D2 (e.g. Glory of the Past)
+                vfs_target_keys.add(k)
+                vfs_target_zh.add(zh_str)
                 target_sfx.add(sfx)
-            continue
+                continue
+            else:
+                vfs_veto_keys.add(k)
+                vfs_veto_zh.add(zh_str)
+                if is_ref:
+                    target_sfx.add(sfx)
+                continue
+        elif zh_str in CATEGORY_LABELS:
+            is_vetoed = True
+            # Never poison hard_veto_sfx with short category badges
         elif zh_str in WINDOWS_108_NONTARGET_EN:
             is_vetoed = True
             hard_veto_sfx.add(sfx)
-        elif P_UNIT_FLAVOR_RE.match(plain_zh):
+        elif P_UNIT_FLAVOR_RE.search(plain_zh):
             is_vetoed = True
             hard_veto_sfx.add(sfx)
         elif zh_str in veto_names_zh and not is_ref:
@@ -428,17 +458,18 @@ def build_index() -> dict:
 
         elif tag in CARD_PREFIXES:
             m60_val = m60_lookup.get(sfx, "")
-            if P_UNIT_FLAVOR_RE.match(plain_zh):
+            if P_UNIT_FLAVOR_RE.search(plain_zh):
                 is_vetoed = True
                 hard_veto_sfx.add(sfx)
             elif is_ref:
                 is_target = True
-            elif sfx in m60_hero_suffixes:
-                if zh_str != m60_val and len(plain_zh) >= 4:
-                    is_target = True
-            elif m60_val in ("秘技", "技能", "专属", "棋手", "棋手·秘技", "任务", "天赋", "效果", "装备"):
-                if len(plain_zh) >= 4 and any(p in zh_str for p in ("，", "。", "：", ":", "\n", "+", "-", "%")):
-                    is_target = True
+            elif plain_zh not in veto_names_zh and (
+                len(plain_zh) >= 6
+                or m60_val in ("秘技", "技能", "专属", "棋手", "棋手·秘技", "任务", "天赋", "效果", "装备")
+                or (sfx in m60_hero_suffixes and zh_str != m60_val and len(plain_zh) >= 4)
+                or any(p in zh_str for p in ("，", "。", "：", ":", "\n", "+", "-", "%"))
+            ):
+                is_target = True
             else:
                 is_vetoed = True
 
@@ -589,6 +620,10 @@ def build_index() -> dict:
     assert len(sfx_conflicts) == 0, f"Found {len(sfx_conflicts)} conflicting sfx between target and veto keys!"
 
     payload = {
+        "stats": {
+            "target_unique_count": len(vfs_target_zh),
+            "target_keys_count": len(vfs_target_keys),
+        },
         "hero_suffixes": sorted(m60_hero_suffixes),
         "vfs_target_keys": sorted(vfs_target_keys),
         "vfs_target_zh": sorted(vfs_target_zh),

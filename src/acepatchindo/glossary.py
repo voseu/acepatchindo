@@ -12,8 +12,10 @@ from typing import Callable
 from acepatchindo.lexicon_id import translate_segment_en_to_id
 from acepatchindo.tag_aligner import (
     BRACKET_TERM_MAP,
+    adapt_tier1_placeholders_to_source,
     normalize_formula_skeleton_zh,
     normalize_plain_zh,
+    normalize_tag_boundary_spacing,
     reinject_formula_and_skeleton,
     reinject_skeleton_from_source,
     translate_preserving_skeleton,
@@ -1247,11 +1249,7 @@ class ThreeTierGlossary:
                     idx = len(sentinels)
                     tok = f"__WXQPR{idx}__"
                     val = m.group(0)
-                    if val == "Central Plains":
-                        val = "Central Plain"
-                    elif val == "Sunset Sea":
-                        val = "Sunset"
-                    elif val == "Magical Damage":
+                    if val == "Magical Damage":
                         val = "Magic Damage"
                     sentinels.append((tok, val))
                     return tok
@@ -1262,6 +1260,9 @@ class ThreeTierGlossary:
 
             for tok, orig_val in sentinels:
                 out = out.replace(tok, orig_val, 1)
+
+            # Re-run card rewriter post-translation to restore proper nouns and natural Indonesian structures
+            out = rewrite_en_card_to_id(source_zh, out)
 
             out = re.sub(
                 r"\b(Ancient Coin|Refined Ancient Coin|Central Plain|Zhulu(?: Plateau)?|Three Kingdoms|Sunset(?: Sea)?|Jixia|Great Wall|Xuanyong|Yaotian|Cloudream|Riverlands)\s+[Kk]artu(?:\s+Hero)?\b",
@@ -1482,13 +1483,26 @@ class ThreeTierGlossary:
         """Apply canonical glossary polishing, placeholder spacing, bracket normalization, and card wrapping."""
         if not text:
             return text
-        polished = polish_indonesian_card_text(source_zh, text, baseline_en)
-        spaced = ensure_placeholder_spacing(normalize_brackets(polished))
-        if ";" not in spaced and len(spaced) > 20:
-            wrapped = wrap_card_description(spaced)
+
+        candidate = rewrite_en_card_to_id(source_zh, text)
+        ok_r, _ = validate_translation(source_zh, candidate)
+        if not ok_r:
+            candidate = reinject_skeleton_from_source(
+                source_zh,
+                TAG_RE.sub("", candidate),
+                inner_translator=self._translate_raw_zh_to_id,
+                baseline_en=baseline_en,
+                en_translator=self.translate_en_to_id,
+            )
+
+        candidate = polish_indonesian_card_text(source_zh, candidate, baseline_en)
+        candidate = ensure_placeholder_spacing(normalize_brackets(candidate))
+        bounded = self._fit_length_bound(source_zh, candidate)
+        if ";" not in bounded and len(bounded) > 20:
+            wrapped = wrap_card_description(bounded)
             if validate_translation(source_zh, wrapped)[0]:
                 return wrapped
-        return spaced
+        return bounded
 
     def translate_entry(
         self, source_zh: str, baseline_en: str | None = None
@@ -1500,58 +1514,41 @@ class ThreeTierGlossary:
         # 1. Tier 1 exact match (includes exact 108 missing Windows strings & Tier 1 CN->ID)
         if source_zh in self.tier1_exact_zh_to_id:
             raw_t1 = self.tier1_exact_zh_to_id[source_zh]
-            ok_direct, _ = validate_translation(source_zh, raw_t1)
+            adapted_t1 = adapt_tier1_placeholders_to_source(source_zh, raw_t1)
+            ok_direct, _ = validate_translation(source_zh, adapted_t1)
             if ok_direct:
-                return (self._finalize_output(source_zh, raw_t1, baseline_en or ""), "tier1")
+                return (self._finalize_output(source_zh, adapted_t1, baseline_en or ""), "tier1")
             cand = self._fit_length_bound(
                 source_zh,
                 reinject_skeleton_from_source(
                     source_zh,
-                    raw_t1,
+                    adapted_t1,
                     inner_translator=self._translate_raw_zh_to_id,
                     baseline_en=baseline_en,
                     en_translator=self.translate_en_to_id,
                 ),
             )
             ok, _ = validate_translation(source_zh, cand)
-            has_chunk_slice = any(
-                bc in cand
-                for bc in (
-                    "<color=#ffffffbf> Pasif: Basic Attack",
-                    "<color=#ffffffbf> di depannya",
-                    "<color=#ffffffbf> pipa dan mengaktifkan",
-                    "<color=#d487e4> bola energi yang",
-                    "<color=#d487e4> Saat bola",
-                )
-            )
-            if ok and not has_chunk_slice:
+            if ok:
                 return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
 
         # 2. Tier 1 normalized (tag-stripped) match + skeleton re-injection
         norm_zh = normalize_plain_zh(source_zh)
         if norm_zh and norm_zh in self.tier1_plain_zh_to_id:
+            raw_t1 = self.tier1_plain_zh_to_id[norm_zh]
+            adapted_t1 = adapt_tier1_placeholders_to_source(source_zh, raw_t1)
             cand = self._fit_length_bound(
                 source_zh,
                 reinject_skeleton_from_source(
                     source_zh,
-                    self.tier1_plain_zh_to_id[norm_zh],
+                    adapted_t1,
                     inner_translator=self._translate_raw_zh_to_id,
                     baseline_en=baseline_en,
                     en_translator=self.translate_en_to_id,
                 ),
             )
             ok, _ = validate_translation(source_zh, cand)
-            has_chunk_slice = any(
-                bc in cand
-                for bc in (
-                    "<color=#ffffffbf> Pasif: Basic Attack",
-                    "<color=#ffffffbf> di depannya",
-                    "<color=#ffffffbf> pipa dan mengaktifkan",
-                    "<color=#d487e4> bola energi yang",
-                    "<color=#d487e4> Saat bola",
-                )
-            )
-            if ok and not has_chunk_slice:
+            if ok:
                 return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
 
         # 2b. Tier 1 formula-skeleton match (handles all 234 dynamic formula Hero skills/enhancements/awakenings)
@@ -1624,6 +1621,17 @@ class ThreeTierGlossary:
                 )
                 if validate_translation(source_zh, cand)[0]:
                     return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
+
+        # 2d. Exact-tag baseline_en match: If baseline_en carries exact tags, translate preserving skeleton
+        if baseline_en:
+            b_tags = TAG_RE.findall(baseline_en)
+            src_tags = TAG_RE.findall(source_zh)
+            if b_tags and b_tags == src_tags:
+                cand_en = translate_preserving_skeleton(baseline_en, self.translate_en_to_id)
+                cand_en = sanitize_target_text(source_zh, cand_en)
+                cand_en = normalize_tag_boundary_spacing(source_zh, cand_en)
+                if validate_translation(source_zh, cand_en)[0]:
+                    return (self._finalize_output(source_zh, cand_en, baseline_en), "tier2")
 
         # 3. Tier 2 exact or plain entity/detail match -> EN -> ID
         t2_en = self.tier2_zh_to_en.get(source_zh) or (

@@ -300,15 +300,16 @@ BADGE_ALIAS_MAP: dict[str, list[str]] = {
 
 ATOMIC_KEYWORD_ALIASES: dict[str, tuple[str, ...]] = {
     "登场": ("Deploy", "pada-entri efek", "pada-entri", "Deployment", "On Play"),
-    "开团": ("Initiate", "Engage", "Inisiasi"),
+    "开团": ("Initiate", "Engage", "Inisiasi", "Awal Combat", "Combat start", "Combat Start"),
     "整备": ("Prepare", "Preparation", "Persiapan"),
     "筹备": ("Prepare", "Preparation", "Persiapan"),
     "复生": ("Revive", "Resurrect", "Bangkit"),
     "完美复生": ("Perfect Revive", "Perfect Resurrect", "Perfect Resurrection"),
-    "阿科米亚核心": ("Arcomia Core", "Akomia Core"),
+    "阿科米亚核心": ("Arcomia Core", "Akomia Core", "Acomia Core"),
     "干剑·莫邪": ("Twin Blade · Male", "Twin Blade · Female", "Twin Blades", "Twin Blade"),
     "图腾": ("Totem",),
     "转瞬": ("Instant", "Fleeting", "Sekilas"),
+    "闪现": ("Flash.", "Flash"),
     "唯一": ("Unique", "Satu-satunya"),
     "无法拆卸": (
         "tidak dapat dilepas",
@@ -318,6 +319,22 @@ ATOMIC_KEYWORD_ALIASES: dict[str, tuple[str, ...]] = {
         "Indismantlable",
         "Non-dismantlable",
     ),
+    "日落海专属装备": (
+        "Sunset Exclusive Equipment",
+        "[Sunset] Exclusive Equipment",
+        "[Sunset Sea] Exclusive Equipment",
+        "Sunset Sea Exclusive Equipment",
+        "Eksklusif Equipment",
+        "Exclusive Equipment",
+    ),
+    "灵异探测大改装": (
+        "Supranatural Detector Perombakan Besar",
+        "Supranatural Detector",
+        "Spiritual Detection Major Modification",
+    ),
+    "空山人语": ("Words of Empty Mountain", "Empty Mountain Words"),
+    "水穷云起": ("Rising Clouds from Water End", "Water End Cloud Rise"),
+    "玄微之种": ("Xuanwei Seed", "Seed of Xuanwei"),
 }
 
 GLYPH_KEYWORD_MAP: dict[str, tuple[str, ...]] = {
@@ -354,10 +371,86 @@ ATOMIC_TAGGED_SPAN_RE = re.compile(
 
 
 def normalize_plain_zh(text: str) -> str:
-    """Strip Unity tags, control tokens, and whitespace so text matches Tier 1 descCn."""
-    cleaned = TAG_RE.sub("", text)
-    cleaned = CONTROL_TOKEN_RE.sub("", cleaned)
-    return re.sub(r"\s+", "", cleaned).strip()
+    """Strip Unity tags, control tokens, dynamic placeholders, and whitespace so text matches Tier 1 descCn."""
+    s = TAG_RE.sub("", text)
+    s = CONTROL_TOKEN_RE.sub("", s)
+    # 1. Replace game token placeholders with their Chinese wiki equivalents
+    s = s.replace("{Energy}", "能量").replace("{LordExp}", "棋手经验").replace("{LordHp}", "棋手生命值")
+    s = re.sub(r"棋手生命(?!值)", "棋手生命值", s)
+    # 2. Unwrap default values from dynamic placeholders instead of deleting them
+    s = re.sub(r"\{[0-9]+\|([^{}]+)\}", r"\1", s)
+    s = re.sub(r"\{[^{}:]+:\s*([^{}]+)\}", r"\1", s)
+    # 3. Strip runtime tracker suffixes and brackets/quotes
+    s = re.sub(r"（[^）]*当前[^）]*）", "", s)
+    s = re.sub(r"\([^)]*当前[^)]*\)", "", s)
+    s = s.replace("【", "[").replace("】", "]").replace("“", "").replace("”", "").replace('"', "")
+    s = re.sub(r"\{[^{}]*\}", "", s)
+    return re.sub(r"\s+", "", s).strip()
+
+
+def adapt_tier1_placeholders_to_source(source_zh: str, t1_id: str) -> str:
+    """Preserve game runtime placeholders ({Energy}, {LordExp}, {LordHp}, dynamic templates, and tracker suffixes)."""
+    out = t1_id
+
+    # 1. Map icon placeholders if in source_zh
+    if "{LordExp}" in source_zh:
+        pattern_exp = (
+            r"\b(?:(?:Contestant|Chess Player|Player|Pemain|Lord)\s+)?(?:EXP|Pengalaman|Experience)\b|"
+            r"\b(?:EXP|Pengalaman|Experience)(?:\s+(?:Contestant|Chess Player|Player|Pemain|Lord))?\b"
+        )
+        out = re.sub(pattern_exp, "{LordExp}", out, flags=re.I)
+    if "{LordHp}" in source_zh:
+        pattern_hp = (
+            r"\b(?:(?:Contestant|Chess Player|Player|Pemain|Lord)\s+)?(?:HP|Darah|Health)\b|"
+            r"\b(?:HP|Darah|Health)(?:\s+(?:Contestant|Chess Player|Player|Pemain|Lord))?\b"
+        )
+        out = re.sub(pattern_hp, "{LordHp}", out, flags=re.I)
+    if "{Energy}" in source_zh:
+        out = re.sub(r"\b(?:Energi|Energy)\b", "{Energy}", out, flags=re.I)
+
+    # 2a. Dynamic placeholder ranges: {N|v1}-{M|v2}
+    for m in re.finditer(r"(\{(\d+)\|([^{}]+)\}\s*-\s*\{(\d+)\|([^{}]+)\})", source_zh):
+        full_range = m.group(1)
+        v1 = m.group(3)
+        v2 = m.group(5)
+        range_pattern = rf"(?<![A-Za-z0-9_{{|]){re.escape(v1)}\s*-\s*{re.escape(v2)}(?![A-Za-z0-9_{{|])"
+        out = re.sub(range_pattern, full_range, out, count=1)
+
+    # 2b. Dynamic placeholders with defaults: {N|val}
+    for m in re.finditer(r"\{(\d+)\|([^{}]+)\}", source_zh):
+        full_ph = m.group(0)
+        if full_ph in out:
+            continue
+        val = m.group(2)
+        pattern = r"(?<![A-Za-z0-9_{|])" + re.escape(val) + r"(?![A-Za-z0-9_{|])"
+        out = re.sub(pattern, full_ph, out, count=1)
+
+    # 2b. Named or token dynamic placeholders with defaults: {Name: val}
+    for m in re.finditer(r"\{([A-Za-z0-9_]+)\s*:\s*([^{}]+)\}", source_zh):
+        full_ph = m.group(0)
+        val = m.group(2).strip()
+        pattern = r"(?<![A-Za-z0-9_{|:])" + re.escape(val) + r"(?![A-Za-z0-9_{|])"
+        out = re.sub(pattern, full_ph, out, count=1)
+
+    # 3. Trailing tracker suffixes in source_zh (e.g. （当前已获得：{Dynamic:0}） or (Saat ini: {Dynamic:0}))
+    m_sfx = re.search(r"[（\(]([^）\)]*当前[^）\)]*)[）\)]", source_zh)
+    if m_sfx and not re.search(r"[（\(][^）\)]*Saat\s+ini[^）\)]*[）\)]", out, flags=re.I):
+        sfx_raw = m_sfx.group(1)
+        inner_phs = PLACEHOLDER_RE.findall(sfx_raw)
+        if "{Dynamic:" in sfx_raw:
+            dyn_m = re.search(r"\{Dynamic:\d+\}", sfx_raw)
+            dyn_ph = dyn_m.group(0) if dyn_m else "{Dynamic:0}"
+            out = out.rstrip(". ") + f" (Saat ini: {dyn_ph})."
+        elif inner_phs:
+            ph_str = inner_phs[0]
+            if "层" in sfx_raw:
+                out = out.rstrip(". ") + f" (Saat ini: {ph_str} Lapis)."
+            elif "胜" in sfx_raw:
+                out = out.rstrip(". ") + f" (Saat ini: {ph_str} Kemenangan)."
+            else:
+                out = out.rstrip(". ") + f" (Saat ini: {ph_str})."
+
+    return out
 
 
 def normalize_formula_skeleton_zh(text: str) -> str:
@@ -538,14 +631,20 @@ def reinject_formula_and_skeleton(
         sent = f"__WXQICON{chr(65 + idx)}__"
         icon_sentinels.append((sent, f"{num_ph}{icon_ph}"))
 
-        clean_num_ph = normalize_plain_zh(num_ph)
-        src_clean = src_clean.replace(f"{clean_num_ph}{icon_ph}", sent, 1)
-
         zh_icon_pat = (
             r"(?:点?\s*能量|\{Energy\})" if icon_ph == "{Energy}"
             else r"(?:点?\s*(?:棋手经验|经验)|\{LordExp\})" if icon_ph == "{LordExp}"
             else r"(?:点?\s*(?:棋手生命值|玩家生命值|生命值)|\{LordHp\})"
         )
+        src_clean, cnt_src = re.subn(
+            rf"(?:\d+(?:\.\d+)?(?:\s*[~-]\s*\d+(?:\.\d+)?)?|\{{[^{{}}]+\}}(?:\s*[~-]\s*\{{[^{{}}]+\}})?)\s*{zh_icon_pat}",
+            sent,
+            src_clean,
+            count=1,
+        )
+        if not cnt_src:
+            src_clean = re.sub(zh_icon_pat, sent, src_clean, count=1)
+
         # Try WITH required leading number/range first!
         cn_clean, cnt_cn = re.subn(
             rf"(?:\d+(?:\.\d+)?(?:\s*[~-]\s*\d+(?:\.\d+)?)?|\{{[^{{}}]+\}}(?:\s*[~-]\s*\{{[^{{}}]+\}})?)\s*{zh_icon_pat}",
@@ -569,16 +668,12 @@ def reinject_formula_and_skeleton(
             out = out[:m_out.start()] + sent + out[m_out.end():]
 
     # Strip remaining standalone icon placeholders from src_clean/cn_clean
-    src_clean = (
-        src_clean.replace("{Energy}", "")
-        .replace("{LordExp}", "")
-        .replace("{LordHp}", "")
-    )
-    cn_clean = (
-        cn_clean.replace("能量", "")
-        .replace("棋手经验", "")
-        .replace("棋手生命值", "")
-    )
+    for icon_term in (
+        "能量", "棋手经验", "经验", "棋手生命值", "玩家生命值",
+        "{Energy}", "{LordExp}", "{LordHp}",
+    ):
+        src_clean = src_clean.replace(icon_term, "")
+        cn_clean = cn_clean.replace(icon_term, "")
     src_clean = re.sub(r"\[\d+\]点?(物理|法术|真实)伤害\(([^)]+)\)", r"\2的\1伤害", src_clean)
     src_clean = re.sub(r"\[\d+\]点?(护盾|生命值?)\(([^)]+)\)", r"\2的\1", src_clean)
 
@@ -955,6 +1050,26 @@ def _wrap_keyword_or_entity(u_open: str, u_close: str, u_zh: str, text_segment: 
             if before.rfind("<") <= before.rfind(">"):
                 return text_segment[: m.start()] + f"{u_open}{m.group(0)}{u_close}" + text_segment[m.end() :]
 
+    # Special single-span mechanic target phrase wrapping (Directed Transfer & Level gain)
+    if "穿戴装备最多" in u_zh:
+        m_equip = re.search(
+            r"(?:(?:1\s+)?Hero\s+\[[^\]]+\](?:\s+milikmu|\s+sekutu)?\s+(?:yang\s+memakai|yang\s+mengenakan|dengan)\s+Equipment\s+terbanyak|"
+            r"Hero\s+\[[^\]]+\](?:\s+milikmu|\s+sekutu)?\s+dengan\s+Equipment\s+terbanyak)",
+            text_segment,
+            flags=re.I,
+        )
+        if m_equip:
+            before = text_segment[: m_equip.start()]
+            if before.rfind("<") <= before.rfind(">"):
+                return text_segment[: m_equip.start()] + f"{u_open}{m_equip.group(0)}{u_close}" + text_segment[m_equip.end() :]
+
+    if re.search(r"等级\+(?:\d+|\{[^}]+\})", u_zh):
+        m_lvl = re.search(r"(?:mendapat\s+)?\+\s*(?:\d+|\{[^}]+\})\s*Level", text_segment, flags=re.I)
+        if m_lvl:
+            before = text_segment[: m_lvl.start()]
+            if before.rfind("<") <= before.rfind(">"):
+                return text_segment[: m_lvl.start()] + f"{u_open}{m_lvl.group(0)}{u_close}" + text_segment[m_lvl.end() :]
+
     # If proper noun entity tag (<color=...><b> or <b>)
     if "<b>" in u_open:
         # Match English proper noun at the end of the clause
@@ -1058,18 +1173,24 @@ def reinject_skeleton_from_source(
     if "\n" in source_zh and "\n" in result and source_zh.count("\n") == result.count("\n"):
         src_lines = source_zh.split("\n")
         res_lines = result.split("\n")
+        b_lines = (
+            baseline_en.split("\n")
+            if (baseline_en and baseline_en.count("\n") == source_zh.count("\n"))
+            else []
+        )
         aligned_lines: list[str] = []
-        for s_l, r_l in zip(src_lines, res_lines):
+        for idx, (s_l, r_l) in enumerate(zip(src_lines, res_lines)):
             if not s_l.strip() and not r_l.strip():
                 aligned_lines.append("")
                 continue
+            b_l = b_lines[idx] if idx < len(b_lines) else None
             l_aligned = reinject_skeleton_from_source(
                 s_l,
                 r_l,
                 inner_translator=inner_translator,
-                baseline_en=None,
+                baseline_en=b_l,
                 en_translator=en_translator,
-                allow_en_fallback=False,
+                allow_en_fallback=allow_en_fallback,
             )
             aligned_lines.append(l_aligned)
         cand_multiline = "\n".join(aligned_lines)
@@ -1397,7 +1518,14 @@ def reinject_skeleton_from_source(
                             min(mapped_end, len(content_clause_indices) - 1)
                         ]
                         CTRL = set("╥╆╪╬╉═╧╊╅╈╦╇╋")
-                        if len(span_zh) <= 8 or any(c in spans[0].group(1) for c in CTRL) or "<a href=" in spans[0].group(1) or actual_start == actual_end:
+                        if (
+                            len(span_zh) <= 8
+                            or any(c in spans[0].group(1) for c in CTRL)
+                            or "<a href=" in spans[0].group(1)
+                            or actual_start == actual_end
+                            or "穿戴装备最多" in span_zh
+                            or "等级+" in span_zh
+                        ):
                             id_clauses[actual_start] = _wrap_keyword_or_entity(
                                 spans[0].group(1), spans[0].group(3), span_zh, id_clauses[actual_start]
                             )

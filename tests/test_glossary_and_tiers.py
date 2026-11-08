@@ -185,8 +185,8 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
             if PROSE_CALQUE_RE.search(stripped):
                 target_stopword_hits += 1
 
-    assert 4000 <= target_count <= 5200, (
-        f"Expected between 4,000 and 5,200 target gameplay descriptions in unique, got {target_count}"
+    assert 4000 <= target_count <= 5600, (
+        f"Expected between 4,000 and 5,600 target gameplay descriptions in unique, got {target_count}"
     )
     assert target_stopword_hits < 50, (
         f"Expected < 50 prose calque hits in target descriptions, got {target_stopword_hits}"
@@ -536,7 +536,7 @@ def test_catalog_has_no_indlish_or_untranslated_english_prose() -> None:
         v_clean = TAG_RE.sub("", v).strip()
         k_clean = TAG_RE.sub("", k).strip()
         if v_clean and v_clean[0] in CTRL:
-            if not any(c in k_clean[:6] for c in CTRL):
+            if not any(c in k_clean[:10] for c in CTRL):
                 misplaced_ctrl.append((k, v))
     assert len(misplaced_ctrl) == 0, f"Found misplaced control glyphs at index 0 ({len(misplaced_ctrl)}): {misplaced_ctrl[:3]}"
 

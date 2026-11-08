@@ -27,6 +27,27 @@ CANONICAL_MECHANIC_MAP: dict[str, str] = {
     r"\bdi field\b": "di arena",
     r"\bdi medan tempur\b": "di arena",
     r"\bdi battlefield\b": "di arena",
+    r"\bmedan tempur\b": "di arena",
+    r"\bMisterius Kekuatan\b": "Kekuatan Misterius",
+    r"\bMisteri Kekuatan\b": "Kekuatan Misterius",
+    r"\bMysterious Power\b": "Kekuatan Misterius",
+    r"\bMystical Power\b": "Kekuatan Misterius",
+    r"\bGangguan Robot\b": "Glitch Robot",
+    r"\bBroken Robot\b": "Glitch Robot",
+    r"\bGlitch Bots\b": "Glitch Robot",
+    r"\b2 Renovation\b": "2 Refresh",
+    r"\bRound1\s*\{LordHp\}\b": "Round, pulihkan 1 {LordHp}",
+    r"\bEternal Waktu Putaran\b": "Eternal Time Loop",
+    r"\bdapat rekor 12\b": "dapat merekam 12",
+    r"\bterhubung Hero\b": "Hero terhubung",
+    r"\bterdekat musuh\b": "musuh terdekat",
+    r"\bterjauh musuh\b": "musuh terjauh",
+    r"\basli lokasi\b": "lokasi awal",
+    r"\bacak Hero\b": "Hero acak",
+    r"\bacak musuh\b": "musuh acak",
+    r"\bekstra serangan\b": "serangan tambahan",
+    r"^Memulai:": "Initiate:",
+    r"\bMemulai:": "Initiate:",
     r"\bKartu Tactic\b": "Kartu Efek",
     r"\bTactics Card\b": "Kartu Efek",
     r"\bTactic Card\b": "Kartu Efek",
@@ -45,6 +66,8 @@ CANONICAL_MECHANIC_MAP: dict[str, str] = {
 # 2. Canonical Hero Names
 CANONICAL_HERO_NAME_MAP: dict[str, str] = {
     r"\bGanjiang Moye\b": "Gan & Mo",
+    r"\bMo Xie\b": "Gan & Mo",
+    r"\bGeneral Moye\b": "Gan & Mo",
     r"\bBaili Shouyue\b": "Shouyue",
     r"\bZhuge Liang\b": "Kongming",
     r"\bYang Yuhuan\b": "Yuhuan",
@@ -53,10 +76,14 @@ CANONICAL_HERO_NAME_MAP: dict[str, str] = {
 
 # 3. Canonical Faction Names
 CANONICAL_FACTION_MAP: dict[str, str] = {
+    r"\[Central Plains?\]": "[Central Plains]",
+    r"\bCentral Plain(?![sS])\b": "Central Plains",
     r"\[Central Plain\]": "[Central Plains]",
     r"\[Sunset Ocean\]": "[Sunset Sea]",
     r"\[Sunset\]": "[Sunset Sea]",
     r"\[Zhulu\]": "[Zhulu Plateau]",
+    r"\[Zhuolu\]": "[Zhulu Plateau]",
+    r"\[Zhu Lu\]": "[Zhulu Plateau]",
 }
 
 # 4. Canonical Related Card Names
@@ -72,9 +99,8 @@ CANONICAL_RELATED_CARD_MAP: dict[str, str] = {
 
 # Tier 1 Ambiguity Patterns: Level <N> Hero ... +<M>
 LEVEL_N_HERO_RE = re.compile(
-    r"\bLevel\s+(\d+|{[^}]+})\s+"
-    r"((?:<[^>]+>|[\u2540-\u257f]|[🌀🗡️🛡️⚡🔥✨]|\S+)*\s*Hero\b[^.+;\n]*?)\s*"
-    r"\+\s*(\d+|{[^}]+})(?!\s*Level)"
+    r"\bLevel\s+(\d+|{[^}]+})\s+((?:(?:\[[^\]]+\]|<[^>]+>|[\u2540-\u257f]|[🌀🗡️🛡️⚡🔥✨]|\S+)\s+)*?Hero\b[^.+,\n;]*?)\s*\+\s*(\d+|{[^}]+})(?!\s*Level\b)",
+    re.IGNORECASE,
 )
 
 
@@ -136,8 +162,13 @@ def polish_indonesian_card_text(source_zh: str, text_id: str, baseline_en: str =
         res,
     )
     res = re.sub(
-        r"\bsebesar setengah Level 1 Hero lain\b",
-        "sebesar setengah Level dari 1 Hero sekutu lain",
+        r"\b(?:sebesar\s+setengah\s+Level\s+1\s+Hero\s+lain|sebesar\s+setengah\s+Level\s+dari\s+1\s+Hero\s+sekutu\s+lain)\b",
+        "setara setengah Level dari 1 Hero lain",
+        res,
+    )
+    res = re.sub(
+        r"\b(?:sebesar\s+Level\s+1\s+Hero\s+lain|sebesar\s+Level\s+dari\s+1\s+Hero\s+sekutu\s+lain)\b",
+        "setara Level dari 1 Hero lain",
         res,
     )
     res = re.sub(

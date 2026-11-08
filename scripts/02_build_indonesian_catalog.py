@@ -95,7 +95,12 @@ def main() -> None:
                     en_to_id_map[en_base] = aligned
         else:
             # Standalone names, equipment, effect cards, UI, tips, achievements stay English
-            new_unique[zh_src] = en_base
+            clean_en = en_base
+            clean_en = re.sub(r"\bCentral Plain(?![sS])\b", "Central Plains", clean_en)
+            clean_en = re.sub(r"\bGlitch Bots\b", "Glitch Robot", clean_en)
+            clean_en = re.sub(r"\[Zhuolu\]|\[Zhu Lu\]", "[Zhulu Plateau]", clean_en)
+            clean_en = re.sub(r"\bMo Xie|General Moye|Ganjiang Moye\b", "Gan & Mo", clean_en)
+            new_unique[zh_src] = clean_en
             tier_counts["nontarget_en"] += 1
 
     # 2. Add the 108 missing Chinese strings discovered on the user's Windows game
@@ -123,6 +128,19 @@ def main() -> None:
                 tier_counts["missing108_nontarget_en"] += 1
         else:
             raise ValueError(f"Missing 108 string not found in WINDOWS_108_HYBRID_MAP: {zh_src!r}")
+
+    # 2b. Guarantee all target gameplay descriptions from WINDOWS_108_TARGET_DESC_ID that exist in unique are updated
+    for zh_src, id_desc in WINDOWS_108_TARGET_DESC_ID.items():
+        if zh_src in new_unique:
+            finalized_val = glossary._finalize_output(zh_src, id_desc)
+            ok_l, reason_l = validate_translation(zh_src, finalized_val)
+            ok_r, reason_r = runtime_rules.validate_translation(zh_src, finalized_val)
+            if ok_l and ok_r:
+                new_unique[zh_src] = finalized_val
+            else:
+                raise ValueError(
+                    f"Failed validation for WINDOWS_108_TARGET_DESC_ID ({reason_l}/{reason_r}): {zh_src!r} -> {finalized_val!r}"
+                )
 
     # 3. Translate contextual entries if any ([asset_hex, key, source_zh, target_en])
     for ctx_row in data.get("contextual", []):
@@ -166,6 +184,8 @@ def main() -> None:
             if "\n" in val_source and "\n" not in id_val:
                 id_val = restore_newlines_from_source(val_source, id_val)
 
+            id_val = glossary._finalize_output(val_source, id_val, en_target)
+
             ok_local, reason_local = validate_translation(val_source, id_val)
             ok_runtime, reason_runtime = runtime_rules.validate_translation(val_source, id_val)
             if not ok_local or not ok_runtime:
@@ -183,7 +203,12 @@ def main() -> None:
                     en_to_id_map[en_target] = id_val
         else:
             # Non-target stays clean English
-            row[3] = en_target
+            clean_en = en_target
+            clean_en = re.sub(r"\bCentral Plain(?![sS])\b", "Central Plains", clean_en)
+            clean_en = re.sub(r"\bGlitch Bots\b", "Glitch Robot", clean_en)
+            clean_en = re.sub(r"\[Zhuolu\]|\[Zhu Lu\]", "[Zhulu Plateau]", clean_en)
+            clean_en = re.sub(r"\bMo Xie|General Moye|Ganjiang Moye\b", "Gan & Mo", clean_en)
+            row[3] = clean_en
             eu_nontarget_count += 1
 
     data["unique"] = new_unique

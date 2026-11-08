@@ -150,10 +150,24 @@ class HybridClassifier:
         suffix = key[5:17] if key.startswith("#") and len(key) >= 17 else ""
 
         # 1. Immediate rejection if not in allowed target prefixes
-        if tag not in ALLOWED_TARGET_PREFIXES or tag == "60D2":
+        if tag not in ALLOWED_TARGET_PREFIXES:
             return False
 
+        if tag == "60D2":
+            if not opt_zh:
+                return False
+            p_zh = normalize_plain_zh(opt_zh)
+            if not (
+                len(p_zh) >= 8
+                and any(p in opt_zh for p in ("，", "。", "：", ":", "\n", "+", "-"))
+                and not P_UNIT_FLAVOR_RE.search(p_zh)
+                and p_zh not in self.veto_names_zh
+            ):
+                return False
+
         if opt_zh:
+            if opt_zh in WINDOWS_108_TARGET_DESC_ID or opt_zh in self.ref_target_zh:
+                return True
             if (
                 opt_zh in WINDOWS_108_NONTARGET_EN
                 or opt_zh in self.veto_names_zh

@@ -4446,9 +4446,30 @@ def _apply_casing(orig: str, repl: str) -> str:
     return repl
 
 
+CANONICAL_PROTECTED_ENTITIES = (
+    "Glitch Robots", "Glitch Robot", "Glitch Bots", "Glitch Bot",
+    "Arcomia Core", "Central Plains", "Sunset Sea", "Zhulu Plateau",
+    "Three Kingdoms", "Cloudland", "Northern Extremity", "Land of Valor",
+    "Cradle of Origin", "High Heaven", "Gan & Mo", "Eternal Time Loop",
+    "Early Game Surge", "Melody", "Destiny",
+    "Tier 5 Hero Voucher", "Tier 4 Hero Voucher", "Tier 3 Hero Voucher",
+    "Tier 2 Hero Voucher", "Tier 1 Hero Voucher",
+    "Tier 5 Voucher", "Tier 4 Voucher", "Tier 3 Voucher",
+    "Tier 2 Voucher", "Tier 1 Voucher",
+)
+
+
 def translate_segment_en_to_id(segment: str) -> str:
     """Translate an English segment (with __WXQ*__ sentinels already placed) into natural Indonesian."""
     out = segment.replace("’", "'").replace("‘", "'")
+
+    # Protect canonical proper names from being translated word-by-word
+    canon_sentinels: list[tuple[str, str]] = []
+    for ent in CANONICAL_PROTECTED_ENTITIES:
+        if ent in out:
+            tok = f"__WXQCANON{len(canon_sentinels)}__"
+            canon_sentinels.append((tok, ent))
+            out = out.replace(ent, tok)
 
     # Roman numeral I protection
     out = re.sub(r"(?:^|(?<=[\n>(]))(\s*)I(?=\s*[.):、])", r"\1__ROMAN_I__", out)
@@ -4595,6 +4616,9 @@ def translate_segment_en_to_id(segment: str) -> str:
         joined,
         flags=re.I,
     )
+
+    for tok, orig_ent in canon_sentinels:
+        joined = joined.replace(tok, orig_ent)
 
     joined = joined.replace("__ROMAN_I__", "I")
     return joined

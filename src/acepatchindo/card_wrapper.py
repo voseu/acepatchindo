@@ -113,6 +113,23 @@ def _wrap_single_paragraph(paragraph: str, max_width: int) -> str:
     if not paragraph.strip() or _visible_length(paragraph) <= max_width:
         return paragraph
 
+    # Protect short atomic tags (visible length <= 18) so they never split internally
+    atomic_tags: list[str] = []
+
+    def _protect_atomic(m: re.Match[str]) -> str:
+        tag_str = m.group(0)
+        if _visible_length(tag_str) <= 18:
+            idx = len(atomic_tags)
+            atomic_tags.append(tag_str)
+            return f"\x00ATOMIC{idx}\x00"
+        return tag_str
+
+    ATOMIC_TAG_RE = re.compile(
+        r"(?:<a\s+href=[^>]+>.*?</a>|<color=[^>]+><b>.*?</b></color>|<b>.*?</b>)",
+        re.DOTALL,
+    )
+    para = ATOMIC_TAG_RE.sub(_protect_atomic, paragraph)
+
     # Tokenize by whitespace while keeping XML tags attached to their adjacent word tokens
     protected: list[str] = []
 
@@ -121,7 +138,7 @@ def _wrap_single_paragraph(paragraph: str, max_width: int) -> str:
         protected.append(m.group(0))
         return f"\x00TAG{idx}\x00"
 
-    masked = TAG_TOKEN_RE.sub(_protect_tag, paragraph)
+    masked = TAG_TOKEN_RE.sub(_protect_tag, para)
     # Bind standalone '+' or '-' to following digits so signs never wrap alone
     masked = re.sub(r"(?<=\s)([+-])\s+(\d)", r"\1\2", masked)
 
@@ -131,6 +148,7 @@ def _wrap_single_paragraph(paragraph: str, max_width: int) -> str:
         if not w:
             continue
         rw = re.sub(r"\x00TAG(\d+)\x00", lambda m: protected[int(m.group(1))], w)
+        rw = re.sub(r"\x00ATOMIC(\d+)\x00", lambda m: atomic_tags[int(m.group(1))], rw)
         restored_words.append(rw)
 
     lines: list[str] = []

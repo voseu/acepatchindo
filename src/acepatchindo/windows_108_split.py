@@ -73,6 +73,10 @@ WINDOWS_108_TARGET_DESC_ID: dict[str, str] = {
         "Pilih Chess Player Wu Feng dan kuasai segala jurus! Lewat Skill Chess Player, dapatkan acak 1 Kartu Secret Art "
         "milik lawan untuk menciptakan kombo tak terduga di setiap pertandingan."
     ),
+    "任意途径获得的<a href=3130011><color=#99DEB0>═临时等级</color></a>增加<color=#99DEB0>80%</color>，且获得临时等级的<color=#99DEB0>30%</color>立即可转化为永久等级。": (
+        "Diperoleh dari jalur mana pun, <a href=3130011><color=#99DEB0>═Temporary Level</color></a> meningkat sebesar "
+        "<color=#99DEB0>80%</color>, dan <color=#99DEB0>30%</color> dari Temporary Level yang diperoleh dapat segera diubah menjadi Level permanen."
+    ),
     "<color=#ffffff><color=#ffffff><b>唯一</b></color></color>\n攻击速度+30%。攻速上限改为5.0。战斗期间，每获得2点法力值，提升1%攻击速度。": (
         "<color=#ffffff><color=#ffffff><b>Unique</b></color></color>\n"
         "Attack Speed +30%. Batas Attack Speed diubah jadi 5.0. Selama Combat, setiap memperoleh 2 Mana, meningkatkan 1% Attack Speed."
@@ -111,6 +115,61 @@ WINDOWS_108_TARGET_DESC_ID: dict[str, str] = {
     ),
     "每使用3张效果牌，随机获得1张效果牌。": (
         "Setiap menggunakan 3 Kartu Efek, dapatkan 1 Kartu Efek acak."
+    ),
+    # Forensic Audit Target Gameplay & Tooltips
+    "战斗失败时额外获得2次刷新，每回合开始时恢复1{LordHp}。": (
+        "Saat kalah bertempur, dapat +2 Refresh tambahan. Awal setiap Round, pulihkan 1 {LordHp}."
+    ),
+    "立即获得2能量和2次刷新，持续3回合：商店刷新出自己流派英雄的概率提升100%。": (
+        "Segera dapat 2 Energi dan 2 Refresh. Selama 3 Round: peluang Shop menampilkan Hero Faction-mu +100%."
+    ),
+    "攻击蹭蹭涨每1点神秘力量提供的法术攻击力提升至8。": (
+        "Power Up!: Setiap 1 poin Kekuatan Misterius meningkatkan Magic Attack menjadi 8."
+    ),
+    "块头大大大每1点神秘力量提供的最大生命值提升至200。": (
+        "Bulk Up!: Setiap 1 poin Kekuatan Misterius meningkatkan Max HP menjadi 200."
+    ),
+    "神秘力量提升1点；每有1点神秘力量，所有友方英雄获得5法术攻击力（当前已获得：{Dynamic:0}）。": (
+        "Kekuatan Misterius +1. Untuk setiap 1 poin Kekuatan Misterius, semua Hero sekutu mendapat +5 Magic Attack (Saat ini: {Dynamic:0})."
+    ),
+    "神秘力量提升1点；每有1点神秘力量，所有友方英雄获得120最大生命值（当前已获得：{Dynamic:0}）。": (
+        "Kekuatan Misterius +1. Untuk setiap 1 poin Kekuatan Misterius, semua Hero sekutu mendapat +120 Max HP (Saat ini: {Dynamic:0})."
+    ),
+    "<color=#ffffff><b>获得1张更强力的永恒时之回环，可记录12张英雄或效果牌</b></color>。": (
+        "<color=#ffffff><b>Dapat 1 Eternal Time Loop yang lebih kuat, dapat merekam 12 kartu Hero atau Kartu Efek</b></color>."
+    ),
+    "本局对战中，每使用1张效果牌，使1名穿戴装备最多的【逐鹿】英雄等级+2。": (
+        "Dalam pertandingan ini, setiap kali menggunakan 1 Kartu Efek, 1 Hero [Zhulu Plateau] dengan Equipment terbanyak mendapat +2 Level."
+    ),
+    "本局对战中，每使用1张效果牌，使1名穿戴装备最多的【日落海】英雄等级+2。": (
+        "Dalam pertandingan ini, setiap kali menggunakan 1 Kartu Efek, 1 Hero [Sunset Sea] dengan Equipment terbanyak mendapat +2 Level."
+    ),
+    "卡牌的╬整备效果，会在回合开始阶段触发。刚刚上场的卡牌，其╬整备效果不会生效。": (
+        "Efek ╬Prepare kartu akan terpicu pada awal Round. Kartu yang baru saja dimainkan, efek ╬Prepare miliknya tidak akan aktif."
+    ),
+    "拥有╦合成关键词的卡牌，当棋手通过打出相同卡牌升级时，会根据条件触发╦合成卡牌的效果。": (
+        "Kartu dengan keyword ╦Combine, saat Contestant naik level dengan memainkan kartu yang sama, akan memicu efek kartu ╦Combine sesuai persyaratan."
+    ),
+    "这里是赵云的卡牌的效果，可以<color=#98CBFF>提升英雄的等级</color>。这个效果在\n<color=#98CBFF>╨登场</color>也就是<color=#98CBFF>卡牌打出时生效</color>": (
+        "Ini adalah efek kartu Zhao Yun, dapat <color=#98CBFF>meningkatkan Level Hero</color>. Efek ini aktif saat\n<color=#98CBFF>╨Deploy</color>, yaitu <color=#98CBFF>ketika kartu dimainkan</color>"
+    ),
+    "<color=#98CBFF>╨登场</color>关键词会在打出卡牌时立刻触发对应的效果。": (
+        "Keyword <color=#98CBFF>╨Deploy</color> langsung memicu efek terkait saat kartu dimainkan."
+    ),
+    "<color=#98CBFF>╈退场</color>关键词在<color=#98CBFF>棋盘上的</color>英雄被卖出时触发，实战中需要在效果触发和英雄战力之间做决断。": (
+        "Keyword <color=#98CBFF>╈Retire</color> terpicu saat Hero di arena dijual, dalam pertarungan perlu memilih antara memicu efek atau mempertahankan kekuatan tempur Hero."
+    ),
+    "首先要明确的是<color=#98CBFF>═临时等级</color>在战斗结束之后便会消失，所以接下来我们将会了解几个关于<color=#98CBFF>═临时等级</color>关键词效果的应用场景。": (
+        "Pertama, perlu dicatat bahwa <color=#98CBFF>═Temporary Level</color> akan hilang setelah pertempuran selesai. Selanjutnya kita akan mempelajari skenario penggunaan keyword <color=#98CBFF>═Temporary Level</color>."
+    ),
+    "每当友方【大河流域】英雄释放大招后，有30%的概率再释放1次。": (
+        "Setiap kali Hero sekutu [Riverlands] melepaskan Ultimate, memiliki 30% peluang untuk melepaskannya 1 kali lagi."
+    ),
+    "每有1名友方【倒悬天】英雄登场，便使所有友方【倒悬天】英雄等级+1。": (
+        "Setiap kali 1 Hero sekutu [High Heaven] melakukan Deploy, semua Hero sekutu [High Heaven] mendapat +1 Level."
+    ),
+    "随机获得3张不同阵营的英雄牌，并使其等级+3。": (
+        "Dapatkan 3 Kartu Hero acak dari Faction berbeda, dan Level-nya bertambah +3."
     ),
 }
 
