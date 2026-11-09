@@ -573,3 +573,27 @@ def test_12_forensic_cleanliness_and_zero_regressions():
         assert not retreat_leak_pat.search(val), f"memicu Retreat in {val!r}"
         assert not sendiri_hp_pat.search(val), f"sendiri HP/Level in {val!r}"
 
+    # 6. Universal structural invariant checks (15 forensic categories)
+    FACTION_PAT = r"\[(?:Central Plains|Riverlands|Three Kingdoms|Sunset Sea|Zhulu Plateau|High Heaven|First Lands|Factionless|Great Wall|Jixia|Divinity)\]"
+    strict_checks = [
+        ("Keberangkatan", re.compile(r"\bKeberangkatan\b", re.I)),
+        ("Ultimate Treasure adalah", re.compile(r"Ultimate\s+Treasure\s+adalah", re.I)),
+        ("pamungkas acak harta", re.compile(r"pamungkas\s+acak\s+harta", re.I)),
+        ("Faction Hero/Kartu/Token", re.compile(rf"{FACTION_PAT}\s+(?:Hero|Kartu|Token)\b")),
+        ("[Keilahian] / [Suci]", re.compile(r"\[(?:Keilahian|Suci)\]", re.I)),
+        ("Skill menggunakan", re.compile(r"\bSkill\s+menggunakan\b", re.I)),
+        ("sebuah milikmu / Awaken milikmu Kartu", re.compile(r"\bsebuah\s+milikmu\b|\bAwaken(?:ed)?\s+milikmu\s+Kartu\b", re.I)),
+        ("Khusus Tamu", re.compile(r"\bKhusus\s+Tamu\b", re.I)),
+        ("tag kartu", re.compile(r"(?:</color>|</b>)\s*kartu\b")),
+        ("Kartu Shouyue", re.compile(r"\bKartu\s+Shouyue\b")),
+        ("chess", re.compile(r"\bchess\b", re.I)),
+        ("bebas Refresh/Shop/penguatan / di menyimpan", re.compile(r"\bbebas\s+(?:Refresh|Shop|penguatan)\b|\bdi\s+menyimpan\b", re.I)),
+        ("Tidak kalah Level / ke kalah digit", re.compile(r"\bTidak\s+kalah\s+Level\b|\bke\s+kalah\s+\d", re.I)),
+        ("kamu bermain / bermain Kartu / undian kartu", re.compile(r"\bkamu\s+bermain\b|\bbermain\s+(?:sebuah\s+|sama\s+)?(?:Awakened\s+)?Kartu\b|\bundian\s+kartu\b", re.I)),
+        ("sendiri Hero / kamu sendiri sebuah / pemain Level", re.compile(r"\bsendiri\s+Hero\b|\bkamu\s+sendiri\s+sebuah\b|\bpemain\s+Level\b", re.I)),
+        ("evolves / fictitious / seized unit / Luar biasa Suara", re.compile(r"\bevolves\b|\bfictitious\b|\bseized\s+unit\b|\bLuar\s+biasa\s+Suara\b", re.I)),
+    ]
+    for zh, val in active_targets:
+        for label, rx in strict_checks:
+            assert not rx.search(val), f"Forensic violation '{label}' in {val!r} (ZH: {zh!r})"
+
