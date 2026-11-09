@@ -22,9 +22,9 @@ Seluruh **3 Fase Pembangunan Utama** telah **100% tuntas**, terverifikasi secara
    - Pembungkus baris otomatis (`src/acepatchindo/card_wrapper.py`) menjaga panjang baris terlihat `<= 34` karakter (untuk kalimat tanpa tabel `;`) tanpa memotong kata di tengah, tanpa memisahkan token `[...]`/`{...}`/`<...>` lintas baris, tanpa operator `+`/`-` menggantung di ujung baris, dan menjaga *box-drawing glyph* (`╪ ╨ ╫ ╬ ═ ╆ ╇ ╈ ╉ ╊ ╧`) menempel rapat (*snug*) pada kata kunci mekaniknya.
 
 3. **Native Win32 C++17 Dark-Gold GUI + Embedded PyInstaller Worker:**
-   - **Deliverable Utama:** `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe` (`55.095.328` byte, SHA-256: `fdcca7cf757a98fc1f5ad6c01641a6ebdf63cec3c2477efa2bc41ccf428a483a`).
+   - **Deliverable Utama:** `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe` (`55.095.328` byte, SHA-256: `c5d1633a069d8891af1f1c5e91c940174bfb2373e2e683bfbb0b8df5caf9f2f6`).
    - **Outer Stub (`src/gui/celeslib_gui.cpp` + `src/gui/celeslib_i18n.h`):** Dikompilasi dengan `x86_64-w64-mingw32-g++` (`scripts/08_compile_celeslib_gui.py`), memiliki antarmuka bilingual instan (`UI: Indonesia` / `UI: English`), pilihan mode patch (`ID Hybrid` / `EN Full`), manajemen PC (`Auto-Detect`, `Pilih Folder`, `Pasang Patch`, `Pulihkan`, `Periksa`), dan Android USB/ADB (`Pindai USB`, `Patch APK`, `Pulihkan APK`).
-   - **Embedded Payload (`ace-worker.exe`):** Berukuran tetap `53.927.862` byte (`0x336DFB6`) (SHA-256: `a648e25463685c392618ae46631f11fb79254f997d3e570bab4dd5dbf877476c`), diverifikasi dengan SHA-256 sebelum diekstrak ke `%LOCALAPPDATA%\Celeslib\HoK Ace Patcher\ace-worker.exe`.
+   - **Embedded Payload (`ace-worker.exe`):** Berukuran tetap `53.927.862` byte (`0x336DFB6`) (SHA-256: `30b922b1bb6b7a12c6ad97e44244289b139c363b3217a3d3fe0ef8e289c9731c`), diverifikasi dengan SHA-256 sebelum diekstrak ke `%LOCALAPPDATA%\Celeslib\HoK Ace Patcher\ace-worker.exe`.
 
 ---
 

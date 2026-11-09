@@ -383,7 +383,12 @@ def test_partial_game_update_preserves_receipt_and_restores_remaining_packages(
     assert items[0][1]["relative"] == "WXQ_Data/Package/builtin/4/4.db"
 
 
-def test_lock_and_process_errors_are_localized_in_id(monkeypatch) -> None:
+def test_lock_and_process_errors_are_localized_in_id(
+    tmp_path: Path, monkeypatch
+) -> None:
+    import json
+    import sys
+
     monkeypatch.setenv("CELESLIB_UI_LANG", "id")
     rep_lock = adaptive._localize_report_message(
         {"message": "Another patch operation is using this installation"}
@@ -394,6 +399,27 @@ def test_lock_and_process_errors_are_localized_in_id(monkeypatch) -> None:
         {"message": "Close the game before patching: wxq.exe"}
     )
     assert "Tutup game terlebih dahulu sebelum memasang patch: wxq.exe" in rep_game["message"]
+
+    # Verify zero-arg adaptive.main() (as invoked by PyInstaller adaptive_worker)
+    res_file = tmp_path / "result.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "ace-worker.exe",
+            "discover",
+            "--work",
+            str(tmp_path / "work"),
+            "--result",
+            str(res_file),
+        ],
+    )
+    code = adaptive.main()
+    assert code in (0, 1)
+    assert res_file.is_file()
+    payload = json.loads(res_file.read_text(encoding="utf-8"))
+    assert isinstance(payload.get("message"), str)
+
 
 
 

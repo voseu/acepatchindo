@@ -615,12 +615,12 @@ def run(action: str, game: Path, assets: Path, work: Path) -> dict:
         raise
 
 
-def main(argv: list[str] | None = None) -> int:
-    code = _orig_main(argv)
+def main(*args) -> int:
+    code = _orig_main(*args)
     try:
         parser = argparse.ArgumentParser(add_help=False)
         parser.add_argument("--result", type=Path)
-        known, _ = parser.parse_known_args(argv)
+        known, _ = parser.parse_known_args(args[0] if args else None)
         if known.result and known.result.is_file():
             data = json.loads(known.result.read_text(encoding="utf-8"))
             if isinstance(data, dict) and isinstance(data.get("message"), str):
