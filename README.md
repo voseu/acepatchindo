@@ -44,5 +44,5 @@ Aplikasi *patcher* lokalisasi resmi **Celeslib** untuk menerjemahkan gim **Honor
 
 | Berkas | Ukuran (Byte) | SHA-256 |
 | :--- | ---: | :--- |
-| `Celeslib-HoK-Ace-Patcher-v1.0.0.exe` | `55.094.304` | `24180a28a2a96b7a3423d62984261c7de6d3643ae4772d52bc729534b16c8319` |
-| `ace-worker.exe` (*embedded payload*) | `53.927.862` | `91a46a837ec83845bfdfb0cf98ca5e90ec4af205c81840dd7d1e3ce7751f6b6c` |
+| `Celeslib-HoK-Ace-Patcher-v1.0.0.exe` | `55.095.328` | `fdcca7cf757a98fc1f5ad6c01641a6ebdf63cec3c2477efa2bc41ccf428a483a` |
+| `ace-worker.exe` (*embedded payload*) | `53.927.862` | `a648e25463685c392618ae46631f11fb79254f997d3e570bab4dd5dbf877476c` |

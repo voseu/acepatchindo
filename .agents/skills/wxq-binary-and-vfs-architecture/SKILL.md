@@ -7,19 +7,19 @@ description: Use when inspecting, unpacking, modifying, or repacking Honor of Ki
 
 ## Overview
 
-`dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe` (`55,094,304` bytes) is a **two-layer Windows x86_64 executable**:
+`dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe` (`55,095,328` bytes) is a **two-layer Windows x86_64 executable**:
 1. **Outer Native Win32 C++17 GUI Stub (`src/gui/celeslib_gui.cpp` + `src/gui/celeslib_i18n.h`):** Compiled via `x86_64-w64-mingw32-g++` (`scripts/08_compile_celeslib_gui.py`), featuring a custom Dark-Gold owner-drawn interface, instant `UI: Indonesia` / `UI: English` toggle, and `ID Hybrid` / `EN Full` patch mode selector.
-2. **Embedded PyInstaller Worker (`ace-worker.exe`, `53,927,862` bytes):** Stored in the `.rdata` payload slot (`0x11CC62..0x348AC18`), verified via an embedded uppercase SHA-256 hex digest before extraction to `%LOCALAPPDATA%\Celeslib\HoKAcePatcher\worker\<sha256_prefix16>\ace-worker.exe`.
+2. **Embedded PyInstaller Worker (`ace-worker.exe`, `53,927,862` bytes):** Stored in the appended payload slot, verified via an embedded uppercase SHA-256 hex digest before extraction to `%LOCALAPPDATA%\Celeslib\HoK Ace Patcher\ace-worker.exe`.
 
 **CRITICAL RUNTIME REQUIREMENT:** Always use `/home/whise/.local/bin/uv run --python 3.12` or `.venv/bin/python` (Python 3.12) when unmarshalling, compiling, or executing `.pyc` and `PYZ.pyz` files.
 
 ## Two-Layer Binary Layout (`dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe`)
 
-| Component / Slice | Offset Range (Hex) | Size (Bytes) | Role |
-|---|---|---:|---|
-| Outer Win32 GUI Stub + Headers | `0x000000` – `0x11CC61` | `1,166,434` | Native Win32 C++17 Dark-Gold GUI code, embedded 64-char uppercase SHA-256 slot, icons & resources |
-| Embedded `ace-worker.exe` Payload | `0x11CC62` – `0x348AC17` | `53,927,862` (`0x336DFB6`) | Complete Python 3.12 PyInstaller PE executable (`ace-worker.exe`) |
-| Trailing PE Section Alignment | `0x348AC18` – `0x348AC3F` | `40` | Final section alignment up to `55,094,304` bytes |
+| Component / Slice | Size (Bytes) | Role |
+|---|---:|---|
+| Outer Win32 GUI Stub + Headers | `1,167,458` | Native Win32 C++17 Dark-Gold GUI code, embedded `CELESLIB_WORKER_V1` magic + 64-char uppercase SHA-256 header, icons & resources |
+| Embedded `ace-worker.exe` Payload | `53,927,862` (`0x336DFB6`) | Complete Python 3.12 PyInstaller PE executable (`ace-worker.exe`) |
+| Trailing Footer Pointer | `8` | 64-bit little-endian offset to the SHA-256 header (`55,095,328` bytes total) |
 
 *(Legacy baseline reference: `Honor of Kings Ace English Patcher 1.4.12.exe` (`59,877,888` bytes) had its `ace-worker.exe` at `0x4CAC4A..0x3838C00` and SHA-256 digest at `0x4CABFA`.)*
 

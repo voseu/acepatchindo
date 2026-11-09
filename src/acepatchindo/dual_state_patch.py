@@ -267,6 +267,8 @@ def load_catalog(folder: Path) -> Catalog | None:
 
 
 _orig_run = _run
+_orig_main = main
+_orig_assert_game_stopped = _assert_game_stopped
 
 _ID_MESSAGE_REPLACEMENTS: tuple[tuple[str, str], ...] = (
     (
@@ -313,12 +315,142 @@ _ID_MESSAGE_REPLACEMENTS: tuple[tuple[str, str], ...] = (
         "Select WXQ.exe or a folder containing WXQ.exe and WXQ_Data/Package/builtin.",
         "Pilih WXQ.exe atau folder yang berisi WXQ.exe dan WXQ_Data/Package/builtin.",
     ),
+    (
+        "Another patch operation is using this installation",
+        "Operasi patch lain sedang menggunakan instalasi ini. Tunggu hingga selesai atau tutup proses patcher lain.",
+    ),
+    (
+        "Close the game before patching: ",
+        "Tutup game terlebih dahulu sebelum memasang patch: ",
+    ),
+    (
+        "Game updated between scanning and staging",
+        "File game berubah saat proses berjalan. Silakan ulangi pemasangan patch.",
+    ),
+    (
+        "are the same file",
+        "merupakan file yang sama (hardlink staging dibersihkan otomatis, silakan ulangi)",
+    ),
     ("Installation discovered.", "Instalasi ditemukan."),
     (" known strings; ", " string dikenal; "),
     (" unknown left Chinese; ", " tidak dikenal dipertahankan; "),
     (" graphics; ", " grafik; "),
     (" strings skipped for capacity.", " string dilewati karena kapasitas."),
 )
+
+
+def _assert_game_stopped() -> None:
+    if os.name == "nt":
+        try:
+            res = subprocess.run(
+                ["tasklist", "/FO", "CSV", "/NH"],
+                check=False,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
+            names = {{
+                line.split(",", 1)[0].strip(\'"\').lower()
+                for line in res.stdout.splitlines()
+                if line.strip()
+            }}
+            helpers = {{"wxqhelper.exe", "wxq_helper.exe", "wxqbase.exe"}} & names
+            if helpers and "wxq.exe" not in names:
+                for h_proc in sorted(helpers):
+                    subprocess.run(
+                        ["taskkill", "/F", "/IM", h_proc],
+                        check=False,
+                        capture_output=True,
+                    )
+        except Exception:
+            pass
+    _orig_assert_game_stopped()
+
+
+try:
+    import wxq_patch.installer as _wxq_installer
+    _wxq_installer._assert_game_stopped = _assert_game_stopped
+except Exception:
+    pass
+
+
+def _receipt_matches_live(game: Path, receipt: dict) -> bool:
+    if receipt.get("state") != "complete" or receipt.get("action") != "install":
+        return False
+    items = receipt.get("files") or []
+    if not items:
+        return False
+    try:
+        return any(
+            _matches_hash(safe_path(game, item["relative"]), item.get("after"))
+            for item in items
+            if isinstance(item, dict) and isinstance(item.get("relative"), str)
+        )
+    except (KeyError, OSError, TypeError, ValueError):
+        return False
+
+
+def _matching_restore_items(game: Path) -> list[tuple[Path, dict]]:
+    root = receipt_root(game)
+    if not root.exists():
+        return []
+    candidates: dict[str, tuple[Path, dict]] = {{}}
+    for path in sorted(root.glob("*/receipt.json"), reverse=True):
+        try:
+            receipt = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, ValueError):
+            continue
+        if receipt.get("state") != "complete" or receipt.get("action") != "install":
+            continue
+        items = receipt.get("files") or []
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            rel = item.get("relative")
+            if not isinstance(rel, str):
+                continue
+            try:
+                if _matches_hash(safe_path(game, rel), item.get("after")):
+                    candidates.setdefault(rel, (path, item))
+            except (KeyError, OSError, TypeError, ValueError):
+                continue
+    return sorted(candidates.values(), key=lambda value: value[1]["relative"])
+
+
+def find_restore(game: Path) -> tuple[Path, dict] | None:
+    root = receipt_root(game)
+    if not root.exists():
+        return None
+    for path in sorted(root.glob("*/receipt.json"), reverse=True):
+        try:
+            r = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, ValueError):
+            continue
+        if _receipt_matches_live(game, r):
+            return path, r
+    return None
+
+
+def _clean_work_staging(work: Path) -> None:
+    work_path = Path(work)
+
+    def _onerror(func, path, exc_info):
+        try:
+            os.chmod(path, 0o666)
+            func(path)
+        except Exception:
+            try:
+                Path(path).unlink(missing_ok=True)
+            except Exception:
+                pass
+
+    for sub in ("staged", "replacements"):
+        target = work_path / sub
+        if target.exists():
+            shutil.rmtree(target, ignore_errors=False, onerror=_onerror)
+            if target.exists():
+                shutil.rmtree(target, ignore_errors=True)
 
 
 def _localize_report_message(report: dict) -> dict:
@@ -440,7 +572,12 @@ def _stamp_receipt_catalog_sha(resolved_game: Path, cat_sha: str) -> None:
         pass
 
 
+_orig_run_entry = run
+
+
 def _run(action: str, game: Path, assets: Path, work: Path) -> dict:
+    if action in ("install", "stage"):
+        _clean_work_staging(work)
     if action == "install":
         resolved_game = Path(game).resolve()
         try:
@@ -449,7 +586,14 @@ def _run(action: str, game: Path, assets: Path, work: Path) -> dict:
                 _orig_run("restore", resolved_game, assets, work)
         except Exception:
             pass
-    report = _orig_run(action, game, assets, work)
+        _clean_work_staging(work)
+    try:
+        report = _orig_run(action, game, assets, work)
+    except Exception as exc:
+        loc_msg = _localize_report_message({{"message": str(exc)}})["message"]
+        if loc_msg != str(exc):
+            raise RuntimeError(loc_msg) from exc
+        raise
     if action == "install":
         try:
             cat_sha = _catalog_fingerprint(assets)
@@ -459,4 +603,33 @@ def _run(action: str, game: Path, assets: Path, work: Path) -> dict:
         except Exception:
             pass
     return _localize_report_message(report)
+
+
+def run(action: str, game: Path, assets: Path, work: Path) -> dict:
+    try:
+        return _orig_run_entry(action, game, assets, work)
+    except Exception as exc:
+        loc_msg = _localize_report_message({{"message": str(exc)}})["message"]
+        if loc_msg != str(exc):
+            raise RuntimeError(loc_msg) from exc
+        raise
+
+
+def main(argv: list[str] | None = None) -> int:
+    code = _orig_main(argv)
+    try:
+        parser = argparse.ArgumentParser(add_help=False)
+        parser.add_argument("--result", type=Path)
+        known, _ = parser.parse_known_args(argv)
+        if known.result and known.result.is_file():
+            data = json.loads(known.result.read_text(encoding="utf-8"))
+            if isinstance(data, dict) and isinstance(data.get("message"), str):
+                _localize_report_message(data)
+                known.result.write_text(
+                    json.dumps(data, ensure_ascii=True, indent=2),
+                    encoding="utf-8",
+                )
+    except Exception:
+        pass
+    return code
 '''

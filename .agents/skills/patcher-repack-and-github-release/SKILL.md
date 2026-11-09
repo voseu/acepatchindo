@@ -7,7 +7,7 @@ description: Use when repacking the Windows executable Celeslib-HoK-Ace-Patcher-
 
 ## Overview
 
-The production Windows 64-bit deliverable is `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe` (`55,094,304` bytes), published to GitHub repository `https://github.com/voseu/acepatchindo.git` under release tag [`v1.0.0-celeslib`](https://github.com/voseu/acepatchindo/releases/tag/v1.0.0-celeslib).
+The production Windows 64-bit deliverable is `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe` (`55,095,328` bytes), published to GitHub repository `https://github.com/voseu/acepatchindo.git` under release tag [`v1.0.0-celeslib`](https://github.com/voseu/acepatchindo/releases/tag/v1.0.0-celeslib).
 
 ## End-to-End Rebuild & Repack Pipeline
 
@@ -15,16 +15,16 @@ The production Windows 64-bit deliverable is `dist/Celeslib-HoK-Ace-Patcher-v1.0
    - Run `PYTHONPATH=src:work/pyz_extracted .venv/bin/python3 scripts/02_build_indonesian_catalog.py` (using `ThreeTierGlossary.from_reference_files(Path("data/references/tier1_wiki_id.json"), Path("data/references/tier2_wiki_en.json"))`) so all `5,621` active `unique` descriptions and `15,397` active `english_updates` entries are translated, aligned, polished, wrapped (`<= 34` visible chars), and validated.
 2. **Patch Worker Modules & Repack `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe`:**
    - Run `PYTHONPATH=src:work/pyz_extracted .venv/bin/python3 scripts/03_patch_worker_modules.py` and `PYTHONPATH=src:work/pyz_extracted .venv/bin/python3 scripts/05_repack_windows_exe.py` (plus `scripts/08_compile_celeslib_gui.py` if `src/gui/celeslib_gui.cpp` changed).
-   - This compiles modified `wxq_patch` runtime modules (`table_catalog.py`, `adaptive.py`) into Python 3.12 `.pyc` bytecode, repacks `PYZ.pyz`, rebuilds `ace-worker.exe` (`53,927,862` bytes = `0x336DFB6`), patches the uppercase SHA-256 hex digest into the Win32 GUI stub (`src/gui/celeslib_gui.cpp`), writes `ace-worker.exe` into `0x11CC62..0x348AC18`, and updates `dist/SHA256SUMS.txt`.
-3. **Run Full Verification Suite (`52` Tests):**
+   - This compiles modified `wxq_patch` runtime modules (`table_catalog.py`, `adaptive.py`) into Python 3.12 `.pyc` bytecode, repacks `PYZ.pyz`, rebuilds `ace-worker.exe` (`53,927,862` bytes = `0x336DFB6`), patches the uppercase SHA-256 hex digest into the Win32 GUI stub (`src/gui/celeslib_gui.cpp`), appends `ace-worker.exe` with the 8-byte footer pointer, and updates `dist/SHA256SUMS.txt`.
+3. **Run Full Verification Suite (`55` Tests):**
    ```bash
    PYTHONPATH=src:work/pyz_extracted .venv/bin/pytest tests/ -v
    ```
 
 ## Atomic 5-Point SHA-256 Synchronization
 
-Whenever `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe` is rebuilt, the exact SHA-256 digests of both `Celeslib-HoK-Ace-Patcher-v1.0.0.exe` (`55,094,304` bytes) and `ace-worker.exe` (`53,927,862` bytes @ `0x11CC62..0x348AC18`) MUST match across all 5 locations:
-1. `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe` ( currently `24180a28a2a96b7a3423d62984261c7de6d3643ae4772d52bc729534b16c8319` / worker `91a46a837ec83845bfdfb0cf98ca5e90ec4af205c81840dd7d1e3ce7751f6b6c` )
+Whenever `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe` is rebuilt, the exact SHA-256 digests of both `Celeslib-HoK-Ace-Patcher-v1.0.0.exe` (`55,095,328` bytes) and `ace-worker.exe` (`53,927,862` bytes) MUST match across all 5 locations:
+1. `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe` ( currently `fdcca7cf757a98fc1f5ad6c01641a6ebdf63cec3c2477efa2bc41ccf428a483a` / worker `a648e25463685c392618ae46631f11fb79254f997d3e570bab4dd5dbf877476c` )
 2. `dist/SHA256SUMS.txt`
 3. `README.md` (`## Verifikasi Integritas (SHA-256)`)
 4. Git `origin/main` and tag `v1.0.0-celeslib` (`git tag -f v1.0.0-celeslib && git push origin main && git push origin v1.0.0-celeslib --force`)

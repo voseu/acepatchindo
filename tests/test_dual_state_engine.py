@@ -293,5 +293,109 @@ def test_numeric_template_fallback_handles_live_balance_hotfix() -> None:
     assert expected_id.encode("utf-8") in patched_bytes
 
 
+def test_clean_work_staging_removes_hardlinked_staged_files_before_install(
+    tmp_path: Path, monkeypatch
+) -> None:
+    import os
+
+    game = tmp_path / "WXQ"
+    pkg4_dir = game / "WXQ_Data" / "Package" / "builtin" / "4"
+    pkg4_dir.mkdir(parents=True)
+    live_db = pkg4_dir / "4.db"
+    live_db.write_bytes(b"LIVE_PACKAGE_4_BYTES")
+
+    work = tmp_path / "work"
+    staged_dir = work / "staged" / "4" / "4"
+    staged_dir.mkdir(parents=True)
+    staged_db = staged_dir / "4.db"
+    # Simulate hardlink created by previous commit() via os.link
+    os.link(live_db, staged_db)
+    assert live_db.stat().st_ino == staged_db.stat().st_ino
+
+    repl_dir = work / "replacements" / "4"
+    repl_dir.mkdir(parents=True)
+    (repl_dir / "OLD.assets").write_bytes(b"STALE")
+
+    seen_staged_exists: list[bool] = []
+
+    def fake_orig_run(action: str, g: Path, a: Path, w: Path) -> dict:
+        seen_staged_exists.append((w / "staged").exists() or (w / "replacements").exists())
+        return {"state": "current", "message": "English installed and verified."}
+
+    monkeypatch.setattr(adaptive, "_orig_run", fake_orig_run)
+    monkeypatch.setattr(adaptive, "_needs_pre_install_restore", lambda g, s: False)
+
+    adaptive._run("install", game, tmp_path / "assets", work)
+    assert seen_staged_exists == [False]
+    assert not staged_db.exists()
+    # Live file in game directory must remain completely intact!
+    assert live_db.exists()
+    assert live_db.read_bytes() == b"LIVE_PACKAGE_4_BYTES"
+
+
+def test_partial_game_update_preserves_receipt_and_restores_remaining_packages(
+    tmp_path: Path, monkeypatch
+) -> None:
+    import hashlib
+    import json
+
+    game = tmp_path / "WXQ"
+    p1 = game / "WXQ_Data" / "Package" / "builtin" / "1" / "1.db"
+    p4 = game / "WXQ_Data" / "Package" / "builtin" / "4" / "4.db"
+    p1.parent.mkdir(parents=True)
+    p4.parent.mkdir(parents=True)
+
+    # Simulate partial game update: 1.db was updated by launcher, 4.db is still patched
+    p1.write_bytes(b"UPDATED_BY_LAUNCHER_1_DB")
+    patched_p4_bytes = b"PATCHED_4_DB_STILL_LIVE"
+    p4.write_bytes(patched_p4_bytes)
+    p4_after_sha = hashlib.sha256(patched_p4_bytes).hexdigest()
+
+    r_root = tmp_path / "receipts"
+    r_dir = r_root / "1793497168990741300-92b4bcbb"
+    r_dir.mkdir(parents=True)
+    receipt_data = {
+        "state": "complete",
+        "action": "install",
+        "files": [
+            {
+                "relative": "WXQ_Data/Package/builtin/1/1.db",
+                "before": "00" * 32,
+                "after": "11" * 32,  # No longer matches live p1
+            },
+            {
+                "relative": "WXQ_Data/Package/builtin/4/4.db",
+                "before": "22" * 32,
+                "after": p4_after_sha,  # Still matches live p4!
+            },
+        ],
+    }
+    (r_dir / "receipt.json").write_text(json.dumps(receipt_data), encoding="utf-8")
+    monkeypatch.setattr(adaptive, "receipt_root", lambda g: r_root)
+
+    # 1. Receipt must STILL match live so prune_stale_state does NOT delete it
+    assert adaptive._receipt_matches_live(game, receipt_data) is True
+    assert adaptive.find_restore(game) is not None
+
+    # 2. _matching_restore_items must return 4.db and skip updated 1.db
+    items = adaptive._matching_restore_items(game)
+    assert len(items) == 1
+    assert items[0][1]["relative"] == "WXQ_Data/Package/builtin/4/4.db"
+
+
+def test_lock_and_process_errors_are_localized_in_id(monkeypatch) -> None:
+    monkeypatch.setenv("CELESLIB_UI_LANG", "id")
+    rep_lock = adaptive._localize_report_message(
+        {"message": "Another patch operation is using this installation"}
+    )
+    assert "Operasi patch lain sedang menggunakan instalasi ini" in rep_lock["message"]
+
+    rep_game = adaptive._localize_report_message(
+        {"message": "Close the game before patching: wxq.exe"}
+    )
+    assert "Tutup game terlebih dahulu sebelum memasang patch: wxq.exe" in rep_game["message"]
+
+
+
 
 

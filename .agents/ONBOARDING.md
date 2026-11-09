@@ -6,7 +6,7 @@ Selamat datang di proyek **Celeslib Honor of Kings: Ace Patcher (`acepatchindo`)
 
 ## 🎯 1. Status Proyek & Arsitektur Saat Ini (`v1.0.0-celeslib`)
 
-Seluruh **3 Fase Pembangunan Utama** telah **100% tuntas**, terverifikasi secara forensik (`52/52` *automated tests passed*), dan dipublikasikan ke GitHub Release [`v1.0.0-celeslib`](https://github.com/voseu/acepatchindo/releases/tag/v1.0.0-celeslib):
+Seluruh **3 Fase Pembangunan Utama** telah **100% tuntas**, terverifikasi secara forensik (`55/55` *automated tests passed*), dan dipublikasikan ke GitHub Release [`v1.0.0-celeslib`](https://github.com/voseu/acepatchindo/releases/tag/v1.0.0-celeslib):
 
 1. **Dual-State Localization Engine (`ID Hybrid` & `EN Full`):**
    - **`ID Hybrid` (`--patch-lang id`, Default):** Menerjemahkan seluruh **`5.621`** deskripsi efek gameplay aktif di `catalog["unique"]` (termasuk `58` deskripsi dari `108` string Mandarin yang sebelumnya terlewat di Windows) dan **`15.397`** entri `catalog["english_updates"]` aktif (mencakup *Hero Active/Passive Skills, Awakenings, Effect Cards, Equipment, Talents/Sub-Cards,* dan *Contestant/Lord Skills*) ke **Bahasa Indonesia** taktis yang natural, sembari menjaga:
@@ -16,15 +16,15 @@ Seluruh **3 Fase Pembangunan Utama** telah **100% tuntas**, terverifikasi secara
      - **Nama Contestant Kanonik:** `Xiang`, `Ying Lü`, `Bai Ge`, `Little Daji`, `Little Sun Bin`, `Little Zhuang Fish`, `Little Chang'e`.
      - **Header & Footer Kanonik:** Header `... Series` (`Summon Series`, `General Series`, `Combine Series`, dll.) dan footer `#60D2` (`Cannot be copied`, `Unstackable`, `Disappears after triggering`, dll.) tetap dalam Bahasa Inggris.
    - **`EN Full` (`--patch-lang en`):** Menerjemahkan 100% teks gim ke Bahasa Inggris penuh menggunakan `catalog_en_full.json.gz`.
-   - **Kompatibilitas Multi-State & *Balance Hotfix*:** Mendukung instalasi langsung di atas gim *Fresh Mandarin* maupun gim yang sudah ter-patch (`v1` Full-ID atau English Patcher `1.4.12`), dilengkapi *runtime numeric-template fallback* (`wxq_patch/adaptive.py`) yang tahan terhadap *balance hotfix* angka dari server.
+   - **Kompatibilitas Multi-State, Partial Game Update, & *Balance Hotfix*:** Mendukung instalasi langsung di atas gim *Fresh Mandarin*, gim yang sudah ter-patch (`v1` Full-ID atau English Patcher `1.4.12`), maupun gim yang mengalami *partial launcher update* (pembaruan sebagian paket `.db` seperti `builtin/0` & `builtin/1`), dilengkapi pembersihan *hardlink* staging otomatis sebelum `install`/`stage`, *per-file backup preservation & restore*, penghentian *orphan worker* otomatis saat jendela ditutup, serta *runtime numeric-template fallback* (`wxq_patch/adaptive.py`) yang tahan terhadap *balance hotfix* angka dari server.
 
 2. **CJK-Safe Card Layout & Word-Wrap (`<= 34` Karakter Terlihat):**
    - Pembungkus baris otomatis (`src/acepatchindo/card_wrapper.py`) menjaga panjang baris terlihat `<= 34` karakter (untuk kalimat tanpa tabel `;`) tanpa memotong kata di tengah, tanpa memisahkan token `[...]`/`{...}`/`<...>` lintas baris, tanpa operator `+`/`-` menggantung di ujung baris, dan menjaga *box-drawing glyph* (`╪ ╨ ╫ ╬ ═ ╆ ╇ ╈ ╉ ╊ ╧`) menempel rapat (*snug*) pada kata kunci mekaniknya.
 
 3. **Native Win32 C++17 Dark-Gold GUI + Embedded PyInstaller Worker:**
-   - **Deliverable Utama:** `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe` (`55.094.304` byte, SHA-256: `24180a28a2a96b7a3423d62984261c7de6d3643ae4772d52bc729534b16c8319`).
+   - **Deliverable Utama:** `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe` (`55.095.328` byte, SHA-256: `fdcca7cf757a98fc1f5ad6c01641a6ebdf63cec3c2477efa2bc41ccf428a483a`).
    - **Outer Stub (`src/gui/celeslib_gui.cpp` + `src/gui/celeslib_i18n.h`):** Dikompilasi dengan `x86_64-w64-mingw32-g++` (`scripts/08_compile_celeslib_gui.py`), memiliki antarmuka bilingual instan (`UI: Indonesia` / `UI: English`), pilihan mode patch (`ID Hybrid` / `EN Full`), manajemen PC (`Auto-Detect`, `Pilih Folder`, `Pasang Patch`, `Pulihkan`, `Periksa`), dan Android USB/ADB (`Pindai USB`, `Patch APK`, `Pulihkan APK`).
-   - **Embedded Payload (`ace-worker.exe`):** Berukuran tetap `53.927.862` byte (`0x336DFB6`) pada offset `0x11CC62..0x348AC18` (SHA-256: `91a46a837ec83845bfdfb0cf98ca5e90ec4af205c81840dd7d1e3ce7751f6b6c`), diverifikasi dengan SHA-256 sebelum diekstrak ke `%LOCALAPPDATA%\Celeslib\HoKAcePatcher\worker\<sha256_prefix16>\ace-worker.exe`.
+   - **Embedded Payload (`ace-worker.exe`):** Berukuran tetap `53.927.862` byte (`0x336DFB6`) (SHA-256: `a648e25463685c392618ae46631f11fb79254f997d3e570bab4dd5dbf877476c`), diverifikasi dengan SHA-256 sebelum diekstrak ke `%LOCALAPPDATA%\Celeslib\HoK Ace Patcher\ace-worker.exe`.
 
 ---
 

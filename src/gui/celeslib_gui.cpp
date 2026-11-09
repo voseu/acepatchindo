@@ -71,6 +71,7 @@ struct AppState {
     std::wstring status_text = L"SIAP";
     Gdiplus::Color status_color = Theme::AccentGreen;
     bool is_busy = false;
+    HANDLE active_process = NULL;
     int hovered_btn = -1;
     std::mutex mtx;
 
@@ -81,6 +82,29 @@ struct AppState {
 
 static AppState g_state;
 static HWND g_hwnd = nullptr;
+
+// Terminate active child worker process if GUI is closing
+void TerminateActiveWorker() {
+    std::lock_guard<std::mutex> lock(g_state.mtx);
+    if (g_state.active_process != NULL) {
+        TerminateProcess(g_state.active_process, 1);
+        g_state.active_process = NULL;
+    }
+}
+
+// Clean up any stray orphan ace-worker.exe left over from a previously closed/crashed session
+void KillOrphanWorkers() {
+    STARTUPINFOW si = { sizeof(si) };
+    si.dwFlags = STARTF_USESHOWWINDOW;
+    si.wShowWindow = SW_HIDE;
+    PROCESS_INFORMATION pi = { 0 };
+    wchar_t cmd[] = L"taskkill.exe /F /IM ace-worker.exe /T";
+    if (CreateProcessW(NULL, cmd, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
+        WaitForSingleObject(pi.hProcess, 2000);
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+    }
+}
 
 // Embedded Worker Protocol
 static const char WORKER_MAGIC_HEADER[] = "CELESLIB_WORKER_V1";
@@ -476,6 +500,10 @@ void ExecuteWorkerAction(const std::wstring& action, const std::wstring& game_pa
                 cmd << L" --game-dir \"" << game_path << L"\"";
             }
 
+            if (action == L"install" || action == L"restore") {
+                KillOrphanWorkers();
+            }
+
             std::wstring cmd_str = cmd.str();
             AppendLog(L"[INFO] Menjalankan: " + cmd_str);
 
@@ -503,6 +531,10 @@ void ExecuteWorkerAction(const std::wstring& action, const std::wstring& game_pa
             cmd_buf.push_back(0);
 
             if (CreateProcessW(NULL, cmd_buf.data(), NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
+                {
+                    std::lock_guard<std::mutex> lock(g_state.mtx);
+                    g_state.active_process = pi.hProcess;
+                }
                 CloseHandle(hWrite);
 
                 char buf[512];
@@ -528,6 +560,10 @@ void ExecuteWorkerAction(const std::wstring& action, const std::wstring& game_pa
                 WaitForSingleObject(pi.hProcess, INFINITE);
                 DWORD exit_code = 0;
                 GetExitCodeProcess(pi.hProcess, &exit_code);
+                {
+                    std::lock_guard<std::mutex> lock(g_state.mtx);
+                    g_state.active_process = NULL;
+                }
                 CloseHandle(pi.hProcess);
                 CloseHandle(pi.hThread);
                 CloseHandle(hRead);
@@ -679,6 +715,10 @@ void ExecuteMobileWorkerAction(const std::wstring& operation) {
             cmd_buf.push_back(0);
 
             if (CreateProcessW(NULL, cmd_buf.data(), NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
+                {
+                    std::lock_guard<std::mutex> lock(g_state.mtx);
+                    g_state.active_process = pi.hProcess;
+                }
                 CloseHandle(hWrite);
 
                 char buf[512];
@@ -704,6 +744,10 @@ void ExecuteMobileWorkerAction(const std::wstring& operation) {
                 WaitForSingleObject(pi.hProcess, INFINITE);
                 DWORD exit_code = 0;
                 GetExitCodeProcess(pi.hProcess, &exit_code);
+                {
+                    std::lock_guard<std::mutex> lock(g_state.mtx);
+                    g_state.active_process = NULL;
+                }
                 CloseHandle(pi.hProcess);
                 CloseHandle(pi.hThread);
                 CloseHandle(hRead);
@@ -1293,6 +1337,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                     return 0;
                 }
                 if (x >= 934 && x <= 980) {
+                    TerminateActiveWorker();
                     PostQuitMessage(0);
                     return 0;
                 }
@@ -1495,7 +1540,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_ERASEBKGND:
             return 1; // Prevent flicker
 
+        case WM_CLOSE:
+            TerminateActiveWorker();
+            DestroyWindow(hwnd);
+            return 0;
+
         case WM_DESTROY:
+            TerminateActiveWorker();
             PostQuitMessage(0);
             return 0;
     }

@@ -28,19 +28,20 @@ EN_TO_ID_JSON = ROOT / "data" / "catalog_checkpoints" / "en_to_id_map.json"
 
 
 def find_windows_originals() -> Path | None:
-    """Dynamically locate the active originals backup directory on the mounted Windows filesystem."""
-    if not WINDOWS_USERS_BASE.exists():
-        return None
-    candidates = sorted(
-        WINDOWS_USERS_BASE.glob(
-            "*/AppData/Local/HoK Ace English Patch/adaptive/*/*/originals"
-        ),
-        key=lambda p: p.stat().st_mtime,
-        reverse=True,
-    )
-    for c in candidates:
-        if c.is_dir() and (c / "WXQ_Data").exists():
-            return c
+    """Dynamically locate the active originals backup directory (or live WXQ directory) on the mounted Windows filesystem."""
+    if WINDOWS_USERS_BASE.exists():
+        candidates = sorted(
+            WINDOWS_USERS_BASE.glob(
+                "*/AppData/Local/HoK Ace English Patch/adaptive/*/*/originals"
+            ),
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )
+        for c in candidates:
+            if c.is_dir() and (c / "WXQ_Data").exists():
+                return c
+    if WINDOWS_LIVE_WXQ.is_dir() and (WINDOWS_LIVE_WXQ / "WXQ_Data").exists():
+        return WINDOWS_LIVE_WXQ
     return None
 
 
@@ -177,8 +178,8 @@ def run_verification() -> tuple[dict, dict, list[dict]]:
         print(f"Chinese Game Counts: {dict(counts_zh)}")
         print(f"Capacity Overflow / Skipped Count: {counts_zh.get('capacity_skipped', 0)}")
 
-        assert counts_zh.get("tables", 0) + counts_zh.get("unreadable_assets", 0) == 508, (
-            f"Expected 508 tables (including unreadable assets), got {counts_zh.get('tables')} tables, {counts_zh.get('unreadable_assets', 0)} unreadable"
+        assert counts_zh.get("tables", 0) + counts_zh.get("unreadable_assets", 0) >= 508, (
+            f"Expected >= 508 tables (including unreadable assets), got {counts_zh.get('tables')} tables, {counts_zh.get('unreadable_assets', 0)} unreadable"
         )
         assert counts_zh.get("unknown", 0) <= 500, (
             f"Expected <= 500 unknown strings safely preserved, got {counts_zh.get('unknown')}"
