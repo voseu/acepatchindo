@@ -370,27 +370,42 @@ ATOMIC_TAGGED_SPAN_RE = re.compile(
 )
 
 
+NORM_ZH_LIFE_RE = re.compile(r"棋手生命(?!值)")
+NORM_ZH_UNWRAP_NUM_RE = re.compile(r"\{[0-9]+\|([^{}]+)\}")
+NORM_ZH_UNWRAP_NAME_RE = re.compile(r"\{[^{}:]+:\s*([^{}]+)\}")
+NORM_ZH_TRACKER_RE = re.compile(
+    r"[（\(][^）\)]*(?:当前|已击败|击败次数|复生次数|还剩|胜利次数|幸运数字|剩余使用次数|还可获得)[^）\)]*[）\)]"
+)
+NORM_ZH_STRIP_PH_RE = re.compile(r"\{[^{}]*\}")
+NORM_ZH_SPACES_RE = re.compile(r"\s+")
+
+
 def normalize_plain_zh(text: str) -> str:
     """Strip Unity tags, control tokens, dynamic placeholders, and whitespace so text matches Tier 1 descCn."""
     s = TAG_RE.sub("", text)
     s = CONTROL_TOKEN_RE.sub("", s)
     # 1. Replace game token placeholders with their Chinese wiki equivalents
     s = s.replace("{Energy}", "能量").replace("{LordExp}", "棋手经验").replace("{LordHp}", "棋手生命值")
-    s = re.sub(r"棋手生命(?!值)", "棋手生命值", s)
+    s = NORM_ZH_LIFE_RE.sub("棋手生命值", s)
     # 2. Unwrap default values from dynamic placeholders instead of deleting them
-    s = re.sub(r"\{[0-9]+\|([^{}]+)\}", r"\1", s)
-    s = re.sub(r"\{[^{}:]+:\s*([^{}]+)\}", r"\1", s)
+    s = NORM_ZH_UNWRAP_NUM_RE.sub(r"\1", s)
+    s = NORM_ZH_UNWRAP_NAME_RE.sub(r"\1", s)
     # 3. Strip runtime tracker suffixes and brackets/quotes
-    s = re.sub(r"（[^）]*当前[^）]*）", "", s)
-    s = re.sub(r"\([^)]*当前[^)]*\)", "", s)
+    s = NORM_ZH_TRACKER_RE.sub("", s)
     s = s.replace("【", "[").replace("】", "]").replace("“", "").replace("”", "").replace('"', "")
-    s = re.sub(r"\{[^{}]*\}", "", s)
-    return re.sub(r"\s+", "", s).strip()
+    s = NORM_ZH_STRIP_PH_RE.sub("", s)
+    return NORM_ZH_SPACES_RE.sub("", s).strip()
 
 
 def adapt_tier1_placeholders_to_source(source_zh: str, t1_id: str) -> str:
     """Preserve game runtime placeholders ({Energy}, {LordExp}, {LordHp}, dynamic templates, and tracker suffixes)."""
     out = t1_id
+
+    # Identify trailing tracker clauses and their internal placeholders
+    tracker_clauses = [m.group(0) for m in NORM_ZH_TRACKER_RE.finditer(source_zh)]
+    tracker_phs: set[str] = set()
+    for tc in tracker_clauses:
+        tracker_phs.update(PLACEHOLDER_RE.findall(tc))
 
     # 1. Map icon placeholders if in source_zh
     if "{LordExp}" in source_zh and out.count("{LordExp}") < source_zh.count("{LordExp}"):
@@ -424,34 +439,68 @@ def adapt_tier1_placeholders_to_source(source_zh: str, t1_id: str) -> str:
         full_ph = m.group(0)
         if full_ph in out:
             continue
+        if full_ph in tracker_phs:
+            continue
         val = m.group(2)
         pattern = r"(?<![A-Za-z0-9_{|])" + re.escape(val) + r"(?![A-Za-z0-9_{|])"
         out = re.sub(pattern, full_ph, out, count=1)
 
-    # 2b. Named or token dynamic placeholders with defaults: {Name: val}
+    # 2c. Named or token dynamic placeholders with defaults: {Name: val}
     for m in re.finditer(r"\{([A-Za-z0-9_]+)\s*:\s*([^{}]+)\}", source_zh):
         full_ph = m.group(0)
+        if full_ph in out:
+            continue
+        # Skip tracker placeholders so they never replace leading stat numbers in main body!
+        if full_ph in tracker_phs:
+            continue
         val = m.group(2).strip()
+
+        # If it's a Tier Voucher placeholder, strictly attach to Tier number!
+        if "阶英雄兑换券" in source_zh and ("Hero Voucher" in out or "Tier" in out):
+            pattern_tier = r"(?<=\bTier\s)" + re.escape(val) + r"(?![A-Za-z0-9_{|])"
+            if re.search(pattern_tier, out):
+                out = re.sub(pattern_tier, full_ph, out, count=1)
+                continue
+
         pattern = r"(?<![A-Za-z0-9_{|:])" + re.escape(val) + r"(?![A-Za-z0-9_{|])"
         out = re.sub(pattern, full_ph, out, count=1)
 
-    # 3. Trailing tracker suffixes in source_zh (e.g. （当前已获得：{Dynamic:0}） or (Saat ini: {Dynamic:0}))
-    m_sfx = re.search(r"[（\(]([^）\)]*当前[^）\)]*)[）\)]", source_zh)
-    if m_sfx and not re.search(r"[（\(][^）\)]*Saat\s+ini[^）\)]*[）\)]", out, flags=re.I):
-        sfx_raw = m_sfx.group(1)
-        inner_phs = PLACEHOLDER_RE.findall(sfx_raw)
-        if "{Dynamic:" in sfx_raw:
-            dyn_m = re.search(r"\{Dynamic:\d+\}", sfx_raw)
-            dyn_ph = dyn_m.group(0) if dyn_m else "{Dynamic:0}"
-            out = out.rstrip(". ") + f" (Saat ini: {dyn_ph})."
-        elif inner_phs:
-            ph_str = inner_phs[0]
-            if "层" in sfx_raw:
-                out = out.rstrip(". ") + f" (Saat ini: {ph_str} Lapis)."
-            elif "胜" in sfx_raw:
-                out = out.rstrip(". ") + f" (Saat ini: {ph_str} Kemenangan)."
+    # 3. Trailing tracker suffixes in source_zh
+    for tc in tracker_clauses:
+        inner_phs = PLACEHOLDER_RE.findall(tc)
+        if not inner_phs:
+            continue
+        ph = inner_phs[0]
+        if "已击败" in tc or "killcount" in tc:
+            if re.search(r"Sudah\s+mengalahkan:\s*(?:\d+|\{[^{}]+\})", out, re.I):
+                out = re.sub(r"(Sudah\s+mengalahkan:\s*)(?:\d+|\{[^{}]+\})", rf"\g<1>{ph}", out, flags=re.I)
+            elif re.search(r"Dikalahkan:\s*(?:\d+|\{[^{}]+\})", out, re.I):
+                out = re.sub(r"(Dikalahkan:\s*)(?:\d+|\{[^{}]+\})", rf"\g<1>{ph}", out, flags=re.I)
+            elif ph not in out:
+                out = out.rstrip(". ") + f" (Sudah mengalahkan: {ph})."
+        elif "复生次数" in tc or "ResCardInfoDataBin_1541" in tc:
+            if re.search(r"total\s+Revive:\s*(?:\d+|\{[^{}]+\})", out, re.I):
+                out = re.sub(r"(total\s+Revive:\s*)(?:\d+|\{[^{}]+\})", rf"\g<1>{ph}", out, flags=re.I)
+            elif ph not in out:
+                out = out.rstrip(". ") + f" (total Revive: {ph})."
+        elif "XYTokenAValue" in tc:
+            if re.search(r"(?:saat\s+ini|Current):\s*(?:\d+|\{[^{}]+\})", out, re.I):
+                out = re.sub(r"((?:saat\s+ini|Current):\s*)(?:\d+|\{[^{}]+\})", rf"\g<1>{ph}", out, flags=re.I)
+        elif "当前" in tc and ph not in out:
+            if "{Dynamic:" in tc:
+                dyn_m = re.search(r"\{Dynamic:\d+\}", tc)
+                dyn_ph = dyn_m.group(0) if dyn_m else "{Dynamic:0}"
+                out = out.rstrip(". ") + f" (Saat ini: {dyn_ph})."
+            elif "层" in tc:
+                out = out.rstrip(". ") + f" (Saat ini: {ph} Lapis)."
+            elif "胜" in tc:
+                out = out.rstrip(". ") + f" (Saat ini: {ph} Kemenangan)."
+            elif "张" in tc:
+                out = out.rstrip(". ") + f" (Saat ini: {ph} Kartu)."
+            elif "件" in tc:
+                out = out.rstrip(". ") + f" (Saat ini: {ph} item)."
             else:
-                out = out.rstrip(". ") + f" (Saat ini: {ph_str})."
+                out = out.rstrip(". ") + f" (Saat ini: {ph})."
 
     return out
 

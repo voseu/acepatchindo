@@ -586,7 +586,16 @@ def test_12_forensic_cleanliness_and_zero_regressions():
         ("sebuah milikmu / Awaken milikmu Kartu", re.compile(r"\bsebuah\s+milikmu\b|\bAwaken(?:ed)?\s+milikmu\s+Kartu\b", re.I)),
         ("Khusus Tamu", re.compile(r"\bKhusus\s+Tamu\b", re.I)),
         ("tag kartu anti-evasion", re.compile(r">[A-Za-z][A-Za-z0-9 '·•\-:&]*(?:</b>)?(?:</color>)?(?:</a>)?\s+[Kk]artu\b(?!\s+(?:Hero|Efek|Equipment|Talent|Strategi|Mekanisme|Taktik|Biru|Pilihan))")),
-        ("Kartu Shouyue", re.compile(r"\bKartu\s+Shouyue\b")),
+        ("Baili Shouyue", re.compile(r"\bBaili\s+Shouyue\b", re.I)),
+        ("Baili Xuance", re.compile(r"\bBaili\s+Xuance\b", re.I)),
+        ("Blade of Fate / terkenal pedang", re.compile(r"\b(?:Blade of Fate|terkenal pedang)\b", re.I)),
+        ("Tim Buff / Semua anggota meningkatkan", re.compile(r"\bTim\s+Buff\b|Semua\s+anggota\s+meningkatkan", re.I)),
+        ("0-yuan / 0 Yuan", re.compile(r"\b0-(?:yuan|Yuan)\b|\b0\s+Yuan\b", re.I)),
+        ("double colon", re.compile(r"::")),
+        ("nested brackets", re.compile(r"\[[^\]]*\[|\][^\[]*\]")),
+        ("split decimal / range", re.compile(r"\d+\s*(?:miliknya|mereka)\s*[\.\-~]\s*\d+|\d+\s*[\.\-~]\s*(?:miliknya|mereka)\s*\d+")),
+        ("masuk field / mimpi menyimpan / peluang ke", re.compile(r"\bmasuk\s+field\b|\bmimpi\s+menyimpan\b|\bpeluang\s+ke\s+(?:me|ber|ter|di)", re.I)),
+        ("Modifier kartu inverted", re.compile(r"\b(?:Shared Fortune|Mysterious Hero|Lanjutan Mekanisme|Tier tinggi|No Faction|Lelang|Umum)\s+[Kk]artu\b")),
         ("chess", re.compile(r"\bchess\b", re.I)),
         ("papan", re.compile(r"\bpapan\b", re.I)),
         ("Unbracketed Faction", re.compile(UNBRACKETED_FACTION)),
@@ -605,4 +614,10 @@ def test_12_forensic_cleanliness_and_zero_regressions():
             assert not re.search(r"\bPeserta\b", val, re.I), f"Peserta leak in {val!r}"
         if "第二" in zh and "秒" not in zh:
             assert not re.search(r"\bdetik\b", val, re.I), f"detik leak in {val!r}"
+        if "平局" in zh:
+            assert not re.search(r"\bMenarik\b", val, re.I), f"Menarik leak for 平局 in {val!r}"
+        if "获得1张{ResCardInfoDataBin_1981" in zh:
+            assert re.search(r"Tier\s*\{ResCardInfoDataBin_1981", val), f"Voucher Tier placeholder not aligned in {val!r}"
+        if "{killcount:0}" in zh:
+            assert not re.search(r"memperoleh\s*\{killcount:0\}", val, re.I), f"killcount placeholder swapped into stat slot in {val!r}"
 

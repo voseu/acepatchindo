@@ -201,6 +201,46 @@ WINDOWS_108_TARGET_DESC_ID: dict[str, str] = {
     "随机获得3张不同阵营的英雄牌，并使其等级+3。": (
         "Dapatkan 3 Kartu Hero acak dari Faction berbeda, dan Level-nya bertambah +3."
     ),
+    "曜化作星辰对当前目标造成<color=#dfa15e>70+120%物理攻击力的物理伤害</color>。": (
+        "Yao berubah jadi bintang dan memberikan <color=#dfa15e>70+120% Physical Attack sebagai Physical Damage</color> ke target saat ini."
+    ),
+    "曜化作星辰对当前目标造成70+120%物理攻击力的物理伤害。": (
+        "Yao berubah jadi bintang dan memberikan 70+120% Physical Attack sebagai Physical Damage ke target saat ini."
+    ),
+    "水流至多分叉出2道支流追逐两侧2格内敌人，造成等量伤害和击飞": (
+        "Aliran air bercabang hingga 2 arus yang mengejar musuh dalam 2 petak di kedua sisi, memberikan Damage setara dan efek Knock-Up."
+    ),
+    "战斗开始时，若己方有<color=#99DEB0>至少2个</color>阵营，所有英雄获<color=#99DEB0>20</color>×阵营数的等级。": (
+        "Saat Combat dimulai, jika timmu memiliki <color=#99DEB0>setidaknya 2</color> Faction, semua Hero memperoleh Level sebesar <color=#99DEB0>20</color> × jumlah Faction."
+    ),
+    "获得2张<color=#000000><b>名刀·司命</b></color>。你的{LordHp}本局第一次降至0时，不会被淘汰，并保留{1|1}{LordHp}。": (
+        "Memperoleh 2 Kartu <color=#000000><b>Destiny</b></color>. Saat {LordHp} milikmu turun ke 0 untuk pertama kalinya di pertandingan ini, tidak akan Tereliminasi dan mempertahankan {1|1} {LordHp}."
+    ),
+    "获得2张<color=#ffffff><b>名刀·司命</b></color>。你的{LordHp}本局第一次降至0时，不会被淘汰，并保留{1|1}{LordHp}。": (
+        "Memperoleh 2 Kartu <color=#ffffff><b>Destiny</b></color>. Saat {LordHp} milikmu turun ke 0 untuk pertama kalinya di pertandingan ini, tidak akan Tereliminasi dan mempertahankan {1|1} {LordHp}."
+    ),
+    "获得3张名刀·司命。下一场对战你的棋手不会被淘汰。": (
+        "Memperoleh 3 Kartu Destiny. Contestant milikmu tidak akan Tereliminasi pada pertandingan berikutnya."
+    ),
+    "获得<color=#FFD700>全员增幅·二</color>：场上所有己方英雄等级+5。": (
+        "Memperoleh <color=#FFD700>Team Buff II</color>: Semua Hero sekutu di arena mendapat +5 Level."
+    ),
+    "获得<color=#FFD700>全员增幅·二</color>：场上所有己方英雄等级+{AddLevel:10}。此效果每回合增强5级。": (
+        "Memperoleh <color=#FFD700>Team Buff II</color>: Level dari semua Hero sekutu di arena +{AddLevel:10}. Efek ini meningkat sebesar 5 Level setiap Round."
+    ),
+    "获得一张效果牌<color=#FFD700>全员增幅·一</color>：己方英雄等级+3。\n战斗开始时，若己方英雄总等级不高于敌方，则己方英雄获得+5═临时等级，直到战斗结束；反之，则己方全体获得10点法力值。": (
+        "Memperoleh 1 Kartu Efek <color=#FFD700>Team Buff I</color>: Hero sekutu mendapat +3 Level.\nSaat Combat dimulai, jika Total Level Hero sekutu tidak lebih tinggi dari musuh, Hero sekutu mendapat +5 ═Temporary Level hingga pertempuran usai; jika sebaliknya, semua Hero sekutu mendapat 10 Mana."
+    ),
+    "全体【逐鹿】英雄本回合获得200（+100×战术牌打出次数，当前：{XYTokenAValue_up:300}）点<b>护盾</b>。": (
+        "Semua Hero [Zhulu Plateau] memperoleh 200 <b>Shield</b> pada Round ini (+100 untuk tiap Kartu Efek yang dimainkan, saat ini: {XYTokenAValue_up:300})."
+    ),
+    "<a href=3130012>╆<b>转瞬</b></a>\n全体【逐鹿】英雄本回合获得200（+100×战术牌打出次数，当前：{XYTokenAValue_up:300}）点<b>护盾</b>。": (
+        "<a href=3130012>╆<b>Fleeting</b></a>\nSemua Hero [Zhulu Plateau] memperoleh 200 <b>Shield</b> pada Round ini (+100 untuk tiap Kartu Efek yang dimainkan, saat ini: {XYTokenAValue_up:300})."
+    ),
+    "零元购：第一轮拍卖": "Beli 0 Gold: Lelang Putaran ke-1",
+    "零元购：第二轮拍卖": "Beli 0 Gold: Lelang Putaran ke-2",
+    "零元购：第三轮拍卖": "Beli 0 Gold: Lelang Putaran ke-3",
+    "拍卖重现：第三轮拍卖": "Kilas Balik Lelang: Lelang Putaran ke-3",
 }
 
 # Non-target strings kept in clean English

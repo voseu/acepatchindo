@@ -601,11 +601,257 @@ ZH_SERIES_HEADER_MAP: dict[str, str] = {
     "通用系列": "General Series",
 }
 
+SERIES_HEADER_RE = re.compile(
+    r"^((?:<a\s+href=[^>]+>)?<color=#99DEB0>)([^<]*系列)(</color>(?:</a>)?)\n(.+)$",
+    flags=re.S,
+)
+CHEST_CHOICE_RE = re.compile(r"(?:指定英雄穿戴|穿戴给英雄)，可从(.+?)中选择(\d+)件。")
+HERO_CHOICE_VOUCHER_RE = re.compile(r"(\d+)选(\d+)(?:【([^】]+)】|(无阵营)的?)(\d+)阶英雄，获得(\d+)张该英雄牌。")
+HERO_SPECIFIED_RE = re.compile(r"^(.*?)指定(\d+)名英雄，获得(\d+)张该英雄牌。(.*)$")
+OPUS_CORRUPTION_RE = re.compile(
+    r"♪|♫|Synchronis|\(Text\)|\bRiot rate\b|\d+\s*(?:Zhang|Chang)\b|Forensic|small part of the world|non-resistible|breached\.",
+    flags=re.I,
+)
+SEMICOLON_SPLIT_RE = re.compile(r";\s*(?=[A-Z]|Pilih|Dapatkan|Memperoleh)")
+NUM_FIND_RE = re.compile(r"\d+(?:\.\d+)?")
+SPACES_RE = re.compile(r"[ \t]+")
+NORM_SPACES_RE = re.compile(r"\s+")
+CARD_HERO_NAME_INVERT_RE = re.compile(
+    r"\b(Ancient Coin|Refined Ancient Coin|Central Plain|Zhulu(?: Plateau)?|Three Kingdoms|Sunset(?: Sea)?|Jixia|Great Wall|Xuanyong|Yaotian|Cloudream|Riverlands)\s+[Kk]artu(?:\s+Hero)?\b"
+)
+RANDOM_CARD_RE = re.compile(r"\b(\d+)\s+[Aa]cak\s+(Kartu\s+[A-Za-z ]+)\b")
+SEBUAH_NUM_RE = re.compile(r"\bsebuah\s+((?:<[^>]+>\s*)*\d+)", flags=re.I)
+NUM_PLACEHOLDER_RE = re.compile(r"\{[^{}]*\}")
+CTRL_FIND_RE = re.compile(r"[\u2540-\u257f]")
+
+COMPILED_VAR_SUBS: tuple[tuple[re.Pattern[str], str], ...] = tuple(
+    (re.compile(pat, flags=re.IGNORECASE), repl)
+    for pat, repl in [
+        (r"(?<![A-Za-z])(?:Magic|Magical)\s+ATK(?![A-Za-z])", "Magic Attack"),
+        (r"(?<![A-Za-z])Physical\s+ATK(?![A-Za-z])", "Physical Attack"),
+        (r"(?<![A-Za-z])Sage['’]s\s+Sanctuary(?![A-Za-z])", "Sage's Sanctuary"),
+        (r"\b(\d+)\s*Chang\b", r"\1 kartu"),
+        (r"\b(\d+)\s*Number of times\b", r"\1 kali"),
+        (r"(?<![A-Za-z])Magical Attack(?![A-Za-z])", "Magic Attack"),
+        (r"(?<![A-Za-z])Magical Damage(?![A-Za-z])", "Magic Damage"),
+        (r"(?<![A-Za-z])Magical Defense(?![A-Za-z])", "Magic Defense"),
+        (r"(?<![A-Za-z])Spell Penetration(?![A-Za-z])", "Magic Penetration"),
+        (
+            r"(?<![A-Za-z])(?:Maximum HP|Max Health|Maximum Health)(?![A-Za-z])",
+            "Max HP",
+        ),
+        (r"(?<![A-Za-z])Maximum Mana(?![A-Za-z])", "Max Mana"),
+        (
+            r"(?<![A-Za-z])(?:Exquisite Ancient Coins|Exquisite Ancient Coin|Refined Ancient Coins)(?![A-Za-z])",
+            "Refined Ancient Coin",
+        ),
+        (r"\bfans\s+(?:his|her|its|their)\s+wings\b", "mengepakkan sayapnya"),
+        (r"(?<![A-Za-z])wolf\s+souls(?![A-Za-z])", "Wolf Souls"),
+        (r"(?<![A-Za-z])wolf\s+soul(?![A-Za-z])", "Wolf Soul"),
+        (r"(?<![A-Za-z])bear\s+spirits(?![A-Za-z])", "Bear Spirits"),
+        (r"(?<![A-Za-z])bear\s+spirit(?![A-Za-z])", "Bear Spirit"),
+        (r"(?<![A-Za-z])shadow\s+servants(?![A-Za-z])", "Shadow Servants"),
+        (r"(?<![A-Za-z])shadow\s+servant(?![A-Za-z])", "Shadow Servant"),
+        (r"(?<![A-Za-z])chaos\s+rifts(?![A-Za-z])", "Chaos Rifts"),
+        (r"(?<![A-Za-z])chaos\s+rift(?![A-Za-z])", "Chaos Rift"),
+        (r"(?<![A-Za-z])mechanical\s+puppets(?![A-Za-z])", "Mechanical Puppets"),
+        (r"(?<![A-Za-z])mechanical\s+puppet(?![A-Za-z])", "Mechanical Puppet"),
+        (r"(?<![A-Za-z])spinning\s+blades(?![A-Za-z])", "Spinning Blades"),
+        (r"(?<![A-Za-z])spinning\s+blade(?![A-Za-z])", "Spinning Blade"),
+        (
+            r"\bspreads\s+(?:his|her|its|their)\s+wings\s+to\s+dance\b",
+            "membentangkan sayapnya dan menari",
+        ),
+        (
+            r"\bimproving\s+(?:his|her|its|their)\s+attack\s+by\b",
+            "meningkatkan Attack miliknya sebesar",
+        ),
+        (r"(?<![A-Za-z])Ancient Coins(?![A-Za-z])", "Ancient Coin"),
+        (r"(?<![A-Za-z])Perfect Resurrection(?![A-Za-z])", "Perfect Revive"),
+        (r"(?<![A-Za-z])Akomia Core(?![A-Za-z])", "Arcomia Core"),
+        (r"(?<![A-Za-z])Fire Thief(?![A-Za-z])", "Steal Fire"),
+        (r"(?<![A-Za-z])(?:Talent Cards|Talent Card)(?![A-Za-z])", "Kartu Talent"),
+        (r"(?<![A-Za-z])(?:Effect Cards|Effect Card)(?![A-Za-z])", "Kartu Efek"),
+        (
+            r"(?<![A-Za-z])(?:Equipment Cards|Equipment Card)(?![A-Za-z])",
+            "Kartu Equipment",
+        ),
+        (r"(?<![A-Za-z])(?:Hero Vouchers|Hero Voucher)(?![A-Za-z])", "Voucher Hero"),
+        (r"(?<![A-Za-z])Temporary Levels?\s+up(?![A-Za-z])", "Peningkatan Temporary Level"),
+        (r"(?<![A-Za-z])Temporary Levels(?![A-Za-z])", "Temporary Level"),
+        (r"(?<![A-Za-z])real (?:Level|Tier)s?(?![A-Za-z])", "True Level"),
+        (
+            r"(?<![A-Za-z])(?:Perfect Revivals?|Perfect Resurrections?)(?![A-Za-z])",
+            "Perfect Revive",
+        ),
+        (r"(?<![A-Za-z])faster growth(?![A-Za-z])", "pertumbuhan lebih cepat"),
+        (r"(?<![A-Za-z])growth methods?(?![A-Za-z])", "metode pertumbuhan"),
+        (r"\b([A-Z][A-Za-z0-9'&.\- ]{1,25}?)'s\s+basic\s+attacks?\b", r"Basic Attack \1"),
+        (r"\b([A-Z][A-Za-z0-9'&.\- ]{1,25}?)'s\s+attacks?\b", r"serangan \1"),
+        (r"\bNo\.\s*(\d+)\s+laser\s+cannon\b", r"Laser Cannon No.\1"),
+        (r"\bNo\.\s*(\d+)\b", r"No.\1"),
+        (r"\bBullet Damage Up\b", "Peningkatan Damage Peluru"),
+        (r"\bMissile Decay Down\b", "Pengurangan Decay Rudal"),
+        (r"\bPassive Cap Up\b", "Peningkatan Batas Pasif"),
+        (r"\bBounce Count Up\b", "Peningkatan Jumlah Pantulan"),
+        (r"\bRestore Effect Up\b", "Peningkatan Efek Pemulihan"),
+        (r"\bDamage Up\b", "Peningkatan Damage"),
+        (r"\bDecay Down\b", "Pengurangan Decay"),
+        (r"\bCap Up\b", "Peningkatan Batas"),
+        (r"\bCount Up\b", "Peningkatan Jumlah"),
+        (r"\bRange Up\b", "Peningkatan Jarak"),
+        (r"\bDuration Up\b", "Peningkatan Durasi"),
+        (r"\bEffect Up\b", "Peningkatan Efek"),
+        (r"\bLimit Up\b", "Peningkatan Batas"),
+        (r"\bSpeed Up\b", "Peningkatan Kecepatan"),
+        (r"\bCooldown Down\b", "Pengurangan Cooldown"),
+        (r"\bknocks?\s+up\b", "memberi efek Knock-Up"),
+        (r"\bknocked\s+up\b", "terkena Knock-Up"),
+        (r"\bknocking\s+up\b", "memberi efek Knock-Up"),
+        (r"\bknock\s+up\b", "Knock-Up"),
+        (r"\bKnock-up\b", "Knock-Up"),
+        (r"\bon\s+skill\s+cast\b", "saat menggunakan Skill"),
+        (r"\bon\s+cast\b", "saat digunakan"),
+        (r"\bon\s+casting\b", "saat menggunakan"),
+        (r"\bCombat Start\b", "Awal Combat"),
+        (r"\bprepares?\s+for\s+war\b", "Prepare"),
+        (r"\bplayed\s+at\s+the\s+same\s+time\b", "diterjunkan bersamaan"),
+        (r"\bplay\s+at\s+the\s+same\s+time\b", "diterjunkan bersamaan"),
+        (r"\bhighest-Tier\s+Hero\b", "Hero Tier tertinggi"),
+        (r"\byour\s+highest-Level\s+Hero\b", "Hero milikmu dengan Level tertinggi"),
+        (r"\bhighest-Level\s+Hero\b", "Hero Level tertinggi"),
+        (r"\bself-destructs?\b", "meledakkan diri"),
+        (r"\blowest\s+HP\s+value\b", "HP terendah"),
+        (r"\bhighest\s+current\s+HP\s+percentage\b", "persentase HP saat ini tertinggi"),
+        (r"\bfor\s+the\s+next\s+(\d+)\s+seconds?\b", r"selama \1 detik berikutnya"),
+        (r"\bstrengthening\s+cards?\b", "Kartu Penguatan"),
+        (r"\ban\s+allied\s+Summon\b", "unit Summon sekutu"),
+        (r"\ballied\s+Summons?\b", "unit Summon sekutu"),
+        (r"\bAttack\s+mode\b", "mode serangan"),
+        (r"\bpoints?\s+of\s+Attack\b", "poin Attack"),
+        (r"\bAttack\s+damage\b", "Damage serangan"),
+        (r"\bAttack\s+Bonus\b", "Bonus Attack"),
+    ]
+)
+
+COMPILED_GLOSSARY_CLEANUP_RULES: tuple[tuple[re.Pattern[str], str | Callable], ...] = (
+    (
+        re.compile(
+            r"\bke\s+(me[a-z]+|ber[a-z]+|ter[a-z]+|di[a-z]+|memper[a-z]+|meng[a-z]+|meny[a-z]+|men[a-z]+|mem[a-z]+|mel[a-z]+|mer[a-z]+)\b",
+            re.I,
+        ),
+        lambda m: f"untuk {m.group(1).lower()}",
+    ),
+    (re.compile(r"\b(Basic Attack)(?:\s+\1)+\b", re.I), r"\1"),
+    (
+        re.compile(
+            r"\b(meningkatkan|mengurangi|menambah|menurunkan)\s+([^.,;:\n]{1,40}?)\s+oleh\s+(?=(?:<[^>]+>\s*)*[\d\[{+-])",
+            re.I,
+        ),
+        r"\1 \2 sebesar ",
+    ),
+    (re.compile(r"\bLuban\s+Tidak(?:\.\s*|\s+)(\d+)\b"), r"Luban No.\1"),
+    (re.compile(r"\bTidak\.\s*(\d+)\b"), r"No.\1"),
+    (re.compile(r"\bHebat Dinding\b"), "Great Wall"),
+    (re.compile(r"\bMechanical Minion sebuah(\d+)\b"), r"Mechanical Minion A\1"),
+    (re.compile(r"\bmementalkan\s+atas\b", re.I), "Knock-Up"),
+    (re.compile(r"\bDamage\s+Atas\b", re.I), "Peningkatan Damage"),
+    (re.compile(r"\bDecay\s+Bawah\b", re.I), "Pengurangan Decay"),
+    (re.compile(r"\bBatas\s+Atas\b", re.I), "Peningkatan Batas"),
+    (re.compile(r"\bpada\s+skill\s+menggunakan\b", re.I), "saat menggunakan Skill"),
+    (re.compile(r"\bpada\s+menggunakan\b", re.I), "saat digunakan"),
+    (re.compile(r"\bdasar\s+([A-Z][A-Za-z0-9'&.\- ]{1,25}?)\s+serangan\b"), r"Basic Attack \1"),
+    (re.compile(r"\bdasar\s+serangan\b"), "Basic Attack"),
+    (
+        re.compile(
+            r"\bmelompat\s+menjadi\s+(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)(?:\s+dari\s+musuh)?\b",
+            re.I,
+        ),
+        "melompat ke area terpadat musuh",
+    ),
+    (re.compile(r"\bmelompat\s+menjadi\s+padat\s+musuh\s+formasi\b", re.I), "melompat ke formasi musuh yang padat"),
+    (
+        re.compile(
+            r"\bmelompat\s+(?:dengan\s+suci\s+pedang\s+)?menjadi\s+(?:sebuah\s+)?padat\s+(?:grup|area|formasi)(?:\s+dari\s+musuh)?\b",
+            re.I,
+        ),
+        "melompat ke area terpadat musuh",
+    ),
+    (
+        re.compile(r"\bmenerjang\s+menjadi\s+(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)\b", re.I),
+        "menerjang ke area terpadat musuh",
+    ),
+    (
+        re.compile(
+            r"\bmelemparkan\s+sebuah\s+bom\s+pada\s+(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)\b",
+            re.I,
+        ),
+        "melemparkan bom ke area terpadat musuh",
+    ),
+    (
+        re.compile(r"\b(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)(?:\s+dari\s+musuh)?\b", re.I),
+        "area terpadat musuh",
+    ),
+    (re.compile(r"\bEnergi\s+bola\s+itu\s+(?:orbit\s+dia|mengelilinginya)\b", re.I), "Bola Energi yang mengelilinginya"),
+    (re.compile(r"\bBola\s+energi\s+itu\s+(?:orbit\s+dia|mengelilinginya)\b", re.I), "Bola Energi yang mengelilinginya"),
+    (re.compile(r"\bitu\s+orbit\s+dia\b", re.I), "yang mengelilinginya"),
+    (re.compile(r"\bitu\s+mengelilinginya\b", re.I), "yang mengelilinginya"),
+    (re.compile(r"\bsebuah\s+padat\b", re.I), "area terpadat"),
+    (re.compile(r"sempurna kebangkitan", re.I), "Perfect Revive"),
+    (re.compile(r"\bTemporary Level\s+atas\b", re.I), "Peningkatan Temporary Level"),
+    (re.compile(r"\bsebuah\s+((?:<[^>]+>\s*)*\d+)", re.I), r"\1"),
+    (re.compile(r"\badalah\s+milikmu\b", re.I), "milikmu"),
+    (re.compile(r"\bCombat\s+Mulai\b", re.I), "Awal Combat"),
+    (re.compile(r"\bPreparation\s+untuk\s+perang\b", re.I), "Prepare"),
+    (re.compile(r"\bbermain\s+pada\s+saat\s+yang\s+sama\b", re.I), "diterjunkan bersamaan"),
+    (re.compile(r"\btertinggi-Tier\s+Hero\b", re.I), "Hero Tier tertinggi"),
+    (re.compile(r"\btertinggi\s+milikmu-Level\s+Hero\b", re.I), "Hero milikmu dengan Level tertinggi"),
+    (re.compile(r"\bdiri\s+sendiri-menghancurkan\b", re.I), "meledakkan diri"),
+    (re.compile(r"\bnilai\s+terendah\s+HP\b", re.I), "HP terendah"),
+    (re.compile(r"\bnilai\s+tertinggi\s+HP\s+saat\s+ini\s+persentase\b", re.I), "persentase HP saat ini tertinggi"),
+    (re.compile(r"\buntuk\s+berikutnya\s+(\d+)\s+detik\b", re.I), r"selama \1 detik berikutnya"),
+    (re.compile(r"\bpenguatan\s+kartu\b", re.I), "Kartu Penguatan"),
+    (re.compile(r"\bsebuah\s+sekutu\s+Memanggil\b", re.I), "unit Summon sekutu"),
+    (re.compile(r"(\+\d+%?)\s+Menyerang\b"), r"\1 Attack"),
+    (re.compile(r"\bMenyerang\s+mode\b", re.I), "mode serangan"),
+    (re.compile(r"\bpoin\s+dari\s+Menyerang\b", re.I), "poin Attack"),
+    (re.compile(r"\bMenyerang\s+kerusakan\b", re.I), "Damage serangan"),
+    (re.compile(r"\bBonus\s+Menyerang\b", re.I), "Bonus Attack"),
+)
+
+GLOSSARY_LITERAL_REPLACEMENTS: tuple[tuple[str, str], ...] = (
+    ("[Hebat Dinding]", "[Great Wall]"),
+    ("Mechanical Minion sebuah1", "Mechanical Minion A1"),
+    ("Mechanical Minion sebuah2", "Mechanical Minion A2"),
+    ("orbit di sekitarnya", "mengelilinginya"),
+    ("Kartu Effect", "Kartu Efek"),
+    ("kartu Effect", "kartu Efek"),
+    ("Sementara Level", "Temporary Level"),
+    ("sementara Level", "Temporary Level"),
+    ("Nyata Level", "True Level"),
+    ("nyata Level", "True Level"),
+    ("Cepat Growth", "pertumbuhan lebih cepat"),
+    ("cepat growth", "pertumbuhan lebih cepat"),
+)
+
+
+def apply_glossary_cleanup(text: str) -> str:
+    out = text
+    for old, new in GLOSSARY_LITERAL_REPLACEMENTS:
+        if old in out:
+            out = out.replace(old, new)
+    for pat, repl in COMPILED_GLOSSARY_CLEANUP_RULES:
+        if callable(repl):
+            out = pat.sub(repl, out)
+        else:
+            out = pat.sub(repl, out)
+    return out
+
 
 def _normalize_en_key(text: str) -> str:
     cleaned = TAG_RE.sub("", text)
     cleaned = CONTROL_TOKEN_RE.sub("", cleaned)
-    return re.sub(r"\s+", " ", cleaned).strip().lower()
+    return NORM_SPACES_RE.sub(" ", cleaned).strip().lower()
 
 
 @dataclass
@@ -1617,6 +1863,22 @@ class ThreeTierGlossary:
                 "获得1张随机的╆转瞬英雄牌。",
                 "Mendapatkan 1 ╆Fleeting Kartu Hero acak.",
             ),
+            (
+                "立即获得<color=#99DEB0>4张</color>召唤、╉<color=#99DEB0>图腾系列</color>英雄牌。召唤单位时（含召唤物，╉图腾），获得<color=#99DEB0>1张</color>召唤、╉<color=#99DEB0>图腾系列</color>英雄牌（每回合最多<color=#99DEB0>4张</color>）。",
+                "Segera memperoleh <color=#99DEB0>4</color> Kartu Hero Seri Summon dan ╉<color=#99DEB0>Totem</color>. Saat memanggil unit (termasuk unit Summon dan ╉Totem), peroleh <color=#99DEB0>1</color> Kartu Hero Seri Summon dan ╉<color=#99DEB0>Totem</color> (maks. <color=#99DEB0>4 kartu</color> per Round).",
+            ),
+            (
+                "立即获得<color=#99DEB0>4张</color><a href=10><color=#99DEB0>╫牺牲</color></a>英雄牌。你的英雄触发<a href=10><color=#99DEB0>╫牺牲</color></a>时，获得<color=#99DEB0>1张</color><a href=10><color=#99DEB0>╫牺牲</color></a>英雄牌（每回合最多<color=#99DEB0>4张</color>）。",
+                "Segera memperoleh <color=#99DEB0>4</color> Kartu Hero <a href=10><color=#99DEB0>╫Sacrifice</color></a>. Saat Hero milikmu memicu <a href=10><color=#99DEB0>╫Sacrifice</color></a>, peroleh <color=#99DEB0>1</color> Kartu Hero <a href=10><color=#99DEB0>╫Sacrifice</color></a> (maks. <color=#99DEB0>4</color> per Round).",
+            ),
+            (
+                "立即获得<color=#99DEB0>4张牺牲</color>英雄牌。你的英雄触发<color=#99DEB0>牺牲</color>时，获得<color=#99DEB0>1张</color>牺牲英雄牌（每回合最多<color=#99DEB0>4张</color>）。",
+                "Segera memperoleh <color=#99DEB0>4 Kartu Hero Sacrifice</color>. Saat Hero milikmu memicu <color=#99DEB0>Sacrifice</color>, peroleh <color=#99DEB0>1</color> Kartu Hero Sacrifice (maks. <color=#99DEB0>4</color> per Round).",
+            ),
+            (
+                "立即获得<color=#99DEB0>4张</color>召唤、<a href=321><color=#99DEB0>╉图腾</color></a>系列英雄牌。<color=#99DEB0>召唤单位时（含召唤物，<a href=321><color=#99DEB0>╉图腾</color></a>）</color>，获得<color=#99DEB0>1张</color>召唤、<a href=321><color=#99DEB0>╉图腾</color></a>系列英雄牌（每回合最多<color=#99DEB0>4张</color>）。",
+                "Segera memperoleh <color=#99DEB0>4</color> Kartu Hero Seri Summon dan <a href=321><color=#99DEB0>╉Totem</color></a>. <color=#99DEB0>Saat memanggil unit (termasuk unit Summon dan <a href=321><color=#99DEB0>╉Totem</color></a>)</color>, peroleh <color=#99DEB0>1</color> Kartu Hero Seri Summon dan <a href=321><color=#99DEB0>╉Totem</color></a> (maks. <color=#99DEB0>4</color> per Round).",
+            ),
         ]
         for zh_c, id_c in curated_t1_pairs:
             self._register_t1_pair(zh_c, id_c)
@@ -1640,115 +1902,8 @@ class ThreeTierGlossary:
             seg = rewrite_en_card_to_id(source_zh, seg)
             out = seg.replace("The First Lands", "First Lands")
 
-            # Normalize English baseline variants to canonical Tier 1 terms
-            var_subs = [
-                (r"(?<![A-Za-z])(?:Magic|Magical)\s+ATK(?![A-Za-z])", "Magic Attack"),
-                (r"(?<![A-Za-z])Physical\s+ATK(?![A-Za-z])", "Physical Attack"),
-                (r"(?<![A-Za-z])Sage['’]s\s+Sanctuary(?![A-Za-z])", "Sage's Sanctuary"),
-                (r"\b(\d+)\s*Chang\b", r"\1 kartu"),
-                (r"\b(\d+)\s*Number of times\b", r"\1 kali"),
-                (r"(?<![A-Za-z])Magical Attack(?![A-Za-z])", "Magic Attack"),
-                (r"(?<![A-Za-z])Magical Damage(?![A-Za-z])", "Magic Damage"),
-                (r"(?<![A-Za-z])Magical Defense(?![A-Za-z])", "Magic Defense"),
-                (r"(?<![A-Za-z])Spell Penetration(?![A-Za-z])", "Magic Penetration"),
-                (
-                    r"(?<![A-Za-z])(?:Maximum HP|Max Health|Maximum Health)(?![A-Za-z])",
-                    "Max HP",
-                ),
-                (r"(?<![A-Za-z])Maximum Mana(?![A-Za-z])", "Max Mana"),
-                (
-                    r"(?<![A-Za-z])(?:Exquisite Ancient Coins|Exquisite Ancient Coin|Refined Ancient Coins)(?![A-Za-z])",
-                    "Refined Ancient Coin",
-                ),
-                (r"\bfans\s+(?:his|her|its|their)\s+wings\b", "mengepakkan sayapnya"),
-                (r"(?<![A-Za-z])wolf\s+souls(?![A-Za-z])", "Wolf Souls"),
-                (r"(?<![A-Za-z])wolf\s+soul(?![A-Za-z])", "Wolf Soul"),
-                (r"(?<![A-Za-z])bear\s+spirits(?![A-Za-z])", "Bear Spirits"),
-                (r"(?<![A-Za-z])bear\s+spirit(?![A-Za-z])", "Bear Spirit"),
-                (r"(?<![A-Za-z])shadow\s+servants(?![A-Za-z])", "Shadow Servants"),
-                (r"(?<![A-Za-z])shadow\s+servant(?![A-Za-z])", "Shadow Servant"),
-                (r"(?<![A-Za-z])chaos\s+rifts(?![A-Za-z])", "Chaos Rifts"),
-                (r"(?<![A-Za-z])chaos\s+rift(?![A-Za-z])", "Chaos Rift"),
-                (r"(?<![A-Za-z])mechanical\s+puppets(?![A-Za-z])", "Mechanical Puppets"),
-                (r"(?<![A-Za-z])mechanical\s+puppet(?![A-Za-z])", "Mechanical Puppet"),
-                (r"(?<![A-Za-z])spinning\s+blades(?![A-Za-z])", "Spinning Blades"),
-                (r"(?<![A-Za-z])spinning\s+blade(?![A-Za-z])", "Spinning Blade"),
-                (
-                    r"\bspreads\s+(?:his|her|its|their)\s+wings\s+to\s+dance\b",
-                    "membentangkan sayapnya dan menari",
-                ),
-                (
-                    r"\bimproving\s+(?:his|her|its|their)\s+attack\s+by\b",
-                    "meningkatkan Attack miliknya sebesar",
-                ),
-                (r"(?<![A-Za-z])Ancient Coins(?![A-Za-z])", "Ancient Coin"),
-                (r"(?<![A-Za-z])Perfect Resurrection(?![A-Za-z])", "Perfect Revive"),
-                (r"(?<![A-Za-z])Akomia Core(?![A-Za-z])", "Arcomia Core"),
-                (r"(?<![A-Za-z])Fire Thief(?![A-Za-z])", "Steal Fire"),
-                (r"(?<![A-Za-z])(?:Talent Cards|Talent Card)(?![A-Za-z])", "Kartu Talent"),
-                (r"(?<![A-Za-z])(?:Effect Cards|Effect Card)(?![A-Za-z])", "Kartu Efek"),
-                (
-                    r"(?<![A-Za-z])(?:Equipment Cards|Equipment Card)(?![A-Za-z])",
-                    "Kartu Equipment",
-                ),
-                (r"(?<![A-Za-z])(?:Hero Vouchers|Hero Voucher)(?![A-Za-z])", "Voucher Hero"),
-                (r"(?<![A-Za-z])Temporary Levels?\s+up(?![A-Za-z])", "Peningkatan Temporary Level"),
-                (r"(?<![A-Za-z])Temporary Levels(?![A-Za-z])", "Temporary Level"),
-                (r"(?<![A-Za-z])real (?:Level|Tier)s?(?![A-Za-z])", "True Level"),
-                (
-                    r"(?<![A-Za-z])(?:Perfect Revivals?|Perfect Resurrections?)(?![A-Za-z])",
-                    "Perfect Revive",
-                ),
-                (r"(?<![A-Za-z])faster growth(?![A-Za-z])", "pertumbuhan lebih cepat"),
-                (r"(?<![A-Za-z])growth methods?(?![A-Za-z])", "metode pertumbuhan"),
-                (r"\b([A-Z][A-Za-z0-9'&.\- ]{1,25}?)'s\s+basic\s+attacks?\b", r"Basic Attack \1"),
-                (r"\b([A-Z][A-Za-z0-9'&.\- ]{1,25}?)'s\s+attacks?\b", r"serangan \1"),
-                (r"\bNo\.\s*(\d+)\s+laser\s+cannon\b", r"Laser Cannon No.\1"),
-                (r"\bNo\.\s*(\d+)\b", r"No.\1"),
-                (r"\bBullet Damage Up\b", "Peningkatan Damage Peluru"),
-                (r"\bMissile Decay Down\b", "Pengurangan Decay Rudal"),
-                (r"\bPassive Cap Up\b", "Peningkatan Batas Pasif"),
-                (r"\bBounce Count Up\b", "Peningkatan Jumlah Pantulan"),
-                (r"\bRestore Effect Up\b", "Peningkatan Efek Pemulihan"),
-                (r"\bDamage Up\b", "Peningkatan Damage"),
-                (r"\bDecay Down\b", "Pengurangan Decay"),
-                (r"\bCap Up\b", "Peningkatan Batas"),
-                (r"\bCount Up\b", "Peningkatan Jumlah"),
-                (r"\bRange Up\b", "Peningkatan Jarak"),
-                (r"\bDuration Up\b", "Peningkatan Durasi"),
-                (r"\bEffect Up\b", "Peningkatan Efek"),
-                (r"\bLimit Up\b", "Peningkatan Batas"),
-                (r"\bSpeed Up\b", "Peningkatan Kecepatan"),
-                (r"\bCooldown Down\b", "Pengurangan Cooldown"),
-                (r"\bknocks?\s+up\b", "memberi efek Knock-Up"),
-                (r"\bknocked\s+up\b", "terkena Knock-Up"),
-                (r"\bknocking\s+up\b", "memberi efek Knock-Up"),
-                (r"\bknock\s+up\b", "Knock-Up"),
-                (r"\bKnock-up\b", "Knock-Up"),
-                (r"\bon\s+skill\s+cast\b", "saat menggunakan Skill"),
-                (r"\bon\s+cast\b", "saat digunakan"),
-                (r"\bon\s+casting\b", "saat menggunakan"),
-                (r"\bCombat Start\b", "Awal Combat"),
-                (r"\bprepares?\s+for\s+war\b", "Prepare"),
-                (r"\bplayed\s+at\s+the\s+same\s+time\b", "diterjunkan bersamaan"),
-                (r"\bplay\s+at\s+the\s+same\s+time\b", "diterjunkan bersamaan"),
-                (r"\bhighest-Tier\s+Hero\b", "Hero Tier tertinggi"),
-                (r"\byour\s+highest-Level\s+Hero\b", "Hero milikmu dengan Level tertinggi"),
-                (r"\bhighest-Level\s+Hero\b", "Hero Level tertinggi"),
-                (r"\bself-destructs?\b", "meledakkan diri"),
-                (r"\blowest\s+HP\s+value\b", "HP terendah"),
-                (r"\bhighest\s+current\s+HP\s+percentage\b", "persentase HP saat ini tertinggi"),
-                (r"\bfor\s+the\s+next\s+(\d+)\s+seconds?\b", r"selama \1 detik berikutnya"),
-                (r"\bstrengthening\s+cards?\b", "Kartu Penguatan"),
-                (r"\ban\s+allied\s+Summon\b", "unit Summon sekutu"),
-                (r"\ballied\s+Summons?\b", "unit Summon sekutu"),
-                (r"\bAttack\s+mode\b", "mode serangan"),
-                (r"\bpoints?\s+of\s+Attack\b", "poin Attack"),
-                (r"\bAttack\s+damage\b", "Damage serangan"),
-                (r"\bAttack\s+Bonus\b", "Bonus Attack"),
-            ]
-            for pat, repl in var_subs:
-                out = re.sub(pat, repl, out, flags=re.IGNORECASE)
+            for pat, repl in COMPILED_VAR_SUBS:
+                out = pat.sub(repl, out)
 
             sentinels: list[tuple[str, str]] = []
             if self._protected_re is not None:
@@ -1771,168 +1926,21 @@ class ThreeTierGlossary:
             # Re-run card rewriter post-translation to restore proper nouns and natural Indonesian structures
             out = rewrite_en_card_to_id(source_zh, out)
 
-            out = re.sub(
-                r"\b(Ancient Coin|Refined Ancient Coin|Central Plain|Zhulu(?: Plateau)?|Three Kingdoms|Sunset(?: Sea)?|Jixia|Great Wall|Xuanyong|Yaotian|Cloudream|Riverlands)\s+[Kk]artu(?:\s+Hero)?\b",
+            out = CARD_HERO_NAME_INVERT_RE.sub(
                 lambda m: f"Kartu Hero {m.group(1)}" if "hero" in m.group(0).lower() else f"Kartu {m.group(1)}",
                 out,
             )
-            out = re.sub(r"\b(\d+)\s+[Aa]cak\s+(Kartu\s+[A-Za-z ]+)\b", r"\1 \2 acak", out)
-
-            out = re.sub(
-                r"\bke\s+(me[a-z]+|ber[a-z]+|ter[a-z]+|di[a-z]+|memper[a-z]+|meng[a-z]+|meny[a-z]+|men[a-z]+|mem[a-z]+|mel[a-z]+|mer[a-z]+)\b",
-                lambda m: f"untuk {m.group(1).lower()}",
-                out,
-                flags=re.I,
-            )
-            out = re.sub(r"\b(Basic Attack)(?:\s+\1)+\b", r"\1", out, flags=re.I)
-            out = re.sub(
-                r"\b(meningkatkan|mengurangi|menambah|menurunkan)\s+([^.,;:\n]{1,40}?)\s+oleh\s+(?=(?:<[^>]+>\s*)*[\d\[{+-])",
-                r"\1 \2 sebesar ",
-                out,
-                flags=re.I,
-            )
-            out = re.sub(r"\bLuban\s+Tidak(?:\.\s*|\s+)(\d+)\b", r"Luban No.\1", out)
-            out = re.sub(r"\bTidak\.\s*(\d+)\b", r"No.\1", out)
-            out = out.replace("[Hebat Dinding]", "[Great Wall]")
-            out = re.sub(r"\bHebat Dinding\b", "Great Wall", out)
-            out = re.sub(r"\bMechanical Minion sebuah(\d+)\b", r"Mechanical Minion A\1", out)
-            out = out.replace("Mechanical Minion sebuah1", "Mechanical Minion A1")
-            out = out.replace("Mechanical Minion sebuah2", "Mechanical Minion A2")
-            out = re.sub(r"(?i)\bmementalkan\s+atas\b", "Knock-Up", out)
-            out = re.sub(r"(?i)\bDamage\s+Atas\b", "Peningkatan Damage", out)
-            out = re.sub(r"(?i)\bDecay\s+Bawah\b", "Pengurangan Decay", out)
-            out = re.sub(r"(?i)\bBatas\s+Atas\b", "Peningkatan Batas", out)
-            out = re.sub(r"(?i)\bpada\s+skill\s+menggunakan\b", "saat menggunakan Skill", out)
-            out = re.sub(r"(?i)\bpada\s+menggunakan\b", "saat digunakan", out)
-            out = re.sub(r"\bdasar\s+([A-Z][A-Za-z0-9'&.\- ]{1,25}?)\s+serangan\b", r"Basic Attack \1", out)
-            out = re.sub(r"\bdasar\s+serangan\b", "Basic Attack", out)
-            out = out.replace("orbit di sekitarnya", "mengelilinginya")
-            out = re.sub(r"(?i)\bmelompat\s+menjadi\s+(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)(?:\s+dari\s+musuh)?\b", "melompat ke area terpadat musuh", out)
-            out = re.sub(r"(?i)\bmelompat\s+menjadi\s+padat\s+musuh\s+formasi\b", "melompat ke formasi musuh yang padat", out)
-            out = re.sub(r"(?i)\bmelompat\s+(?:dengan\s+suci\s+pedang\s+)?menjadi\s+(?:sebuah\s+)?padat\s+(?:grup|area|formasi)(?:\s+dari\s+musuh)?\b", "melompat ke area terpadat musuh", out)
-            out = re.sub(r"(?i)\bmenerjang\s+menjadi\s+(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)\b", "menerjang ke area terpadat musuh", out)
-            out = re.sub(r"(?i)\bmelemparkan\s+sebuah\s+bom\s+pada\s+(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)\b", "melemparkan bom ke area terpadat musuh", out)
-            out = re.sub(r"(?i)\b(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)(?:\s+dari\s+musuh)?\b", "area terpadat musuh", out)
-            out = re.sub(r"(?i)\bEnergi\s+bola\s+itu\s+(?:orbit\s+dia|mengelilinginya)\b", "Bola Energi yang mengelilinginya", out)
-            out = re.sub(r"(?i)\bBola\s+energi\s+itu\s+(?:orbit\s+dia|mengelilinginya)\b", "Bola Energi yang mengelilinginya", out)
-            out = re.sub(r"(?i)\bitu\s+orbit\s+dia\b", "yang mengelilinginya", out)
-            out = re.sub(r"(?i)\bitu\s+mengelilinginya\b", "yang mengelilinginya", out)
-            out = re.sub(r"(?i)\bsebuah\s+padat\b", "area terpadat", out)
-
-            for old_ft, new_ft in (
-                ("Kartu Effect", "Kartu Efek"),
-                ("kartu Effect", "kartu Efek"),
-                ("Sementara Level", "Temporary Level"),
-                ("sementara Level", "Temporary Level"),
-                ("Nyata Level", "True Level"),
-                ("nyata Level", "True Level"),
-                ("Cepat Growth", "pertumbuhan lebih cepat"),
-                ("cepat growth", "pertumbuhan lebih cepat"),
-            ):
-                out = out.replace(old_ft, new_ft)
-            out = re.sub(r"(?i)sempurna kebangkitan", "Perfect Revive", out)
-            out = re.sub(r"(?i)\bTemporary Level\s+atas\b", "Peningkatan Temporary Level", out)
-            out = re.sub(r"\bsebuah\s+((?:<[^>]+>\s*)*\d+)", r"\1", out, flags=re.I)
-            out = re.sub(r"\badalah\s+milikmu\b", "milikmu", out, flags=re.I)
-
-            out = re.sub(r"\bCombat\s+Mulai\b", "Awal Combat", out, flags=re.I)
-            out = re.sub(r"\bPreparation\s+untuk\s+perang\b", "Prepare", out, flags=re.I)
-            out = re.sub(r"\bbermain\s+pada\s+saat\s+yang\s+sama\b", "diterjunkan bersamaan", out, flags=re.I)
-            out = re.sub(r"\btertinggi-Tier\s+Hero\b", "Hero Tier tertinggi", out, flags=re.I)
-            out = re.sub(r"\btertinggi\s+milikmu-Level\s+Hero\b", "Hero milikmu dengan Level tertinggi", out, flags=re.I)
-            out = re.sub(r"\bdiri\s+sendiri-menghancurkan\b", "meledakkan diri", out, flags=re.I)
-            out = re.sub(r"\bnilai\s+terendah\s+HP\b", "HP terendah", out, flags=re.I)
-            out = re.sub(r"\bnilai\s+tertinggi\s+HP\s+saat\s+ini\s+persentase\b", "persentase HP saat ini tertinggi", out, flags=re.I)
-            out = re.sub(r"\buntuk\s+berikutnya\s+(\d+)\s+detik\b", r"selama \1 detik berikutnya", out, flags=re.I)
-            out = re.sub(r"\bpenguatan\s+kartu\b", "Kartu Penguatan", out, flags=re.I)
-            out = re.sub(r"\bsebuah\s+sekutu\s+Memanggil\b", "unit Summon sekutu", out, flags=re.I)
-            out = re.sub(r"(\+\d+%?)\s+Menyerang\b", r"\1 Attack", out)
-            out = re.sub(r"\bMenyerang\s+mode\b", "mode serangan", out, flags=re.I)
-            out = re.sub(r"\bpoin\s+dari\s+Menyerang\b", "poin Attack", out, flags=re.I)
-            out = re.sub(r"\bMenyerang\s+kerusakan\b", "Damage serangan", out, flags=re.I)
-            out = re.sub(r"\bBonus\s+Menyerang\b", "Bonus Attack", out, flags=re.I)
-
+            out = RANDOM_CARD_RE.sub(r"\1 \2 acak", out)
+            out = apply_glossary_cleanup(out)
             return out
 
         res = translate_preserving_skeleton(en_text, _convert_segment)
-        res = re.sub(r"\bsebuah\s+((?:<[^>]+>\s*)*\d+)", r"\1", res, flags=re.I)
+        res = SEBUAH_NUM_RE.sub(r"\1", res)
         return self._finalize_output(source_zh, res, en_text)
 
     def _fit_length_bound(self, source_zh: str, candidate: str) -> str:
         """Guarantee candidate satisfies len(candidate) <= max(len(source_zh) * 8, 48) when len(source_zh) >= 4."""
-        candidate = re.sub(
-            r"\bke\s+(me[a-z]+|ber[a-z]+|ter[a-z]+|di[a-z]+|memper[a-z]+|meng[a-z]+|meny[a-z]+|men[a-z]+|mem[a-z]+|mel[a-z]+|mer[a-z]+)\b",
-            lambda m: f"untuk {m.group(1).lower()}",
-            candidate,
-            flags=re.I,
-        )
-        candidate = re.sub(r"\b(Basic Attack)(?:\s+\1)+\b", r"\1", candidate, flags=re.I)
-        candidate = re.sub(
-            r"\b(meningkatkan|mengurangi|menambah|menurunkan)\s+([^.,;:\n]{1,40}?)\s+oleh\s+(?=(?:<[^>]+>\s*)*[\d\[{+-])",
-            r"\1 \2 sebesar ",
-            candidate,
-            flags=re.I,
-        )
-        candidate = re.sub(r"\bLuban\s+Tidak(?:\.\s*|\s+)(\d+)\b", r"Luban No.\1", candidate)
-        candidate = re.sub(r"\bTidak\.\s*(\d+)\b", r"No.\1", candidate)
-        candidate = candidate.replace("[Hebat Dinding]", "[Great Wall]")
-        candidate = re.sub(r"\bHebat Dinding\b", "Great Wall", candidate)
-        candidate = re.sub(r"\bMechanical Minion sebuah(\d+)\b", r"Mechanical Minion A\1", candidate)
-        candidate = candidate.replace("Mechanical Minion sebuah1", "Mechanical Minion A1")
-        candidate = candidate.replace("Mechanical Minion sebuah2", "Mechanical Minion A2")
-        candidate = re.sub(r"(?i)\bmementalkan\s+atas\b", "Knock-Up", candidate)
-        candidate = re.sub(r"(?i)\bDamage\s+Atas\b", "Peningkatan Damage", candidate)
-        candidate = re.sub(r"(?i)\bDecay\s+Bawah\b", "Pengurangan Decay", candidate)
-        candidate = re.sub(r"(?i)\bBatas\s+Atas\b", "Peningkatan Batas", candidate)
-        candidate = re.sub(r"(?i)\bpada\s+skill\s+menggunakan\b", "saat menggunakan Skill", candidate)
-        candidate = re.sub(r"(?i)\bpada\s+menggunakan\b", "saat digunakan", candidate)
-        candidate = re.sub(r"\bdasar\s+([A-Z][A-Za-z0-9'&.\- ]{1,25}?)\s+serangan\b", r"Basic Attack \1", candidate)
-        candidate = re.sub(r"\bdasar\s+serangan\b", "Basic Attack", candidate)
-        candidate = candidate.replace("orbit di sekitarnya", "mengelilinginya")
-        candidate = re.sub(r"(?i)\bmelompat\s+menjadi\s+(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)(?:\s+dari\s+musuh)?\b", "melompat ke area terpadat musuh", candidate)
-        candidate = re.sub(r"(?i)\bmelompat\s+menjadi\s+padat\s+musuh\s+formasi\b", "melompat ke formasi musuh yang padat", candidate)
-        candidate = re.sub(r"(?i)\bmelompat\s+(?:dengan\s+suci\s+pedang\s+)?menjadi\s+(?:sebuah\s+)?padat\s+(?:grup|area|formasi)(?:\s+dari\s+musuh)?\b", "melompat ke area terpadat musuh", candidate)
-        candidate = re.sub(r"(?i)\bmenerjang\s+menjadi\s+(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)\b", "menerjang ke area terpadat musuh", candidate)
-        candidate = re.sub(r"(?i)\bmelemparkan\s+sebuah\s+bom\s+pada\s+(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)\b", "melemparkan bom ke area terpadat musuh", candidate)
-        candidate = re.sub(r"(?i)\b(?:sebuah\s+)?padat\s+(?:musuh\s+)?(?:area|grup|formasi|gugus)(?:\s+dari\s+musuh)?\b", "area terpadat musuh", candidate)
-        candidate = re.sub(r"(?i)\bEnergi\s+bola\s+itu\s+(?:orbit\s+dia|mengelilinginya)\b", "Bola Energi yang mengelilinginya", candidate)
-        candidate = re.sub(r"(?i)\bBola\s+energi\s+itu\s+(?:orbit\s+dia|mengelilinginya)\b", "Bola Energi yang mengelilinginya", candidate)
-        candidate = re.sub(r"(?i)\bitu\s+orbit\s+dia\b", "yang mengelilinginya", candidate)
-        candidate = re.sub(r"(?i)\bitu\s+mengelilinginya\b", "yang mengelilinginya", candidate)
-        candidate = re.sub(r"(?i)\bsebuah\s+padat\b", "area terpadat", candidate)
-
-        for old_ft, new_ft in (
-            ("Kartu Effect", "Kartu Efek"),
-            ("kartu Effect", "kartu Efek"),
-            ("Sementara Level", "Temporary Level"),
-            ("sementara Level", "Temporary Level"),
-            ("Nyata Level", "True Level"),
-            ("nyata Level", "True Level"),
-            ("Cepat Growth", "pertumbuhan lebih cepat"),
-            ("cepat growth", "pertumbuhan lebih cepat"),
-        ):
-            candidate = candidate.replace(old_ft, new_ft)
-        candidate = re.sub(r"(?i)sempurna kebangkitan", "Perfect Revive", candidate)
-        candidate = re.sub(r"(?i)\bTemporary Level\s+atas\b", "Peningkatan Temporary Level", candidate)
-        candidate = re.sub(r"\bsebuah\s+((?:<[^>]+>\s*)*\d+)", r"\1", candidate, flags=re.I)
-        candidate = re.sub(r"\badalah\s+milikmu\b", "milikmu", candidate, flags=re.I)
-
-        candidate = re.sub(r"\bCombat\s+Mulai\b", "Awal Combat", candidate, flags=re.I)
-        candidate = re.sub(r"\bPreparation\s+untuk\s+perang\b", "Prepare", candidate, flags=re.I)
-        candidate = re.sub(r"\bbermain\s+pada\s+saat\s+yang\s+sama\b", "diterjunkan bersamaan", candidate, flags=re.I)
-        candidate = re.sub(r"\btertinggi-Tier\s+Hero\b", "Hero Tier tertinggi", candidate, flags=re.I)
-        candidate = re.sub(r"\btertinggi\s+milikmu-Level\s+Hero\b", "Hero milikmu dengan Level tertinggi", candidate, flags=re.I)
-        candidate = re.sub(r"\bdiri\s+sendiri-menghancurkan\b", "meledakkan diri", candidate, flags=re.I)
-        candidate = re.sub(r"\bnilai\s+terendah\s+HP\b", "HP terendah", candidate, flags=re.I)
-        candidate = re.sub(r"\bnilai\s+tertinggi\s+HP\s+saat\s+ini\s+persentase\b", "persentase HP saat ini tertinggi", candidate, flags=re.I)
-        candidate = re.sub(r"\buntuk\s+berikutnya\s+(\d+)\s+detik\b", r"selama \1 detik berikutnya", candidate, flags=re.I)
-        candidate = re.sub(r"\bpenguatan\s+kartu\b", "Kartu Penguatan", candidate, flags=re.I)
-        candidate = re.sub(r"\bsebuah\s+sekutu\s+Memanggil\b", "unit Summon sekutu", candidate, flags=re.I)
-        candidate = re.sub(r"(\+\d+%?)\s+Menyerang\b", r"\1 Attack", candidate)
-        candidate = re.sub(r"\bMenyerang\s+mode\b", "mode serangan", candidate, flags=re.I)
-        candidate = re.sub(r"\bpoin\s+dari\s+Menyerang\b", "poin Attack", candidate, flags=re.I)
-        candidate = re.sub(r"\bMenyerang\s+kerusakan\b", "Damage serangan", candidate, flags=re.I)
-        candidate = re.sub(r"\bBonus\s+Menyerang\b", "Bonus Attack", candidate, flags=re.I)
+        candidate = apply_glossary_cleanup(candidate)
 
         if len(source_zh) < 4:
             return candidate
@@ -2005,7 +2013,7 @@ class ThreeTierGlossary:
         candidate = polish_indonesian_card_text(source_zh, candidate, baseline_en)
         candidate = ensure_placeholder_spacing(normalize_brackets(candidate))
         if ";" not in source_zh and ";" in candidate:
-            candidate = re.sub(r";\s*(?=[A-Z]|Pilih|Dapatkan|Memperoleh)", ". ", candidate)
+            candidate = SEMICOLON_SPLIT_RE.sub(". ", candidate)
             candidate = sanitize_target_text(source_zh, candidate)
         bounded = self._fit_length_bound(source_zh, candidate)
         if (";" in source_zh or ";" not in bounded) and len(bounded) > 20:
@@ -2043,11 +2051,7 @@ class ThreeTierGlossary:
                 return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
 
         # 1b. Composite Talent Series header+body splitter
-        m_ser = re.match(
-            r"^((?:<a\s+href=[^>]+>)?<color=#99DEB0>)([^<]*系列)(</color>(?:</a>)?)\n(.+)$",
-            source_zh,
-            flags=re.S,
-        )
+        m_ser = SERIES_HEADER_RE.match(source_zh)
         if m_ser:
             canon_header = ZH_SERIES_HEADER_MAP.get(m_ser.group(2), m_ser.group(2).replace("系列", " Series"))
             body_zh = m_ser.group(4)
@@ -2080,11 +2084,11 @@ class ThreeTierGlossary:
         skel_zh = normalize_formula_skeleton_zh(source_zh)
         if skel_zh and skel_zh in self.tier1_formula_zh_to_id:
             cands = self.tier1_formula_zh_to_id[skel_zh]
-            src_nums = re.findall(r"\d+(?:\.\d+)?", normalize_plain_zh(source_zh))
+            src_nums = NUM_FIND_RE.findall(normalize_plain_zh(source_zh))
             best_cand = cands[0]
             best_score = -1
             for c_cn, c_id in cands:
-                c_nums = re.findall(r"\d+(?:\.\d+)?", normalize_plain_zh(c_cn))
+                c_nums = NUM_FIND_RE.findall(normalize_plain_zh(c_cn))
                 score = sum(1 for a, b in zip(src_nums, c_nums) if a == b)
                 if score > best_score:
                     best_score = score
@@ -2199,7 +2203,7 @@ class ThreeTierGlossary:
                 break
 
         # 2f. Equipment Selection Chests Deterministic Parser
-        m_chest = re.search(r"(?:指定英雄穿戴|穿戴给英雄)，可从(.+?)中选择(\d+)件。", source_zh)
+        m_chest = CHEST_CHOICE_RE.search(source_zh)
         if m_chest:
             raw_items = m_chest.group(1).split("、")
             count = m_chest.group(2)
@@ -2252,7 +2256,7 @@ class ThreeTierGlossary:
                 return (self._finalize_output(source_zh, chest_id, baseline_en or ""), "tier2")
 
         # 2g. Hero Choice Vouchers Deterministic Parser
-        m_v1 = re.search(r"(\d+)选(\d+)(?:【([^】]+)】|(无阵营)的?)(\d+)阶英雄，获得(\d+)张该英雄牌。", source_zh)
+        m_v1 = HERO_CHOICE_VOUCHER_RE.search(source_zh)
         if m_v1:
             pool = m_v1.group(1)
             pick = m_v1.group(2)
@@ -2286,7 +2290,7 @@ class ThreeTierGlossary:
             if validate_translation(source_zh, voucher_id)[0]:
                 return (self._finalize_output(source_zh, voucher_id, baseline_en or ""), "tier2")
 
-        m_v2 = re.search(r"^(.*?)指定(\d+)名英雄，获得(\d+)张该英雄牌。(.*)$", source_zh)
+        m_v2 = HERO_SPECIFIED_RE.search(source_zh)
         if m_v2:
             pfx_zh = m_v2.group(1).strip()
             count = m_v2.group(2)
@@ -2300,11 +2304,7 @@ class ThreeTierGlossary:
         # 2d. Exact-tag baseline_en match: If baseline_en carries exact tags, translate preserving skeleton
         # Guarded against upstream Opus-MT corruption
         if baseline_en:
-            if not re.search(
-                r"♪|♫|Synchronis|\(Text\)|\bRiot rate\b|\d+\s*(?:Zhang|Chang)\b|Forensic|small part of the world|non-resistible|breached\.",
-                baseline_en,
-                flags=re.I,
-            ):
+            if not OPUS_CORRUPTION_RE.search(baseline_en):
                 b_tags = TAG_RE.findall(baseline_en)
                 src_tags = TAG_RE.findall(source_zh)
                 if b_tags and b_tags == src_tags:
@@ -2480,7 +2480,7 @@ class ThreeTierGlossary:
                 .replace("×", "x")
             )
             out = CJK_RE.sub("", out)
-            out = re.sub(r"[ \t]+", " ", out).strip()
+            out = SPACES_RE.sub(" ", out).strip()
             return out or "OK"
 
         cand = translate_preserving_skeleton(source_zh, _seg_fn)

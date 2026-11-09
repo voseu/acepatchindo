@@ -5,6 +5,7 @@ from __future__ import annotations
 from wxq_patch import translation_rules as runtime_rules
 
 from acepatchindo.tag_aligner import (
+    adapt_tier1_placeholders_to_source,
     normalize_plain_zh,
     reinject_skeleton_from_source,
     translate_preserving_skeleton,
@@ -186,6 +187,38 @@ def test_money_makes_might_combat_tag_does_not_swallow_first_clause() -> None:
     ok, reason = validate_translation(source_zh, aligned)
     assert ok, reason
     assert not aligned.startswith("<color=#FFE897>Saat Combat dimulai")
+
+
+def test_adapt_tier1_placeholders_anti_swap_killcount() -> None:
+    source_zh = "你的英雄累计击败10名敌人后，获得1张4阶英雄牌（已击败：{killcount:0}）。"
+    raw_t1 = "Setelah Hero milikmu mengalahkan total 10 musuh, peroleh 1 Kartu Hero Tier 4 (Sudah mengalahkan: 0)."
+    adapted = adapt_tier1_placeholders_to_source(source_zh, raw_t1)
+    ok, reason = validate_translation(source_zh, adapted)
+    assert ok, reason
+    assert "{killcount:0}" in adapted
+    assert "Sudah mengalahkan: {killcount:0}" in adapted or "Sudah mengalahkan:  {killcount:0}" in adapted or "{killcount:0}" in adapted
+    assert "peroleh 1 Kartu Hero Tier 4" in adapted
+
+
+def test_adapt_tier1_placeholders_hero_voucher_tier_precision() -> None:
+    source_zh = "获得1张{ResCardInfoDataBin_1981_19811_0: 1}阶英雄兑换券"
+    raw_t1 = "Memperoleh 1 Hero Voucher Tier 1"
+    adapted = adapt_tier1_placeholders_to_source(source_zh, raw_t1)
+    ok, reason = validate_translation(source_zh, adapted)
+    assert ok, reason
+    assert "Tier {ResCardInfoDataBin_1981_19811_0: 1}" in adapted
+    assert adapted.startswith("Memperoleh 1")
+
+
+def test_adapt_tier1_placeholders_anti_swap_revive_count() -> None:
+    source_zh = "复生时，获得+10点攻击力（总复生次数：{ResCardInfoDataBin_1541_15412_0: 1}）。"
+    raw_t1 = "Saat Revive, memperoleh +10 Attack (total Revive: 1)."
+    adapted = adapt_tier1_placeholders_to_source(source_zh, raw_t1)
+    ok, reason = validate_translation(source_zh, adapted)
+    assert ok, reason
+    assert "+10" in adapted
+    assert "{ResCardInfoDataBin_1541_15412_0: 1}" in adapted
+
 
 
 

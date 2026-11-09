@@ -29,6 +29,9 @@ from acepatchindo.card_rewriter import (  # noqa: E402
     CANONICAL_FACTION_MAP,
     CANONICAL_HERO_NAME_MAP,
     CANONICAL_RELATED_CARD_MAP,
+    COMPILED_CANONICAL_FACTION_RULES,
+    COMPILED_CANONICAL_HERO_NAME_RULES,
+    COMPILED_CANONICAL_RELATED_CARD_RULES,
 )
 from acepatchindo.card_wrapper import ensure_placeholder_spacing  # noqa: E402
 from acepatchindo.glossary import ThreeTierGlossary  # noqa: E402
@@ -49,36 +52,42 @@ OUT_CATALOG_GZ = OUT_DIR / "catalog.json.gz"
 OUT_EN_TO_ID_JSON = OUT_DIR / "en_to_id_map.json"
 
 
+COMPILED_SYNC_EXTRA_RULES: tuple[tuple[re.Pattern[str], str], ...] = (
+    (re.compile(r"\bfragrant\b", re.I), "Xiang"),
+    (re.compile(r"\b(?:Ying Law|Ying Lu|Yinglü|Qin Lu)\b"), "Ying Lü"),
+    (re.compile(r"\bWhite Song\b"), "Bai Ge"),
+    (re.compile(r"\bXiao Xiao Little Daji\b"), "Little Daji"),
+    (re.compile(r"\bSun Xiaobin\b"), "Little Sun Bin"),
+    (re.compile(r"\bZhuang Xiaoyu\b"), "Little Zhuang Fish"),
+    (re.compile(r"\bChang Xiao'e\b"), "Little Chang'e"),
+    (re.compile(r"Famous Blade [•·] Life-Stealer"), "Destiny"),
+    (re.compile(r"\bFamous Blade - Siming\b"), "Destiny"),
+    (re.compile(r"\bFamous Sword Siming\b"), "Destiny"),
+    (re.compile(r"\bFamous Sword - Siming\b"), "Destiny"),
+    (re.compile(r"\bFamous Sword\b"), "Destiny"),
+    (re.compile(r"\bFamous Blade\b"), "Destiny"),
+    (re.compile(r"\bCentral Plain(?![sS])\b"), "Central Plains"),
+    (re.compile(r"\[Sunset\](?!\s*Sea)"), "[Sunset Sea]"),
+    (re.compile(r"\[Zhulu\](?!\s*Plateau)"), "[Zhulu Plateau]"),
+    (re.compile(r"\[Zhuolu\]|\[Zhu Lu\]"), "[Zhulu Plateau]"),
+    (re.compile(r"\bGlitch Bots\b"), "Glitch Robot"),
+    (re.compile(r"\b(?:Lots of Friends|Plenty of Friends)\b"), "Many Friends"),
+)
+
+
 def sync_canonical_english_names(text: str) -> str:
     """Synchronize non-target English strings with canonical proper names."""
     if not text:
         return text
     res = text
-    for pattern, repl in CANONICAL_FACTION_MAP.items():
-        res = re.sub(pattern, repl, res)
-    for pattern, repl in CANONICAL_HERO_NAME_MAP.items():
-        res = re.sub(pattern, repl, res)
-    for pattern, repl in CANONICAL_RELATED_CARD_MAP.items():
-        res = re.sub(pattern, repl, res)
-    res = re.sub(r"\bfragrant\b", "Xiang", res, flags=re.I)
-    res = re.sub(r"\b(?:Ying Law|Ying Lu|Yinglü|Qin Lu)\b", "Ying Lü", res)
-    res = re.sub(r"\bWhite Song\b", "Bai Ge", res)
-    res = re.sub(r"\bXiao Xiao Little Daji\b", "Little Daji", res)
-    res = re.sub(r"\bSun Xiaobin\b", "Little Sun Bin", res)
-    res = re.sub(r"\bZhuang Xiaoyu\b", "Little Zhuang Fish", res)
-    res = re.sub(r"\bChang Xiao'e\b", "Little Chang'e", res)
-    res = re.sub(r"Famous Blade [•·] Life-Stealer", "Destiny", res)
-    res = re.sub(r"\bFamous Blade - Siming\b", "Destiny", res)
-    res = re.sub(r"\bFamous Sword Siming\b", "Destiny", res)
-    res = re.sub(r"\bFamous Sword - Siming\b", "Destiny", res)
-    res = re.sub(r"\bFamous Sword\b", "Destiny", res)
-    res = re.sub(r"\bFamous Blade\b", "Destiny", res)
-    res = re.sub(r"\bCentral Plain(?![sS])\b", "Central Plains", res)
-    res = re.sub(r"\[Sunset\](?!\s*Sea)", "[Sunset Sea]", res)
-    res = re.sub(r"\[Zhulu\](?!\s*Plateau)", "[Zhulu Plateau]", res)
-    res = re.sub(r"\[Zhuolu\]|\[Zhu Lu\]", "[Zhulu Plateau]", res)
-    res = re.sub(r"\bGlitch Bots\b", "Glitch Robot", res)
-    res = re.sub(r"\b(?:Lots of Friends|Plenty of Friends)\b", "Many Friends", res)
+    for pattern, repl in COMPILED_CANONICAL_FACTION_RULES:
+        res = pattern.sub(repl, res)
+    for pattern, repl in COMPILED_CANONICAL_HERO_NAME_RULES:
+        res = pattern.sub(repl, res)
+    for pattern, repl in COMPILED_CANONICAL_RELATED_CARD_RULES:
+        res = pattern.sub(repl, res)
+    for pattern, repl in COMPILED_SYNC_EXTRA_RULES:
+        res = pattern.sub(repl, res)
     res = ensure_placeholder_spacing(res)
     return res
 
