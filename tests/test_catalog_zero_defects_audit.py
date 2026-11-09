@@ -575,6 +575,7 @@ def test_12_forensic_cleanliness_and_zero_regressions():
 
     # 6. Universal structural invariant checks (15 forensic categories)
     FACTION_PAT = r"\[(?:Central Plains|Riverlands|Three Kingdoms|Sunset Sea|Zhulu Plateau|High Heaven|First Lands|Factionless|Great Wall|Jixia|Divinity)\]"
+    UNBRACKETED_FACTION = r"\b(?:Central Plains|Riverlands|Three Kingdoms|Sunset Sea|Zhulu Plateau|High Heaven|First Lands|Factionless|Great Wall|Jixia)\s+(?:Hero|Kartu)\b"
     strict_checks = [
         ("Keberangkatan", re.compile(r"\bKeberangkatan\b", re.I)),
         ("Ultimate Treasure adalah", re.compile(r"Ultimate\s+Treasure\s+adalah", re.I)),
@@ -584,16 +585,24 @@ def test_12_forensic_cleanliness_and_zero_regressions():
         ("Skill menggunakan", re.compile(r"\bSkill\s+menggunakan\b", re.I)),
         ("sebuah milikmu / Awaken milikmu Kartu", re.compile(r"\bsebuah\s+milikmu\b|\bAwaken(?:ed)?\s+milikmu\s+Kartu\b", re.I)),
         ("Khusus Tamu", re.compile(r"\bKhusus\s+Tamu\b", re.I)),
-        ("tag kartu", re.compile(r"(?:</color>|</b>)\s*kartu\b")),
+        ("tag kartu anti-evasion", re.compile(r">[A-Za-z][A-Za-z0-9 '·•\-:&]*(?:</b>)?(?:</color>)?(?:</a>)?\s+[Kk]artu\b(?!\s+(?:Hero|Efek|Equipment|Talent|Strategi|Mekanisme|Taktik|Biru|Pilihan))")),
         ("Kartu Shouyue", re.compile(r"\bKartu\s+Shouyue\b")),
         ("chess", re.compile(r"\bchess\b", re.I)),
+        ("papan", re.compile(r"\bpapan\b", re.I)),
+        ("Unbracketed Faction", re.compile(UNBRACKETED_FACTION)),
+        ("keluar dari", re.compile(r"\d+\s+keluar\s+dari\s+\d+", re.I)),
         ("bebas Refresh/Shop/penguatan / di menyimpan", re.compile(r"\bbebas\s+(?:Refresh|Shop|penguatan)\b|\bdi\s+menyimpan\b", re.I)),
         ("Tidak kalah Level / ke kalah digit", re.compile(r"\bTidak\s+kalah\s+Level\b|\bke\s+kalah\s+\d", re.I)),
         ("kamu bermain / bermain Kartu / undian kartu", re.compile(r"\bkamu\s+bermain\b|\bbermain\s+(?:sebuah\s+|sama\s+)?(?:Awakened\s+)?Kartu\b|\bundian\s+kartu\b", re.I)),
         ("sendiri Hero / kamu sendiri sebuah / pemain Level", re.compile(r"\bsendiri\s+Hero\b|\bkamu\s+sendiri\s+sebuah\b|\bpemain\s+Level\b", re.I)),
         ("evolves / fictitious / seized unit / Luar biasa Suara", re.compile(r"\bevolves\b|\bfictitious\b|\bseized\s+unit\b|\bLuar\s+biasa\s+Suara\b", re.I)),
+        ("Sub-card anomalies & top 3", re.compile(r"╆Fleeting\s+Kartu\s+Hero\b|di\s+atas\s+3\b|1\s+kali\s+Menyerap|Bintang-Poin|Langka\s+Peti|Bintang\s+Cat\s+Harta|Mawar\s+Hadiah|Cahaya\s+bintang\s+Shimmer|Lebih\s+awal\s+game\s+Surge|Mistis\s+Suara|Melodious\s+Suara", re.I)),
     ]
     for zh, val in active_targets:
         for label, rx in strict_checks:
             assert not rx.search(val), f"Forensic violation '{label}' in {val!r} (ZH: {zh!r})"
+        if "棋手" in zh:
+            assert not re.search(r"\bPeserta\b", val, re.I), f"Peserta leak in {val!r}"
+        if "第二" in zh and "秒" not in zh:
+            assert not re.search(r"\bdetik\b", val, re.I), f"detik leak in {val!r}"
 

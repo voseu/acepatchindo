@@ -202,6 +202,8 @@ def main() -> None:
     # 4. Process all 29,750 english_updates entries ([asset, key, prev_en, target_en, optional_zh])
     eu_target_count = 0
     eu_nontarget_count = 0
+    eu_cache: dict[tuple[str, str], str] = {}
+    eu_nontarget_cache: dict[str, str] = {}
     for row in data.get("english_updates", []):
         if not isinstance(row, list) or len(row) not in (4, 5):
             raise ValueError(f"Unexpected english_updates row format: {row!r}")
@@ -213,28 +215,33 @@ def main() -> None:
         opt_zh = val_source if len(row) == 5 and CJK_RE.search(val_source) else ""
 
         if classifier.is_target_update(asset, key, prev_en, en_target, opt_zh):
-            if opt_zh:
-                if opt_zh in new_unique and en_target == data["unique"].get(opt_zh):
-                    id_val = new_unique[opt_zh]
-                else:
-                    id_val, _ = glossary.translate_entry(opt_zh, baseline_en=en_target)
+            cache_key = (val_source, en_target)
+            if cache_key in eu_cache:
+                id_val = eu_cache[cache_key]
             else:
-                cand = sanitize_target_text(val_source, glossary.translate_en_to_id(en_target))
-                id_val = cand if runtime_rules.validate_translation(val_source, cand)[0] else en_target
+                if opt_zh:
+                    if opt_zh in new_unique and en_target == data["unique"].get(opt_zh):
+                        id_val = new_unique[opt_zh]
+                    else:
+                        id_val, _ = glossary.translate_entry(opt_zh, baseline_en=en_target)
+                else:
+                    cand = sanitize_target_text(val_source, glossary.translate_en_to_id(en_target))
+                    id_val = cand if runtime_rules.validate_translation(val_source, cand)[0] else en_target
 
-            if "\n" in val_source and "\n" not in id_val:
-                id_val = restore_newlines_from_source(val_source, id_val)
+                if "\n" in val_source and "\n" not in id_val:
+                    id_val = restore_newlines_from_source(val_source, id_val)
 
-            id_val = glossary._finalize_output(val_source, id_val, en_target)
+                id_val = glossary._finalize_output(val_source, id_val, en_target)
 
-            ok_local, reason_local = validate_translation(val_source, id_val)
-            ok_runtime, reason_runtime = runtime_rules.validate_translation(val_source, id_val)
-            if not ok_local or not ok_runtime:
-                validation_failures += 1
-                raise ValueError(
-                    f"english_updates validation failed ({reason_local}/{reason_runtime}) "
-                    f"for {val_source!r} -> {id_val!r}"
-                )
+                ok_local, reason_local = validate_translation(val_source, id_val)
+                ok_runtime, reason_runtime = runtime_rules.validate_translation(val_source, id_val)
+                if not ok_local or not ok_runtime:
+                    validation_failures += 1
+                    raise ValueError(
+                        f"english_updates validation failed ({reason_local}/{reason_runtime}) "
+                        f"for {val_source!r} -> {id_val!r}"
+                    )
+                eu_cache[cache_key] = id_val
 
             row[3] = id_val
             eu_target_count += 1
@@ -244,7 +251,12 @@ def main() -> None:
                     en_to_id_map[en_target] = id_val
         else:
             # Non-target stays clean English
-            row[3] = sync_canonical_english_names(en_target)
+            if en_target in eu_nontarget_cache:
+                row[3] = eu_nontarget_cache[en_target]
+            else:
+                val_nontarget = sync_canonical_english_names(en_target)
+                eu_nontarget_cache[en_target] = val_nontarget
+                row[3] = val_nontarget
             eu_nontarget_count += 1
 
     data["unique"] = new_unique
