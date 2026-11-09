@@ -7,26 +7,31 @@ description: Use when inspecting, unpacking, modifying, or repacking Honor of Ki
 
 ## Overview
 
-`Honor of Kings Ace English Patcher 1.4.12.exe` (`59,877,888` bytes) is a **two-layer Windows executable**: an outer Rust (`egui`/`eframe`) GUI binary that embeds a complete Python 3.12 PyInstaller executable (`ace-worker.exe`) inside its `.rdata` section.
+`dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe` (`55,094,304` bytes) is a **two-layer Windows x86_64 executable**:
+1. **Outer Native Win32 C++17 GUI Stub (`src/gui/celeslib_gui.cpp` + `src/gui/celeslib_i18n.h`):** Compiled via `x86_64-w64-mingw32-g++` (`scripts/08_compile_celeslib_gui.py`), featuring a custom Dark-Gold owner-drawn interface, instant `UI: Indonesia` / `UI: English` toggle, and `ID Hybrid` / `EN Full` patch mode selector.
+2. **Embedded PyInstaller Worker (`ace-worker.exe`, `53,927,862` bytes):** Stored in the `.rdata` payload slot (`0x11CC62..0x348AC18`), verified via an embedded uppercase SHA-256 hex digest before extraction to `%LOCALAPPDATA%\Celeslib\HoKAcePatcher\worker\<sha256_prefix16>\ace-worker.exe`.
 
-**CRITICAL RUNTIME REQUIREMENT:** Always use `/home/whise/.local/bin/uv run --python 3.12` when unmarshalling, compiling, or executing `.pyc` and `PYZ.pyz` files. Host Python 3.14 has an incompatible bytecode/opcode format.
+**CRITICAL RUNTIME REQUIREMENT:** Always use `/home/whise/.local/bin/uv run --python 3.12` or `.venv/bin/python` (Python 3.12) when unmarshalling, compiling, or executing `.pyc` and `PYZ.pyz` files.
 
-## Two-Layer Binary Layout (`Honor of Kings Ace English Patcher 1.4.12.exe`)
+## Two-Layer Binary Layout (`dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe`)
 
-| Offset Range (Hex / Dec) | Size (Bytes) | Role |
-|---|---|---|
-| `0x000000` – `0x4CABF9` (`0` – `5,024,761`) | `5,024,762` | Outer Rust `egui` code (`.text`) and initial `.rdata` |
-| `0x4CABFA` – `0x4CAC3B` (`5,024,762` – `5,024,827`) | `66` (`0x42`) | Expected uppercase SHA-256 hex digest (`64` chars + `\r\n`) of `ace-worker.exe` |
-| `0x4CAC3C` – `0x4CAC49` (`5,024,828` – `5,024,841`) | `14` (`0x0E`) | Embedded worker filename: `"ace-worker.exe"` |
-| `0x4CAC4A` – `0x3838BFF` (`5,024,842` – `58,952,703`) | `53,927,862` (`0x336DFB6`) | Embedded PyInstaller PE executable (`ace-worker.exe`) |
-| `0x3838C00` – `0x391A7FF` (`58,952,704` – `59,877,887`) | `925,184` | Outer Rust GUI strings, `.data`, `.pdata`, `.rsrc`, `.reloc` |
+| Component / Slice | Offset Range (Hex) | Size (Bytes) | Role |
+|---|---|---:|---|
+| Outer Win32 GUI Stub + Headers | `0x000000` – `0x11CC61` | `1,166,434` | Native Win32 C++17 Dark-Gold GUI code, embedded 64-char uppercase SHA-256 slot, icons & resources |
+| Embedded `ace-worker.exe` Payload | `0x11CC62` – `0x348AC17` | `53,927,862` (`0x336DFB6`) | Complete Python 3.12 PyInstaller PE executable (`ace-worker.exe`) |
+| Trailing PE Section Alignment | `0x348AC18` – `0x348AC3F` | `40` | Final section alignment up to `55,094,304` bytes |
 
-### Embedded Worker (`ace-worker.exe`) Internal Offsets
+*(Legacy baseline reference: `Honor of Kings Ace English Patcher 1.4.12.exe` (`59,877,888` bytes) had its `ace-worker.exe` at `0x4CAC4A..0x3838C00` and SHA-256 digest at `0x4CABFA`.)*
 
-- **PE Bootloader Stub:** File offset `5,024,842` to `5,373,514` (`348,672` bytes).
-- **PyInstaller CArchive:** File offset `5,373,514` to `58,952,704` (`plen = 53,579,190` bytes).
-- **PyInstaller `MEI` Cookie (88 bytes):** File offset `58,952,616` (`magic = b"MEI\x0c\x0b\x0a\x0b\x0e"`, `plen = 53579190`, `toc_pos = 53531742`, `toc_len = 47360`, `pyvers = 312`).
-- **Outer Rust Hardcoded Size References:** VMA `0x1400FEBF1`, `0x14010F49C`, `0x1401178D0`, `0x140117C16` all pass `$0x336DFB6` (`53,927,862`). Keep `ace-worker.exe` at **exact `53,927,862` bytes** by padding zeros before the 88-byte `MEI` cookie.
+### Embedded Worker (`ace-worker.exe`) Internal Offsets (Relative to Worker Start)
+
+- **PE Bootloader Stub:** Relative offset `0` to `348,672` (`348,672` bytes).
+- **PyInstaller CArchive:** Relative offset `348,672` to `53,927,862` (`plen = 53,579,190` bytes).
+- **PyInstaller `MEI` Cookie (88 bytes):** Relative offset `53,927,774` (`magic = b"MEI\x0c\x0b\x0a\x0b\x0e"`, `plen = 53579190`, `pyvers = 312`).
+- **Fixed Size Constraint:** Keep `ace-worker.exe` at **exact `53,927,862` (`0x336DFB6`) bytes** by inserting zero-padding between the end of the CArchive TOC and the 88-byte `MEI` cookie.
+- **Embedded Catalogs Inside CArchive:**
+  - `catalog\catalog.json.gz` — Active `ID Hybrid` catalog (`41,483` `unique` entries + `29,750` `english_updates` entries).
+  - `catalog\catalog_en_full.json.gz` — Full English catalog (`EN Full` mode).
 
 ## Real Game Installation on Windows Partition (Read-Only Reference)
 
@@ -39,15 +44,16 @@ The user's actual Honor of Kings: Ace installation is on `/dev/nvme0n1p3` (mount
 2. **Untouched Original Chinese Game Backup (`originals/`):**
    `/run/media/whise/Windows/Users/azzam/AppData/Local/HoK Ace English Patch/adaptive/b07d115d01fb4a16c6e16a37/1793497168990741300-92b4bcbb/originals`
    - Contains the 6 untouched QtsVFS packages (`1`, `4`, `15`, `19`, `20`, `21` inside `WXQ_Data/Package/builtin/`), totaling **508 Protobuf localization tables** (`352,251` records, `39,470` unique Chinese strings used, plus **108 unique Chinese strings / 409 records** missed by English Patcher 1.4.12).
-3. **Live Game Folder (Currently English-Patched):**
+3. **Live Game Folder:**
    `/run/media/whise/Windows/Program Files/WXQLauncher/WXQ`
 
-## Dual-State Patching Requirement (Chinese AND Already-English Games)
+## Dual-State & Hotfix-Resilient Patching Architecture (`wxq_patch`)
 
-In `wxq_patch/table_catalog.py`, `translate_table` originally only calls `catalog.lookup(asset, key, source)` when `CJK_RE.search(source)` is `True`.
-Because the user's live Windows game is **already patched to English** (`267,876` records are English, `CJK_RE.search(source)` is `False`), the Indonesian patcher MUST support both states:
-1. **Unpatched Chinese Game (`CJK_RE.search(source)` is `True`):** Translates `Chinese -> Indonesian` via `catalog.lookup(asset, key, source)`.
-2. **Already-English-Patched Game (`CJK_RE.search(source)` is `False`):**
-   - In `Catalog.__init__`, build `self.en_to_id: dict[str, str]` (mapping English strings to Indonesian strings) and update `self.english_updates` targets to Indonesian.
-   - In `translate_table`, if `source` is in `self.en_to_id`, translate `English -> Indonesian` and validate against the original Chinese source (or English source).
-   - Also in `adaptive.py`, recognize receipts in `%LOCALAPPDATA%\HoK Ace English Patch\adaptive` so `Restore` or re-patching over the English patch works cleanly without losing the original Chinese backups!
+In `wxq_patch/table_catalog.py` and `wxq_patch/adaptive.py`:
+1. **Language Mode Selection (`--patch-lang id|en` or `WXQ_PATCH_LANG=id|en`):**
+   - `id` (`ID Hybrid`, default): Loads `catalog\catalog.json.gz` (gameplay descriptions in Bahasa Indonesia, names/titles/UI chrome in canonical English).
+   - `en` (`EN Full`): Loads `catalog\catalog_en_full.json.gz` (100% English).
+2. **Unconditional Cross-Version Restore Before Install:**
+   - When switching between `v1` Full-ID, English Patcher `1.4.12`, `ID Hybrid`, or `EN Full`, `adaptive.install` automatically restores untouched Chinese originals from the receipt backup when `catalog_sha` or `patch_lang` differs, ensuring zero stale string contamination.
+3. **Runtime Numeric-Template Fallback (Live Balance Hotfix Resilience):**
+   - If a server hotfix tweaks numbers inside a Chinese card description (e.g., `25%` -> `30%`), `Catalog.lookup` normalizes digits to `<N>` placeholders, matches the template, and reinjects the new live numbers at runtime if `validate_translation` passes.

@@ -3,60 +3,45 @@ name: hok-ace-translation-hierarchy
 description: Use when building the Indonesian glossary, scraping reference websites, or translating Honor of Kings Ace strings from Chinese or English into Indonesian.
 ---
 
-# HoK: Ace 3-Tier Translation Hierarchy
+# HoK: Ace 3-Tier Translation Hierarchy & ID Hybrid Specification
 
 ## Overview
 
-All Indonesian translations MUST strictly follow the 3-Tier Reference Hierarchy defined below. Never invent terminology when an entry exists in Tier 1 or Tier 2.
+All translations in **ID Hybrid** mode (`data/catalog_checkpoints/catalog.json.gz`) MUST strictly follow the **3-Tier Reference Hierarchy** and the **Locked Canonical Glossary** below (`src/acepatchindo/glossary.py` and `src/acepatchindo/card_rewriter.py`).
 
-## The 3-Tier Authority Rule
+## Scope of `ID Hybrid` Mode (`HybridClassifier`)
 
-```dot
-digraph translation_hierarchy {
-    "Source String (ZH / EN)" [shape=box];
-    "Exists in Tier 1 (hok-ace-translate-id.netlify.app)?" [shape=diamond];
-    "Use Tier 1 Indonesian Text & Name" [shape=box];
-    "Exists in Tier 2 (hokace.wiki)?" [shape=diamond];
-    "Take Tier 2 English -> Translate to Indonesian (using Tier 1 Glossary)" [shape=box];
-    "Tier 3: Chinese -> English (verify catalog.json.gz EN) -> Translate to Indonesian" [shape=box];
+- **Translated to Natural Tactical Bahasa Indonesia:**
+  - All **`5,621`** active gameplay descriptions in `catalog["unique"]` (including the **`58`** gameplay descriptions in `WINDOWS_108_TARGET_DESC_ID`) and all **`15,397`** active `catalog["english_updates"]` entries across:
+    1. Hero Active & Passive Skill Descriptions
+    2. Hero Awakening Descriptions
+    3. Effect Card (Tactic / Secret Skill) Descriptions
+    4. Equipment Descriptions
+    5. Talent & Sub-Card Descriptions
+    6. Contestant (Lord / Chess Player) Skill & Related Card Descriptions
+- **Kept in Canonical English (Hard Vetoed from Indonesian Translation):**
+  - All `35,862` non-target entries in `catalog["unique"]` (including `50` UI/title strings in `WINDOWS_108_NONTARGET_EN`, pure equipment names such as `Wolf Tribe Totem Statue` / `Wolf Tooth Tribe Totem Statue+`, Hero Names, Card Titles, Talent Titles, Menu/UI Chrome, and training dummy debug strings).
 
-    "Source String (ZH / EN)" -> "Exists in Tier 1 (hok-ace-translate-id.netlify.app)?";
-    "Exists in Tier 1 (hok-ace-translate-id.netlify.app)?" -> "Use Tier 1 Indonesian Text & Name" [label="yes"];
-    "Exists in Tier 1 (hok-ace-translate-id.netlify.app)?" -> "Exists in Tier 2 (hokace.wiki)?" [label="no"];
-    "Exists in Tier 2 (hokace.wiki)?" -> "Take Tier 2 English -> Translate to Indonesian (using Tier 1 Glossary)" [label="yes"];
-    "Exists in Tier 2 (hokace.wiki)?" -> "Tier 3: Chinese -> English (verify catalog.json.gz EN) -> Translate to Indonesian" [label="no"];
-}
-```
+## Locked Canonical Glossary (Must Remain English)
 
-### Tier 1: Primary Indonesian Reference (`https://hok-ace-translate-id.netlify.app/`)
+1. **Bracketed Faction Names (Always Bracketed After Head Noun, e.g. `Hero [Central Plains]`):**
+   - `[Central Plains]`, `[Sunset Sea]`, `[Zhulu Plateau]`, `[Three Kingdoms]`, `[Riverlands]`, `[High Heaven]`, `[First Lands]`, `[Factionless]`, `[Great Wall]`, `[Jixia]`
+2. **Core Mechanics & Tokens:**
+   - `Initiate` (`╪Initiate`), `Deploy` (`╨Deploy`), `Prepare` (`╬Prepare`), `Sacrifice` (`╫Sacrifice`), `Revive` (`╧Revive`), `Perfect Revive` (`╧Perfect Revive`), `Temporary Level` (`═Temporary Level`), `Fleeting` (`╆Fleeting`), `Defeat` (`╇Defeat`), `Retire` (`╈Retire`), `Totem` (`╉Totem`: `Seer Totem`, `Bond Totem`, `Afterlife Totem`, `Fate Totem`), `Steal` (`╊Steal`), `Soul Snatch` (`╊Soul Snatch`), `Arcomia Core`, `Combine`, `[Divinity]`
+3. **Contestant (Lord) Names:**
+   - `Xiang`, `Ying Lü`, `Bai Ge`, `Little Daji`, `Little Sun Bin`, `Little Zhuang Fish`, `Little Chang'e` (and role noun `Contestant`, never `Peserta` or `Chess Player`).
+4. **Canonical Hero & Sub-Card Title Sync (Must Match Standalone Title in `catalog["unique"]`):**
+   - **Heroes:** `干将莫邪` -> `'Gan & Mo'`, `百里守约` -> `'Shouyue'` (never `Baili Shouyue`), `百里玄策` -> `'Xuance'` (never `Baili Xuance`), `诸葛亮` -> `'Kongming'`, `杨玉环` -> `'Yuhuan'`, `姜子牙` -> `'Ziya'`.
+   - **Sub-Cards & Tokens:** `妙音` / `绕梁之音` -> `'Melody'`, `开局狂飙` / `开局爆发` -> `'Early Game Surge'`, `时光虹吸` -> `'Time Siphon'`, `点星` -> `'Star Point'`, `珍品宝箱` -> `'Treasure Chest'`, `全员增幅` -> `'Team-Wide Buff'`, `全员增幅·一` -> `'Team Buff I'`, `全员增幅·二` -> `'Team Buff II'`, `众星闪耀` -> `'Starry Radiance'`, `离场` (card) -> `'Departure'`, `有福同享` -> `'Shared Fortune'`, `超级储能` -> `'Super Energy Storage'`, `星绘秘宝` -> `'Star Painting Treasure'`, `蔷薇秘宝` -> `'Rose Treasure'`, `星彩秘宝` -> `'Starlight Treasure'`, `蔷薇奖励` -> `'Rose Reward'`, `名刀·司命` -> `'Destiny'`, `五阶英雄兑换券` -> `'Tier 5 Hero Voucher'`, `故障机器人` -> `'Glitch Robot'`, `好运连连` -> `'[Good Luck]'`.
+5. **Series Headers & `#60D2` Footers:**
+   - Leading `<color=#99DEB0>... Series</color>` headers (`Summon Series`, `General Series`, `Combine Series`, `╬Prepare Series`, `═Temporary Level Series`, etc.) and trailing `#60D2` footers (`Cannot be copied`, `Unstackable`, `Disappears after triggering`, etc.) remain in canonical English.
 
-- **Extraction Method:** Fetch `https://hok-ace-translate-id.netlify.app/` and parse the two embedded JSON script tags:
-  1. `<script id="data" type="application/json">`:
-     - `hero` (85 items): `id`, `cn`, `name`, `tier`, `faction`, `desc` (ID), `descCn` (ZH), `kw`
-     - `effect` (98 items): `id`, `cn`, `name`, `tier`, `faction`, `desc` (ID), `descCn` (ZH), `group`
-     - `equip` (73 items): `id`, `cn`, `name`, `tier`, `faction`, `desc` (ID), `descCn` (ZH)
-     - `talent` (258 items): `id`, `cn`, `name`, `tier`, `faction`, `desc` (ID), `descCn` (ZH)
-     - `keywords` (14 items) & `factions` (9 items)
-  2. `<script id="lords-data" type="application/json">`:
-     - 19 Chessplayers/Lords (`name`, `talents[]` with `cardName` and Indonesian `desc`, `related[]` with `name` and Indonesian `desc`).
-- **Terminology Style (Hybrid Indonesian-English):**
-  - Keep Proper Names of Heroes (`Su Lie`, `Alessio`), Cards (`Talent Scouting`), Equipment (`Storm Greatsword`), Talents (`Copier`), Factions (`Central Plain`, `Riverlands`, `Sunset`, `Zhulu Plateau`, `Three Kingdoms`), and Core Mechanics (`Sacrifice`, `Temporary Level`, `Physical Damage`, `Magic Damage`, `True Damage`, `Attack Speed`, `Attack Power`, `Max HP`, `Shield`, `Stun`, `Silence`, `Disarm`, `Root`, `Knockback`, `Combat`, `Round`, `Shop`, `Refresh`, `Tier`) in English as established in Tier 1.
-  - Translate card category terms and prose into natural Indonesian (`Kartu Hero`, `Kartu Efek`, `Kartu Secret Art`, `dapatkan`, `secara permanen`, `saat gugur`, `musuh terdekat`, `sekitarnya`).
+## The 3-Tier Authority Rule (`ThreeTierGlossary`)
 
-### Tier 2: Secondary English Reference (`https://hokace.wiki/`)
-
-- **Extraction Method:**
-  - Fetch `https://hokace.wiki/search/` and extract `const entries = [...]` (624 items across `Talent`, `Effect card`, `Equipment`, `Hero`, `Chess player`, `Mechanic`, `Summon`).
-  - Each entry contains `name` (EN), `alt` (ZH), `type`, `url`, and `search` (combined ZH + EN summary).
-  - For detailed descriptions of items missing from Tier 1, fetch `https://hokace.wiki<url>` and `https://hokace.wiki/zh<url>`.
-- **Translation Rule:** When an item is absent from Tier 1 but present in Tier 2, keep its Tier 2 English proper name and translate its English description into Indonesian using Tier 1's hybrid terminology rules.
-
-### Tier 3: Fallback (`ZH -> EN -> ID`)
-
-- **Scope:**
-  1. All remaining ~40,000 strings in `catalog/catalog.json.gz` (`unique` and `english_updates`) and `wxq_patch` override modules (`hok_terminology.py`, `glossary.py`, `direct_*_overrides.py`).
-  2. The **108 unknown Chinese strings (`409` records)** found in the user's live Windows game (`originals/WXQ_Data/Package/builtin`) that were missed by English Patcher 1.4.12.
-- **Process:**
-  1. For strings already in `catalog.json.gz`, use the Chinese key (`ZH`) + existing validated English value (`EN`) as the `ZH -> EN` bridge (correcting any proper-name discrepancies against Tier 1/Tier 2).
-  2. For the 108 unknown Chinese strings in the game database, translate `ZH -> EN` first, then `EN -> ID`.
-  3. Translate into clean, accurate Indonesian (`ID`) while strictly preserving all tags, placeholders, control tokens, and semicolons (see `wxq-tag-and-validation-guard`).
+1. **Tier 1 (`data/references/tier1_wiki_id.json` + `curated_t1_pairs` in `src/acepatchindo/glossary.py`):**
+   - Primary Indonesian reference from `https://hok-ace-translate-id.netlify.app/` and curated verified translations.
+   - Matched via exact Chinese key, normalized plain Chinese, or formula skeleton (`tier1_formula_zh_to_id`, ranked by exact `RUNTIME_BRACKET_TOKEN_RE` and numeric match).
+2. **Tier 2 (`data/references/tier2_wiki_en.json` & `tier2_wiki_details_en.json`):**
+   - Secondary English reference from `https://hokace.wiki/`, rewritten into tactical Bahasa Indonesia via `rewrite_en_card_to_id` + `polish_indonesian_card_text`.
+3. **Tier 3 (`ZH -> EN -> ID` Fallback):**
+   - Uses validated English baseline (`work/v2_baseline/catalog_en_full.json.gz`) rewritten and polished through `card_rewriter.py`, `tag_aligner.py`, and wrapped to `<= 34` visible characters via `card_wrapper.py`.

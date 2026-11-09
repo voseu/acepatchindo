@@ -1,42 +1,39 @@
 ---
 name: patcher-repack-and-github-release
-description: Use when repacking the Windows executable Honor of Kings Ace Indonesian Patcher.exe on Linux, patching outer Rust GUI strings and SHA-256 worker digest, or publishing releases to GitHub repository voseu/acepatchindo.
+description: Use when repacking the Windows executable Celeslib-HoK-Ace-Patcher-v1.0.0.exe on Linux, building the Win32 GUI stub and embedded ace-worker.exe, or publishing releases to GitHub repository voseu/acepatchindo.
 ---
 
-# Patcher Binary Repacking & GitHub Release
+# Celeslib Patcher Binary Repacking & GitHub Release (`v1.0.0-celeslib`)
 
 ## Overview
 
-Because the development host is Linux and the target deliverable is a standalone Windows 64-bit `.exe` (`Honor of Kings Ace Indonesian Patcher 1.4.12.exe`), we repack the embedded PyInstaller `ace-worker.exe` in-place while preserving exact PE section and slice lengths, update the outer Rust binary's SHA-256 verification digest, and publish the release to `https://github.com/voseu/acepatchindo.git`.
+The production Windows 64-bit deliverable is `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe` (`55,094,304` bytes), published to GitHub repository `https://github.com/voseu/acepatchindo.git` under release tag [`v1.0.0-celeslib`](https://github.com/voseu/acepatchindo/releases/tag/v1.0.0-celeslib).
 
-## Deterministic In-Place Repacking Algorithm
+## End-to-End Rebuild & Repack Pipeline
 
-1. **Compile Modified `wxq_patch` Modules (Python 3.12):**
-   - Use `/home/whise/.local/bin/uv run --python 3.12` to compile modified `.py` files (such as `table_catalog.py` with dual Chinese + English-to-Indonesian support) into `.pyc` files.
-   - Repack `PYZ.pyz` using `zlib.compress(code_marshal_bytes, 9)` (keep `length == 0` for namespace packages like `archspec.vendor`).
-2. **Minify & Compress `catalog\catalog.json.gz`:**
-   - Serialize JSON with `json.dumps(cat, ensure_ascii=False, separators=(',', ':')).encode('utf-8')`.
-   - Compress with `gzip.compress(raw_json, compresslevel=9)`.
-3. **Rebuild the PyInstaller CArchive of `ace-worker.exe`:**
-   - Extract the original `ace-worker.exe` slice from `Honor of Kings Ace English Patcher 1.4.12.exe` (`data[0x4CAC4A : 0x3838C00]`, exact length `53,927,862` bytes).
-   - Keep the first `348,672` bytes (PE bootloader stub, offset `0` to `348,672` of `ace-worker.exe`) intact.
-   - Rebuild the CArchive entries starting at offset `348,672`:
-     - Replace `catalog\catalog.json.gz` (`cflag=1`, `zlib.compress(gz_bytes, 9)`, `ulen=len(gz_bytes)`).
-     - Replace `PYZ.pyz` (`cflag=0`, `typcd=ord('z')`).
-     - If total CArchive size (entries + TOC + 88-byte cookie) is less than `53,579,190` bytes, insert zero-padding (`\x00`) between the end of the TOC and the 88-byte `MEI` cookie so `plen` remains **exact `53,579,190` bytes** and `len(new_ace_worker)` remains **exact `53,927,862` (`0x336DFB6`) bytes**.
-     - *(If additional byte slack is ever needed, unused offline generator dicts in `PYZ.pyz` such as `wxq_patch.direct_remaining_group_overrides_01..07` can be replaced with empty stub dicts in `PYZ.pyz`, freeing > 600 KB without affecting runtime `adaptive.pyc` or `mobile.pyc`.)*
-4. **Update Outer Rust Binary SHA-256 Digest:**
-   - Compute `worker_sha256 = hashlib.sha256(new_ace_worker).hexdigest().upper().encode('ascii')` (64 bytes).
-   - Write `worker_sha256` at file offset `0x4CABFA` (preserving the trailing `\r\n` at `0x4CAC3A`).
-   - Write `new_ace_worker` at file offset `0x4CAC4A` to `0x3838C00`.
-5. **Localize Fixed-Length Outer Rust GUI Strings (Safe In-Place Byte Replacement):**
-   - Only replace strings in `.rdata` after `0x3838C00` when the replacement UTF-8 byte length is **strictly equal** to the original UTF-8 byte length (because Rust `&str` fat pointers hardcode `(ptr, len)` in `.text`).
-   - Verify with a round-trip extraction test (`pyinstxtractor.py` + `SHA-256` check at `0x4CABFA`).
+1. **Rebuild `ID Hybrid` Catalog (`data/catalog_checkpoints/catalog.json.gz`):**
+   - Run `PYTHONPATH=src:work/pyz_extracted .venv/bin/python3 scripts/02_build_indonesian_catalog.py` (using `ThreeTierGlossary.from_reference_files(Path("data/references/tier1_wiki_id.json"), Path("data/references/tier2_wiki_en.json"))`) so all `5,621` active `unique` descriptions and `15,397` active `english_updates` entries are translated, aligned, polished, wrapped (`<= 34` visible chars), and validated.
+2. **Patch Worker Modules & Repack `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe`:**
+   - Run `PYTHONPATH=src:work/pyz_extracted .venv/bin/python3 scripts/03_patch_worker_modules.py` and `PYTHONPATH=src:work/pyz_extracted .venv/bin/python3 scripts/05_repack_windows_exe.py` (plus `scripts/08_compile_celeslib_gui.py` if `src/gui/celeslib_gui.cpp` changed).
+   - This compiles modified `wxq_patch` runtime modules (`table_catalog.py`, `adaptive.py`) into Python 3.12 `.pyc` bytecode, repacks `PYZ.pyz`, rebuilds `ace-worker.exe` (`53,927,862` bytes = `0x336DFB6`), patches the uppercase SHA-256 hex digest into the Win32 GUI stub (`src/gui/celeslib_gui.cpp`), writes `ace-worker.exe` into `0x11CC62..0x348AC18`, and updates `dist/SHA256SUMS.txt`.
+3. **Run Full Verification Suite (`52` Tests):**
+   ```bash
+   PYTHONPATH=src:work/pyz_extracted .venv/bin/pytest tests/ -v
+   ```
 
-## GitHub Repository & Release (`https://github.com/voseu/acepatchindo.git`)
+## Atomic 5-Point SHA-256 Synchronization
 
-1. **Repository Hygiene (`.gitignore`):**
-   - Never commit 60 MB `.exe` binaries, `.dll`/`.pyd` files, or `Honor of Kings Ace English Patcher 1.4.12.exe_extracted/` into Git tree history (GitHub rejects files > 100 MB and bloats clones).
-   - Commit all source code (`src/`, `scripts/`, `tests/`, `.agents/`, `README.md`, `.github/workflows/`).
-2. **Publishing the Windows `.exe` Release:**
-   - Upload the built `Honor-of-Kings-Ace-Indonesian-Patcher-1.4.12.exe` and `SHA256SUMS.txt` directly to **GitHub Releases** on `voseu/acepatchindo` (using authenticated GitHub API / `gh release create` or GitHub Actions release workflow) so the user can download and install it directly on Windows.
+Whenever `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe` is rebuilt, the exact SHA-256 digests of both `Celeslib-HoK-Ace-Patcher-v1.0.0.exe` (`55,094,304` bytes) and `ace-worker.exe` (`53,927,862` bytes @ `0x11CC62..0x348AC18`) MUST match across all 5 locations:
+1. `dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe` ( currently `24180a28a2a96b7a3423d62984261c7de6d3643ae4772d52bc729534b16c8319` / worker `91a46a837ec83845bfdfb0cf98ca5e90ec4af205c81840dd7d1e3ce7751f6b6c` )
+2. `dist/SHA256SUMS.txt`
+3. `README.md` (`## Verifikasi Integritas (SHA-256)`)
+4. Git `origin/main` and tag `v1.0.0-celeslib` (`git tag -f v1.0.0-celeslib && git push origin main && git push origin v1.0.0-celeslib --force`)
+5. Live GitHub Release `v1.0.0-celeslib` assets and release body:
+   ```bash
+   gh release upload v1.0.0-celeslib \
+     dist/Celeslib-HoK-Ace-Patcher-v1.0.0.exe \
+     dist/SHA256SUMS.txt \
+     assets/previews/celeslib_patcher_id.png \
+     assets/previews/celeslib_patcher_en.png \
+     --clobber
+   ```
