@@ -500,8 +500,10 @@ def test_12_forensic_cleanliness_and_zero_regressions():
        <Name> kartu, Kartu Li Xin Efek, milikmu Skill/Control/Temporary/permanen, memicu Retreat.
     """
     from acepatchindo.hybrid_classifier import get_hybrid_classifier
-    from acepatchindo.validator import validate_translation
+    from acepatchindo.validator import validate_translation, RUNTIME_BRACKET_TOKEN_RE
+    from acepatchindo.card_wrapper import _visible_length
     from acepatchindo.windows_108_split import WINDOWS_108_TARGET_DESC_ID
+    from collections import Counter
     import wxq_patch.translation_rules as runtime_rules
 
     # 1. All 58 raw entries pass validation
@@ -594,7 +596,8 @@ def test_12_forensic_cleanliness_and_zero_regressions():
         ("double colon", re.compile(r"::")),
         ("nested brackets", re.compile(r"\[[^\]]*\[|\][^\[]*\]")),
         ("split decimal / range", re.compile(r"\d+\s*(?:miliknya|mereka)\s*[\.\-~]\s*\d+|\d+\s*[\.\-~]\s*(?:miliknya|mereka)\s*\d+")),
-        ("masuk field / mimpi menyimpan / peluang ke", re.compile(r"\bmasuk\s+field\b|\bmimpi\s+menyimpan\b|\bpeluang\s+ke\s+(?:me|ber|ter|di)", re.I)),
+        ("masuk field / mimpi menyimpan / peluang ke", re.compile(r"\bmasuk\s+field\b|\bmimpi\s+menyimpan\b|\bpeluang\s+ke\b", re.I)),
+        ("Opus/grammar corruption", re.compile(r"Tidak\.|adalah\s+di\s+atas|\bSaat\s+tipe\b|mantra\s+sucks|scarcestone|Deploy\s+horizontally|Hero\.Hero|memicu\.|itu\.\.\.|<color=[^>]+>11\.</color>|\bAmbil\s+Summon\b", re.I)),
         ("Modifier kartu inverted", re.compile(r"\b(?:Shared Fortune|Mysterious Hero|Lanjutan Mekanisme|Tier tinggi|No Faction|Lelang|Umum)\s+[Kk]artu\b")),
         ("chess", re.compile(r"\bchess\b", re.I)),
         ("papan", re.compile(r"\bpapan\b", re.I)),
@@ -607,6 +610,9 @@ def test_12_forensic_cleanliness_and_zero_regressions():
         ("evolves / fictitious / seized unit / Luar biasa Suara", re.compile(r"\bevolves\b|\bfictitious\b|\bseized\s+unit\b|\bLuar\s+biasa\s+Suara\b", re.I)),
         ("Sub-card anomalies & top 3", re.compile(r"╆Fleeting\s+Kartu\s+Hero\b|di\s+atas\s+3\b|1\s+kali\s+Menyerap|Bintang-Poin|Langka\s+Peti|Bintang\s+Cat\s+Harta|Mawar\s+Hadiah|Cahaya\s+bintang\s+Shimmer|Lebih\s+awal\s+game\s+Surge|Mistis\s+Suara|Melodious\s+Suara", re.I)),
     ]
+    cjk_outside_braces = re.compile(r"[。，：；（）]")
+    detached_icon_pat = re.compile(r"\{\d+\|[^{}]+\}\s+(?:Hero|Voucher|Kartu)\b|\bKonversi\s+\{(?:Energy|LordExp|LordHp)\}")
+
     for zh, val in active_targets:
         for label, rx in strict_checks:
             assert not rx.search(val), f"Forensic violation '{label}' in {val!r} (ZH: {zh!r})"
@@ -620,4 +626,31 @@ def test_12_forensic_cleanliness_and_zero_regressions():
             assert re.search(r"Tier\s*\{ResCardInfoDataBin_1981", val), f"Voucher Tier placeholder not aligned in {val!r}"
         if "{killcount:0}" in zh:
             assert not re.search(r"memperoleh\s*\{killcount:0\}", val, re.I), f"killcount placeholder swapped into stat slot in {val!r}"
+
+        # CJK fullwidth punctuation outside {...} must be zero
+        val_no_braces = re.sub(r"\{[^{}]*\}", "", val)
+        assert not cjk_outside_braces.search(val_no_braces), f"Fullwidth CJK punctuation outside braces in {val!r} (ZH: {zh!r})"
+
+        # Runtime bracket formula token multiset equality
+        assert Counter(RUNTIME_BRACKET_TOKEN_RE.findall(zh)) == Counter(RUNTIME_BRACKET_TOKEN_RE.findall(val)), (
+            f"Runtime bracket tokens mismatch in {val!r} (ZH: {zh!r})"
+        )
+
+        # Detached {N|val}{Icon} checks
+        assert not detached_icon_pat.search(val), f"Detached placeholder/icon in {val!r} (ZH: {zh!r})"
+
+        # Verify 4张古币牌 retains 4 Kartu and tracker placeholder
+        if "本回合每使用4张古币牌" in zh:
+            assert "4 Kartu" in val, f"Missing '4 Kartu' in {val!r}"
+            assert re.search(r"\(total\s+Revive:\s*\{ResCardInfoDataBin_1541_15412_0:\s*1\}\)", val), f"Missing tracker in {val!r}"
+
+        # Word wrap check: if no ';' in zh, each line visible length <= 34 (unless single unbroken token > 34)
+        if ";" not in zh:
+            for line in val.split("\n"):
+                vis_len = _visible_length(line)
+                if vis_len > 34:
+                    line_masked = re.sub(r"\[[^\]]+\]", lambda m: m.group(0).replace(" ", "_"), line)
+                    words = [w for w in line_masked.split(" ") if w]
+                    has_long_word = any(_visible_length(w) > 34 for w in words)
+                    assert has_long_word, f"Line exceeds 34 visible chars ({vis_len}): {line!r} in {val!r} (ZH: {zh!r})"
 

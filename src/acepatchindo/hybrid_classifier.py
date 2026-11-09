@@ -102,8 +102,8 @@ class HybridClassifier:
         if not zh_clean:
             return False
 
-        # 1. Hard vetoes: non-target 108, training dummy
-        if zh_clean in WINDOWS_108_NONTARGET_EN:
+        # 1. Hard vetoes: non-target 108, training dummy, pure item titles
+        if zh_clean in WINDOWS_108_NONTARGET_EN or zh_clean in ("狼牙部落的图腾雕像", "狼牙部落的图腾雕像+"):
             return False
         if P_UNIT_FLAVOR_RE.search(zh_clean):
             return False

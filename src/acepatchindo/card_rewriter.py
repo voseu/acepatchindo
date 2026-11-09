@@ -493,10 +493,14 @@ POLISH_RULES_UNIVERSAL_1: tuple[tuple[re.Pattern[str], str | Callable], ...] = (
 )
 
 # Bracketed Faction Regex
-FACTION_PAT = r"(\[(?:Central Plains|Riverlands|Three Kingdoms|Sunset Sea|Zhulu Plateau|High Heaven|First Lands|Factionless|Great Wall|Jixia|Divinity)\])"
+FACTION_PAT = r"([\[【](?:Central Plains|Riverlands|Three Kingdoms|Sunset Sea|Zhulu Plateau|High Heaven|First Lands|Factionless|Great Wall|Jixia|Divinity)[\]】])"
 UNBRACKETED_FACTIONS = r"(?:Central Plains|Riverlands|Three Kingdoms|Sunset Sea|Zhulu Plateau|High Heaven|First Lands|Factionless|Great Wall|Jixia)"
 
 POLISH_RULES_UNIVERSAL_2: tuple[tuple[re.Pattern[str], str | Callable], ...] = (
+    (re.compile(r"\bLainnya\s+([\[【][^\]】]+[\]】])\s+Hero\b", re.I), r"Hero \1 lainnya"),
+    (re.compile(r"\bLainnya\s+([\[【][^\]】]+[\]】])\s+unit\b", re.I), r"unit \1 lainnya"),
+    (re.compile(r"\bLainnya\s+Hero\s+sekutu\b", re.I), "Hero sekutu lainnya"),
+    (re.compile(r"\bLainnya\s+Hero\b", re.I), "Hero lainnya"),
     (re.compile(rf"\bnon-{FACTION_PAT}\s+Hero\b", re.I), r"Hero non-\1"),
     (re.compile(rf"\bLainnya\s+{FACTION_PAT}\s+Hero\b", re.I), r"Hero \1 lainnya"),
     (re.compile(rf"(?:sebuah\s+)?Awakened\s+{FACTION_PAT}\s+Hero\b", re.I), r"Hero \1 Awakened"),
@@ -563,6 +567,35 @@ POLISH_RULES_UNIVERSAL_2: tuple[tuple[re.Pattern[str], str | Callable], ...] = (
     (re.compile(r"\bmilikmu\s+Temporary\s+Level\b", re.I), "Temporary Level milikmu"),
     (re.compile(r"\bmilikmu\s+Control\s+efek\b", re.I), "efek Control milikmu"),
     (re.compile(r"\bHero'\s+Level\b", re.I), "Level Hero"),
+    # No. 7 normalization & possessives
+    (re.compile(r"\bNo\.\s*(\d+)\b"), r"No.\1"),
+    (re.compile(r"\bNo\.(\d+)'s\s+favorite\s+music\b", re.I), r"musik favorit No.\1"),
+    (re.compile(r"\bNo\.(\d+)'s\s+laser\s+cannon\b", re.I), r"meriam laser No.\1"),
+    (re.compile(r"\bNo\.(\d+)'s\s+", re.I), r"No.\1 "),
+    (re.compile(r"\bTidak\.\s*favorit\s*(\d+)\s*(?:Musik|musik)\b", re.I), r"musik favorit No.\1"),
+    (re.compile(r"\bBermain\s+Tidak\.favorit\s*7\s*Musik\b", re.I), "Memutar musik favorit No.7"),
+    (re.compile(r"\bMengaktifkan\s+Tidak\.laser\s*7\s*meriam\b", re.I), "Mengaktifkan meriam laser No.7"),
+    (re.compile(r"\bTidak\.laser\s*(\d+)\s*meriam\b", re.I), r"meriam laser No.\1"),
+    (re.compile(r"\bTidak\.favorit\s*(\d+)\b", re.I), r"favorit No.\1"),
+    # Pronomina grammar & position cleanup
+    (re.compile(r"\bdi\s+milikmu\s+Combat\b", re.I), "di dalam Combat"),
+    (re.compile(r"\bHero\s+Di\s+atas\s+milikmu\s+Level\s+(\d+)\b", re.I), r"Hero milikmu di atas Level \1"),
+    (re.compile(r"\bmencapai\s+milikmu\s+Level\s+(\d+)\b", re.I), r"mencapai Level \1"),
+    (re.compile(r"\byang\s+milikmu\s+Level\s+akan\b", re.I), "agar Level-nya"),
+    (re.compile(r"\b(?:Saat|Setiap\s+kali)\s+milikmu\s+((?:<[^>]+>)*)(Hero|╉?Totem)\b", re.I), r"Saat \1\2 milikmu"),
+    (re.compile(r"\bmilikmu\s+(<a[^>]*><color=[^>]+>╉Totem</color></a>)", re.I), r"\1 milikmu"),
+    (re.compile(r"\bsebuah\s+sekutu\s+(Tank|Pejuang|Mage|Assassin|Marksman|Support|unit|Hero)\b", re.I), r"\1 sekutu"),
+    (re.compile(r"\bpada\s+sebuah\s+Ditargetkan\s+(posisi|petak(?:\s+slot)?)\b", re.I), r"pada \1 yang ditargetkan"),
+    (re.compile(r"\bberikutnya\s+((?:<color=[^>]+>)?)[Kk]artu\s+Hero\s+dimainkan\b", re.I), r"\1Kartu Hero berikutnya yang dimainkan"),
+    (re.compile(r"\bDasar\s+Damage\s+serangan\b", re.I), "Damage Basic Attack"),
+    # Calque 'adalah di atas' (is above / is over)
+    (re.compile(r"\badalah\s+di\s+atas(?=\s*[\d%])", re.I), "di atas"),
+    (re.compile(r"\b(?:Combat|pertempuran)\s+adalah\s+di\s+atas\b", re.I), "Combat berakhir"),
+    (re.compile(r"\badalah\s+di\s+atas\b", re.I), "berakhir"),
+    # Long bracket expressions condensation (guarantees visible line <= 34)
+    (re.compile(r"\[Biru\s+dan\s+Di\s+atas\s+Kualitas\s+([^\]]+)\]", re.I), r"[Kualitas Biru+ \1]"),
+    (re.compile(r"\[2\*jumlah\s+dari\s+(?:sekutu\s+)?Mage(?:\s+Hero)?\s+(?:pada\s+)?di\s+arena(?: milikmu)?\]", re.I), "[2 x jumlah Mage sekutu]"),
+    (re.compile(r"\[2\*jumlah\s+dari\s+sekutu\s+Mage\s+Hero\s+di\s+arena\]", re.I), "[2 x jumlah Mage sekutu]"),
     # Artikel Harfiah & Polisemi
     (re.compile(r"\bsebuah\s+tambahan\b", re.I), "tambahan"),
     (re.compile(r"\bsebuah\s+[Ee]kstra\b"), "ekstra"),
@@ -750,7 +783,7 @@ def polish_indonesian_card_text(source_zh: str, text_id: str, baseline_en: str =
     if not text_id:
         return text_id
 
-    res = text_id
+    res = text_id.replace("【", "[").replace("】", "]")
 
     # 1. Enforce Related Card Title sync
     for rx, repl in COMPILED_CANONICAL_RELATED_CARD_RULES:
@@ -805,7 +838,7 @@ def polish_indonesian_card_text(source_zh: str, text_id: str, baseline_en: str =
         res = re.sub(r"<color=#ffffff>\s*(?:hanya|Unique)\s*</color>", "<color=#ffffff>Unik</color>", res, flags=re.I)
         res = re.sub(r"<color=#ffffff><b>\s*(?:hanya|Unique)\s*</b></color>", "<color=#ffffff><b>Unik</b></color>", res, flags=re.I)
         res = re.sub(r"\bhanya\b", "Unik", res, flags=re.I)
-    if "抽" in source_zh:
+    if "抽" in source_zh or "摸" in source_zh:
         res = re.sub(r"\b(?:Seri|menarik)\s+(\d+|[A-Za-z<]+)\s*kartu\b", r"Ambil \1 kartu", res, flags=re.I)
         res = re.sub(r"\b(?:Seri|menarik)\s+sebuah\s+([A-Za-z0-9 ·•\-\[\]]+)\s+Kartu\b", r"Ambil 1 Kartu \1", res, flags=re.I)
         res = re.sub(r"\b(?:Seri|menarik)\s+sebuah\b", "Ambil 1", res, flags=re.I)
@@ -816,11 +849,6 @@ def polish_indonesian_card_text(source_zh: str, text_id: str, baseline_en: str =
         res = re.sub(r"\bDraws?\s+(?:are\s+not|not)\s+counted\b", "Seri tidak dihitung", res, flags=re.I)
         res = re.sub(r"\bties\s+are\s+not\s+counted\b", "Seri tidak dihitung", res, flags=re.I)
         res = re.sub(r"\bMenarik\b(?!\s*[/–-]|\s*Kalah|\s*Defeat)", "Seri", res)
-    else:
-        res = re.sub(r"\bSeri\s+(\d+|[A-Za-z<]+)\s*kartu\b", r"Ambil \1 kartu", res, flags=re.I)
-        res = re.sub(r"\bSeri\s+sebuah\b", "Ambil 1", res, flags=re.I)
-        res = re.sub(r"\bSeri\s+1\b", "Ambil 1", res, flags=re.I)
-        res = re.sub(r"\bSeri\b(?!\s*[/–-]|\s*Kalah|\s*Defeat)", "Ambil", res)
     if "第二" in source_zh and "秒" not in source_zh:
         res = re.sub(r"\bdetik\b", "ke-2", res, flags=re.I)
     if "棋手" in source_zh:
@@ -893,7 +921,7 @@ def polish_indonesian_card_text(source_zh: str, text_id: str, baseline_en: str =
     if "╉图腾" in source_zh and "系列" in source_zh:
         sub_cand = re.sub(
             r"Mendapatkan\s+segera\s+<color=#99DEB0>4</color>.*",
-            "Segera memperoleh <color=#99DEB0>4</color> Kartu Hero Seri Summon dan ╉<color=#99DEB0>Totem</color>. Saat memanggil unit (termasuk unit Summon dan ╉Totem), peroleh <color=#99DEB0>1</color> Kartu Hero Seri Summon dan ╉<color=#99DEB0>Totem</color> (maks. <color=#99DEB0>4 kartu</color> per Round).",
+            "Segera memperoleh <color=#99DEB0>4</color> Kartu Hero bertema Summon dan ╉<color=#99DEB0>Totem</color>. Saat memanggil unit (termasuk unit Summon dan ╉Totem), peroleh <color=#99DEB0>1</color> Kartu Hero bertema Summon dan ╉<color=#99DEB0>Totem</color> (maks. <color=#99DEB0>4 kartu</color> per Round).",
             res,
             flags=re.S,
         )

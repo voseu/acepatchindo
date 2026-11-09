@@ -15,6 +15,7 @@ EMPTY_TAG_RE = re.compile(
     r"<(color=[^>]+|b|i|a[^>]*|size=[^>]+)>\s*</(?:color|b|i|a|size)>"
 )
 NESTED_BRACE_RE = re.compile(r"\{[^{}]*\{|\}[^{}]*\}")
+RUNTIME_BRACKET_TOKEN_RE = re.compile(r"\[(?:\d+|\d+[A-Za-z0-9_+/.*%-]+)\]")
 
 
 def strip_non_text(value: str) -> str:
@@ -37,6 +38,10 @@ def validate_translation(source: str, translated: object) -> tuple[bool, str]:
         PLACEHOLDER_RE.findall(translated)
     ):
         return (False, "placeholders_changed")
+    if Counter(RUNTIME_BRACKET_TOKEN_RE.findall(source)) != Counter(
+        RUNTIME_BRACKET_TOKEN_RE.findall(translated)
+    ):
+        return (False, "bracket_tokens_changed")
     if Counter(CONTROL_TOKEN_RE.findall(source)) != Counter(
         CONTROL_TOKEN_RE.findall(translated)
     ):

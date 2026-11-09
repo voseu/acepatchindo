@@ -5,6 +5,7 @@ from __future__ import annotations
 import gzip
 import json
 import re
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
@@ -42,6 +43,7 @@ from acepatchindo.validator import (
     CJK_RE,
     CONTROL_TOKEN_RE,
     PLACEHOLDER_RE,
+    RUNTIME_BRACKET_TOKEN_RE,
     TAG_RE,
     sanitize_target_text,
     validate_translation,
@@ -609,7 +611,8 @@ CHEST_CHOICE_RE = re.compile(r"(?:指定英雄穿戴|穿戴给英雄)，可从(.
 HERO_CHOICE_VOUCHER_RE = re.compile(r"(\d+)选(\d+)(?:【([^】]+)】|(无阵营)的?)(\d+)阶英雄，获得(\d+)张该英雄牌。")
 HERO_SPECIFIED_RE = re.compile(r"^(.*?)指定(\d+)名英雄，获得(\d+)张该英雄牌。(.*)$")
 OPUS_CORRUPTION_RE = re.compile(
-    r"♪|♫|Synchronis|\(Text\)|\bRiot rate\b|\d+\s*(?:Zhang|Chang)\b|Forensic|small part of the world|non-resistible|breached\.",
+    r"♪|♫|Synchronis|\(Text\)|\bRiot rate\b|\d+\s*(?:Zhang|Chang)\b|Forensic|small part of the world|non-resistible|breached\."
+    r"|[。，：；（）]|\b1One\.|It's\.\.\.|Hero cards\.\.|triggers\.|scarcestone|It's a gift\.|When typed|sucks blood|\.\d+Point\b",
     flags=re.I,
 )
 SEMICOLON_SPLIT_RE = re.compile(r";\s*(?=[A-Z]|Pilih|Dapatkan|Memperoleh)")
@@ -1865,7 +1868,7 @@ class ThreeTierGlossary:
             ),
             (
                 "立即获得<color=#99DEB0>4张</color>召唤、╉<color=#99DEB0>图腾系列</color>英雄牌。召唤单位时（含召唤物，╉图腾），获得<color=#99DEB0>1张</color>召唤、╉<color=#99DEB0>图腾系列</color>英雄牌（每回合最多<color=#99DEB0>4张</color>）。",
-                "Segera memperoleh <color=#99DEB0>4</color> Kartu Hero Seri Summon dan ╉<color=#99DEB0>Totem</color>. Saat memanggil unit (termasuk unit Summon dan ╉Totem), peroleh <color=#99DEB0>1</color> Kartu Hero Seri Summon dan ╉<color=#99DEB0>Totem</color> (maks. <color=#99DEB0>4 kartu</color> per Round).",
+                "Segera memperoleh <color=#99DEB0>4</color> Kartu Hero bertema Summon dan ╉<color=#99DEB0>Totem</color>. Saat memanggil unit (termasuk unit Summon dan ╉Totem), peroleh <color=#99DEB0>1</color> Kartu Hero bertema Summon dan ╉<color=#99DEB0>Totem</color> (maks. <color=#99DEB0>4 kartu</color> per Round).",
             ),
             (
                 "立即获得<color=#99DEB0>4张</color><a href=10><color=#99DEB0>╫牺牲</color></a>英雄牌。你的英雄触发<a href=10><color=#99DEB0>╫牺牲</color></a>时，获得<color=#99DEB0>1张</color><a href=10><color=#99DEB0>╫牺牲</color></a>英雄牌（每回合最多<color=#99DEB0>4张</color>）。",
@@ -1877,7 +1880,232 @@ class ThreeTierGlossary:
             ),
             (
                 "立即获得<color=#99DEB0>4张</color>召唤、<a href=321><color=#99DEB0>╉图腾</color></a>系列英雄牌。<color=#99DEB0>召唤单位时（含召唤物，<a href=321><color=#99DEB0>╉图腾</color></a>）</color>，获得<color=#99DEB0>1张</color>召唤、<a href=321><color=#99DEB0>╉图腾</color></a>系列英雄牌（每回合最多<color=#99DEB0>4张</color>）。",
-                "Segera memperoleh <color=#99DEB0>4</color> Kartu Hero Seri Summon dan <a href=321><color=#99DEB0>╉Totem</color></a>. <color=#99DEB0>Saat memanggil unit (termasuk unit Summon dan <a href=321><color=#99DEB0>╉Totem</color></a>)</color>, peroleh <color=#99DEB0>1</color> Kartu Hero Seri Summon dan <a href=321><color=#99DEB0>╉Totem</color></a> (maks. <color=#99DEB0>4</color> per Round).",
+                "Segera memperoleh <color=#99DEB0>4</color> Kartu Hero bertema Summon dan <a href=321><color=#99DEB0>╉Totem</color></a>. <color=#99DEB0>Saat memanggil unit (termasuk unit Summon dan <a href=321><color=#99DEB0>╉Totem</color></a>)</color>, peroleh <color=#99DEB0>1</color> Kartu Hero bertema Summon dan <a href=321><color=#99DEB0>╉Totem</color></a> (maks. <color=#99DEB0>4</color> per Round).",
+            ),
+            (
+                "<color=#99DEB0>召唤系列</color>\n立即获得<color=#99DEB0>4张</color>召唤、<a href=321><color=#99DEB0>╉图腾</color></a>系列英雄牌。<color=#99DEB0>召唤单位时（含召唤物，<a href=321><color=#99DEB0>╉图腾</color></a>）</color>，获得<color=#99DEB0>1张</color>召唤、<a href=321><color=#99DEB0>╉图腾</color></a>系列英雄牌（每回合最多<color=#99DEB0>4张</color>）。",
+                "<color=#99DEB0>Summon Series</color>\nSegera memperoleh <color=#99DEB0>4</color> Kartu Hero bertema Summon dan <a href=321><color=#99DEB0>╉Totem</color></a>. <color=#99DEB0>Saat memanggil unit (termasuk unit Summon dan <a href=321><color=#99DEB0>╉Totem</color></a>)</color>, peroleh <color=#99DEB0>1</color> Kartu Hero bertema Summon dan <a href=321><color=#99DEB0>╉Totem</color></a> (maks. <color=#99DEB0>4</color> per Round).",
+            ),
+            # Precision runtime bracket and formula card repairs
+            (
+                "<color=#ffffffbf>被动：</color>吕布会根据敌人位置使用不同招式，普攻能对身前2格内敌人造成伤害。\n<color=#ffffffbf>主动：</color>吕布跃入敌人密集区域，将2格内敌人<color=#ffffffbf>击飞</color>1秒并造成<color=#dfa15e>[123300p1q1]+[123300p1q2/100]%物理攻击力的物理伤害</color>，降低其70%生命恢复效果，持续5秒。每命中1名敌人恢复<color=#9ff5d0>[123310p1q5/100]%最大生命值</color>并在接下来的5秒内提升[123320p2q2/100]%物理吸血。",
+                "<color=#ffffffbf>Pasif:</color> Lu Bu menggunakan jurus berbeda sesuai posisi musuh, Basic Attack dapat memberikan Damage ke musuh dalam 2 petak di depannya.\n<color=#ffffffbf>Aktif:</color> Lu Bu melompat ke area terpadat musuh, memberi efek <color=#ffffffbf>Knock-Up</color> 1 detik ke musuh dalam 2 petak dan memberikan <color=#dfa15e>[123300p1q1]+[123300p1q2/100]% Physical Attack sebagai Physical Damage</color>, mengurangi 70% efek pemulihan HP mereka selama 5 detik. Tiap mengenai 1 musuh memulihkan <color=#9ff5d0>[123310p1q5/100]% Max HP</color> dan meningkatkan [123320p2q2/100]% Physical Lifesteal selama 5 detik berikutnya.",
+            ),
+            (
+                "<color=#ffffffbf>被动：</color>机关傀儡拥有无限攻击距离并且浮空射击，不会受到碰撞影响。\n\n<color=#ffffffbf>主动：</color>机关傀儡远离当前目标飞向下一个位置，在过程中会连续射击目标8次，造成<color=#dfa15e>[0]%物理攻击力的物理伤害</color>，并恢复<color=#9ff5d0>[1]点生命值</color>。",
+                "<color=#ffffffbf>Pasif:</color> Mechanical Puppet memiliki Attack Range tanpa batas dan menembak sambil melayang, tidak terpengaruh oleh tabrakan.\n\n<color=#ffffffbf>Aktif:</color> Mechanical Puppet terbang menjauh dari target saat ini ke posisi berikutnya, menembak target 8 kali berturut-turut selama prosesnya, memberikan <color=#dfa15e>[0]% Physical Attack sebagai Physical Damage</color> dan memulihkan <color=#9ff5d0>[1] HP</color>.",
+            ),
+            (
+                "拍击伤害提升至[6365074p1q5/100]%最大生命值",
+                "Damage Slap meningkat menjadi [6365074p1q5/100]% Max HP.",
+            ),
+            (
+                "本回合每使用4张古币牌，获得1次<a href=16><color=#ffffff>╧<b>复生</b></color></a>（总复生次数：{ResCardInfoDataBin_1541_15412_0: 1}）。\n<a href=10><color=#ffffff>╫<b>牺牲</b></color></a>：<a href=3130011><color=#ffffff>═<b>临时等级</b></color></a>+20。",
+                "Setiap menggunakan 4 Kartu Ancient Coin pada Round ini, memperoleh 1 <a href=16><color=#ffffff>╧<b>Revive</b></color></a> (total Revive: {ResCardInfoDataBin_1541_15412_0: 1}).\n<a href=10><color=#ffffff>╫<b>Sacrifice</b></color></a>: <a href=3130011><color=#ffffff>═<b>Temporary Level</b></color></a> +20.",
+            ),
+            (
+                "获得1张3阶兑换券。回合开始时，获得<color=#FFE897>{3|1}{LordExp}</color>。满级后，改为获得{0|1}{Energy}。",
+                "Memperoleh 1 Voucher Tier 3. Di awal Ronde, memperoleh <color=#FFE897>{3|1}{LordExp}</color>. Setelah mencapai Level Max, diganti memperoleh {0|1}{Energy}.",
+            ),
+            (
+                "<color=#ffffff><b>唯一</b></color>。每击败1名英雄，<color=#ffffff>获得{0|1}{Energy}</color>。单回合击败不少于5名英雄时，获得<color=#ffffff>能量转换</color>。能量转换：消耗{0|3}{Energy}，使1名英雄获得30级（满级英雄除外）。",
+                "<color=#ffffff><b>Unik</b></color>. Setiap mengalahkan 1 Hero, <color=#ffffff>memperoleh {0|1}{Energy}</color>. Saat satu Ronde mengalahkan minimal 5 Hero, memperoleh <color=#ffffff>Konversi Energy</color>. Konversi Energy: menghabiskan {0|3}{Energy}, memberi 30 Level ke 1 Hero (kecuali Hero Level Max).",
+            ),
+            (
+                "播放七号最喜欢的音乐，让全场英雄跳起舞来，且最大生命值+20。",
+                "Memutar musik favorit No.7, membuat semua Hero di arena menari dan memperoleh +20 Max HP.",
+            ),
+            (
+                "激活七号的激光炮，七号可以使用它攻击场内的英雄，七号攻击力和己方英雄等级相关。",
+                "Mengaktifkan meriam laser No.7. No.7 dapat menggunakannya untuk menyerang Hero di arena; Attack No.7 bergantung pada Level Hero sekutu.",
+            ),
+            (
+                "<a href=11><color=#99DEB0>╬整备系列</color></a>\n立即获得<color=#99DEB0>3张</color><a href=11><color=#99DEB0>╬整备</color></a>英雄牌。你的英雄触发<a href=11><color=#99DEB0>╬整备</color></a>时，获得<color=#99DEB0>1张</color><a href=11><color=#99DEB0>╬整备</color></a>英雄牌（每回合最多<color=#99DEB0>3张</color>）。",
+                "<a href=11><color=#99DEB0>╬Prepare Series</color></a>\nSegera memperoleh <color=#99DEB0>3</color> Kartu Hero <a href=11><color=#99DEB0>╬Prepare</color></a>. Saat Hero milikmu memicu <a href=11><color=#99DEB0>╬Prepare</color></a>, peroleh <color=#99DEB0>1</color> Kartu Hero <a href=11><color=#99DEB0>╬Prepare</color></a> (maks. <color=#99DEB0>3</color> per Round).",
+            ),
+            (
+                "立即获得<color=#99DEB0>3张</color><a href=11><color=#99DEB0>╬整备</color></a>英雄牌。你的英雄触发<a href=11><color=#99DEB0>╬整备</color></a>时，获得<color=#99DEB0>1张</color><a href=11><color=#99DEB0>╬整备</color></a>英雄牌（每回合最多<color=#99DEB0>3张</color>）。",
+                "Segera memperoleh <color=#99DEB0>3</color> Kartu Hero <a href=11><color=#99DEB0>╬Prepare</color></a>. Saat Hero milikmu memicu <a href=11><color=#99DEB0>╬Prepare</color></a>, peroleh <color=#99DEB0>1</color> Kartu Hero <a href=11><color=#99DEB0>╬Prepare</color></a> (maks. <color=#99DEB0>3</color> per Round).",
+            ),
+            (
+                "<a href=11><color=#99DEB0>╬整备系列</color></a>\n你的英雄每次触发<a href=11><color=#99DEB0>╬整备</color></a>时，己方英雄<color=#99DEB0>+1.5%</color>最大生命值。",
+                "<a href=11><color=#99DEB0>╬Prepare Series</color></a>\nSetiap kali Hero milikmu memicu <a href=11><color=#99DEB0>╬Prepare</color></a>, Hero sekutu memperoleh <color=#99DEB0>+1.5%</color> Max HP.",
+            ),
+            (
+                "你的英雄每次触发<a href=11><color=#99DEB0>╬整备</color></a>时，己方英雄<color=#99DEB0>+1.5%</color>最大生命值。",
+                "Setiap kali Hero milikmu memicu <a href=11><color=#99DEB0>╬Prepare</color></a>, Hero sekutu memperoleh <color=#99DEB0>+1.5%</color> Max HP.",
+            ),
+            (
+                "<color=#99DEB0>召唤系列</color>\n召唤单位（召唤物、图腾）时，额外获得<color=#99DEB0>100</color>+召唤者等级×<color=#99DEB0>80%</color>的<a href=3130011><color=#99DEB0>═临时等级</color></a>，每回合前<color=#99DEB0>15</color>个召唤单位获得<color=#99DEB0>╧完美复生</color>。",
+                "<color=#99DEB0>Summon Series</color>\nSaat memanggil unit (unit Summon, Totem), peroleh tambahan <color=#99DEB0>100</color> + Level pemanggil x <color=#99DEB0>80%</color> <a href=3130011><color=#99DEB0>═Temporary Level</color></a>; <color=#99DEB0>15</color> unit panggilan pertama setiap Round memperoleh <color=#99DEB0>╧Perfect Revive</color>.",
+            ),
+            (
+                "召唤单位（召唤物、图腾）时，额外获得<color=#99DEB0>100</color>+召唤者等级×<color=#99DEB0>80%</color>的<a href=3130011><color=#99DEB0>═临时等级</color></a>，每回合前<color=#99DEB0>15</color>个召唤单位获得<color=#99DEB0>╧完美复生</color>。",
+                "Saat memanggil unit (unit Summon, Totem), peroleh tambahan <color=#99DEB0>100</color> + Level pemanggil x <color=#99DEB0>80%</color> <a href=3130011><color=#99DEB0>═Temporary Level</color></a>; <color=#99DEB0>15</color> unit panggilan pertama setiap Round memperoleh <color=#99DEB0>╧Perfect Revive</color>.",
+            ),
+            (
+                "<a href=3130011><color=#99DEB0>═临时等级系列</color></a>\n己方英雄获得临时等级时，每获得<color=#99DEB0>10级</color>，额外随机分配<color=#99DEB0>1点</color>属性：双攻/攻击速度/双防中的随机<color=#99DEB0>1个</color>。",
+                "<a href=3130011><color=#99DEB0>═Temporary Level Series</color></a>\nSaat Hero sekutu memperoleh Temporary Level, tiap memperoleh <color=#99DEB0>10 Level</color>, secara acak memberikan tambahan <color=#99DEB0>1 poin</color> atribut: acak <color=#99DEB0>1</color> dari Attack/Attack Speed/Defense.",
+            ),
+            (
+                "己方英雄获得临时等级时，每获得<color=#99DEB0>10级</color>，额外随机分配<color=#99DEB0>1点</color>属性：双攻/攻击速度/双防中的随机<color=#99DEB0>1个</color>。",
+                "Saat Hero sekutu memperoleh Temporary Level, tiap memperoleh <color=#99DEB0>10 Level</color>, secara acak memberikan tambahan <color=#99DEB0>1 poin</color> atribut: acak <color=#99DEB0>1</color> dari Attack/Attack Speed/Defense.",
+            ),
+            (
+                "<a href=3130011><color=#99DEB0>═临时等级系列</color></a>\n战斗开始时，己方所有英雄获得等同于其真实等级<color=#99DEB0>70%</color>的临时等级。",
+                "<a href=3130011><color=#99DEB0>═Temporary Level Series</color></a>\nSaat Combat dimulai, semua Hero sekutu memperoleh Temporary Level sebesar <color=#99DEB0>70%</color> dari True Level mereka.",
+            ),
+            (
+                "战斗开始时，己方所有英雄获得等同于其真实等级<color=#99DEB0>70%</color>的临时等级。",
+                "Saat Combat dimulai, semua Hero sekutu memperoleh Temporary Level sebesar <color=#99DEB0>70%</color> dari True Level mereka.",
+            ),
+            (
+                "<color=#99DEB0>通用系列</color>\n己方英雄阵亡时，随机召唤<color=#99DEB0>1</color>只与己方最高等级英雄相同等级的<color=#99DEB0>始祖熊灵/猩红石像/蔚蓝石像</color>，每场最多召唤<color=#99DEB0>3</color>只。",
+                "<color=#99DEB0>General Series</color>\nSaat Hero sekutu gugur, panggil secara acak <color=#99DEB0>1</color> <color=#99DEB0>Ancestral Bear Spirit/Crimson Golem/Blue Golem</color> dengan Level yang sama dengan Hero level tertinggi sekutu (maks. <color=#99DEB0>3</color> per pertempuran).",
+            ),
+            (
+                "己方英雄阵亡时，随机召唤<color=#99DEB0>1</color>只与己方最高等级英雄相同等级的<color=#99DEB0>始祖熊灵/猩红石像/蔚蓝石像</color>，每场最多召唤<color=#99DEB0>3</color>只。",
+                "Saat Hero sekutu gugur, panggil secara acak <color=#99DEB0>1</color> <color=#99DEB0>Ancestral Bear Spirit/Crimson Golem/Blue Golem</color> dengan Level yang sama dengan Hero level tertinggi sekutu (maks. <color=#99DEB0>3</color> per pertempuran).",
+            ),
+            (
+                "<color=#99DEB0>通用系列</color>\n战斗开始后，<color=#99DEB0>每9秒将随机敌方2个单位变猪</color>，持续<color=#99DEB0>3秒</color>。",
+                "<color=#99DEB0>General Series</color>\nSetelah Combat dimulai, <color=#99DEB0>tiap 9 detik mengubah 2 unit musuh acak menjadi babi</color> selama <color=#99DEB0>3 detik</color>.",
+            ),
+            (
+                "战斗开始后，<color=#99DEB0>每9秒将随机敌方2个单位变猪</color>，持续<color=#99DEB0>3秒</color>。",
+                "Setelah Combat dimulai, <color=#99DEB0>tiap 9 detik mengubah 2 unit musuh acak menjadi babi</color> selama <color=#99DEB0>3 detik</color>.",
+            ),
+            (
+                "战斗开始后，每<color=#99DEB0>9秒</color>将随机敌方<color=#99DEB0>2个</color>单位变猪，持续<color=#99DEB0>3秒</color>。",
+                "Setelah Combat dimulai, setiap <color=#99DEB0>9 detik</color> mengubah <color=#99DEB0>2</color> unit musuh acak menjadi babi selama <color=#99DEB0>3 detik</color>.",
+            ),
+            (
+                "合成英雄时，会随机额外获得<color=#99DEB0>6-66级</color>。通过本天赋获得<color=#99DEB0>300级</color>时（每名英雄限1次），场上等级最低的英雄获得<color=#99DEB0>60级</color>。",
+                "Saat menggabungkan Hero, akan secara acak memperoleh tambahan <color=#99DEB0>6-66 Level</color>. Saat memperoleh <color=#99DEB0>300 Level</color> melalui Talent ini (terbatas 1 kali per Hero), Hero dengan Level terendah di arena memperoleh <color=#99DEB0>60 Level</color>.",
+            ),
+            (
+                "<color=#99DEB0>合成系列</color>\n合成英雄时，会随机额外获得<color=#99DEB0>6-66级</color>。通过本天赋获得<color=#99DEB0>300级</color>时（每名英雄限1次），场上等级最低的英雄获得<color=#99DEB0>60级</color>。",
+                "<color=#99DEB0>Combine Series</color>\nSaat menggabungkan Hero, akan secara acak memperoleh tambahan <color=#99DEB0>6-66 Level</color>. Saat memperoleh <color=#99DEB0>300 Level</color> melalui Talent ini (terbatas 1 kali per Hero), Hero dengan Level terendah di arena memperoleh <color=#99DEB0>60 Level</color>.",
+            ),
+            (
+                "<color=#99DEB0>合成系列</color>\n合成英雄时随机额外获得<color=#99DEB0>6-66级</color>。累计获得<color=#99DEB0>300级</color>时（每名英雄限<color=#99DEB0>1次</color>），场上等级最低的英雄<color=#99DEB0>+60级</color>。",
+                "<color=#99DEB0>Combine Series</color>\nSaat menggabungkan Hero, secara acak memperoleh tambahan <color=#99DEB0>6-66 Level</color>. Saat akumulasi mencapai <color=#99DEB0>300 Level</color> (terbatas <color=#99DEB0>1 kali</color> per Hero), Hero dengan Level terendah di arena memperoleh <color=#99DEB0>+60 Level</color>.",
+            ),
+            (
+                "合成英雄时随机额外获得<color=#99DEB0>6-66级</color>。累计获得<color=#99DEB0>300级</color>时（每名英雄限<color=#99DEB0>1次</color>），场上等级最低的英雄<color=#99DEB0>+60级</color>。",
+                "Saat menggabungkan Hero, secara acak memperoleh tambahan <color=#99DEB0>6-66 Level</color>. Saat akumulasi mencapai <color=#99DEB0>300 Level</color> (terbatas <color=#99DEB0>1 kali</color> per Hero), Hero dengan Level terendah di arena memperoleh <color=#99DEB0>+60 Level</color>.",
+            ),
+            (
+                "战斗结束时，你每存活1名英雄，获得1{Energy}。",
+                "Saat Combat berakhir, untuk tiap 1 Hero sekutu yang bertahan hidup, peroleh 1{Energy}.",
+            ),
+            (
+                "战斗结束时，你每存活1名英雄，获得1点{Energy}。",
+                "Saat Combat berakhir, untuk tiap 1 Hero sekutu yang bertahan hidup, peroleh 1{Energy}.",
+            ),
+            (
+                "打出时<color=#FFE897>立刻在嬴政和武则天中随机选定一人</color>，下场战斗开始时使其吸收其他友军的<color=#FFE897>全部等级、初始法力值、双攻和双抗</color>，直到战斗结束。",
+                "Saat dimainkan, <color=#FFE897>segera pilih secara acak 1 di antara Ying Zheng dan Wu Zetian</color>; saat Combat berikutnya dimulai, ia menyerap <color=#FFE897>seluruh Level, Mana awal, Attack ganda, dan Defense ganda</color> dari sekutu lainnya hingga Combat berakhir.",
+            ),
+            (
+                "打出时<color=#FFE897>立刻在嬴政和武则天中随机选定一人</color>，下场战斗开始时使其吸收其他友军的<color=#FFE897>全部等级、初始法力值和双攻</color>，直到战斗结束。",
+                "Saat dimainkan, <color=#FFE897>segera pilih secara acak 1 di antara Ying Zheng dan Wu Zetian</color>; saat Combat berikutnya dimulai, ia menyerap <color=#FFE897>seluruh Level, Mana awal, dan Attack ganda</color> dari sekutu lainnya hingga Combat berakhir.",
+            ),
+            (
+                "混沌裂隙中只会出现坦克英雄，并每秒获得2点双抗（裂隙存在时可重新指定位置）。",
+                "Hanya Hero Tank yang muncul di Chaos Rift, dan memperoleh 2 poin Defense ganda setiap detik (dapat menentukan ulang posisi selama Rift masih ada).",
+            ),
+            (
+                "混沌裂隙中只会出现坦克英雄，并每秒获得2点双抗。",
+                "Hanya Hero Tank yang muncul di Chaos Rift, dan memperoleh 2 poin Defense ganda setiap detik.",
+            ),
+            (
+                "混沌裂隙中只会出现战士英雄，并获得15点物理和法术穿透（裂隙存在时可重新指定位置）。",
+                "Hanya Hero Fighter yang muncul di Chaos Rift, dan memperoleh 15 poin Physical dan Magic Penetration (dapat menentukan ulang posisi selama Rift masih ada).",
+            ),
+            (
+                "混沌裂隙中只会出现战士英雄，并获得15点物理和法术穿透。",
+                "Hanya Hero Fighter yang muncul di Chaos Rift, dan memperoleh 15 poin Physical dan Magic Penetration.",
+            ),
+            (
+                "混沌裂隙中只会出现射手英雄，并获得0.5基础攻速（裂隙存在时可重新指定位置）。",
+                "Hanya Hero Marksman yang muncul di Chaos Rift, dan memperoleh 0.5 Base Attack Speed (dapat menentukan ulang posisi selama Rift masih ada).",
+            ),
+            (
+                "混沌裂隙中只会出现法师英雄，并获得额外10点攻击回蓝（裂隙存在时可重新指定位置）。",
+                "Hanya Hero Mage yang muncul di Chaos Rift, dan memperoleh tambahan 10 Mana Regen saat menyerang (dapat menentukan ulang posisi selama Rift masih ada).",
+            ),
+            (
+                "混沌裂隙中只会出现辅助英雄，战斗开始时分享一半等级给其他友方英雄（裂隙存在时可重新指定位置）。",
+                "Hanya Hero Support yang muncul di Chaos Rift; saat Combat dimulai, membagikan setengah Level kepada Hero sekutu lainnya (dapat menentukan ulang posisi selama Rift masih ada).",
+            ),
+            (
+                "曹操和苏烈共战时，二人<color=#99DEB0>每1级获得5%暴击率和5%攻击速度</color>。其每攻击<color=#99DEB0>2次</color>后发动<color=#99DEB0>1次</color>强力攻击，对周围<color=#99DEB0>1格</color>敌人造成<color=#99DEB0>800%</color>真实伤害，并击飞、眩晕敌人<color=#99DEB0>1秒</color>。双方等级可突破至<color=#99DEB0>2000</color>。任意一方战败时，另一方获得等同其等级的═临时等级。",
+                "Saat Cao Cao dan Su Lie bertempur bersama, keduanya <color=#99DEB0>memperoleh 5% Crit Rate dan 5% Attack Speed per 1 Level</color>. Tiap <color=#99DEB0>2 kali</color> menyerang melancarkan <color=#99DEB0>1 kali</color> serangan kuat, memberikan <color=#99DEB0>800%</color> True Damage ke musuh dalam <color=#99DEB0>1 petak</color> sekitar, serta efek Knock-Up dan Stun ke musuh selama <color=#99DEB0>1 detik</color>. Level keduanya dapat menembus hingga <color=#99DEB0>2000</color>. Saat salah satu gugur, yang lain memperoleh ═Temporary Level sebesar Level-nya.",
+            ),
+            (
+                "曹操和苏烈共战时，二人<color=#99DEB0>每1级获得5%暴击率和5%攻击速度</color>。其每攻击<color=#99DEB0>2次</color>后发动<color=#99DEB0>1次</color>强力攻击，对周围<color=#99DEB0>1格</color>敌人造成<color=#99DEB0>800%</color>真实伤害，并击飞、眩晕敌人<color=#99DEB0>1秒</color>。双方等级可突破至<color=#99DEB0>2000</color>。任意一方战败时，另一方获得等同其等级的<a href=3130011><color=#99DEB0>═临时等级</color></a>。",
+                "Saat Cao Cao dan Su Lie bertempur bersama, keduanya <color=#99DEB0>memperoleh 5% Crit Rate dan 5% Attack Speed per 1 Level</color>. Tiap <color=#99DEB0>2 kali</color> menyerang melancarkan <color=#99DEB0>1 kali</color> serangan kuat, memberikan <color=#99DEB0>800%</color> True Damage ke musuh dalam <color=#99DEB0>1 petak</color> sekitar, serta efek Knock-Up dan Stun ke musuh selama <color=#99DEB0>1 detik</color>. Level keduanya dapat menembus hingga <color=#99DEB0>2000</color>. Saat salah satu gugur, yang lain memperoleh <a href=3130011><color=#99DEB0>═Temporary Level</color></a> sebesar Level-nya.",
+            ),
+            (
+                "诸葛亮和明世隐共战时，二人<color=#99DEB0>有概率连续施法3次</color>，概率随等级提升（<color=#99DEB0>10</color>/<color=#99DEB0>50</color>/<color=#99DEB0>100</color>/<color=#99DEB0>200级</color>对应<color=#99DEB0>20%</color>/<color=#99DEB0>40%</color>/<color=#99DEB0>60%</color>/<color=#99DEB0>80%</color>）。每次施法，二人═临时等级<color=#99DEB0>+5</color>，本回合法术吸血<color=#99DEB0>+5%</color>、法术攻击力<color=#99DEB0>+5%</color>。",
+                "Saat Kongming dan Ming bertempur bersama, keduanya <color=#99DEB0>berpeluang melepaskan skill 3 kali berturut-turut</color>, peluang meningkat seiring Level (<color=#99DEB0>10</color>/<color=#99DEB0>50</color>/<color=#99DEB0>100</color>/<color=#99DEB0>Level 200</color> setara <color=#99DEB0>20%</color>/<color=#99DEB0>40%</color>/<color=#99DEB0>60%</color>/<color=#99DEB0>80%</color>). Tiap melepaskan skill, keduanya mendapat ═Temporary Level <color=#99DEB0>+5</color>, Magic Lifesteal <color=#99DEB0>+5%</color>, dan Magic Attack <color=#99DEB0>+5%</color> pada Round ini.",
+            ),
+            (
+                "诸葛亮和明世隐共战时，二人<color=#99DEB0>有概率连续施法3次</color>，概率随等级提升（<color=#99DEB0>10</color>/<color=#99DEB0>50</color>/<color=#99DEB0>100</color>/<color=#99DEB0>200级</color>对应<color=#99DEB0>20%</color>/<color=#99DEB0>40%</color>/<color=#99DEB0>60%</color>/<color=#99DEB0>80%</color>）。每次施法，二人<a href=3130011><color=#99DEB0>═临时等级</color></a><color=#99DEB0>+5</color>，本回合法术吸血<color=#99DEB0>+5%</color>、法术攻击力<color=#99DEB0>+5%</color>。",
+                "Saat Kongming dan Ming bertempur bersama, keduanya <color=#99DEB0>berpeluang melepaskan skill 3 kali berturut-turut</color>, peluang meningkat seiring Level (<color=#99DEB0>10</color>/<color=#99DEB0>50</color>/<color=#99DEB0>100</color>/<color=#99DEB0>Level 200</color> setara <color=#99DEB0>20%</color>/<color=#99DEB0>40%</color>/<color=#99DEB0>60%</color>/<color=#99DEB0>80%</color>). Tiap melepaskan skill, keduanya mendapat <a href=3130011><color=#99DEB0>═Temporary Level</color></a> <color=#99DEB0>+5</color>, Magic Lifesteal <color=#99DEB0>+5%</color>, dan Magic Attack <color=#99DEB0>+5%</color> pada Round ini.",
+            ),
+            (
+                "<color=#ffffff><b>热能陷阱</b></color>：敌方进入陷阱范围时触发，造成真实伤害并眩晕。\n<color=#ffffff><b>电磁弹簧</b></color>：敌方踩中时触发，将其弹至敌方战场后排，触发2次后消失。\n<color=#ffffff><b>等离子屏障</b></color>：可在横向展开阻碍敌方行动。\n所有机关在升级后均会获得额外强力效果。",
+                "<color=#ffffff><b>Thermal Trap</b></color>: Terpicu saat musuh memasuki area jebakan, memberikan True Damage dan efek Stun.\n<color=#ffffff><b>Electromagnetic Spring</b></color>: Terpicu saat diinjak musuh, melemparnya ke baris belakang medan tempur musuh, menghilang setelah terpicu 2 kali.\n<color=#ffffff><b>Plasma Shield</b></color>: Dapat dibentangkan secara horizontal untuk menghalangi pergerakan musuh.\nSemua mekanisme memperoleh efek kuat tambahan setelah ditingkatkan.",
+            ),
+            (
+                "可放置1个<color=#ffffff><b>热能陷阱</b></color>。敌方踩中时，对其造成真实伤害并眩晕。",
+                "Dapat menempatkan 1 <color=#ffffff><b>Thermal Trap</b></color>. Saat diinjak musuh, memberikan True Damage dan efek Stun kepadanya.",
+            ),
+            (
+                "可放置1个<color=#ffffff><b>电磁弹簧</b></color>。敌方踩中时触发，将其弹至敌方战场后排，触发2次后消失。",
+                "Dapat menempatkan 1 <color=#ffffff><b>Electromagnetic Spring</b></color>. Terpicu saat diinjak musuh, melemparnya ke baris belakang medan tempur musuh, menghilang setelah terpicu 2 kali.",
+            ),
+            (
+                "可放置1个<color=#ffffff><b>等离子屏障</b></color>。可在横向展开阻碍敌方行动。",
+                "Dapat menempatkan 1 <color=#ffffff><b>Plasma Shield</b></color>. Dapat dibentangkan secara horizontal untuk menghalangi pergerakan musuh.",
+            ),
+            (
+                "敌方进入热能陷阱所在格及其左右1格时触发，对周围1格的敌方单位造成50%当前生命值的真实伤害并眩晕2秒，触发后消失。",
+                "Terpicu saat musuh memasuki petak Thermal Trap beserta 1 petak di kiri-kanannya, memberikan True Damage sebesar 50% HP saat ini ke unit musuh dalam 1 petak sekitar dan efek Stun selama 2 detik; menghilang setelah terpicu.",
+            ),
+            (
+                "敌方进入热能陷阱所在格及其左右一格时触发，对周围1格的敌方单位造成50%当前生命值的真实伤害并眩晕2秒，触发后消失。",
+                "Terpicu saat musuh memasuki petak Thermal Trap beserta 1 petak di kiri-kanannya, memberikan True Damage sebesar 50% HP saat ini ke unit musuh dalam 1 petak sekitar dan efek Stun selama 2 detik; menghilang setelah terpicu.",
+            ),
+            (
+                "从<color=#ffffff><b>热能陷阱</b></color>、<color=#ffffff><b>电磁弹簧</b></color>、<color=#ffffff><b>等离子屏障</b></color>3种机关中选择1个。",
+                "Pilih 1 dari 3 mekanisme: <color=#ffffff><b>Thermal Trap</b></color>, <color=#ffffff><b>Electromagnetic Spring</b></color>, atau <color=#ffffff><b>Plasma Shield</b></color>.",
+            ),
+            (
+                "在指定位置从<color=#ffffff><b>热能陷阱</b></color>、<color=#ffffff><b>电磁弹簧</b></color>、<color=#ffffff><b>等离子屏障</b></color>3种机关中随机生成1个。",
+                "Secara acak memunculkan 1 dari 3 mekanisme di posisi target: <color=#ffffff><b>Thermal Trap</b></color>, <color=#ffffff><b>Electromagnetic Spring</b></color>, atau <color=#ffffff><b>Plasma Shield</b></color>.",
+            ),
+            (
+                "在指定位置从热能陷阱/电磁弹簧/等离子屏障中随机选择1个机关进行构筑。",
+                "Secara acak memilih 1 mekanisme dari Thermal Trap/Electromagnetic Spring/Plasma Shield di posisi yang ditentukan untuk dibangun.",
+            ),
+            (
+                "可在横向展开阻碍敌方行动(升级后获得额外效果)。",
+                "Dapat dibentangkan secara horizontal untuk menghalangi pergerakan musuh (memperoleh efek tambahan setelah ditingkatkan).",
+            ),
+            (
+                "可在横向展开阻碍敌方行动（升级后获得额外效果）。",
+                "Dapat dibentangkan secara horizontal untuk menghalangi pergerakan musuh (memperoleh efek tambahan setelah ditingkatkan).",
+            ),
+            (
+                "触发时弹走敌人并眩晕。",
+                "Saat terpicu, mementalkan musuh dan memberikan efek Stun.",
+            ),
+            (
+                "云中君展翅舞蹈向周围1格射出羽箭，对命中的敌人造成<color=#dfa15e>[506110p1q1]+[506110p1q2/100]%物理攻击力的物理伤害</color>，并施加2层撕裂效果。\n\n\n<color=#ffffffbf>撕裂：</color>每秒造成<color=#dfa15e>目标敌人当前生命值2%的物理伤害</color>，持续5秒，最多叠加5层。",
+                "Cirrus membentangkan sayapnya dan menari, menembakkan bulu ke musuh dalam 1 petak, memberikan <color=#dfa15e>[506110p1q1]+[506110p1q2/100]% Physical Attack sebagai Physical Damage</color> dan memberikan 2 stack Rend.\n\n\n<color=#ffffffbf>Rend:</color> Tiap detik memberikan <color=#dfa15e>Damage sebesar 2% HP musuh target saat ini</color> selama 5 detik, dapat di-stack hingga 5 kali.",
             ),
         ]
         for zh_c, id_c in curated_t1_pairs:
@@ -1999,6 +2227,9 @@ class ThreeTierGlossary:
         if not text:
             return text
 
+        if not source_zh:
+            return apply_glossary_cleanup(text)
+
         candidate = rewrite_en_card_to_id(source_zh, text)
         ok_r, _ = validate_translation(source_zh, candidate)
         if not ok_r:
@@ -2007,11 +2238,29 @@ class ThreeTierGlossary:
                 TAG_RE.sub("", candidate),
                 inner_translator=self._translate_raw_zh_to_id,
                 baseline_en=baseline_en,
-                en_translator=self.translate_en_to_id,
+                en_translator=None,
             )
 
         candidate = polish_indonesian_card_text(source_zh, candidate, baseline_en)
         candidate = ensure_placeholder_spacing(normalize_brackets(candidate))
+
+        # Normalize CJK fullwidth punctuation outside {...} placeholders
+        phs = PLACEHOLDER_RE.findall(candidate)
+        sentinels = [f"__CJKPH{i}__" for i in range(len(phs))]
+        for ph, sent in zip(phs, sentinels):
+            candidate = candidate.replace(ph, sent, 1)
+        candidate = (
+            candidate.replace("。", ".")
+            .replace("，", ",")
+            .replace("：", ":")
+            .replace("；", ";")
+            .replace("（", "(")
+            .replace("）", ")")
+        )
+        for ph, sent in zip(phs, sentinels):
+            candidate = candidate.replace(sent, ph, 1)
+
+        candidate = normalize_tag_boundary_spacing(source_zh, candidate)
         if ";" not in source_zh and ";" in candidate:
             candidate = SEMICOLON_SPLIT_RE.sub(". ", candidate)
             candidate = sanitize_target_text(source_zh, candidate)
@@ -2029,6 +2278,16 @@ class ThreeTierGlossary:
         Return (translated_id, tier_used) where tier_used is 'tier1', 'tier2', or 'tier3'.
         Guarantees validate_translation(source_zh, translated_id) == (True, 'ok').
         """
+        if baseline_en and "Max HP</color><color=#ffffffbf></color>" in baseline_en:
+            baseline_en = re.sub(
+                r"(?:provides|grants)\s+(?:a\s+)?Shield\s+equal\s+to\s+(<color=[^>]+>[^<]+</color>)\s*<color=([^>]+)></color>",
+                r"provides \1 <color=\2>Shield</color>",
+                baseline_en,
+                flags=re.I,
+            )
+            if "[505330p1q2]" in source_zh:
+                baseline_en = baseline_en.replace("[505330p1q1]", "[505330p1q2]")
+
         # 1. Tier 1 exact match (includes exact 108 missing Windows strings & Tier 1 CN->ID)
         if source_zh in self.tier1_exact_zh_to_id:
             raw_t1 = self.tier1_exact_zh_to_id[source_zh]
@@ -2085,39 +2344,48 @@ class ThreeTierGlossary:
         if skel_zh and skel_zh in self.tier1_formula_zh_to_id:
             cands = self.tier1_formula_zh_to_id[skel_zh]
             src_nums = NUM_FIND_RE.findall(normalize_plain_zh(source_zh))
-            best_cand = cands[0]
-            best_score = -1
-            for c_cn, c_id in cands:
+            src_brackets = RUNTIME_BRACKET_TOKEN_RE.findall(source_zh)
+
+            def _cand_rank(cand_item: tuple[str, str]) -> int:
+                c_cn, _ = cand_item
                 c_nums = NUM_FIND_RE.findall(normalize_plain_zh(c_cn))
+                c_brackets = RUNTIME_BRACKET_TOKEN_RE.findall(c_cn)
                 score = sum(1 for a, b in zip(src_nums, c_nums) if a == b)
-                if score > best_score:
-                    best_score = score
-                    best_cand = (c_cn, c_id)
-            t1_desc_cn, t1_desc_id = best_cand
-            cand = self._fit_length_bound(
-                source_zh,
-                reinject_formula_and_skeleton(
+                if src_brackets and c_brackets:
+                    if Counter(src_brackets) == Counter(c_brackets):
+                        score += 1000
+                    else:
+                        score -= 1000
+                elif c_brackets and not src_brackets:
+                    score -= 1000
+                return score
+
+            ranked_cands = sorted(cands, key=_cand_rank, reverse=True)
+            for t1_desc_cn, t1_desc_id in ranked_cands:
+                cand = self._fit_length_bound(
                     source_zh,
-                    t1_desc_cn,
-                    t1_desc_id,
-                    inner_translator=self._translate_raw_zh_to_id,
-                    baseline_en=baseline_en,
-                    en_translator=self.translate_en_to_id,
-                ),
-            )
-            ok, _ = validate_translation(source_zh, cand)
-            has_chunk_slice = any(
-                bc in cand
-                for bc in (
-                    "<color=#ffffffbf> Pasif: Basic Attack",
-                    "<color=#ffffffbf> di depannya",
-                    "<color=#ffffffbf> pipa dan mengaktifkan",
-                    "<color=#d487e4> bola energi yang",
-                    "<color=#d487e4> Saat bola",
+                    reinject_formula_and_skeleton(
+                        source_zh,
+                        t1_desc_cn,
+                        t1_desc_id,
+                        inner_translator=self._translate_raw_zh_to_id,
+                        baseline_en=baseline_en,
+                        en_translator=self.translate_en_to_id,
+                    ),
                 )
-            )
-            if ok and not has_chunk_slice:
-                return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
+                ok, _ = validate_translation(source_zh, cand)
+                has_chunk_slice = any(
+                    bc in cand
+                    for bc in (
+                        "<color=#ffffffbf> Pasif: Basic Attack",
+                        "<color=#ffffffbf> di depannya",
+                        "<color=#ffffffbf> pipa dan mengaktifkan",
+                        "<color=#d487e4> bola energi yang",
+                        "<color=#d487e4> Saat bola",
+                    )
+                )
+                if ok and not has_chunk_slice:
+                    return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
 
         # 2c. Tier 1 description match via baseline_en
         if baseline_en:
@@ -2186,20 +2454,20 @@ class ThreeTierGlossary:
                     for sv in skel_variants:
                         if sv in self.tier1_formula_zh_to_id:
                             cands = self.tier1_formula_zh_to_id[sv]
-                            t1_desc_cn, t1_desc_id = cands[0]
-                            cand = self._fit_length_bound(
-                                source_zh,
-                                reinject_formula_and_skeleton(
+                            for t1_desc_cn, t1_desc_id in cands:
+                                cand = self._fit_length_bound(
                                     source_zh,
-                                    t1_desc_cn,
-                                    t1_desc_id,
-                                    inner_translator=self._translate_raw_zh_to_id,
-                                    baseline_en=baseline_en,
-                                    en_translator=self.translate_en_to_id,
-                                ),
-                            )
-                            if validate_translation(source_zh, cand)[0]:
-                                return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
+                                    reinject_formula_and_skeleton(
+                                        source_zh,
+                                        t1_desc_cn,
+                                        t1_desc_id,
+                                        inner_translator=self._translate_raw_zh_to_id,
+                                        baseline_en=baseline_en,
+                                        en_translator=self.translate_en_to_id,
+                                    ),
+                                )
+                                if validate_translation(source_zh, cand)[0]:
+                                    return (self._finalize_output(source_zh, cand, baseline_en or ""), "tier1")
                 break
 
         # 2f. Equipment Selection Chests Deterministic Parser

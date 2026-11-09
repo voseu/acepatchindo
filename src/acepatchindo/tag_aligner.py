@@ -407,6 +407,33 @@ def adapt_tier1_placeholders_to_source(source_zh: str, t1_id: str) -> str:
     for tc in tracker_clauses:
         tracker_phs.update(PLACEHOLDER_RE.findall(tc))
 
+    # 0a. Dynamic placeholder ranges: {N|v1}-{M|v2}
+    # Must run BEFORE atomic icon pairs so ranges like {0|1}-{0|5}{Energy} are not broken into 1-{0|5}
+    for m in re.finditer(r"(\{(\d+)\|([^{}]+)\}\s*-\s*\{(\d+)\|([^{}]+)\})", source_zh):
+        full_range = m.group(1)
+        v1 = m.group(3)
+        v2 = m.group(5)
+        range_pattern = rf"(?<![A-Za-z0-9_{{|]){re.escape(v1)}\s*-\s*{re.escape(v2)}(?![A-Za-z0-9_{{|])"
+        out = re.sub(range_pattern, full_range, out, count=1)
+
+    # 0b. Atomic binding for {N|val}{Icon} pairs (e.g. {3|1}{LordExp}, {0|1}{Energy}, {0|3}{Energy})
+    # Must run BEFORE independent icon and number passes to prevent swapping numbers or replacing proper nouns
+    for m in re.finditer(r"(\{([^{}|:]+)[:|]([^{}]+)\})\s*(\{(?:Energy|LordExp|LordHp)\})", source_zh):
+        full_pair = f"{m.group(1)}{m.group(4)}"
+        if out.count(full_pair) >= source_zh.count(full_pair):
+            continue
+        num_ph = m.group(1)
+        val = m.group(3).strip()
+        icon_ph = m.group(4)
+        if icon_ph == "{LordExp}":
+            icon_pat = r"(?:(?:(?:Contestant|Chess Player|Player|Pemain|Lord)\s+)?(?:EXP|Pengalaman|Experience|\{LordExp\})(?:\s+(?:Contestant|Chess Player|Player|Pemain|Lord))?)"
+        elif icon_ph == "{LordHp}":
+            icon_pat = r"(?:(?:(?:Contestant|Chess Player|Player|Pemain|Lord)\s+)?(?:HP|Darah|Health|\{LordHp\})(?:\s+(?:Contestant|Chess Player|Player|Pemain|Lord))?)"
+        else:
+            icon_pat = r"(?:Energi|Energy|\{Energy\})\b"
+        pair_pat = re.compile(rf"(?<![A-Za-z0-9_{{|:]){re.escape(val)}\s*{icon_pat}", re.I)
+        out = pair_pat.sub(f"{num_ph}{icon_ph}", out, count=1)
+
     # 1. Map icon placeholders if in source_zh
     if "{LordExp}" in source_zh and out.count("{LordExp}") < source_zh.count("{LordExp}"):
         pattern_exp = (
@@ -425,14 +452,6 @@ def adapt_tier1_placeholders_to_source(source_zh: str, t1_id: str) -> str:
     if "{Energy}" in source_zh and out.count("{Energy}") < source_zh.count("{Energy}"):
         needed = source_zh.count("{Energy}") - out.count("{Energy}")
         out = re.sub(r"(?<!\{)\b(?:Energi|Energy)\b(?!\})", "{Energy}", out, count=needed, flags=re.I)
-
-    # 2a. Dynamic placeholder ranges: {N|v1}-{M|v2}
-    for m in re.finditer(r"(\{(\d+)\|([^{}]+)\}\s*-\s*\{(\d+)\|([^{}]+)\})", source_zh):
-        full_range = m.group(1)
-        v1 = m.group(3)
-        v2 = m.group(5)
-        range_pattern = rf"(?<![A-Za-z0-9_{{|]){re.escape(v1)}\s*-\s*{re.escape(v2)}(?![A-Za-z0-9_{{|])"
-        out = re.sub(range_pattern, full_range, out, count=1)
 
     # 2b. Dynamic placeholders with defaults: {N|val}
     for m in re.finditer(r"\{(\d+)\|([^{}]+)\}", source_zh):
@@ -946,14 +965,60 @@ def reinject_formula_and_skeleton(
                     rep2 = f"{c1_o}{form_w}{c1_c} {c2_o}{sh_w}{c2_c}"
                     out = out[:m_s.start()] + rep2 + out[m_s.end():]
 
-    # Step 2c: Any remaining unmatched numeric/formula placeholders from body_source_zh
+    # Identify trailing tracker clauses and their internal placeholders
+    tracker_clauses = [m.group(0) for m in NORM_ZH_TRACKER_RE.finditer(body_source_zh)]
+    tracker_phs: set[str] = set()
+    for tc in tracker_clauses:
+        tracker_phs.update(PLACEHOLDER_RE.findall(tc))
+
+    # Inject tracker suffixes into their matching clauses in out
+    for tc in tracker_clauses:
+        inner_phs = PLACEHOLDER_RE.findall(tc)
+        if not inner_phs:
+            continue
+        ph = inner_phs[0]
+        if "已击败" in tc or "killcount" in tc:
+            if re.search(r"Sudah\s+mengalahkan:\s*(?:\d+|\{[^{}]+\})", out, re.I):
+                out = re.sub(r"(Sudah\s+mengalahkan:\s*)(?:\d+|\{[^{}]+\})", rf"\g<1>{ph}", out, flags=re.I)
+            elif re.search(r"Dikalahkan:\s*(?:\d+|\{[^{}]+\})", out, re.I):
+                out = re.sub(r"(Dikalahkan:\s*)(?:\d+|\{[^{}]+\})", rf"\g<1>{ph}", out, flags=re.I)
+            elif ph not in out:
+                out = out.rstrip(". ") + f" (Sudah mengalahkan: {ph})."
+        elif "复生次数" in tc or "ResCardInfoDataBin_1541" in tc:
+            if re.search(r"total\s+Revive:\s*(?:\d+|\{[^{}]+\})", out, re.I):
+                out = re.sub(r"(total\s+Revive:\s*)(?:\d+|\{[^{}]+\})", rf"\g<1>{ph}", out, flags=re.I)
+            elif ph not in out:
+                out = out.rstrip(". ") + f" (total Revive: {ph})."
+        elif "XYTokenAValue" in tc:
+            if re.search(r"(?:saat\s+ini|Current):\s*(?:\d+|\{[^{}]+\})", out, re.I):
+                out = re.sub(r"((?:saat\s+ini|Current):\s*)(?:\d+|\{[^{}]+\})", rf"\g<1>{ph}", out, flags=re.I)
+        elif "当前" in tc:
+            if re.search(r"(?:saat\s+ini|Current):\s*(?:\d+|\{[^{}]+\})", out, re.I):
+                out = re.sub(r"((?:saat\s+ini|Current):\s*)(?:\d+|\{[^{}]+\})", rf"\g<1>{ph}", out, flags=re.I)
+            elif ph not in out:
+                if "{Dynamic:" in tc:
+                    dyn_m = re.search(r"\{Dynamic:\d+\}", tc)
+                    dyn_ph = dyn_m.group(0) if dyn_m else "{Dynamic:0}"
+                    out = out.rstrip(". ") + f" (Saat ini: {dyn_ph})."
+                elif "层" in tc:
+                    out = out.rstrip(". ") + f" (Saat ini: {ph} Lapis)."
+                elif "胜" in tc:
+                    out = out.rstrip(". ") + f" (Saat ini: {ph} Kemenangan)."
+                elif "张" in tc:
+                    out = out.rstrip(". ") + f" (Saat ini: {ph} Kartu)."
+                elif "件" in tc:
+                    out = out.rstrip(". ") + f" (Saat ini: {ph} item)."
+                else:
+                    out = out.rstrip(". ") + f" (Saat ini: {ph})."
+
+    # Step 2c: Any remaining unmatched numeric/formula placeholders from body_source_zh (excluding tracker placeholders!)
     needed_numeric_phs = Counter(
         ph for ph in PLACEHOLDER_RE.findall(body_source_zh)
-        if not re.match(r"^\{(Energy|LordExp|LordHp)\}$", ph)
+        if not re.match(r"^\{(Energy|LordExp|LordHp)\}$", ph) and ph not in tracker_phs
     )
     curr_numeric_phs = Counter(
         ph for ph in PLACEHOLDER_RE.findall(out)
-        if not re.match(r"^\{(Energy|LordExp|LordHp)\}$", ph)
+        if not re.match(r"^\{(Energy|LordExp|LordHp)\}$", ph) and ph not in tracker_phs
     )
     if curr_numeric_phs != needed_numeric_phs:
         missing_phs: list[str] = []
@@ -1044,6 +1109,10 @@ def normalize_tag_boundary_spacing(source: str, text: str) -> str:
         r"\1 \2",
         spaced,
     )
+    # Ensure space after period before opening tag: Unik.<color=... -> Unik. <color=...
+    spaced = re.sub(r"\.[ \t]*(?=<(?:color=|a\b|b\b|size=))", ". ", spaced)
+    # Clean rogue spaces right after opening tags: <color=#d487e4> Magic -> <color=#d487e4>Magic
+    spaced = re.sub(r"(<(?:color=[^>]+|b|i|a\b[^>]*|size=[^>]+)>)[ \t]+", r"\1", spaced)
     # Clean space after comma if followed by tag or control token
     spaced = re.sub(r",(?=[<[\u2540-\u257f]])", ", ", spaced)
     # Collapse any accidental double spaces created
